@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--    Fragment Error -->
+    <dimen name="fragment_error_text_vertical_padding">24dp</dimen>
+    <dimen name="fragment_error_text_horizontal_padding">56dp</dimen>
+</resources>

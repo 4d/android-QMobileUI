@@ -12,4 +12,15 @@ dependencies {
 
     // Kotlin
     implementation Libs.kotlin_stdlib
+
+    // Support
+    implementation Libs.androidx_appcompat
+    implementation Libs.androidx_recyclerview
+    implementation Libs.androidx_core
+
+    // Navigation
+    implementation Libs.androidx_navigation_fragment
+    implementation Libs.androidx_navigation_ui
+
+    implementation Libs.material
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--    Swipe to delete -->
+    <color name="backgroundSwipeToDelete">#f44336</color>
+
+    <color name="colorSoftError">#CFCFCF</color>
+    <color name="colorSoftErrorText">#6D6D6D</color>
+</resources>

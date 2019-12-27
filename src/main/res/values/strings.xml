@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">AndroidMobileUI</string>
+
+    <!--    Fragment Error-->
+    <string name="label_sample_error">An error occurred. This is a sample error message</string>
+    <string name="content_description_sample_error_image">sample_error_image</string>
 </resources>
