@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 apply from: "$rootDir/buildscripts/ktlint.gradle"
 apply from: "$rootDir/buildscripts/testlog.gradle"
@@ -10,8 +11,19 @@ apply from: "https://raw.githubusercontent.com/JakeWharton/SdkSearch/master/grad
 
 dependencies {
 
+    implementation project(':androidmobileapi')
+    implementation project(':androidmobiledatastore')
+
     // Kotlin
     implementation Libs.kotlin_stdlib
+    implementation Libs.kotlin_reflect
+
+    // RX
+    implementation Libs.rxjava
+
+    // OkHttp
+    implementation Libs.okhttp
+    implementation Libs.retrofit_converter_gson
 
     // Support
     implementation Libs.androidx_appcompat
@@ -23,4 +35,5 @@ dependencies {
     implementation Libs.androidx_navigation_ui
 
     implementation Libs.material
+    implementation Libs.timber
 }
