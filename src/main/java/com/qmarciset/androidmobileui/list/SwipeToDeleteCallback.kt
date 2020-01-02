@@ -19,7 +19,8 @@ abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.Callbac
     private val mClearPaint: Paint = Paint()
     private val mBackground: ColorDrawable = ColorDrawable()
     private val backgroundColor: Int =
-        ContextCompat.getColor(context,
+        ContextCompat.getColor(
+            context,
             R.color.backgroundSwipeToDelete
         )
     private val deleteDrawable: Drawable?
@@ -28,7 +29,8 @@ abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.Callbac
 
     init {
         mClearPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
-        deleteDrawable = AppCompatResources.getDrawable(context,
+        deleteDrawable = AppCompatResources.getDrawable(
+            context,
             R.drawable.ic_delete_white_24dp
         )
         intrinsicWidth = deleteDrawable!!.intrinsicWidth

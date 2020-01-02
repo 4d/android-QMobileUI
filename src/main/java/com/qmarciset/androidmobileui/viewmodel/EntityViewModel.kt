@@ -4,16 +4,18 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobiledatastore.AppDatabaseInterface
 import timber.log.Timber
 
 class EntityViewModel<T>(
     application: Application,
     appDatabase: AppDatabaseInterface,
+    apiService: ApiService,
     id: String,
     tableName: String
 ) :
-    BaseViewModel<T>(application, appDatabase, tableName) {
+    BaseViewModel<T>(application, appDatabase, apiService, tableName) {
 
     val entity: LiveData<T> = roomRepository.getOne(id)
 
@@ -24,6 +26,7 @@ class EntityViewModel<T>(
     class EntityViewModelFactory(
         private val application: Application,
         private val appDatabase: AppDatabaseInterface,
+        private val apiService: ApiService,
         private val id: String,
         private val tableName: String
     ) : ViewModelProvider.NewInstanceFactory() {
@@ -32,6 +35,7 @@ class EntityViewModel<T>(
             return EntityViewModel<T>(
                 application,
                 appDatabase,
+                apiService,
                 id,
                 tableName
             ) as T

@@ -4,4 +4,13 @@
     <!--    Fragment Error-->
     <string name="label_sample_error">An error occurred. This is a sample error message</string>
     <string name="content_description_sample_error_image">sample_error_image</string>
+
+    <string name="try_refresh_data">Please try refreshing data again</string>
+
+    <!--    Swipe To Delete-->
+    <string name="sb_remove">Item was removed from the list.</string>
+    <string name="sb_undo">UNDO</string>
+
+    <!--    Fragment List Stub-->
+    <string name="no_data_to_display_stub">No data to display</string>
 </resources>

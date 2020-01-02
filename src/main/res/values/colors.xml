@@ -3,6 +3,7 @@
     <!--    Swipe to delete -->
     <color name="backgroundSwipeToDelete">#f44336</color>
 
+    <color name="colorSwipeToRefresh">#6200EE</color>
     <color name="colorSoftError">#CFCFCF</color>
     <color name="colorSoftErrorText">#6D6D6D</color>
 </resources>

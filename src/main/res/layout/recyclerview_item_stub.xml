@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="entityData"
+            type="com.qmarciset.androidmobileapi.model.entity.EntityModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/background_light">
+
+        <TextView
+            android:id="@+id/service_name_text"
+            android:layout_width="228dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:textSize="22sp"
+            app:layout_constraintBottom_toTopOf="@+id/id_text"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="___VALUE___" />
+
+        <TextView
+            android:id="@+id/id_text"
+            android:layout_width="228dp"
+            android:layout_height="21dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/service_name_text"
+            tools:text="___ID___" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

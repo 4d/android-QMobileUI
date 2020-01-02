@@ -9,6 +9,7 @@ import com.google.gson.Gson
 import com.qmarciset.androidmobileapi.auth.AuthenticationHelper
 import com.qmarciset.androidmobileapi.model.entity.Entities
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
+import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.utils.parseJsonToType
 import com.qmarciset.androidmobiledatastore.AppDatabaseInterface
 import com.qmarciset.androidmobileui.utils.FromTableInterface
@@ -16,8 +17,14 @@ import okhttp3.ResponseBody
 import timber.log.Timber
 
 @Suppress("UNCHECKED_CAST")
-abstract class EntityListViewModel<T>(application: Application, appDatabase: AppDatabaseInterface, tableName: String, private val fromTableInterface: FromTableInterface) :
-    BaseViewModel<T>(application, appDatabase, tableName) {
+abstract class EntityListViewModel<T>(
+    application: Application,
+    appDatabase: AppDatabaseInterface,
+    apiService: ApiService,
+    tableName: String,
+    private val fromTableInterface: FromTableInterface
+) :
+    BaseViewModel<T>(application, appDatabase, apiService, tableName) {
 
     var entityList: LiveData<List<T>> = roomRepository.getAll()
 
@@ -71,7 +78,8 @@ abstract class EntityListViewModel<T>(application: Application, appDatabase: App
         entityList?.let {
             for (item in entityList) {
                 val itemJson = gson.toJson(item)
-                val entity: EntityModel? = fromTableInterface.parseEntityFromTable(dao.tableName, itemJson.toString())
+                val entity: EntityModel? =
+                    fromTableInterface.parseEntityFromTable(dao.tableName, itemJson.toString())
                 entity.let {
                     this.insert(it as EntityModel)
                     isInserted = true
@@ -84,12 +92,19 @@ abstract class EntityListViewModel<T>(application: Application, appDatabase: App
     class EntityListViewModelFactory(
         private val application: Application,
         private val appDatabase: AppDatabaseInterface,
+        private val apiService: ApiService,
         private val tableName: String,
         private val fromTableInterface: FromTableInterface
     ) : ViewModelProvider.NewInstanceFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return fromTableInterface.entityListViewModelFromTable<T>(tableName, application, appDatabase, fromTableInterface) as T
+            return fromTableInterface.entityListViewModelFromTable<T>(
+                tableName,
+                application,
+                appDatabase,
+                apiService,
+                fromTableInterface
+            ) as T
         }
     }
 }

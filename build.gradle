@@ -34,6 +34,9 @@ dependencies {
     implementation Libs.androidx_navigation_fragment
     implementation Libs.androidx_navigation_ui
 
-    implementation Libs.material
+    // Log
     implementation Libs.timber
+
+    implementation Libs.material
+    implementation Libs.androidx_constraintlayout
 }
