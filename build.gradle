@@ -39,4 +39,10 @@ dependencies {
 
     implementation Libs.material
     implementation Libs.androidx_constraintlayout
+
+    // Unit tests
+    testImplementation Libs.androidx_core_testing
+    testImplementation Libs.mockito
+    testImplementation Libs.junit
+    testImplementation Libs.robolectric
 }

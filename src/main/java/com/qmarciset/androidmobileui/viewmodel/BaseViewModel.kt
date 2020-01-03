@@ -28,8 +28,6 @@ abstract class BaseViewModel<T>(
         RoomRepository(dao)
     val restRepository: RestRepository =
         RestRepository(tableName, apiService)
-//    val restRepository: RestRepository =
-//        RestRepository(tableName, application.applicationContext)
 
     val toastMessage = MutableLiveData<String>()
 
