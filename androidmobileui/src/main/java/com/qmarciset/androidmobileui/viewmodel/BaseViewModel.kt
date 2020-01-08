@@ -5,8 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.repository.RestRepository
-import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobiledatastore.dao.BaseDao
+import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobiledatastore.repository.RoomRepository
 
 /**
