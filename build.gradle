@@ -1,48 +1,97 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    ext.kotlin_version = '1.3.61'
 
-apply from: "$rootDir/buildscripts/ktlint.gradle"
-apply from: "$rootDir/buildscripts/testlog.gradle"
-apply from: "$rootDir/buildscripts/detekt.gradle"
-apply from: "$rootDir/buildscripts/jacoco.gradle"
-apply from: "https://raw.githubusercontent.com/JakeWharton/SdkSearch/master/gradle/projectDependencyGraph.gradle"
+    dependencies {
+        classpath Tools.gradle
+        classpath Tools.kotlin_gradle_plugin
+        classpath Tools.navigation_safe_args_gradle_plugin
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+    repositories {
+        google()
+        jcenter()
+    }
+}
 
-dependencies {
+plugins {
+    id "com.github.ben-manes.versions" version "0.27.0"
+}
 
-    implementation project(':androidmobileapi')
-    implementation project(':androidmobiledatastore')
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
 
-    // Kotlin
-    implementation Libs.kotlin_stdlib
-    implementation Libs.kotlin_reflect
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
 
-    // RX
-    implementation Libs.rxjava
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            android {
+                compileSdkVersion Config.compileSdk
+                buildToolsVersion Config.buildTools
 
-    // OkHttp
-    implementation Libs.okhttp
-    implementation Libs.retrofit_converter_gson
+                defaultConfig {
+//                    applicationId "com.qmarciset.sample4dapp"
+                    minSdkVersion Config.minSdk
+                    targetSdkVersion Config.targetSdk
+                    multiDexEnabled true
+                    versionCode 1
+                    versionName "1.0"
+                    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+                    vectorDrawables.useSupportLibrary = true
+                }
 
-    // Support
-    implementation Libs.androidx_appcompat
-    implementation Libs.androidx_recyclerview
-    implementation Libs.androidx_core
+                buildTypes {
 
-    // Navigation
-    implementation Libs.androidx_navigation_fragment
-    implementation Libs.androidx_navigation_ui
+                    debug {
+                        testCoverageEnabled true
+                    }
 
-    // Log
-    implementation Libs.timber
+                    release {
+                        // Enables code shrinking, obfuscation, and optimization for only
+                        // your project's release build type.
+                        minifyEnabled true
 
-    implementation Libs.material
-    implementation Libs.androidx_constraintlayout
+                        // Enables resource shrinking, which is performed by the
+                        // Android Gradle plugin.
+//                        shrinkResources true
 
-    // Unit tests
-    testImplementation Libs.androidx_core_testing
-    testImplementation Libs.mockito
-    testImplementation Libs.junit
-    testImplementation Libs.robolectric
+                        // Includes the default ProGuard rules files that are packaged with
+                        // the Android Gradle plugin. To learn more, go to the section about
+                        // R8 configuration files.
+                        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                    }
+                }
+
+                testOptions {
+                    unitTests.includeAndroidResources = true
+                }
+                packagingOptions {
+                    exclude 'META-INF/atomicfu.kotlin_module'
+                }
+                compileOptions {
+                    sourceCompatibility Config.javaVersion
+                    targetCompatibility Config.javaVersion
+                }
+                kotlinOptions {
+                    jvmTarget = "1.8"
+                }
+                dataBinding {
+                    enabled = true
+                }
+                lintOptions {
+                    warning 'InvalidPackage'
+                    abortOnError false
+                }
+            }
+        }
+    }
 }
