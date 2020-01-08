@@ -2,7 +2,7 @@ package com.qmarciset.androidmobileui
 
 import android.app.Application
 import com.qmarciset.androidmobileapi.network.ApiService
-import com.qmarciset.androidmobiledatastore.AppDatabaseInterface
+import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobileui.utils.FromTableInterface
 import com.qmarciset.androidmobileui.utils.NavigationInterface
 import com.qmarciset.androidmobileui.utils.ViewDataBindingInterface

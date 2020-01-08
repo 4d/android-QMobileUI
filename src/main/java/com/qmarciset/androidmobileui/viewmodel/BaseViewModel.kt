@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.repository.RestRepository
-import com.qmarciset.androidmobiledatastore.AppDatabaseInterface
+import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobiledatastore.dao.BaseDao
 import com.qmarciset.androidmobiledatastore.repository.RoomRepository
 
@@ -22,7 +22,7 @@ abstract class BaseViewModel<T>(
 ) :
     AndroidViewModel(application) {
 
-    val dao: BaseDao<T> = appDatabase.getAppDatabase(application).getDao(tableName)
+    val dao: BaseDao<T> = appDatabase.getDao(tableName)
 
     val roomRepository: RoomRepository<T> =
         RoomRepository(dao)

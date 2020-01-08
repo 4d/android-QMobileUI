@@ -11,7 +11,7 @@ import com.qmarciset.androidmobileapi.model.entity.Entities
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.utils.parseJsonToType
-import com.qmarciset.androidmobiledatastore.AppDatabaseInterface
+import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobileui.utils.FromTableInterface
 import okhttp3.ResponseBody
 import timber.log.Timber
@@ -26,9 +26,9 @@ abstract class EntityListViewModel<T>(
 ) :
     BaseViewModel<T>(application, appDatabase, apiService, tableName) {
 
-    var entityList: LiveData<List<T>> = roomRepository.getAll()
+    open var entityList: LiveData<List<T>> = roomRepository.getAll()
 
-    val dataLoading = MutableLiveData<Boolean>().apply { value = false }
+    open val dataLoading = MutableLiveData<Boolean>().apply { value = false }
 
     init {
         Timber.d("EntityListViewModel initializing...")

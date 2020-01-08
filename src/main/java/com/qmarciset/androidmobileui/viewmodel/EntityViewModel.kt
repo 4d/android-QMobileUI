@@ -5,10 +5,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.qmarciset.androidmobileapi.network.ApiService
-import com.qmarciset.androidmobiledatastore.AppDatabaseInterface
+import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import timber.log.Timber
 
-class EntityViewModel<T>(
+open class EntityViewModel<T>(
     application: Application,
     appDatabase: AppDatabaseInterface,
     apiService: ApiService,
@@ -17,7 +17,7 @@ class EntityViewModel<T>(
 ) :
     BaseViewModel<T>(application, appDatabase, apiService, tableName) {
 
-    val entity: LiveData<T> = roomRepository.getOne(id)
+    open val entity: LiveData<T> = roomRepository.getOne(id)
 
     init {
         Timber.d("EntityViewModel initializing...")

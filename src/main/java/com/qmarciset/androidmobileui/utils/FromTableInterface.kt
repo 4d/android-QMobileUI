@@ -3,7 +3,7 @@ package com.qmarciset.androidmobileui.utils
 import android.app.Application
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobileapi.network.ApiService
-import com.qmarciset.androidmobiledatastore.AppDatabaseInterface
+import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobileui.viewmodel.EntityListViewModel
 import kotlin.reflect.KClass
 
