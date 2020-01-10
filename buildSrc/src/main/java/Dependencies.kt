@@ -1,8 +1,13 @@
 import org.gradle.api.JavaVersion
 
 object Versions {
+    val androidmobileapi = "0.0.1@aar"
+    val androidmobiledatastore = "0.0.1"
+    val androidmobileui = "0.0.1"
+
     val android_gradle_plugin = "3.5.2"
-    val arch_core = "2.0.1"
+    val arch_core = "2.0.0"
+    val artifactory = "4.13.0"
     val atsl_junit = "1.1.1"
     val constraint_layout = "2.0.0-beta3"
     val design = "1.0.0"
@@ -38,6 +43,16 @@ object Tools {
     val kotlin_gradle_plugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}"
     val navigation_safe_args_gradle_plugin =
         "androidx.navigation:navigation-safe-args-gradle-plugin:${Versions.navigation}"
+    val artifactory = "org.jfrog.buildinfo:build-info-extractor-gradle:${Versions.artifactory}"
+}
+
+object AndroidMobileLibs {
+    val androidmobileapi =
+        "com.qmarciset.androidmobileapi:androidmobileapi:${Versions.androidmobileapi}"
+    val androidmobiledatastore =
+        "com.qmarciset.androidmobiledatastore:androidmobiledatastore:${Versions.androidmobiledatastore}"
+    val androidmobileui =
+        "com.qmarciset.androidmobileui:androidmobileui:${Versions.androidmobileui}"
 }
 
 object Libs {

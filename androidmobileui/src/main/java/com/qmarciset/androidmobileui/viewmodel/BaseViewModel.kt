@@ -19,8 +19,7 @@ abstract class BaseViewModel<T>(
     appDatabase: AppDatabaseInterface,
     apiService: ApiService,
     tableName: String
-) :
-    AndroidViewModel(application) {
+) : AndroidViewModel(application) {
 
     val dao: BaseDao<T> = appDatabase.getDao(tableName)
 

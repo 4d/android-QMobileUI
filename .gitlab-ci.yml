@@ -1,3 +1,8 @@
+variables:
+  ANDROID_COMPILE_SDK: "29"
+  ANDROID_SDK_TOOLS: "4333796"
+  ANDROID_BUILD_TOOLS: "29.0.2"
+
 stages:
   - lint
   - build
@@ -25,13 +30,61 @@ lint:
     paths:
     - androidmobileui/build/reports/
 
-build:
+# OSX PLATFORM
+
+.download_sdk_osx: &download_sdk_osx |
+  echo "Starting download_sdk_osx"
+  curl -o android-sdk.zip https://dl.google.com/android/repository/sdk-tools-darwin-${ANDROID_SDK_TOOLS}.zip
+
+# LINUX PLATFORM
+
+.download_sdk_linux: &download_sdk_linux |
+  echo "Starting download_sdk_linux"
+  curl -o android-sdk.zip https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip
+
+.build_sdk: &build_sdk |
+  echo "Starting build_sdk"
+  unzip -q android-sdk.zip -d android-sdk
+  rm android-sdk.zip
+  echo y | android-sdk/tools/bin/sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null
+  echo y | android-sdk/tools/bin/sdkmanager "platform-tools" >/dev/null
+  echo y | android-sdk/tools/bin/sdkmanager "tools" >/dev/null
+  echo y | android-sdk/tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}" >/dev/null
+  export ANDROID_HOME=$PWD/android-sdk
+  export ANDROID_SDK_HOME=$PWD/android-sdk
+  export ANDROID_SDK_ROOT=$PWD/android-sdk
+  export PATH=$PATH:$ANDROID_HOME/platform-tools/
+  export PATH=$PATH:$ANDROID_HOME/tools/
+  export PATH=$PATH:$ANDROID_HOME/tools/bin/
+  export PATH=$PATH:$ANDROID_AVD_HOME
+
+buildLinux:
   stage: build
   script:
-    - ./gradlew clean assemble --console=rich
+    - *download_sdk_linux
+    - *build_sdk
+    - ./gradlew clean --console=rich
+    - ./gradlew assemble --console=rich
+    - ./gradlew artifactoryPublish --console=rich
+  tags:
+    - linux
   artifacts:
     paths:
-     - androidmobileui/build/outputs/
+     - androidmobileui/build/outputs/aar/
+
+buildOsx:
+  stage: build
+  script:
+    - *download_sdk_osx
+    - *build_sdk
+    - ./gradlew clean --console=rich
+    - ./gradlew assemble --console=rich
+    - ./gradlew artifactoryPublish --console=rich
+  tags:
+    - osx
+  artifacts:
+    paths:
+     - androidmobileui/build/outputs/aar/
 
 unitTests:
   stage: test

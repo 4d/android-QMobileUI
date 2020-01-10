@@ -1,14 +1,12 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlin_version = '1.3.61'
-
     dependencies {
         classpath Tools.gradle
         classpath Tools.kotlin_gradle_plugin
         classpath Tools.navigation_safe_args_gradle_plugin
+        classpath Tools.artifactory
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
     repositories {
         google()
@@ -21,7 +19,16 @@ plugins {
 }
 
 allprojects {
+    apply plugin: 'maven-publish'
+    apply plugin: "com.jfrog.artifactory"
     repositories {
+        maven {
+            url "${artifactory_contextUrl}/${artifactory_repoKey}"
+            credentials {
+                username = artifactory_user
+                password = artifactory_password
+            }
+        }
         google()
         jcenter()
     }
@@ -58,7 +65,7 @@ subprojects {
                     release {
                         // Enables code shrinking, obfuscation, and optimization for only
                         // your project's release build type.
-                        minifyEnabled true
+//                        minifyEnabled true
 
                         // Enables resource shrinking, which is performed by the
                         // Android Gradle plugin.
@@ -70,7 +77,10 @@ subprojects {
                         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
                     }
                 }
-
+                configurations.all {
+                    // Check for updates every build
+                    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+                }
                 testOptions {
                     unitTests.includeAndroidResources = true
                 }
