@@ -1,5 +1,5 @@
 include ':androidmobileui'
-rootProject.name='AndroidMobileUI'
+rootProject.name = 'AndroidMobileUI'
 //include ':androidmobileapi'
 //project(':androidmobileapi').projectDir = new File(settingsDir, '../AndroidMobileAPI/androidmobileapi')
 //include ':androidmobiledatastore'

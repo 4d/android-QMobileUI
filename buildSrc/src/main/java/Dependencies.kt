@@ -1,7 +1,7 @@
 import org.gradle.api.JavaVersion
 
 object Versions {
-    val androidmobileapi = "0.0.1@aar"
+    val androidmobileapi = "0.0.1"
     val androidmobiledatastore = "0.0.1"
     val androidmobileui = "0.0.1"
 
@@ -13,8 +13,12 @@ object Versions {
     val design = "1.0.0"
     val espresso = "3.2.0"
     val glide = "4.9.0"
+    val hamcrest = "2.2.0"
     val junit = "4.12"
     val kotlin = "1.3.61"
+    val kotlin_coroutines = "1.3.61"
+    val leakcanary = "2.0"
+    val lifecycle = "2.1.0"
     val mockito = "3.2.0"
     val multidex = "1.0.3"
     val navigation = "2.2.0-rc03"
@@ -27,6 +31,7 @@ object Versions {
     val rx_android = "2.1.1"
     val rxjava2 = "2.1.3"
     val support = "1.1.0"
+    val test = "1.2.0"
     val timber = "4.7.1"
 }
 
@@ -67,6 +72,13 @@ object Libs {
     val androidx_room_compiler = "androidx.room:room-compiler:${Versions.room}"
     val androidx_room_testing = "androidx.room:room-testing:${Versions.room}"
 
+    // Lifecycle
+    val androidx_lifecyle = "androidx.lifecycle:lifecycle-common-java8:${Versions.lifecycle}"
+    val androidx_lifecyle_extensions =
+        "androidx.lifecycle:lifecycle-extensions:${Versions.lifecycle}"
+    val androidx_lifecyle_viewmodel =
+        "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.lifecycle}"
+
     // Arch core
     val androidx_core_testing = "androidx.arch.core:core-testing:${Versions.arch_core}"
 
@@ -79,6 +91,7 @@ object Libs {
     val okhttp = "com.squareup.okhttp3:okhttp:${Versions.okhttp}"
     val okhttp_logging_intercepter = "com.squareup.okhttp3:logging-interceptor:${Versions.okhttp}"
     val okhttp_mockwebserver = "com.squareup.okhttp3:mockwebserver:${Versions.okhttp}"
+    val okhttp_urlconnection = "com.squareup.okhttp3:okhttp-urlconnection:${Versions.okhttp}"
 
     // Espresso
     val androidx_espresso = "androidx.test.espresso:espresso-core:${Versions.espresso}"
@@ -90,6 +103,10 @@ object Libs {
     val androidx_junit_ktx = "androidx.test.ext:junit-ktx:${Versions.atsl_junit}"
     val androidx_junit = "androidx.test.ext:junit:${Versions.atsl_junit}"
 
+    // Android test
+    val androidx_test_core = "androidx.test:core:${Versions.test}"
+    val android_text_core_ktx = "androidx.test:core-ktx:${Versions.test}"
+
     // Mockito
     val mockito = "org.mockito:mockito-core:${Versions.mockito}"
     val mockito_android = "org.mockito:mockito-android:${Versions.mockito}"
@@ -98,11 +115,15 @@ object Libs {
     // Kotlin
     val kotlin_stdlib = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
     val kotlin_reflect = "org.jetbrains.kotlin:kotlin-reflect:${Versions.kotlin}"
+    val kotlint_coroutines =
+        "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlin_coroutines}"
 
     // Navigation
     val androidx_navigation_fragment =
         "androidx.navigation:navigation-fragment-ktx:${Versions.navigation}"
     val androidx_navigation_ui = "androidx.navigation:navigation-ui-ktx:${Versions.navigation}"
+    val androidx_navigation_runtime =
+        "androidx.navigation:navigation-runtime-ktx:${Versions.navigation}"
 
     // Glide
     val glide = "com.github.bumptech.glide:glide:${Versions.glide}"
@@ -118,4 +139,6 @@ object Libs {
     val multidex = "com.android.support:multidex:${Versions.multidex}"
     val junit = "junit:junit:${Versions.junit}"
     val robolectric = "org.robolectric:robolectric:${Versions.robolectric}"
+    val hamcrest = "org.hamcrest:hamcrest-all:${Versions.hamcrest}"
+    val leakcanary = "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanary}"
 }
