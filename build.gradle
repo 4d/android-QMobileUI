@@ -48,7 +48,6 @@ subprojects {
                 buildToolsVersion Config.buildTools
 
                 defaultConfig {
-//                    applicationId "com.qmarciset.sample4dapp"
                     minSdkVersion Config.minSdk
                     targetSdkVersion Config.targetSdk
                     multiDexEnabled true

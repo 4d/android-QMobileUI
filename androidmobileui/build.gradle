@@ -12,10 +12,10 @@ apply from: "https://raw.githubusercontent.com/JakeWharton/SdkSearch/master/grad
 dependencies {
 
     // AndroidMobile libraries
-//    implementation project(':androidmobileapi')
-//    implementation project(':androidmobiledatastore')
     implementation(AndroidMobileLibs.androidmobileapi) { changing = true }
     implementation(AndroidMobileLibs.androidmobiledatastore) { changing = true }
+//    implementation project(':androidmobileapi')
+//    implementation project(':androidmobiledatastore')
 
     // Common
     implementation Libs.androidx_appcompat
@@ -30,9 +30,6 @@ dependencies {
 
     // Utils
     implementation Libs.material
-    implementation Libs.okhttp
-    implementation Libs.retrofit_converter_gson
-    implementation Libs.rxjava
     implementation Libs.timber
 
     // Testing
