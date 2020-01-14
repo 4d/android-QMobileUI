@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AndroidMobileUI.iml" filepath="$PROJECT_DIR$/AndroidMobileUI.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../AndroidMobileAPI/androidmobileapi/androidmobileapi.iml" filepath="$PROJECT_DIR$/../AndroidMobileAPI/androidmobileapi/androidmobileapi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../AndroidMobileDataStore/androidmobiledatastore/androidmobiledatastore.iml" filepath="$PROJECT_DIR$/../AndroidMobileDataStore/androidmobiledatastore/androidmobiledatastore.iml" />
       <module fileurl="file://$PROJECT_DIR$/androidmobileui/androidmobileui.iml" filepath="$PROJECT_DIR$/androidmobileui/androidmobileui.iml" />
       <module fileurl="file://$PROJECT_DIR$/buildSrc/buildSrc.iml" filepath="$PROJECT_DIR$/buildSrc/buildSrc.iml" />
     </modules>
