@@ -11,43 +11,32 @@ apply from: "https://raw.githubusercontent.com/JakeWharton/SdkSearch/master/grad
 
 dependencies {
 
+    // AndroidMobile libraries
 //    implementation project(':androidmobileapi')
 //    implementation project(':androidmobiledatastore')
-
     implementation(AndroidMobileLibs.androidmobileapi) { changing = true }
     implementation(AndroidMobileLibs.androidmobiledatastore) { changing = true }
 
-    // Kotlin
-    implementation Libs.kotlin_stdlib
-    implementation Libs.kotlin_reflect
-
-    // RX
-    implementation Libs.rxjava
-
-    // OkHttp
-    implementation Libs.okhttp
-    implementation Libs.retrofit_converter_gson
-
-    // Support
+    // Common
     implementation Libs.androidx_appcompat
-    implementation Libs.androidx_recyclerview
+    implementation Libs.androidx_constraintlayout
     implementation Libs.androidx_core
+    implementation Libs.androidx_recyclerview
+    implementation Libs.kotlin_stdlib
 
     // Navigation
     implementation Libs.androidx_navigation_fragment
     implementation Libs.androidx_navigation_ui
 
-    // Log
+    // Utils
+    implementation Libs.material
+    implementation Libs.okhttp
+    implementation Libs.retrofit_converter_gson
+    implementation Libs.rxjava
     implementation Libs.timber
 
-    implementation Libs.material
-    implementation Libs.androidx_constraintlayout
-
-    // Unit tests
-    testImplementation Libs.androidx_core_testing
-    testImplementation Libs.mockito
+    // Testing
     testImplementation Libs.junit
-    testImplementation Libs.robolectric
 }
 
 def libraryGroupId = 'com.qmarciset.androidmobileui'
@@ -78,12 +67,13 @@ publishing {
 }
 
 artifactory {
-    contextUrl = "${artifactory_contextUrl}"
+    def machineIP = System.getenv('ARTIFACTORY_MACHINE_IP')
+    contextUrl = "http://${machineIP}:8081/artifactory"
     publish {
         repository {
-            repoKey = artifactory_repoKey
-            username = artifactory_user
-            password = artifactory_password
+            repoKey = "libs-release-local"
+            username = System.getenv('ARTIFACTORY_USERNAME')
+            password = System.getenv('ARTIFACTORY_PASSWORD')
         }
         defaults {
             publications('aar')
