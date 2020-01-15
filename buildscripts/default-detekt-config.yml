@@ -1,10 +1,11 @@
 build:
   maxIssues: 10
+  excludeCorrectable: false
   weights:
-    # complexity: 2
-    # LongParameterList: 1
-    # style: 1
-    # comments: 1
+  # complexity: 2
+  # LongParameterList: 1
+  # style: 1
+  # comments: 1
 
 config:
   validation: true
@@ -24,11 +25,11 @@ processors:
 console-reports:
   active: true
   exclude:
-  #  - 'ProjectStatisticsReport'
-  #  - 'ComplexityReport'
-  #  - 'NotificationReport'
-  #  - 'FindingsReport'
-     - 'FileBasedFindingsReport'
+    #  - 'ProjectStatisticsReport'
+    #  - 'ComplexityReport'
+    #  - 'NotificationReport'
+    #  - 'FindingsReport'
+    - 'FileBasedFindingsReport'
   #  - 'BuildFailureReport'
 
 comments:
@@ -106,6 +107,13 @@ complexity:
     ignorePrivate: false
     ignoreOverridden: false
 
+coroutines:
+  active: true
+  GlobalCoroutineUsage:
+    active: false
+  RedundantSuspendModifier:
+    active: false
+
 empty-blocks:
   active: true
   EmptyCatchBlock:
@@ -125,7 +133,7 @@ empty-blocks:
     active: true
   EmptyFunctionBlock:
     active: true
-    ignoreOverriddenFunctions: false
+    ignoreOverridden: false
   EmptyIfBlock:
     active: true
   EmptyInitBlock:
@@ -173,22 +181,22 @@ exceptions:
     active: true
     excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
     exceptionNames:
-     - ArrayIndexOutOfBoundsException
-     - Error
-     - Exception
-     - IllegalMonitorStateException
-     - NullPointerException
-     - IndexOutOfBoundsException
-     - RuntimeException
-     - Throwable
+      - ArrayIndexOutOfBoundsException
+      - Error
+      - Exception
+      - IllegalMonitorStateException
+      - NullPointerException
+      - IndexOutOfBoundsException
+      - RuntimeException
+      - Throwable
     allowedExceptionNameRegex: "^(_|(ignore|expected).*)"
   TooGenericExceptionThrown:
     active: true
     exceptionNames:
-     - Error
-     - Exception
-     - Throwable
-     - RuntimeException
+      - Error
+      - Exception
+      - Throwable
+      - RuntimeException
 
 formatting:
   active: true
@@ -202,6 +210,9 @@ formatting:
     autoCorrect: true
   CommentSpacing:
     active: true
+    autoCorrect: true
+  EnumEntryNameCase:
+    active: false
     autoCorrect: true
   Filename:
     active: true
@@ -233,6 +244,9 @@ formatting:
     autoCorrect: true
   NoEmptyClassBody:
     active: true
+    autoCorrect: true
+  NoEmptyFirstLineInMethodBlock:
+    active: false
     autoCorrect: true
   NoLineBreakAfterElse:
     active: true
@@ -332,7 +346,7 @@ naming:
     excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
     parameterPattern: '[a-z][A-Za-z0-9]*'
     excludeClassPattern: '$^'
-    ignoreOverriddenFunctions: true
+    ignoreOverridden: true
   InvalidPackageDeclaration:
     active: false
     rootPackage: ''
@@ -340,7 +354,7 @@ naming:
     active: true
   MemberNameEqualsClassName:
     active: true
-    ignoreOverriddenFunction: true
+    ignoreOverridden: true
   ObjectPropertyNaming:
     active: true
     excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
@@ -413,8 +427,8 @@ potential-bugs:
     excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
     excludeAnnotatedProperties: ""
     ignoreOnClassesPattern: ""
-  #MapGetWithNotNullAssertionOperator:
-  #  active: false
+  MapGetWithNotNullAssertionOperator:
+    active: false
   MissingWhenCase:
     active: true
   RedundantElseInWhen:
@@ -458,6 +472,12 @@ style:
     active: false
     imports: ''
     forbiddenPatterns: ""
+  ForbiddenMethodCall:
+    active: false
+    methods: ''
+  ForbiddenPublicDataClass:
+    active: false
+    ignorePackages: '*.internal,*.internal.*'
   ForbiddenVoid:
     active: false
     ignoreOverridden: false
@@ -541,8 +561,8 @@ style:
   UnnecessaryAbstractClass:
     active: true
     excludeAnnotatedClasses: "dagger.Module"
-  #UnnecessaryAnnotationUseSiteTarget:
-  #  active: false
+  UnnecessaryAnnotationUseSiteTarget:
+    active: false
   UnnecessaryApply:
     active: false
   UnnecessaryInheritance:
