@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
-import com.qmarciset.androidmobileapi.auth.AuthenticationHelper
 import com.qmarciset.androidmobileapi.model.entity.Entities
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobileapi.network.ApiService
@@ -32,7 +31,7 @@ abstract class EntityListViewModel<T>(
 
     init {
         Timber.d("EntityListViewModel initializing...")
-        AuthenticationHelper(restRepository, application.applicationContext).loginIfRequired()
+//        AuthenticationHelper(restRepository, application.applicationContext).loginIfRequired()
     }
 
     fun delete(item: EntityModel) {
