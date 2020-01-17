@@ -95,8 +95,8 @@ class EntityListFragment : Fragment() {
             }
         })
 
-        entityListViewModel.toastMessage.observe(viewLifecycleOwner, Observer {
-            val toastMessage = context?.fetchResourceString(it) ?: ""
+        entityListViewModel.toastMessage.observe(viewLifecycleOwner, Observer { message ->
+            val toastMessage = context?.fetchResourceString(message) ?: ""
             if (toastMessage.isNotEmpty()) {
                 delegate.toast(toastMessage)
                 // To avoid the error toast to be displayed without performing a refresh again

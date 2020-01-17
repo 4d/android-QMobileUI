@@ -13,4 +13,7 @@
 
     <!--    Fragment List Stub-->
     <string name="no_data_to_display_stub">No data to display</string>
+
+    <!--    Login Fragment-->
+    <string name="login_fail">Login unsuccessful</string>
 </resources>
