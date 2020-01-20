@@ -19,26 +19,26 @@
             android:id="@+id/service_name_text"
             android:layout_width="228dp"
             android:layout_height="28dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginStart="@dimen/recycler_item_stub_margin"
+            android:layout_marginTop="@dimen/recycler_item_stub_margin"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:textSize="22sp"
+            android:textSize="@dimen/recycler_item_stub_text_size_title"
             app:layout_constraintBottom_toTopOf="@+id/id_text"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="___VALUE___" />
+            tools:text="@string/list_recycler_item_stub_title_text" />
 
         <TextView
             android:id="@+id/id_text"
             android:layout_width="228dp"
             android:layout_height="21dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginBottom="8dp"
-            android:textSize="16sp"
+            android:layout_marginStart="@dimen/recycler_item_stub_margin"
+            android:layout_marginBottom="@dimen/recycler_item_stub_margin"
+            android:textSize="@dimen/recycler_item_stub_text_size_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/service_name_text"
-            tools:text="___ID___" />
+            tools:text="@string/list_recycler_item_stub_content_text" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

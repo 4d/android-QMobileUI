@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.qmarciset.androidmobileui.FragmentCommunication
+import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.utils.fetchResourceString
 import com.qmarciset.androidmobileui.viewmodel.EntityListViewModel
 import kotlinx.android.synthetic.main.fragment_list_stub.*
@@ -127,7 +128,7 @@ class EntityListFragment : Fragment() {
     private fun initOnRefreshListener() {
         fragment_list_swipe_to_refresh.setProgressBackgroundColorSchemeColor(
             ContextCompat.getColor(
-                requireContext(), com.qmarciset.androidmobileui.R.color.colorSwipeToRefresh
+                requireContext(), com.qmarciset.androidmobileui.R.color.list_swipe_to_refresh
             )
         )
         fragment_list_swipe_to_refresh.setColorSchemeColors(Color.WHITE)
@@ -149,10 +150,10 @@ class EntityListFragment : Fragment() {
                         val snackBar = Snackbar
                             .make(
                                 it.findViewById<View>(android.R.id.content),
-                                it.resources.getString(com.qmarciset.androidmobileui.R.string.sb_remove),
+                                it.resources.getString(R.string.snackbar_remove),
                                 Snackbar.LENGTH_LONG
                             )
-                        snackBar.setAction(it.resources.getString(com.qmarciset.androidmobileui.R.string.sb_undo)) {
+                        snackBar.setAction(it.resources.getString(com.qmarciset.androidmobileui.R.string.snackbar_undo)) {
                             entityListViewModel.insert(item)
                             //                        rv_main.scrollToPosition(position)
                         }

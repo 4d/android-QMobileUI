@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    >
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="SERVER">
+    <PreferenceCategory android:title="@string/cat_title_server">
 
         <EditTextPreference
-            android:defaultValue=" "
-            android:key="remote_url"
+            android:defaultValue="@string/pref_remote_url_default_value"
+            android:key="@string/pref_remote_url_key"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Remote URL" />
+            android:summary="@string/pref_remote_url_summary"
+            android:title="@string/pref_remote_url_title" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="ACCOUNT"
-        app:key="account_category"
-        app:isPreferenceVisible="false">
+    <PreferenceCategory
+        android:title="@string/cat_title_account"
+        app:isPreferenceVisible="false"
+        app:key="@string/cat_account_key">
 
         <Preference
-            app:key="logout"
-            app:summary="Logout current user"
-            app:title="LOGOUT" />
+            app:key="@string/pref_logout_key"
+            app:summary="@string/pref_logout_summary"
+            app:title="@string/pref_logout_title" />
 
     </PreferenceCategory>
 

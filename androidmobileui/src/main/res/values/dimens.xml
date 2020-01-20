@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--    Fragment Error -->
+    <!--    Error Fragment -->
     <dimen name="fragment_error_text_vertical_padding">24dp</dimen>
     <dimen name="fragment_error_text_horizontal_padding">56dp</dimen>
+
+    <!--    Recycler Item Stub-->
+    <dimen name="recycler_item_stub_margin">56dp</dimen>
+    <dimen name="recycler_item_stub_text_size_title">22sp</dimen>
+    <dimen name="recycler_item_stub_text_size_content">16sp</dimen>
 </resources>

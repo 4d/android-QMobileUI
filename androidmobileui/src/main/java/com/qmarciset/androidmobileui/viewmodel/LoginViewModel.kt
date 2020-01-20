@@ -30,7 +30,10 @@ class LoginViewModel(application: Application, private val apiService: ApiServic
 
     val authenticationState: MutableLiveData<AuthenticationState> by lazy {
         val initialState =
-            if (authInfoHelper.sessionToken.isEmpty()) AuthenticationState.UNAUTHENTICATED else AuthenticationState.AUTHENTICATED
+            if (authInfoHelper.sessionToken.isEmpty())
+                AuthenticationState.UNAUTHENTICATED
+            else
+                AuthenticationState.AUTHENTICATED
         MutableLiveData<AuthenticationState>(initialState)
     }
 
@@ -52,7 +55,6 @@ class LoginViewModel(application: Application, private val apiService: ApiServic
         val authRequest = buildAuthRequestBody(email, password)
         authRepository.authenticate(authRequest) { isSuccess, response, error ->
             dataLoading.value = false
-            Timber.d("authenticate returned : isSuccess = $isSuccess, response = $response, error = $error")
             if (isSuccess) {
                 response?.let {
                     if (treatLoginInfo(it)) {

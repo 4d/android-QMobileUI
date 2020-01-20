@@ -3,7 +3,12 @@
     <!--    Swipe to delete -->
     <color name="backgroundSwipeToDelete">#f44336</color>
 
-    <color name="colorSwipeToRefresh">#6200EE</color>
-    <color name="colorSoftError">#CFCFCF</color>
-    <color name="colorSoftErrorText">#6D6D6D</color>
+    <!--    Swipe to refresh -->
+    <color name="list_swipe_to_refresh">#6200EE</color>
+
+    <!--    Error fragment -->
+    <color name="error_fragment_soft_error">#CFCFCF</color>
+
+    <!--    Text color -->
+    <color name="text_color_grey">#6D6D6D</color>
 </resources>

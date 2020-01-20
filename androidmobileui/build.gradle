@@ -21,6 +21,7 @@ dependencies {
     implementation Libs.androidx_appcompat
     implementation Libs.androidx_constraintlayout
     implementation Libs.androidx_core
+    implementation Libs.androidx_preference_ktx
     implementation Libs.androidx_recyclerview
     implementation Libs.kotlin_stdlib
 

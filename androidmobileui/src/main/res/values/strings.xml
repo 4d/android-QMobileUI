@@ -1,19 +1,33 @@
 <resources>
     <string name="app_name">AndroidMobileUI</string>
 
-    <!--    Fragment Error-->
+    <!--    Error Fragment -->
     <string name="label_sample_error">An error occurred. This is a sample error message</string>
     <string name="content_description_sample_error_image">sample_error_image</string>
 
+    <!--    Swipe To Delete-->
+    <string name="snackbar_remove">Item was removed from the list.</string>
+    <string name="snackbar_undo">UNDO</string>
+
+    <!--    List Fragment Stub-->
+    <string name="list_no_data_to_display_stub">No data to display</string>
+    <string name="list_recycler_item_stub_title_text">___VALUE___</string>
+    <string name="list_recycler_item_stub_content_text">___ID___</string>
     <string name="try_refresh_data">Please try refreshing data again</string>
 
-    <!--    Swipe To Delete-->
-    <string name="sb_remove">Item was removed from the list.</string>
-    <string name="sb_undo">UNDO</string>
-
-    <!--    Fragment List Stub-->
-    <string name="no_data_to_display_stub">No data to display</string>
-
-    <!--    Login Fragment-->
-    <string name="login_fail">Login unsuccessful</string>
+    <!--    Settings Fragment -->
+    <string name="cat_title_server">SERVER</string>
+    <string name="pref_remote_url_key">remote_url</string>
+    <string name="pref_remote_url_title">Remote URL</string>
+    <string name="pref_remote_url_summary"> </string>
+    <string name="pref_remote_url_default_value"> </string>
+    <string name="cat_account_key">account_category</string>
+    <string name="cat_title_account">ACCOUNT</string>
+    <string name="pref_logout_key">logout</string>
+    <string name="pref_logout_title">LOGOUT</string>
+    <string name="pref_logout_summary">Logout current user</string>
+    <string name="logout_dialog_negative">Cancel</string>
+    <string name="logout_dialog_positive">Logout</string>
+    <string name="logout_dialog_title">Are you sure you want to Logout ?</string>
+    <string name="logout_dialog_message">You will need to log in again</string>
 </resources>

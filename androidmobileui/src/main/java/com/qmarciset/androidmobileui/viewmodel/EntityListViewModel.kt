@@ -31,7 +31,6 @@ abstract class EntityListViewModel<T>(
 
     init {
         Timber.d("EntityListViewModel initializing...")
-//        AuthenticationHelper(restRepository, application.applicationContext).loginIfRequired()
     }
 
     fun delete(item: EntityModel) {
