@@ -80,15 +80,6 @@ class EntityDetailFragment : Fragment() {
 
     private fun setupObservers() {
         entityViewModel.entity.observe(viewLifecycleOwner, Observer {
-            /*entity ->
-                                   if (entity is Service) {
-                                       fragment_detail_tv_title.text = entity.name
-                                       fragment_detail_tv_id.text = entity.__KEY
-                                   }
-                                   if (entity is Employee) {
-                                       fragment_detail_tv_title.text = "${entity.FirstName} ${entity.LastName}"
-                                       fragment_detail_tv_id.text = entity.__KEY
-                                   }*/
         })
     }
 }

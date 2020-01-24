@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
-import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.viewmodel.LoginViewModel
@@ -64,7 +63,9 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClic
                     showLogoutDialog()
                     true
                 }
-                else -> false
+                else -> {
+                    false
+                }
             }
         }
         return false
@@ -98,15 +99,14 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClic
     }
 
     private fun logout() {
-        loginViewModel.authInfoHelper.sessionToken = ""
-        loginViewModel.authenticationState.postValue(AuthenticationState.UNAUTHENTICATED)
+        loginViewModel.disconnectUser()
     }
 
     private fun getViewModel() {
         loginViewModel = activity?.run {
             ViewModelProvider(
                 this,
-                LoginViewModel.LoginViewModelFactory(delegate.appInstance, delegate.apiService)
+                LoginViewModel.LoginViewModelFactory(delegate.appInstance, delegate.loginApiService)
             )[LoginViewModel::class.java]
         } ?: throw IllegalStateException("Invalid Activity")
     }

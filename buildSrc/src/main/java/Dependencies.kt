@@ -12,8 +12,10 @@ object Versions {
     val design = "1.0.0"
     val junit = "4.13"
     val kotlin = "1.3.61"
+    val mockito = "3.2.4"
     val navigation = "2.2.0-rc04"
     val okhttp = "4.3.0"
+    val preference = "1.1.0"
     val retrofit = "2.7.1"
     val robolectric = "4.3.1"
     val room = "2.2.3"
@@ -70,7 +72,8 @@ object Libs {
 
     // For AndroidMobileAPI
     val androidx_junit = "androidx.test.ext:junit:${Versions.atsl_junit}"
-    val androidx_preference_ktx = "androidx.preference:preference-ktx:1.1.0"
+    val androidx_preference_ktx = "androidx.preference:preference-ktx:${Versions.preference}"
+    val mockito = "org.mockito:mockito-core:${Versions.mockito}"
     val okhttp = "com.squareup.okhttp3:okhttp:${Versions.okhttp}"
     val okhttp_logging_interceptor = "com.squareup.okhttp3:logging-interceptor:${Versions.okhttp}"
     val okhttp_mockwebserver = "com.squareup.okhttp3:mockwebserver:${Versions.okhttp}"

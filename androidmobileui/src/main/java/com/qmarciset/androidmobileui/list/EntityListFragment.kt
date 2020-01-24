@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.utils.fetchResourceString
@@ -26,6 +27,8 @@ import kotlinx.android.synthetic.main.fragment_list_stub.*
 class EntityListFragment : Fragment() {
 
     private var tableName: String = ""
+
+    private lateinit var authInfoHelper: AuthInfoHelper
 
     private lateinit var delegate: FragmentCommunication
     private lateinit var adapter: EntityListAdapter
@@ -83,6 +86,7 @@ class EntityListFragment : Fragment() {
     }
 
     private fun initView() {
+        authInfoHelper = AuthInfoHelper.getInstance(delegate.appInstance)
         setupObservers()
         initRecyclerView()
         initOnRefreshListener()
@@ -128,7 +132,7 @@ class EntityListFragment : Fragment() {
     private fun initOnRefreshListener() {
         fragment_list_swipe_to_refresh.setProgressBackgroundColorSchemeColor(
             ContextCompat.getColor(
-                requireContext(), com.qmarciset.androidmobileui.R.color.list_swipe_to_refresh
+                requireContext(), R.color.list_swipe_to_refresh
             )
         )
         fragment_list_swipe_to_refresh.setColorSchemeColors(Color.WHITE)
@@ -153,7 +157,7 @@ class EntityListFragment : Fragment() {
                                 it.resources.getString(R.string.snackbar_remove),
                                 Snackbar.LENGTH_LONG
                             )
-                        snackBar.setAction(it.resources.getString(com.qmarciset.androidmobileui.R.string.snackbar_undo)) {
+                        snackBar.setAction(it.resources.getString(R.string.snackbar_undo)) {
                             entityListViewModel.insert(item)
                             //                        rv_main.scrollToPosition(position)
                         }

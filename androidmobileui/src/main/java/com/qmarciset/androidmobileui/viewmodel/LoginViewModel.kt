@@ -8,19 +8,19 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
 import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
 import com.qmarciset.androidmobileapi.auth.AuthenticationState
+import com.qmarciset.androidmobileapi.auth.buildAuthRequestBody
+import com.qmarciset.androidmobileapi.auth.handleLoginInfo
 import com.qmarciset.androidmobileapi.model.auth.AuthResponse
-import com.qmarciset.androidmobileapi.network.ApiService
+import com.qmarciset.androidmobileapi.network.LoginApiService
 import com.qmarciset.androidmobileapi.repository.AuthRepository
+import com.qmarciset.androidmobileapi.utils.RequestErrorHandler
 import com.qmarciset.androidmobileapi.utils.parseJsonToType
-import okhttp3.ResponseBody
-import org.json.JSONObject
-import retrofit2.Response
 import timber.log.Timber
 
-class LoginViewModel(application: Application, private val apiService: ApiService) :
+class LoginViewModel(application: Application, loginApiService: LoginApiService) :
     AndroidViewModel(application) {
 
-    private val authRepository: AuthRepository = AuthRepository(apiService)
+    private val authRepository: AuthRepository = AuthRepository(loginApiService)
 
     val authInfoHelper = AuthInfoHelper.getInstance(application.applicationContext)
 
@@ -37,51 +37,43 @@ class LoginViewModel(application: Application, private val apiService: ApiServic
         MutableLiveData<AuthenticationState>(initialState)
     }
 
-    private fun buildAuthRequestBody(email: String, password: String): JSONObject {
-        return JSONObject().apply {
-            put(AuthInfoHelper.AUTH_EMAIL, email)
-            put(AuthInfoHelper.AUTH_PASSWORD, password)
-            put(AuthInfoHelper.AUTH_APPLICATION, authInfoHelper.appInfo)
-            put(AuthInfoHelper.AUTH_DEVICE, authInfoHelper.device)
-            put(AuthInfoHelper.AUTH_TEAM, authInfoHelper.team)
-            put(AuthInfoHelper.AUTH_LANGUAGE, authInfoHelper.language)
-            put(AuthInfoHelper.AUTH_PARAMETERS, JSONObject())
-        }
-    }
-
     fun login(email: String = "", password: String = "") {
         dataLoading.value = true
-        val authRepository = AuthRepository(apiService)
-        val authRequest = buildAuthRequestBody(email, password)
-        authRepository.authenticate(authRequest) { isSuccess, response, error ->
+        val authRequest = authInfoHelper.buildAuthRequestBody(email, password)
+        val shouldRetryOnError = authInfoHelper.guestLogin
+        authRepository.authenticate(authRequest, shouldRetryOnError) { isSuccess, response, error ->
             dataLoading.value = false
             if (isSuccess) {
                 response?.let {
-                    if (treatLoginInfo(it)) {
-                        authenticationState.postValue(AuthenticationState.AUTHENTICATED)
-                        return@authenticate
+                    val responseBody = response.body()
+                    val json = responseBody?.string()
+                    val authResponse: AuthResponse? = Gson().parseJsonToType<AuthResponse>(json)
+                    authResponse?.let {
+                        if (authInfoHelper.handleLoginInfo(authResponse)) {
+                            authenticationState.postValue(AuthenticationState.AUTHENTICATED)
+                            return@authenticate
+                        }
                     }
                 }
                 authenticationState.postValue(AuthenticationState.INVALID_AUTHENTICATION)
             } else {
-                // TODO : check error from response or from error
-                Timber.e("Error: $error")
+                RequestErrorHandler.handleError(error)
                 authenticationState.postValue(AuthenticationState.INVALID_AUTHENTICATION)
             }
         }
     }
 
-    private fun treatLoginInfo(response: Response<ResponseBody>): Boolean {
-
-        val responseBody = response.body()
-        val json = responseBody?.string()
-        val authResponse: AuthResponse? = Gson().parseJsonToType<AuthResponse>(json)
-        authResponse?.let {
-            authInfoHelper.sessionId = authResponse.id ?: ""
-            authInfoHelper.sessionToken = authResponse.token ?: ""
-            return true
+    fun disconnectUser() {
+        authRepository.logout { isSuccess, _, error ->
+            dataLoading.value = false
+            authenticationState.postValue(AuthenticationState.UNAUTHENTICATED)
+            authInfoHelper.sessionToken = ""
+            if (isSuccess) {
+                Timber.d("[ Logout request successful ]")
+            } else {
+                Timber.e("Error: $error")
+            }
         }
-        return false
     }
 
     override fun onCleared() {
@@ -91,7 +83,7 @@ class LoginViewModel(application: Application, private val apiService: ApiServic
 
     class LoginViewModelFactory(
         private val application: Application,
-        private val apiService: ApiService
+        private val apiService: LoginApiService
     ) : ViewModelProvider.NewInstanceFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {

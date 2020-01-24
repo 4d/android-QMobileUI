@@ -9,6 +9,7 @@ import com.google.gson.Gson
 import com.qmarciset.androidmobileapi.model.entity.Entities
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobileapi.network.ApiService
+import com.qmarciset.androidmobileapi.utils.RequestErrorHandler
 import com.qmarciset.androidmobileapi.utils.parseJsonToType
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobileui.utils.FromTableInterface
@@ -54,19 +55,18 @@ abstract class EntityListViewModel<T>(
         restRepository.getAllFromApi { isSuccess, response, error ->
             dataLoading.value = false
             if (isSuccess) {
-                response?.let {
-                    treatData(it)
+                response?.body()?.let {
+                    handleData(it)
                 }
             } else {
-                // TODO : check error from response or from error
                 toastMessage.postValue("try_refresh_data")
-                Timber.e("Error: $error")
+                RequestErrorHandler.handleError(error)
             }
         }
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun treatData(responseBody: ResponseBody): Boolean {
+    private fun handleData(responseBody: ResponseBody): Boolean {
         val json = responseBody.string()
         val gson = Gson()
         val entities = gson.parseJsonToType<Entities>(json)
