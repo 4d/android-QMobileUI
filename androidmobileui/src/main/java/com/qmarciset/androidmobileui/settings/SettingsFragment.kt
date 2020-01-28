@@ -77,6 +77,7 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClic
                 remoteUrlPrefKey -> {
                     val newRemoteUrl = newValue as String
                     loginViewModel.authInfoHelper.remoteUrl = newRemoteUrl
+                    delegate.refreshApiClients()
                     remoteUrlPref?.setDefaultValue(newRemoteUrl)
                     remoteUrlPref?.summary = newRemoteUrl
                 }

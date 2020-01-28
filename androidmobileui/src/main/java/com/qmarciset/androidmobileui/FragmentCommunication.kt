@@ -25,4 +25,6 @@ interface FragmentCommunication {
     val appDatabaseInterface: AppDatabaseInterface
 
     fun toast(message: String)
+
+    fun refreshApiClients()
 }

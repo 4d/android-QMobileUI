@@ -24,9 +24,9 @@ class LoginViewModel(application: Application, loginApiService: LoginApiService)
 
     val authInfoHelper = AuthInfoHelper.getInstance(application.applicationContext)
 
-    open val dataLoading = MutableLiveData<Boolean>().apply { value = false }
+    val dataLoading = MutableLiveData<Boolean>().apply { value = false }
 
-    open val emailValid = MutableLiveData<Boolean>().apply { value = false }
+    val emailValid = MutableLiveData<Boolean>().apply { value = false }
 
     val authenticationState: MutableLiveData<AuthenticationState> by lazy {
         val initialState =
