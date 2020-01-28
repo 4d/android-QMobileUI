@@ -9,17 +9,17 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
+import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.viewmodel.EntityListViewModel
 
-class EntityViewPagerFragment : Fragment() {
+class EntityViewPagerFragment : Fragment(), BaseFragment {
 
     private var position: Int = 0
     private var tableName: String = ""
-    private lateinit var delegate: FragmentCommunication
-
     private var viewPager: ViewPager? = null
+    private lateinit var delegate: FragmentCommunication
     private lateinit var entityListViewModel: EntityListViewModel<*>
 
     override fun onCreateView(
@@ -46,7 +46,12 @@ class EntityViewPagerFragment : Fragment() {
         setupObservers()
     }
 
-    private fun getViewModel() {
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewPager = null
+    }
+
+    override fun getViewModel() {
         val kClazz = delegate.fromTableInterface.entityListViewModelClassFromTable(tableName)
         entityListViewModel = activity?.run {
             ViewModelProvider(
@@ -62,10 +67,13 @@ class EntityViewPagerFragment : Fragment() {
         } ?: throw IllegalStateException("Invalid Activity")
     }
 
-    private fun setupObservers() {
+    override fun setupObservers() {
+
         getViewModel()
+
         entityListViewModel.entityList.observe(viewLifecycleOwner, Observer { entities ->
             entities?.let {
+                // When entity list data changed, refresh the displayed list
                 viewPager?.adapter =
                     EntityViewPagerAdapter(
                         this,
@@ -75,10 +83,5 @@ class EntityViewPagerFragment : Fragment() {
                 viewPager?.currentItem = position
             }
         })
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        viewPager = null
     }
 }

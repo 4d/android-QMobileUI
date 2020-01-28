@@ -35,11 +35,11 @@ fun BottomNavigationView.setupWithNavController(
     // First create a NavHostFragment for each NavGraph ID
     navGraphIds.forEachIndexed { index, navGraphId ->
         val fragmentTag =
-            com.qmarciset.androidmobileui.utils.getFragmentTag(index)
+            getFragmentTag(index)
 
         // Find or create the Navigation host fragment
         val navHostFragment =
-            com.qmarciset.androidmobileui.utils.obtainNavHostFragment(
+            obtainNavHostFragment(
                 fragmentManager,
                 fragmentTag,
                 navGraphId,
@@ -66,7 +66,7 @@ fun BottomNavigationView.setupWithNavController(
                 index == 0
             )
         } else {
-            com.qmarciset.androidmobileui.utils.detachNavHostFragment(
+            detachNavHostFragment(
                 fragmentManager,
                 navHostFragment
             )
@@ -166,11 +166,11 @@ private fun BottomNavigationView.setupDeepLinks(
 ) {
     navGraphIds.forEachIndexed { index, navGraphId ->
         val fragmentTag =
-            com.qmarciset.androidmobileui.utils.getFragmentTag(index)
+            getFragmentTag(index)
 
         // Find or create the Navigation host fragment
         val navHostFragment =
-            com.qmarciset.androidmobileui.utils.obtainNavHostFragment(
+            obtainNavHostFragment(
                 fragmentManager,
                 fragmentTag,
                 navGraphId,

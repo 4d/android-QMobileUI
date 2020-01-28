@@ -37,9 +37,13 @@ class LoginViewModel(application: Application, loginApiService: LoginApiService)
         MutableLiveData<AuthenticationState>(initialState)
     }
 
+    // Authenticates
     fun login(email: String = "", password: String = "") {
         dataLoading.value = true
+        // Builds the request body for $authenticate request
         val authRequest = authInfoHelper.buildAuthRequestBody(email, password)
+        // Provides shouldRetryOnError to know if we should redirect the user to login page or
+        // if we should retry silently
         val shouldRetryOnError = authInfoHelper.guestLogin
         authRepository.authenticate(authRequest, shouldRetryOnError) { isSuccess, response, error ->
             dataLoading.value = false
@@ -49,6 +53,7 @@ class LoginViewModel(application: Application, loginApiService: LoginApiService)
                     val json = responseBody?.string()
                     val authResponse: AuthResponse? = Gson().parseJsonToType<AuthResponse>(json)
                     authResponse?.let {
+                        // Fill SharedPreferences with response details
                         if (authInfoHelper.handleLoginInfo(authResponse)) {
                             authenticationState.postValue(AuthenticationState.AUTHENTICATED)
                             return@authenticate
@@ -63,6 +68,7 @@ class LoginViewModel(application: Application, loginApiService: LoginApiService)
         }
     }
 
+    // Logs out
     fun disconnectUser() {
         authRepository.logout { isSuccess, _, error ->
             dataLoading.value = false
@@ -71,7 +77,7 @@ class LoginViewModel(application: Application, loginApiService: LoginApiService)
             if (isSuccess) {
                 Timber.d("[ Logout request successful ]")
             } else {
-                Timber.e("Error: $error")
+                RequestErrorHandler.handleError(error)
             }
         }
     }

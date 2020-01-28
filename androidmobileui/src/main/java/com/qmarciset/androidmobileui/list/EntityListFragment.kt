@@ -18,20 +18,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
+import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.utils.fetchResourceString
 import com.qmarciset.androidmobileui.viewmodel.EntityListViewModel
 import kotlinx.android.synthetic.main.fragment_list_stub.*
 
-class EntityListFragment : Fragment() {
+class EntityListFragment : Fragment(), BaseFragment {
 
     private var tableName: String = ""
-
-    private lateinit var authInfoHelper: AuthInfoHelper
-
-    private lateinit var delegate: FragmentCommunication
     private lateinit var adapter: EntityListAdapter
+    private lateinit var delegate: FragmentCommunication
+    private lateinit var authInfoHelper: AuthInfoHelper
     private lateinit var entityListViewModel: EntityListViewModel<*>
 
     override fun onCreateView(
@@ -56,11 +55,6 @@ class EntityListFragment : Fragment() {
         return dataBinding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        initView()
-    }
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is FragmentCommunication) {
@@ -69,7 +63,17 @@ class EntityListFragment : Fragment() {
         // access resources elements
     }
 
-    private fun getViewModel() {
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        initView()
+    }
+
+    override fun onDestroyView() {
+        fragment_list_recycler_view.adapter = null
+        super.onDestroyView()
+    }
+
+    override fun getViewModel() {
         val kClazz = delegate.fromTableInterface.entityListViewModelClassFromTable(tableName)
         entityListViewModel = activity?.run {
             ViewModelProvider(
@@ -85,15 +89,7 @@ class EntityListFragment : Fragment() {
         } ?: throw IllegalStateException("Invalid Activity")
     }
 
-    private fun initView() {
-        authInfoHelper = AuthInfoHelper.getInstance(delegate.appInstance)
-        setupObservers()
-        initRecyclerView()
-        initOnRefreshListener()
-        initSwipeToDeleteAndUndo()
-    }
-
-    private fun setupObservers() {
+    override fun setupObservers() {
         entityListViewModel.entityList.observe(viewLifecycleOwner, Observer { entities ->
             entities?.let {
                 adapter.setEntities(it)
@@ -108,6 +104,14 @@ class EntityListFragment : Fragment() {
                 entityListViewModel.toastMessage.postValue("")
             }
         })
+    }
+
+    private fun initView() {
+        authInfoHelper = AuthInfoHelper.getInstance(delegate.appInstance)
+        setupObservers()
+        initRecyclerView()
+        initOnRefreshListener()
+        initSwipeToDeleteAndUndo()
     }
 
     private fun initRecyclerView() {
@@ -169,10 +173,5 @@ class EntityListFragment : Fragment() {
 
         val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
         itemTouchHelper.attachToRecyclerView(fragment_list_recycler_view)
-    }
-
-    override fun onDestroyView() {
-        fragment_list_recycler_view.adapter = null
-        super.onDestroyView()
     }
 }

@@ -50,6 +50,7 @@ abstract class EntityListViewModel<T>(
         roomRepository.insertAll(items as List<T>)
     }
 
+    // Gets all entities
     fun getAllFromApi() {
         dataLoading.value = true
         restRepository.getAllFromApi { isSuccess, response, error ->
@@ -65,7 +66,7 @@ abstract class EntityListViewModel<T>(
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
+    // Retrieves data from response and insert it in database
     private fun handleData(responseBody: ResponseBody): Boolean {
         val json = responseBody.string()
         val gson = Gson()

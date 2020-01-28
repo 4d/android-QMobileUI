@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 
+// Sample fragment to display an error page
 class ErrorFragment : Fragment() {
 
     override fun onCreateView(

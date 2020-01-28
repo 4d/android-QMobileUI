@@ -10,15 +10,15 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.viewmodel.EntityViewModel
 
-class EntityDetailFragment : Fragment() {
+class EntityDetailFragment : Fragment(), BaseFragment {
 
     private var itemId: String = "0"
     private var tableName: String = ""
     private lateinit var delegate: FragmentCommunication
-
     private lateinit var entityViewModel: EntityViewModel<*>
 
     companion object {
@@ -65,7 +65,7 @@ class EntityDetailFragment : Fragment() {
         setupObservers()
     }
 
-    private fun getViewModel() {
+    override fun getViewModel() {
         entityViewModel = ViewModelProvider(
             this,
             EntityViewModel.EntityViewModelFactory(
@@ -78,7 +78,7 @@ class EntityDetailFragment : Fragment() {
         )[EntityViewModel::class.java]
     }
 
-    private fun setupObservers() {
+    override fun setupObservers() {
         entityViewModel.entity.observe(viewLifecycleOwner, Observer {
         })
     }
