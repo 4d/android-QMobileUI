@@ -17,12 +17,12 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.utils.fetchResourceString
 import com.qmarciset.androidmobileui.viewmodel.EntityListViewModel
+import com.qmarciset.androidmobileui.viewmodel.LifecycleViewModel
 import kotlinx.android.synthetic.main.fragment_list_stub.*
 
 class EntityListFragment : Fragment(), BaseFragment {
@@ -30,8 +30,8 @@ class EntityListFragment : Fragment(), BaseFragment {
     private var tableName: String = ""
     private lateinit var adapter: EntityListAdapter
     private lateinit var delegate: FragmentCommunication
-    private lateinit var authInfoHelper: AuthInfoHelper
     private lateinit var entityListViewModel: EntityListViewModel<*>
+    private lateinit var lifecycleViewModel: LifecycleViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -87,6 +87,13 @@ class EntityListFragment : Fragment(), BaseFragment {
                 )
             )[kClazz.java]
         } ?: throw IllegalStateException("Invalid Activity")
+
+        lifecycleViewModel = activity?.run {
+            ViewModelProvider(
+                this,
+                LifecycleViewModel.LifecycleViewModelFactory(delegate.appInstance)
+            )[LifecycleViewModel::class.java]
+        } ?: throw IllegalStateException("Invalid Activity")
     }
 
     override fun setupObservers() {
@@ -104,10 +111,15 @@ class EntityListFragment : Fragment(), BaseFragment {
                 entityListViewModel.toastMessage.postValue("")
             }
         })
+
+        lifecycleViewModel.entersForeground.observe(viewLifecycleOwner, Observer { entersForeground ->
+            if (entersForeground) {
+                entityListViewModel.getData()
+            }
+        })
     }
 
     private fun initView() {
-        authInfoHelper = AuthInfoHelper.getInstance(delegate.appInstance)
         setupObservers()
         initRecyclerView()
         initOnRefreshListener()
@@ -141,7 +153,7 @@ class EntityListFragment : Fragment(), BaseFragment {
         )
         fragment_list_swipe_to_refresh.setColorSchemeColors(Color.WHITE)
         fragment_list_swipe_to_refresh.setOnRefreshListener {
-            entityListViewModel.getAllFromApi()
+            entityListViewModel.getData()
             fragment_list_recycler_view.adapter = adapter
             fragment_list_swipe_to_refresh.isRefreshing = false
         }

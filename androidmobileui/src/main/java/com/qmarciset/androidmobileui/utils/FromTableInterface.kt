@@ -16,6 +16,9 @@ interface FromTableInterface {
     // Provides the appropriate Entity
     fun parseEntityFromTable(tableName: String, jsonString: String): EntityModel
 
+    // Checks if entity has a __GlobalStamp property
+    fun hasGlobalStampPropertyFromTable(tableName: String): Boolean
+
     // Provides the appropriate EntityListViewModel
     fun <T> entityListViewModelFromTable(
         tableName: String,

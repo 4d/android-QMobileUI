@@ -6,11 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
+import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
 import com.qmarciset.androidmobileapi.model.entity.Entities
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
+import com.qmarciset.androidmobileapi.model.error.ErrorReason
 import com.qmarciset.androidmobileapi.network.ApiService
-import com.qmarciset.androidmobileapi.utils.RequestErrorHandler
-import com.qmarciset.androidmobileapi.utils.parseJsonToType
+import com.qmarciset.androidmobileapi.utils.*
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobileui.utils.FromTableInterface
 import okhttp3.ResponseBody
@@ -26,9 +27,20 @@ abstract class EntityListViewModel<T>(
 ) :
     BaseViewModel<T>(application, appDatabase, apiService, tableName) {
 
+    private val authInfoHelper = AuthInfoHelper(application.applicationContext)
+
+    private var hasGlobalStamp = fromTableInterface.hasGlobalStampPropertyFromTable(tableName)
+
     open var entityList: LiveData<List<T>> = roomRepository.getAll()
 
     open val dataLoading = MutableLiveData<Boolean>().apply { value = false }
+
+    @Volatile private var globalStamp = authInfoHelper.globalStamp
+    @Synchronized set(value) {
+        Timber.d("GlobalStamp updated, old value was $globalStamp, new value is $value")
+        field = value
+        authInfoHelper.globalStamp = value
+    }
 
     init {
         Timber.d("EntityListViewModel initializing...")
@@ -50,8 +62,34 @@ abstract class EntityListViewModel<T>(
         roomRepository.insertAll(items as List<T>)
     }
 
+    fun getData() {
+        if (hasGlobalStamp)
+            getMoreRecentEntitiesFromApi()
+        else
+            getAllFromApi()
+    }
+
+    // Gets all entities more recent than current globalStamp
+    private fun getMoreRecentEntitiesFromApi() {
+        Timber.e(">>>>>>>>>>>> getMoreRecentEntitiesFromApi, globalStamp = $globalStamp")
+        dataLoading.value = true
+        val predicate = buildGlobalStampPredicate()
+        restRepository.getMoreRecentEntitiesFromApi(predicate) { isSuccess, response, error ->
+            dataLoading.value = false
+            if (isSuccess) {
+                response?.body()?.let {
+                    handleData(it)
+                }
+            } else {
+                toastMessage.postValue("try_refresh_data")
+                RequestErrorHandler.handleError(error)
+            }
+        }
+    }
+
     // Gets all entities
     fun getAllFromApi() {
+        Timber.e(">>>>>>>>>>>> getAllFromApi")
         dataLoading.value = true
         restRepository.getAllFromApi { isSuccess, response, error ->
             dataLoading.value = false
@@ -82,10 +120,23 @@ abstract class EntityListViewModel<T>(
                 entity.let {
                     this.insert(it as EntityModel)
                     isInserted = true
+                    if (hasGlobalStamp) {
+                        Timber.d("[ Inserting entity with __GlobalStamp = ${it.__GlobalStamp} ]")
+                        it.__GlobalStamp?.let { stamp ->
+                            if (globalStamp < stamp)
+                                globalStamp = stamp
+                        }
+                    } else {
+                        Timber.d("[ Inserting entity with no __GlobalStamp ]")
+                    }
                 }
             }
         }
         return isInserted
+    }
+
+    private fun buildGlobalStampPredicate(): String {
+        return "\"__GlobalStamp > $globalStamp AND __GlobalStamp <= ${globalStamp+2}\""
     }
 
     class EntityListViewModelFactory(
