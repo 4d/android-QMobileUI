@@ -1,6 +1,7 @@
 package com.qmarciset.androidmobileui
 
 import android.app.Application
+import android.net.ConnectivityManager
 import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.network.LoginApiService
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
@@ -25,7 +26,9 @@ interface FragmentCommunication {
 
     val appDatabaseInterface: AppDatabaseInterface
 
-    fun toast(message: String)
+    val connectivityManager: ConnectivityManager
 
     fun refreshApiClients()
+
+    fun isConnected(): Boolean
 }

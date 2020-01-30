@@ -9,9 +9,9 @@ import com.google.gson.Gson
 import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
 import com.qmarciset.androidmobileapi.model.entity.Entities
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
-import com.qmarciset.androidmobileapi.model.error.ErrorReason
 import com.qmarciset.androidmobileapi.network.ApiService
-import com.qmarciset.androidmobileapi.utils.*
+import com.qmarciset.androidmobileapi.utils.RequestErrorHandler
+import com.qmarciset.androidmobileapi.utils.parseJsonToType
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobileui.utils.FromTableInterface
 import okhttp3.ResponseBody
@@ -22,7 +22,7 @@ abstract class EntityListViewModel<T>(
     application: Application,
     appDatabase: AppDatabaseInterface,
     apiService: ApiService,
-    tableName: String,
+    private val tableName: String,
     private val fromTableInterface: FromTableInterface
 ) :
     BaseViewModel<T>(application, appDatabase, apiService, tableName) {
@@ -64,7 +64,10 @@ abstract class EntityListViewModel<T>(
 
     fun getData() {
         if (hasGlobalStamp)
-            getMoreRecentEntitiesFromApi()
+            if (tableName == "Employee")
+                getMoreRecentEntitiesFromApi()
+            else
+                getAllFromApi()
         else
             getAllFromApi()
     }
@@ -136,7 +139,7 @@ abstract class EntityListViewModel<T>(
     }
 
     private fun buildGlobalStampPredicate(): String {
-        return "\"__GlobalStamp > $globalStamp AND __GlobalStamp <= ${globalStamp+2}\""
+        return "\"__GlobalStamp > $globalStamp AND __GlobalStamp <= ${globalStamp + 2}\""
     }
 
     class EntityListViewModelFactory(

@@ -1,23 +1,33 @@
 package com.qmarciset.androidmobileui.settings
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
+import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
+import com.qmarciset.androidmobileui.connectivity.NetworkState
+import com.qmarciset.androidmobileui.utils.displaySnackBar
+import com.qmarciset.androidmobileui.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobileui.viewmodel.LoginViewModel
+import timber.log.Timber
 
-class SettingsFragment : PreferenceFragmentCompat(), BaseFragment, Preference.OnPreferenceClickListener,
+class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
+    Preference.OnPreferenceClickListener,
     Preference.OnPreferenceChangeListener {
 
     private lateinit var delegate: FragmentCommunication
     private lateinit var loginViewModel: LoginViewModel
+    private lateinit var connectivityViewModel: ConnectivityViewModel
 
+    private var logoutRequested = false
     private var remoteUrlPref: Preference? = null
     private lateinit var accountCategoryKey: String
     private lateinit var remoteUrlPrefKey: String
@@ -50,10 +60,65 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment, Preference.On
                 LoginViewModel.LoginViewModelFactory(delegate.appInstance, delegate.loginApiService)
             )[LoginViewModel::class.java]
         } ?: throw IllegalStateException("Invalid Activity")
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            connectivityViewModel = activity?.run {
+                ViewModelProvider(
+                    this,
+                    ConnectivityViewModel.ConnectivityViewModelFactory(
+                        delegate.appInstance,
+                        delegate.connectivityManager
+                    )
+                )[ConnectivityViewModel::class.java]
+            } ?: throw IllegalStateException("Invalid Activity")
+        }
     }
 
     override fun setupObservers() {
-        // Nothing to observe yet
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            connectivityViewModel.networkStateMonitor.observe(
+                viewLifecycleOwner,
+                Observer { networkState ->
+                    Timber.d("<NetworkState changed -> $networkState>")
+                    when (networkState) {
+                        NetworkState.CONNECTED -> {
+                            if (logoutRequested &&
+                                loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED
+                            ) {
+                                logoutRequested = false
+                                logout()
+                            }
+                        }
+                        NetworkState.CONNECTION_LOST -> {
+                        }
+                        NetworkState.DISCONNECTED -> {
+                        }
+                        NetworkState.CONNECTING -> {
+                        }
+                        else -> {
+                        }
+                    }
+                })
+        }
+
+        loginViewModel.authenticationState.observe(
+            this,
+            Observer { authenticationState ->
+                Timber.d("<AuthenticationState changed -> $authenticationState>")
+                when (authenticationState) {
+                    AuthenticationState.AUTHENTICATED -> {
+                        if (logoutRequested && delegate.isConnected()) {
+                            logoutRequested = false
+                            logout()
+                        }
+                    }
+                    AuthenticationState.INVALID_AUTHENTICATION -> {
+                    }
+                    else -> {
+                    }
+                }
+            })
     }
 
     private fun initView() {
@@ -117,6 +182,18 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment, Preference.On
     }
 
     private fun logout() {
-        loginViewModel.disconnectUser()
+        if (delegate.isConnected()) {
+            if (loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED) {
+                loginViewModel.disconnectUser()
+            } else {
+                logoutRequested = true
+                displaySnackBar(activity, "An error occurred, please try again later")
+                Timber.d("Not authenticated yet, logoutRequested = $logoutRequested")
+            }
+        } else {
+            logoutRequested = true
+            displaySnackBar(activity, "No internet connection")
+            Timber.d("No internet connection, logoutRequested = $logoutRequested")
+        }
     }
 }
