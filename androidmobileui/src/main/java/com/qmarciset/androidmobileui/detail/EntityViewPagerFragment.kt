@@ -19,7 +19,11 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
     private var position: Int = 0
     private var tableName: String = ""
     private var viewPager: ViewPager? = null
-    private lateinit var delegate: FragmentCommunication
+
+    // BaseFragment
+    override lateinit var delegate: FragmentCommunication
+
+    // ViewModel
     private lateinit var entityListViewModel: EntityListViewModel<*>
 
     override fun onCreateView(
@@ -38,11 +42,13 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
         if (context is FragmentCommunication) {
             delegate = context
         }
-        // access resources elements
+        // Access resources elements
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        getViewModel()
         setupObservers()
     }
 
@@ -68,9 +74,6 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
     }
 
     override fun setupObservers() {
-
-        getViewModel()
-
         entityListViewModel.entityList.observe(viewLifecycleOwner, Observer { entities ->
             entities?.let {
                 // When entity list data changed, refresh the displayed list

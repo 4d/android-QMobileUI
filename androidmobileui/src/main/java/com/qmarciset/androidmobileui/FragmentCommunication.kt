@@ -9,7 +9,9 @@ import com.qmarciset.androidmobileui.utils.FromTableInterface
 import com.qmarciset.androidmobileui.utils.NavigationInterface
 import com.qmarciset.androidmobileui.utils.ViewDataBindingInterface
 
-// Interface implemented by MainActivity to provide elements that depend on generated type
+/**
+ * Interface implemented by MainActivity to provide elements that depend on generated type
+ */
 interface FragmentCommunication {
 
     val appInstance: Application

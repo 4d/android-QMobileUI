@@ -2,7 +2,6 @@ package com.qmarciset.androidmobileui.list
 
 import android.content.Context
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,10 +18,11 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmarciset.androidmobileapi.auth.AuthenticationState
+import com.qmarciset.androidmobileapi.connectivity.NetworkState
+import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
-import com.qmarciset.androidmobileui.connectivity.NetworkState
 import com.qmarciset.androidmobileui.utils.buildSnackBar
 import com.qmarciset.androidmobileui.utils.displaySnackBar
 import com.qmarciset.androidmobileui.utils.fetchResourceString
@@ -38,11 +38,15 @@ class EntityListFragment : Fragment(), BaseFragment {
     private var tableName: String = ""
     private var syncDataRequested = false
     private lateinit var adapter: EntityListAdapter
-    private lateinit var delegate: FragmentCommunication
-    private lateinit var entityListViewModel: EntityListViewModel<*>
-    private lateinit var lifecycleViewModel: LifecycleViewModel
-    private lateinit var connectivityViewModel: ConnectivityViewModel
+
+    // BaseFragment
+    override lateinit var delegate: FragmentCommunication
+
+    // ViewModels
     private lateinit var loginViewModel: LoginViewModel
+    private lateinit var lifecycleViewModel: LifecycleViewModel
+    private lateinit var entityListViewModel: EntityListViewModel<*>
+    private lateinit var connectivityViewModel: ConnectivityViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -71,12 +75,16 @@ class EntityListFragment : Fragment(), BaseFragment {
         if (context is FragmentCommunication) {
             delegate = context
         }
-        // access resources elements
+        // Access resources elements
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        initView()
+
+        initRecyclerView()
+        initOnRefreshListener()
+        initSwipeToDeleteAndUndo()
+        setupObservers()
     }
 
     override fun onDestroyView() {
@@ -106,7 +114,7 @@ class EntityListFragment : Fragment(), BaseFragment {
             )[LifecycleViewModel::class.java]
         } ?: throw IllegalStateException("Invalid Activity")
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (NetworkUtils.sdkNewerThanKitKat) {
             connectivityViewModel = activity?.run {
                 ViewModelProvider(
                     this,
@@ -155,18 +163,22 @@ class EntityListFragment : Fragment(), BaseFragment {
                             entityListViewModel.getData()
                         } else {
                             syncDataRequested = true
-                            displaySnackBar(activity, "An error occurred, please try again later")
+                            activity?.let {
+                                displaySnackBar(it, it.resources.getString(R.string.error_occurred_try_again))
+                            }
                             Timber.d("Not authenticated yet, refreshDataRequested = $syncDataRequested")
                         }
                     } else {
                         syncDataRequested = true
-                        displaySnackBar(activity, "No internet connection")
-                        Timber.d("No internet connection, refreshDataRequested = $syncDataRequested")
+                        activity?.let {
+                            displaySnackBar(it, it.resources.getString(R.string.no_internet))
+                        }
+                        Timber.d("No Internet connection, refreshDataRequested = $syncDataRequested")
                     }
                 }
             })
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (NetworkUtils.sdkNewerThanKitKat) {
             connectivityViewModel.networkStateMonitor.observe(
                 viewLifecycleOwner,
                 Observer { networkState ->
@@ -211,13 +223,6 @@ class EntityListFragment : Fragment(), BaseFragment {
             })
     }
 
-    private fun initView() {
-        setupObservers()
-        initRecyclerView()
-        initOnRefreshListener()
-        initSwipeToDeleteAndUndo()
-    }
-
     private fun initRecyclerView() {
         adapter = EntityListAdapter(
             tableName,
@@ -250,13 +255,17 @@ class EntityListFragment : Fragment(), BaseFragment {
                     entityListViewModel.getData()
                 } else {
                     syncDataRequested = false
-                    displaySnackBar(activity, "An error occurred, please try again later")
+                    activity?.let {
+                        displaySnackBar(it, it.resources.getString(R.string.error_occurred_try_again))
+                    }
                     Timber.d("Not authenticated yet, refreshDataRequested = $syncDataRequested")
                 }
             } else {
                 syncDataRequested = false
-                displaySnackBar(activity, "No internet connection")
-                Timber.d("No internet connection, refreshDataRequested = $syncDataRequested")
+                activity?.let {
+                    displaySnackBar(it, it.resources.getString(R.string.no_internet))
+                }
+                Timber.d("No Internet connection, refreshDataRequested = $syncDataRequested")
             }
             fragment_list_recycler_view.adapter = adapter
             fragment_list_swipe_to_refresh.isRefreshing = false

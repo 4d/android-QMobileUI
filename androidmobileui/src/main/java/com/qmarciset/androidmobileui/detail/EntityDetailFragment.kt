@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
@@ -18,7 +17,11 @@ class EntityDetailFragment : Fragment(), BaseFragment {
 
     private var itemId: String = "0"
     private var tableName: String = ""
-    private lateinit var delegate: FragmentCommunication
+
+    // BaseFragment
+    override lateinit var delegate: FragmentCommunication
+
+    // ViewModels
     private lateinit var entityViewModel: EntityViewModel<*>
 
     companion object {
@@ -57,11 +60,12 @@ class EntityDetailFragment : Fragment(), BaseFragment {
         if (context is FragmentCommunication) {
             delegate = context
         }
-        // access resources elements
+        // Access resources elements
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
         setupObservers()
     }
 
@@ -78,8 +82,5 @@ class EntityDetailFragment : Fragment(), BaseFragment {
         )[EntityViewModel::class.java]
     }
 
-    override fun setupObservers() {
-        entityViewModel.entity.observe(viewLifecycleOwner, Observer {
-        })
-    }
+    override fun setupObservers() {}
 }

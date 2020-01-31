@@ -21,12 +21,24 @@ abstract class BaseViewModel<T>(
     tableName: String
 ) : AndroidViewModel(application) {
 
+    /**
+     * DAO
+     */
+
     val dao: BaseDao<T> = appDatabase.getDao(tableName)
+
+    /**
+     * Repositories
+     */
 
     val roomRepository: RoomRepository<T> =
         RoomRepository(dao)
     val restRepository: RestRepository =
         RestRepository(tableName, apiService)
+
+    /**
+     * LiveData
+     */
 
     val toastMessage = MutableLiveData<String>()
 

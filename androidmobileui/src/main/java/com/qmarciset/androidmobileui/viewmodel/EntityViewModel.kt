@@ -17,11 +17,15 @@ open class EntityViewModel<T>(
 ) :
     BaseViewModel<T>(application, appDatabase, apiService, tableName) {
 
-    open val entity: LiveData<T> = roomRepository.getOne(id)
-
     init {
         Timber.d("EntityViewModel initializing...")
     }
+
+    /**
+     * LiveData
+     */
+
+    open val entity: LiveData<T> = roomRepository.getOne(id)
 
     class EntityViewModelFactory(
         private val application: Application,

@@ -8,12 +8,16 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.qmarciset.androidmobileui.connectivity.NetworkState
-import com.qmarciset.androidmobileui.connectivity.NetworkStateMonitor
+import com.qmarciset.androidmobileapi.connectivity.NetworkState
+import com.qmarciset.androidmobileapi.connectivity.NetworkStateMonitor
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class ConnectivityViewModel(application: Application, connectivityManager: ConnectivityManager) :
     AndroidViewModel(application) {
+
+    /**
+     * LiveData
+     */
 
     val networkStateMonitor: LiveData<NetworkState> =
         NetworkStateMonitor(

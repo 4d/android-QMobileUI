@@ -10,7 +10,7 @@ import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
 import com.qmarciset.androidmobileapi.model.entity.Entities
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobileapi.network.ApiService
-import com.qmarciset.androidmobileapi.utils.RequestErrorHandler
+import com.qmarciset.androidmobileapi.utils.RequestErrorHelper
 import com.qmarciset.androidmobileapi.utils.parseJsonToType
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobileui.utils.FromTableInterface
@@ -27,24 +27,28 @@ abstract class EntityListViewModel<T>(
 ) :
     BaseViewModel<T>(application, appDatabase, apiService, tableName) {
 
-    private val authInfoHelper = AuthInfoHelper(application.applicationContext)
+    init {
+        Timber.d("EntityListViewModel initializing...")
+    }
 
+    private val authInfoHelper = AuthInfoHelper(application.applicationContext)
     private var hasGlobalStamp = fromTableInterface.hasGlobalStampPropertyFromTable(tableName)
+
+    /**
+     * LiveData
+     */
 
     open var entityList: LiveData<List<T>> = roomRepository.getAll()
 
     open val dataLoading = MutableLiveData<Boolean>().apply { value = false }
 
-    @Volatile private var globalStamp = authInfoHelper.globalStamp
-    @Synchronized set(value) {
-        Timber.d("GlobalStamp updated, old value was $globalStamp, new value is $value")
-        field = value
-        authInfoHelper.globalStamp = value
-    }
-
-    init {
-        Timber.d("EntityListViewModel initializing...")
-    }
+    @Volatile
+    private var globalStamp = authInfoHelper.globalStamp
+        @Synchronized set(value) {
+            Timber.d("GlobalStamp updated, old value was $globalStamp, new value is $value")
+            field = value
+            authInfoHelper.globalStamp = value
+        }
 
     fun delete(item: EntityModel) {
         roomRepository.delete(item as T)
@@ -64,20 +68,21 @@ abstract class EntityListViewModel<T>(
 
     fun getData() {
         if (hasGlobalStamp)
-            if (tableName == "Employee")
-                getMoreRecentEntitiesFromApi()
+            if (tableName == "Employee") // test purpose, Service table has no __GlobalStamp
+                getMoreRecentEntities()
             else
-                getAllFromApi()
+                getAll()
         else
-            getAllFromApi()
+            getAll()
     }
 
-    // Gets all entities more recent than current globalStamp
-    private fun getMoreRecentEntitiesFromApi() {
-        Timber.e(">>>>>>>>>>>> getMoreRecentEntitiesFromApi, globalStamp = $globalStamp")
+    /**
+     * Gets all entities more recent than current globalStamp
+     */
+    private fun getMoreRecentEntities() {
         dataLoading.value = true
         val predicate = buildGlobalStampPredicate()
-        restRepository.getMoreRecentEntitiesFromApi(predicate) { isSuccess, response, error ->
+        restRepository.getMoreRecentEntities(predicate) { isSuccess, response, error ->
             dataLoading.value = false
             if (isSuccess) {
                 response?.body()?.let {
@@ -85,16 +90,17 @@ abstract class EntityListViewModel<T>(
                 }
             } else {
                 toastMessage.postValue("try_refresh_data")
-                RequestErrorHandler.handleError(error)
+                RequestErrorHelper.handleError(error)
             }
         }
     }
 
-    // Gets all entities
-    fun getAllFromApi() {
-        Timber.e(">>>>>>>>>>>> getAllFromApi")
+    /**
+     * Gets all entities
+     */
+    fun getAll() {
         dataLoading.value = true
-        restRepository.getAllFromApi { isSuccess, response, error ->
+        restRepository.getAll { isSuccess, response, error ->
             dataLoading.value = false
             if (isSuccess) {
                 response?.body()?.let {
@@ -102,12 +108,14 @@ abstract class EntityListViewModel<T>(
                 }
             } else {
                 toastMessage.postValue("try_refresh_data")
-                RequestErrorHandler.handleError(error)
+                RequestErrorHelper.handleError(error)
             }
         }
     }
 
-    // Retrieves data from response and insert it in database
+    /**
+     * Retrieves data from response and insert it in database
+     */
     private fun handleData(responseBody: ResponseBody): Boolean {
         val json = responseBody.string()
         val gson = Gson()
@@ -138,6 +146,9 @@ abstract class EntityListViewModel<T>(
         return isInserted
     }
 
+    /**
+     * Returns predicate for requests with __GlobalStamp
+     */
     private fun buildGlobalStampPredicate(): String {
         return "\"__GlobalStamp > $globalStamp AND __GlobalStamp <= ${globalStamp + 2}\""
     }

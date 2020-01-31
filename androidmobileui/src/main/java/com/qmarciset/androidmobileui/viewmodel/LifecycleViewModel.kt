@@ -8,6 +8,10 @@ import androidx.lifecycle.ViewModelProvider
 
 class LifecycleViewModel(application: Application) : AndroidViewModel(application) {
 
+    /**
+     * LiveData
+     */
+
     val entersForeground = MutableLiveData<Boolean>().apply { value = false }
 
     class LifecycleViewModelFactory(

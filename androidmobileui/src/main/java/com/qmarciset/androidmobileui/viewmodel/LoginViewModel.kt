@@ -13,7 +13,7 @@ import com.qmarciset.androidmobileapi.auth.handleLoginInfo
 import com.qmarciset.androidmobileapi.model.auth.AuthResponse
 import com.qmarciset.androidmobileapi.network.LoginApiService
 import com.qmarciset.androidmobileapi.repository.AuthRepository
-import com.qmarciset.androidmobileapi.utils.RequestErrorHandler
+import com.qmarciset.androidmobileapi.utils.RequestErrorHelper
 import com.qmarciset.androidmobileapi.utils.parseJsonToType
 import timber.log.Timber
 
@@ -21,8 +21,11 @@ class LoginViewModel(application: Application, loginApiService: LoginApiService)
     AndroidViewModel(application) {
 
     private val authRepository: AuthRepository = AuthRepository(loginApiService)
-
     val authInfoHelper = AuthInfoHelper.getInstance(application.applicationContext)
+
+    /**
+     * LiveData
+     */
 
     val dataLoading = MutableLiveData<Boolean>().apply { value = false }
 
@@ -37,7 +40,9 @@ class LoginViewModel(application: Application, loginApiService: LoginApiService)
         MutableLiveData<AuthenticationState>(initialState)
     }
 
-    // Authenticates
+    /**
+     * Authenticates
+     */
     fun login(email: String = "", password: String = "") {
         dataLoading.value = true
         // Builds the request body for $authenticate request
@@ -62,13 +67,15 @@ class LoginViewModel(application: Application, loginApiService: LoginApiService)
                 }
                 authenticationState.postValue(AuthenticationState.INVALID_AUTHENTICATION)
             } else {
-                RequestErrorHandler.handleError(error)
+                RequestErrorHelper.handleError(error)
                 authenticationState.postValue(AuthenticationState.INVALID_AUTHENTICATION)
             }
         }
     }
 
-    // Logs out
+    /**
+     * Logs out
+     */
     fun disconnectUser() {
         authRepository.logout { isSuccess, _, error ->
             dataLoading.value = false
@@ -77,7 +84,7 @@ class LoginViewModel(application: Application, loginApiService: LoginApiService)
             if (isSuccess) {
                 Timber.d("[ Logout request successful ]")
             } else {
-                RequestErrorHandler.handleError(error)
+                RequestErrorHelper.handleError(error)
             }
         }
     }

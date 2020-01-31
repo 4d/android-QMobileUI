@@ -12,7 +12,7 @@ class BaseViewHolder(
 ) :
     RecyclerView.ViewHolder(dataBinding.root) {
 
-    // Applies databinding
+    // Applies DataBinding
     fun bind(entity: Any, position: Int) {
         dataBinding.setVariable(BR.entityData, entity)
         dataBinding.executePendingBindings()
