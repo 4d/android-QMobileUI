@@ -83,7 +83,7 @@ class LoginViewModel(application: Application, loginApiService: LoginApiService)
     fun disconnectUser() {
         authRepository.logout { isSuccess, _, error ->
             dataLoading.value = false
-            authenticationState.postValue(AuthenticationState.UNAUTHENTICATED)
+            authenticationState.postValue(AuthenticationState.LOGOUT)
             authInfoHelper.sessionToken = ""
             if (isSuccess) {
                 Timber.d("[ Logout request successful ]")
