@@ -70,6 +70,8 @@ class EntityDetailFragment : Fragment(), BaseFragment {
     }
 
     override fun getViewModel() {
+
+        // Get EntityViewModel
         entityViewModel = ViewModelProvider(
             this,
             EntityViewModel.EntityViewModelFactory(

@@ -5,8 +5,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import timber.log.Timber
 
 class LifecycleViewModel(application: Application) : AndroidViewModel(application) {
+
+    init {
+        Timber.i("LifecycleViewModel initializing...")
+    }
 
     /**
      * LiveData

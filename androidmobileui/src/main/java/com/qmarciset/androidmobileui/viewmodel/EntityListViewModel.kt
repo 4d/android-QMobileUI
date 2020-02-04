@@ -28,7 +28,7 @@ abstract class EntityListViewModel<T>(
     BaseViewModel<T>(application, appDatabase, apiService, tableName) {
 
     init {
-        Timber.d("EntityListViewModel initializing...")
+        Timber.i("EntityListViewModel initializing...")
     }
 
     private val authInfoHelper = AuthInfoHelper(application.applicationContext)
@@ -132,13 +132,13 @@ abstract class EntityListViewModel<T>(
                     this.insert(it as EntityModel)
                     isInserted = true
                     if (hasGlobalStamp) {
-                        Timber.d("[ Inserting entity with __GlobalStamp = ${it.__GlobalStamp} ]")
+                        Timber.i("[ Inserting entity with __GlobalStamp = ${it.__GlobalStamp} ]")
                         it.__GlobalStamp?.let { stamp ->
                             if (globalStamp < stamp)
                                 globalStamp = stamp
                         }
                     } else {
-                        Timber.d("[ Inserting entity with no __GlobalStamp ]")
+                        Timber.i("[ Inserting entity with no __GlobalStamp ]")
                     }
                 }
             }

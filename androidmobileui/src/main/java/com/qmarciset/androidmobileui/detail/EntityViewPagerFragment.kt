@@ -58,6 +58,8 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
     }
 
     override fun getViewModel() {
+
+        // Get EntityListViewModel
         val kClazz = delegate.fromTableInterface.entityListViewModelClassFromTable(tableName)
         entityListViewModel = activity?.run {
             ViewModelProvider(
@@ -74,6 +76,8 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
     }
 
     override fun setupObservers() {
+
+        // Observe entity list
         entityListViewModel.entityList.observe(viewLifecycleOwner, Observer { entities ->
             entities?.let {
                 // When entity list data changed, refresh the displayed list

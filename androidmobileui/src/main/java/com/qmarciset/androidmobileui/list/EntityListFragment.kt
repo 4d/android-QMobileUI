@@ -30,13 +30,14 @@ import com.qmarciset.androidmobileui.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobileui.viewmodel.EntityListViewModel
 import com.qmarciset.androidmobileui.viewmodel.LifecycleViewModel
 import com.qmarciset.androidmobileui.viewmodel.LoginViewModel
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.android.synthetic.main.fragment_list_stub.*
 import timber.log.Timber
 
 class EntityListFragment : Fragment(), BaseFragment {
 
     private var tableName: String = ""
-    private var syncDataRequested = false
+    private lateinit var syncDataRequested: AtomicBoolean
     private lateinit var adapter: EntityListAdapter
 
     // BaseFragment
@@ -54,6 +55,9 @@ class EntityListFragment : Fragment(), BaseFragment {
         savedInstanceState: Bundle?
     ): View? {
         arguments?.getString("tableName")?.let { tableName = it }
+
+        // Every time we land on the fragment, we want refreshed data
+        syncDataRequested = AtomicBoolean(true)
 
         getViewModel()
 
@@ -93,6 +97,8 @@ class EntityListFragment : Fragment(), BaseFragment {
     }
 
     override fun getViewModel() {
+
+        // Get EntityListViewModel
         val kClazz = delegate.fromTableInterface.entityListViewModelClassFromTable(tableName)
         entityListViewModel = activity?.run {
             ViewModelProvider(
@@ -107,6 +113,7 @@ class EntityListFragment : Fragment(), BaseFragment {
             )[kClazz.java]
         } ?: throw IllegalStateException("Invalid Activity")
 
+        // Get LifecycleViewModel
         lifecycleViewModel = activity?.run {
             ViewModelProvider(
                 this,
@@ -114,6 +121,7 @@ class EntityListFragment : Fragment(), BaseFragment {
             )[LifecycleViewModel::class.java]
         } ?: throw IllegalStateException("Invalid Activity")
 
+        // Get ConnectivityViewModel
         if (NetworkUtils.sdkNewerThanKitKat) {
             connectivityViewModel = activity?.run {
                 ViewModelProvider(
@@ -126,6 +134,7 @@ class EntityListFragment : Fragment(), BaseFragment {
             } ?: throw IllegalStateException("Invalid Activity")
         }
 
+        // Get LoginViewModel
         // We need this ViewModel to know when MainActivity has performed its $authenticate so that
         // we don't trigger the initial sync if we are not authenticated yet
         loginViewModel = activity?.run {
@@ -137,90 +146,74 @@ class EntityListFragment : Fragment(), BaseFragment {
     }
 
     override fun setupObservers() {
+
+        // Observe entity list
         entityListViewModel.entityList.observe(viewLifecycleOwner, Observer { entities ->
             entities?.let {
                 adapter.setEntities(it)
             }
         })
 
+        // Observe any toast message
         entityListViewModel.toastMessage.observe(viewLifecycleOwner, Observer { message ->
             val toastMessage = context?.fetchResourceString(message) ?: ""
             if (toastMessage.isNotEmpty()) {
                 activity?.let {
-                    Toast.makeText(it, message, Toast.LENGTH_LONG).show()
+                    Toast.makeText(it, toastMessage, Toast.LENGTH_LONG).show()
                 }
                 // To avoid the error toast to be displayed without performing a refresh again
                 entityListViewModel.toastMessage.postValue("")
             }
         })
 
+        // Observe when app enters foreground
         lifecycleViewModel.entersForeground.observe(
             viewLifecycleOwner,
             Observer { entersForeground ->
                 if (entersForeground) {
-                    if (delegate.isConnected()) {
-                        if (loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED) {
-                            entityListViewModel.getData()
-                        } else {
-                            syncDataRequested = true
-                            activity?.let {
-                                displaySnackBar(it, it.resources.getString(R.string.error_occurred_try_again))
-                            }
-                            Timber.d("Not authenticated yet, refreshDataRequested = $syncDataRequested")
-                        }
+                    if (isReady()) {
+                        syncData()
                     } else {
-                        syncDataRequested = true
-                        activity?.let {
-                            displaySnackBar(it, it.resources.getString(R.string.no_internet))
-                        }
-                        Timber.d("No Internet connection, refreshDataRequested = $syncDataRequested")
+                        syncDataRequested.set(true)
                     }
                 }
             })
 
+        // Observe authentication state
+        loginViewModel.authenticationState.observe(
+            viewLifecycleOwner,
+            Observer { authenticationState ->
+                when (authenticationState) {
+                    AuthenticationState.AUTHENTICATED -> {
+                        if (isReady()) {
+                            syncData()
+                        } else {
+                            syncDataRequested.set(true)
+                        }
+                    }
+                    else -> {
+                    }
+                }
+            })
+
+        // Observe network status
         if (NetworkUtils.sdkNewerThanKitKat) {
             connectivityViewModel.networkStateMonitor.observe(
                 viewLifecycleOwner,
                 Observer { networkState ->
-                    Timber.d("<NetworkState changed -> $networkState>")
                     when (networkState) {
                         NetworkState.CONNECTED -> {
-                            if (syncDataRequested &&
-                                loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED
-                            ) {
-                                syncDataRequested = false
-                                entityListViewModel.getData()
+                            if (isReady()) {
+                                syncData()
+                            } else {
+                                syncDataRequested.set(true)
                             }
-                        }
-                        NetworkState.CONNECTION_LOST -> {
-                        }
-                        NetworkState.DISCONNECTED -> {
-                        }
-                        NetworkState.CONNECTING -> {
                         }
                         else -> {
                         }
                     }
                 })
         }
-
-        loginViewModel.authenticationState.observe(
-            this,
-            Observer { authenticationState ->
-                Timber.d("<AuthenticationState changed -> $authenticationState>")
-                when (authenticationState) {
-                    AuthenticationState.AUTHENTICATED -> {
-                        if (syncDataRequested && delegate.isConnected()) {
-                            syncDataRequested = false
-                            entityListViewModel.getData()
-                        }
-                    }
-                    AuthenticationState.INVALID_AUTHENTICATION -> {
-                    }
-                    else -> {
-                    }
-                }
-            })
     }
 
     private fun initRecyclerView() {
@@ -238,7 +231,6 @@ class EntityListFragment : Fragment(), BaseFragment {
                 RecyclerView.VERTICAL
             )
         )
-
         fragment_list_recycler_view.adapter = adapter
     }
 
@@ -250,23 +242,7 @@ class EntityListFragment : Fragment(), BaseFragment {
         )
         fragment_list_swipe_to_refresh.setColorSchemeColors(Color.WHITE)
         fragment_list_swipe_to_refresh.setOnRefreshListener {
-            if (delegate.isConnected()) {
-                if (loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED) {
-                    entityListViewModel.getData()
-                } else {
-                    syncDataRequested = false
-                    activity?.let {
-                        displaySnackBar(it, it.resources.getString(R.string.error_occurred_try_again))
-                    }
-                    Timber.d("Not authenticated yet, refreshDataRequested = $syncDataRequested")
-                }
-            } else {
-                syncDataRequested = false
-                activity?.let {
-                    displaySnackBar(it, it.resources.getString(R.string.no_internet))
-                }
-                Timber.d("No Internet connection, refreshDataRequested = $syncDataRequested")
-            }
+            forceSyncData()
             fragment_list_recycler_view.adapter = adapter
             fragment_list_swipe_to_refresh.isRefreshing = false
         }
@@ -295,4 +271,46 @@ class EntityListFragment : Fragment(), BaseFragment {
         val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
         itemTouchHelper.attachToRecyclerView(fragment_list_recycler_view)
     }
+
+    /**
+     * Synchronizes data
+     */
+    private fun syncData() {
+        if (syncDataRequested.compareAndSet(true, false)) {
+            entityListViewModel.getData()
+        }
+    }
+
+    /**
+     * Forces data sync, when user pulls to refresh
+     */
+    private fun forceSyncData() {
+        syncDataRequested.set(false)
+        if (isReady()) {
+            entityListViewModel.getData()
+        } else {
+            if (!delegate.isConnected()) {
+                activity?.let {
+                    displaySnackBar(it, it.resources.getString(R.string.no_internet))
+                }
+                Timber.d("No Internet connection, syncDataRequested")
+            } else if (loginViewModel.authenticationState.value != AuthenticationState.AUTHENTICATED) {
+                activity?.let {
+                    displaySnackBar(
+                        it,
+                        it.resources.getString(R.string.error_occurred_try_again)
+                    )
+                }
+                Timber.d("Not authenticated yet, refreshDataRequested = $syncDataRequested")
+            }
+        }
+    }
+
+    /**
+     * Checks if environment is ready to perform an action
+     */
+    private fun isReady(): Boolean =
+        loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
+                delegate.isConnected() &&
+                lifecycleViewModel.entersForeground.value == true
 }

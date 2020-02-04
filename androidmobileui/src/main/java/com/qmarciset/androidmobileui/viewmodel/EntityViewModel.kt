@@ -18,7 +18,7 @@ open class EntityViewModel<T>(
     BaseViewModel<T>(application, appDatabase, apiService, tableName) {
 
     init {
-        Timber.d("EntityViewModel initializing...")
+        Timber.i("EntityViewModel initializing...")
     }
 
     /**

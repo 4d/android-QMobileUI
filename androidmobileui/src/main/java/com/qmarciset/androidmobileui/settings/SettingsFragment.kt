@@ -3,6 +3,9 @@ package com.qmarciset.androidmobileui.settings
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
@@ -11,7 +14,6 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.qmarciset.androidmobileapi.auth.AuthenticationState
-import com.qmarciset.androidmobileapi.connectivity.NetworkState
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
@@ -19,20 +21,22 @@ import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.utils.displaySnackBar
 import com.qmarciset.androidmobileui.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobileui.viewmodel.LoginViewModel
+import java.util.concurrent.atomic.AtomicBoolean
 import timber.log.Timber
 
 class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
     Preference.OnPreferenceClickListener,
     Preference.OnPreferenceChangeListener {
 
-    private var logoutRequested = false
+    private var firstTime = true
     private var remoteUrlPref: Preference? = null
-    private var networkOkDrawable: Drawable? = null
-    private var networkNokDrawable: Drawable? = null
+    private var serverAccessibleDrawable: Drawable? = null
+    private var serverNotAccessibleDrawable: Drawable? = null
     private lateinit var accountCategoryKey: String
     private lateinit var remoteUrlPrefKey: String
     private lateinit var logoutPrefKey: String
     private lateinit var remoteUrl: String
+    private lateinit var checkNetworkRequested: AtomicBoolean
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -45,10 +49,6 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
     // ViewModels
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var connectivityViewModel: ConnectivityViewModel
-
-    companion object {
-        const val SERVER_PING_TIMEOUT = 20000
-    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preferences)
@@ -63,8 +63,9 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
         remoteUrlPrefKey = resources.getString(R.string.pref_remote_url_key)
         accountCategoryKey = resources.getString(R.string.cat_account_key)
         logoutPrefKey = resources.getString(R.string.pref_logout_key)
-        networkOkDrawable = ContextCompat.getDrawable(context, R.drawable.network_ok_circle)
-        networkNokDrawable = ContextCompat.getDrawable(context, R.drawable.network_nok_circle)
+        serverAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.network_ok_circle)
+        serverNotAccessibleDrawable =
+            ContextCompat.getDrawable(context, R.drawable.network_nok_circle)
         noInternetString = resources.getString(R.string.no_internet)
         serverAccessibleString = resources.getString(R.string.server_accessible)
         serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
@@ -78,6 +79,19 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
         setupObservers()
     }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Every time we land on the fragment, we want refreshed data
+        checkNetworkRequested = AtomicBoolean(true)
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
+
+    /**
+     * Initializes layout components
+     */
     private fun initLayout() {
         this.remoteUrl = loginViewModel.authInfoHelper.remoteUrl
 
@@ -89,10 +103,10 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
             findPreference<Preference>(resources.getString(R.string.pref_remote_url_key))
         remoteUrlPref?.setDefaultValue(this.remoteUrl)
         remoteUrlPref?.onPreferenceChangeListener = this
-        checkNetwork()
     }
 
     override fun getViewModel() {
+        // LoginViewModel
         loginViewModel = activity?.run {
             ViewModelProvider(
                 this,
@@ -100,54 +114,56 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
             )[LoginViewModel::class.java]
         } ?: throw IllegalStateException("Invalid Activity")
 
-        if (NetworkUtils.sdkNewerThanKitKat) {
-            connectivityViewModel = activity?.run {
-                ViewModelProvider(
-                    this,
-                    ConnectivityViewModel.ConnectivityViewModelFactory(
-                        delegate.appInstance,
-                        delegate.connectivityManager
-                    )
-                )[ConnectivityViewModel::class.java]
-            } ?: throw IllegalStateException("Invalid Activity")
-        }
+        // ConnectivityViewModel
+        connectivityViewModel = activity?.run {
+            ViewModelProvider(
+                this,
+                ConnectivityViewModel.ConnectivityViewModelFactory(
+                    delegate.appInstance,
+                    delegate.connectivityManager
+                )
+            )[ConnectivityViewModel::class.java]
+        } ?: throw IllegalStateException("Invalid Activity")
     }
 
     override fun setupObservers() {
 
+        // Observe network status
         if (NetworkUtils.sdkNewerThanKitKat) {
             connectivityViewModel.networkStateMonitor.observe(
                 viewLifecycleOwner,
-                Observer { networkState ->
-                    Timber.d("<NetworkState changed -> $networkState>")
-                    checkNetwork()
-                    when (networkState) {
-                        NetworkState.CONNECTED -> {
-                            if (logoutRequested &&
-                                loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED
-                            ) {
-                                logoutRequested = false
-                                logout()
-                            }
-                        }
-                        else -> {
-                        }
+                Observer {
+                    if (!firstTime) {
+                        // first time, checkNetwork() is called in authentication observer event
+                        checkNetwork()
+                    } else {
+                        firstTime = false
                     }
                 })
         }
 
+        // Observe if server is accessible
+        connectivityViewModel.serverAccessible.observe(
+            viewLifecycleOwner,
+            Observer { isAccessible ->
+                if (delegate.isConnected()) {
+                    if (isAccessible) {
+                        setLayoutServerAccessible()
+                    } else {
+                        setLayoutServerNotAccessible()
+                    }
+                } else {
+                    setLayoutNoInternet()
+                }
+            })
+
+        // Observe authentication state
         loginViewModel.authenticationState.observe(
             this,
             Observer { authenticationState ->
-                Timber.d("<AuthenticationState changed -> $authenticationState>")
                 when (authenticationState) {
                     AuthenticationState.AUTHENTICATED -> {
-                        if (logoutRequested && delegate.isConnected()) {
-                            logoutRequested = false
-                            logout()
-                        }
-                    }
-                    AuthenticationState.INVALID_AUTHENTICATION -> {
+                        checkNetwork()
                     }
                     else -> {
                     }
@@ -208,22 +224,23 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
      * Tries to logout if user is authenticated and connected to Internet
      */
     private fun logout() {
-        if (delegate.isConnected()) {
-            if (loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED) {
-                loginViewModel.disconnectUser()
-            } else {
-                logoutRequested = true
-                activity?.let {
-                    displaySnackBar(it, it.resources.getString(R.string.error_occurred_try_again))
-                }
-                Timber.d("Not authenticated yet, logoutRequested = $logoutRequested")
-            }
+        if (isReady()) {
+            loginViewModel.disconnectUser()
         } else {
-            logoutRequested = true
-            activity?.let {
-                displaySnackBar(it, it.resources.getString(R.string.no_internet))
+            if (!delegate.isConnected()) {
+                activity?.let {
+                    displaySnackBar(it, it.resources.getString(R.string.no_internet))
+                }
+                Timber.d("No Internet connection")
+            } else if (loginViewModel.authenticationState.value != AuthenticationState.AUTHENTICATED) {
+                activity?.let {
+                    displaySnackBar(
+                        it,
+                        it.resources.getString(R.string.error_occurred_try_again)
+                    )
+                }
+                Timber.d("Not authenticated yet")
             }
-            Timber.d("No Internet connection, logoutRequested = $logoutRequested")
         }
     }
 
@@ -231,17 +248,43 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
      * Checks network state, and adjust the indicator icon color
      */
     private fun checkNetwork() {
-        if (delegate.isConnected()) {
-            if (NetworkUtils.serverReachable(remoteUrl, SERVER_PING_TIMEOUT)) {
-                remoteUrlPref?.summary = "$remoteUrl - $serverAccessibleString"
-                remoteUrlPref?.icon = networkOkDrawable
+        if (checkNetworkRequested.compareAndSet(true, false)) {
+            if (delegate.isConnected()) {
+                connectivityViewModel.checkAccessibility(this.remoteUrl)
             } else {
-                remoteUrlPref?.summary = "$remoteUrl - $serverNotAccessibleString"
-                remoteUrlPref?.icon = networkNokDrawable
+                setLayoutNoInternet()
             }
-        } else {
-            remoteUrlPref?.summary = "$remoteUrl - $noInternetString"
-            remoteUrlPref?.icon = networkNokDrawable
         }
     }
+
+    /**
+     * Sets the indicator icon color and text to no Internet status
+     */
+    private fun setLayoutNoInternet() {
+        remoteUrlPref?.summary = "$remoteUrl - $noInternetString"
+        remoteUrlPref?.icon = serverNotAccessibleDrawable
+    }
+
+    /**
+     * Sets the indicator icon color and text to server not accessible
+     */
+    private fun setLayoutServerNotAccessible() {
+        remoteUrlPref?.summary = "$remoteUrl - $serverNotAccessibleString"
+        remoteUrlPref?.icon = serverNotAccessibleDrawable
+    }
+
+    /**
+     * Sets the indicator icon color and text to server accessible
+     */
+    private fun setLayoutServerAccessible() {
+        remoteUrlPref?.summary = "$remoteUrl - $serverAccessibleString"
+        remoteUrlPref?.icon = serverAccessibleDrawable
+    }
+
+    /**
+     * Checks if environment is ready to perform an action
+     */
+    private fun isReady(): Boolean =
+        loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
+                delegate.isConnected()
 }
