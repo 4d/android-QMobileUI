@@ -19,7 +19,7 @@ import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.utils.RequestErrorHelper
 import com.qmarciset.androidmobileapi.utils.parseJsonToType
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
-import com.qmarciset.androidmobileui.sync.DataSyncState
+import com.qmarciset.androidmobiledatasync.DataSyncState
 import com.qmarciset.androidmobileui.utils.FromTableInterface
 import okhttp3.ResponseBody
 import timber.log.Timber

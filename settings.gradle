@@ -4,3 +4,5 @@ include ':androidmobileapi'
 project(':androidmobileapi').projectDir = new File(settingsDir, '../AndroidMobileAPI/androidmobileapi')
 include ':androidmobiledatastore'
 project(':androidmobiledatastore').projectDir = new File(settingsDir, '../AndroidMobileDataStore/androidmobiledatastore')
+include ':androidmobiledatasync'
+project(':androidmobiledatasync').projectDir = new File(settingsDir, '../AndroidMobileDataSync/androidmobiledatasync')

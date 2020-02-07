@@ -29,7 +29,7 @@ import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
-import com.qmarciset.androidmobileui.sync.DataSyncState
+import com.qmarciset.androidmobiledatasync.DataSyncState
 import com.qmarciset.androidmobileui.utils.buildSnackBar
 import com.qmarciset.androidmobileui.utils.displaySnackBar
 import com.qmarciset.androidmobileui.utils.fetchResourceString

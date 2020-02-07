@@ -6,6 +6,6 @@
 
 package com.qmarciset.androidmobileui.sync
 
-enum class DataSyncState {
-    SYNCHRONIZED, UNSYNCHRONIZED, SYNCHRONIZING
-}
+import com.qmarciset.androidmobileui.viewmodel.EntityListViewModel
+
+data class EntityViewModelIsToSync(val vm: EntityListViewModel<*>, var isToSync: Boolean)

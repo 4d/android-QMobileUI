@@ -2,15 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../AndroidMobileDataStore/AndroidMobileDataStore.iml" filepath="$PROJECT_DIR$/../AndroidMobileDataStore/AndroidMobileDataStore.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../AndroidMobileDataStore/buildSrc/AndroidMobileDataStore-buildSrc.iml" filepath="$PROJECT_DIR$/../AndroidMobileDataStore/buildSrc/AndroidMobileDataStore-buildSrc.iml" />
       <module fileurl="file://$PROJECT_DIR$/AndroidMobileUI.iml" filepath="$PROJECT_DIR$/AndroidMobileUI.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../Sample4DApp/Sample4DApp.iml" filepath="$PROJECT_DIR$/../Sample4DApp/Sample4DApp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../Sample4DApp/buildSrc/Sample4DApp-buildSrc.iml" filepath="$PROJECT_DIR$/../Sample4DApp/buildSrc/Sample4DApp-buildSrc.iml" />
       <module fileurl="file://$PROJECT_DIR$/../AndroidMobileAPI/androidmobileapi/androidmobileapi.iml" filepath="$PROJECT_DIR$/../AndroidMobileAPI/androidmobileapi/androidmobileapi.iml" />
       <module fileurl="file://$PROJECT_DIR$/../AndroidMobileDataStore/androidmobiledatastore/androidmobiledatastore.iml" filepath="$PROJECT_DIR$/../AndroidMobileDataStore/androidmobiledatastore/androidmobiledatastore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../AndroidMobileDataSync/androidmobiledatasync/androidmobiledatasync.iml" filepath="$PROJECT_DIR$/../AndroidMobileDataSync/androidmobiledatasync/androidmobiledatasync.iml" />
       <module fileurl="file://$PROJECT_DIR$/androidmobileui/androidmobileui.iml" filepath="$PROJECT_DIR$/androidmobileui/androidmobileui.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../Sample4DApp/app/app.iml" filepath="$PROJECT_DIR$/../Sample4DApp/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/buildSrc/buildSrc.iml" filepath="$PROJECT_DIR$/buildSrc/buildSrc.iml" />
     </modules>
   </component>

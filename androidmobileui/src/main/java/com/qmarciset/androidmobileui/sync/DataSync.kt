@@ -10,8 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
-import com.qmarciset.androidmobileui.sync.model.EntityViewModelIsToSync
-import com.qmarciset.androidmobileui.sync.model.GlobalStampWithTable
+import com.qmarciset.androidmobiledatasync.DataSyncState
+import com.qmarciset.androidmobiledatasync.GlobalStampWithTable
 import java.util.concurrent.atomic.AtomicInteger
 import timber.log.Timber
 
@@ -43,7 +43,10 @@ class DataSync(
             liveDataMerger.addSource(dataSyncViewModelIsToSync.vm.globalStamp) {
                 if (it != null) {
                     liveDataMerger.value =
-                        GlobalStampWithTable(dataSyncViewModelIsToSync.vm.dao.tableName, it)
+                        GlobalStampWithTable(
+                            dataSyncViewModelIsToSync.vm.dao.tableName,
+                            it
+                        )
                 }
             }
         }
@@ -78,7 +81,8 @@ class DataSync(
                         authInfoHelper.globalStamp = maxGlobalStamp
                         for (dataSyncViewModelIsToSync in entityViewModelIsToSyncList) {
                             // notify data are synced
-                            dataSyncViewModelIsToSync.vm.dataSynchronized.postValue(DataSyncState.SYNCHRONIZED)
+                            dataSyncViewModelIsToSync.vm.dataSynchronized.postValue(
+                                DataSyncState.SYNCHRONIZED)
                         }
                     } else {
                         Timber.d("isAtLeastOneToSync true")

@@ -10,6 +10,7 @@ object Versions {
     // AndroidMobile libraries
     val androidmobileapi = "0.0.1"
     val androidmobiledatastore = "0.0.1"
+    val androidmobiledatasync = "0.0.1"
 
     val android_gradle_plugin = "3.5.2"
     val artifactory = "4.13.0"
@@ -51,6 +52,8 @@ object AndroidMobileLibs {
         "com.qmarciset.androidmobileapi:androidmobileapi:${Versions.androidmobileapi}"
     val androidmobiledatastore =
         "com.qmarciset.androidmobiledatastore:androidmobiledatastore:${Versions.androidmobiledatastore}"
+    val androidmobiledatasync =
+        "com.qmarciset.androidmobiledatasync:androidmobiledatasync:${Versions.androidmobiledatasync}"
 }
 
 object Libs {
