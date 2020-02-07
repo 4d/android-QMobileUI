@@ -1,3 +1,9 @@
+/*
+ * Created by Quentin Marciset on 7/2/2020.
+ * 4D SAS
+ * Copyright (c) 2020 Quentin Marciset. All rights reserved.
+ */
+
 package com.qmarciset.androidmobileui.sync
 
 import androidx.appcompat.app.AppCompatActivity
@@ -6,8 +12,8 @@ import androidx.lifecycle.Observer
 import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
 import com.qmarciset.androidmobileui.sync.model.EntityViewModelIsToSync
 import com.qmarciset.androidmobileui.sync.model.GlobalStampWithTable
-import timber.log.Timber
 import java.util.concurrent.atomic.AtomicInteger
+import timber.log.Timber
 
 class DataSync(
     private val activity: AppCompatActivity,
@@ -92,7 +98,6 @@ class DataSync(
                 }
             }
         }
-
 
         // observe merged LiveData
         liveDataMerger.observe(activity, observer)

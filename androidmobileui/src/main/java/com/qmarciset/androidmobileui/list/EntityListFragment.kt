@@ -1,3 +1,9 @@
+/*
+ * Created by Quentin Marciset on 7/2/2020.
+ * 4D SAS
+ * Copyright (c) 2020 Quentin Marciset. All rights reserved.
+ */
+
 package com.qmarciset.androidmobileui.list
 
 import android.content.Context
@@ -30,9 +36,9 @@ import com.qmarciset.androidmobileui.utils.fetchResourceString
 import com.qmarciset.androidmobileui.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobileui.viewmodel.EntityListViewModel
 import com.qmarciset.androidmobileui.viewmodel.LoginViewModel
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.android.synthetic.main.fragment_list_stub.*
 import timber.log.Timber
-import java.util.concurrent.atomic.AtomicBoolean
 
 class EntityListFragment : Fragment(), BaseFragment {
 

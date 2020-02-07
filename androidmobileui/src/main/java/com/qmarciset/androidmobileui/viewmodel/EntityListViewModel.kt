@@ -1,3 +1,9 @@
+/*
+ * Created by Quentin Marciset on 7/2/2020.
+ * 4D SAS
+ * Copyright (c) 2020 Quentin Marciset. All rights reserved.
+ */
+
 package com.qmarciset.androidmobileui.viewmodel
 
 import android.app.Application
@@ -49,7 +55,6 @@ abstract class EntityListViewModel<T>(
     val dataSynchronized =
         MutableLiveData<DataSyncState>().apply { value = DataSyncState.UNSYNCHRONIZED }
 
-    
     fun delete(item: EntityModel) {
         roomRepository.delete(item as T)
     }
