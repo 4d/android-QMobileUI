@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../AndroidMobileDataStore/AndroidMobileDataStore.iml" filepath="$PROJECT_DIR$/../AndroidMobileDataStore/AndroidMobileDataStore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../AndroidMobileDataStore/buildSrc/AndroidMobileDataStore-buildSrc.iml" filepath="$PROJECT_DIR$/../AndroidMobileDataStore/buildSrc/AndroidMobileDataStore-buildSrc.iml" />
       <module fileurl="file://$PROJECT_DIR$/AndroidMobileUI.iml" filepath="$PROJECT_DIR$/AndroidMobileUI.iml" />
       <module fileurl="file://$PROJECT_DIR$/../Sample4DApp/Sample4DApp.iml" filepath="$PROJECT_DIR$/../Sample4DApp/Sample4DApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/../Sample4DApp/buildSrc/Sample4DApp-buildSrc.iml" filepath="$PROJECT_DIR$/../Sample4DApp/buildSrc/Sample4DApp-buildSrc.iml" />

@@ -1,3 +1,9 @@
+/*
+ * Created by Quentin Marciset on 7/2/2020.
+ * 4D SAS
+ * Copyright (c) 2020 Quentin Marciset. All rights reserved.
+ */
+
 import org.gradle.api.JavaVersion
 
 object Versions {
