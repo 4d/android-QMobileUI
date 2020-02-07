@@ -23,16 +23,16 @@ import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
+import com.qmarciset.androidmobileui.sync.DataSyncState
 import com.qmarciset.androidmobileui.utils.buildSnackBar
 import com.qmarciset.androidmobileui.utils.displaySnackBar
 import com.qmarciset.androidmobileui.utils.fetchResourceString
 import com.qmarciset.androidmobileui.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobileui.viewmodel.EntityListViewModel
-import com.qmarciset.androidmobileui.viewmodel.LifecycleViewModel
 import com.qmarciset.androidmobileui.viewmodel.LoginViewModel
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.android.synthetic.main.fragment_list_stub.*
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 
 class EntityListFragment : Fragment(), BaseFragment {
 
@@ -45,7 +45,6 @@ class EntityListFragment : Fragment(), BaseFragment {
 
     // ViewModels
     private lateinit var loginViewModel: LoginViewModel
-    private lateinit var lifecycleViewModel: LifecycleViewModel
     private lateinit var entityListViewModel: EntityListViewModel<*>
     private lateinit var connectivityViewModel: ConnectivityViewModel
 
@@ -96,6 +95,9 @@ class EntityListFragment : Fragment(), BaseFragment {
         super.onDestroyView()
     }
 
+    /**
+     * Retrieve viewModels from MainActivity lifecycle
+     */
     override fun getViewModel() {
 
         // Get EntityListViewModel
@@ -111,14 +113,6 @@ class EntityListFragment : Fragment(), BaseFragment {
                     delegate.fromTableInterface
                 )
             )[kClazz.java]
-        } ?: throw IllegalStateException("Invalid Activity")
-
-        // Get LifecycleViewModel
-        lifecycleViewModel = activity?.run {
-            ViewModelProvider(
-                this,
-                LifecycleViewModel.LifecycleViewModelFactory(delegate.appInstance)
-            )[LifecycleViewModel::class.java]
         } ?: throw IllegalStateException("Invalid Activity")
 
         // Get ConnectivityViewModel
@@ -145,6 +139,9 @@ class EntityListFragment : Fragment(), BaseFragment {
         } ?: throw IllegalStateException("Invalid Activity")
     }
 
+    /**
+     * Setup observers
+     */
     override fun setupObservers() {
 
         // Observe entity list
@@ -166,18 +163,9 @@ class EntityListFragment : Fragment(), BaseFragment {
             }
         })
 
-        // Observe when app enters foreground
-        lifecycleViewModel.entersForeground.observe(
-            viewLifecycleOwner,
-            Observer { entersForeground ->
-                if (entersForeground) {
-                    if (isReady()) {
-                        syncData()
-                    } else {
-                        syncDataRequested.set(true)
-                    }
-                }
-            })
+        // Observe when data are synchronized
+        entityListViewModel.dataSynchronized.observe(viewLifecycleOwner, Observer {
+        })
 
         // Observe authentication state
         loginViewModel.authenticationState.observe(
@@ -186,6 +174,7 @@ class EntityListFragment : Fragment(), BaseFragment {
                 when (authenticationState) {
                     AuthenticationState.AUTHENTICATED -> {
                         if (isReady()) {
+                            Timber.e("syncData() from AuthenticationState")
                             syncData()
                         } else {
                             syncDataRequested.set(true)
@@ -204,6 +193,7 @@ class EntityListFragment : Fragment(), BaseFragment {
                     when (networkState) {
                         NetworkState.CONNECTED -> {
                             if (isReady()) {
+                                Timber.e("syncData() from NetworkState")
                                 syncData()
                             } else {
                                 syncDataRequested.set(true)
@@ -216,6 +206,9 @@ class EntityListFragment : Fragment(), BaseFragment {
         }
     }
 
+    /**
+     * Initialize recyclerView
+     */
     private fun initRecyclerView() {
         adapter = EntityListAdapter(
             tableName,
@@ -234,6 +227,9 @@ class EntityListFragment : Fragment(), BaseFragment {
         fragment_list_recycler_view.adapter = adapter
     }
 
+    /**
+     * Initialize Pull to refresh
+     */
     private fun initOnRefreshListener() {
         fragment_list_swipe_to_refresh.setProgressBackgroundColorSchemeColor(
             ContextCompat.getColor(
@@ -248,6 +244,9 @@ class EntityListFragment : Fragment(), BaseFragment {
         }
     }
 
+    /**
+     * Initialize Swipe to delete
+     */
     private fun initSwipeToDeleteAndUndo() {
         val swipeToDeleteCallback: SwipeToDeleteCallback =
             object : SwipeToDeleteCallback(requireContext()) {
@@ -273,11 +272,15 @@ class EntityListFragment : Fragment(), BaseFragment {
     }
 
     /**
-     * Synchronizes data
+     * Requests data sync to MainActivity  if requested
      */
     private fun syncData() {
         if (syncDataRequested.compareAndSet(true, false)) {
-            entityListViewModel.getData()
+            entityListViewModel.getData { shouldSyncData ->
+                if (shouldSyncData) {
+                    delegate.requestDataSync(tableName)
+                }
+            }
         }
     }
 
@@ -287,7 +290,11 @@ class EntityListFragment : Fragment(), BaseFragment {
     private fun forceSyncData() {
         syncDataRequested.set(false)
         if (isReady()) {
-            entityListViewModel.getData()
+            entityListViewModel.getData { shouldSyncData ->
+                if (shouldSyncData) {
+                    delegate.requestDataSync(tableName)
+                }
+            }
         } else {
             if (!delegate.isConnected()) {
                 activity?.let {
@@ -311,6 +318,6 @@ class EntityListFragment : Fragment(), BaseFragment {
      */
     private fun isReady(): Boolean =
         loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
-                delegate.isConnected() &&
-                lifecycleViewModel.entersForeground.value == true
+                entityListViewModel.dataSynchronized.value == DataSyncState.SYNCHRONIZED &&
+                delegate.isConnected()
 }

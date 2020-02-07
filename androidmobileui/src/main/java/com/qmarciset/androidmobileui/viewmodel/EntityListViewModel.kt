@@ -13,6 +13,7 @@ import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.utils.RequestErrorHelper
 import com.qmarciset.androidmobileapi.utils.parseJsonToType
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
+import com.qmarciset.androidmobileui.sync.DataSyncState
 import com.qmarciset.androidmobileui.utils.FromTableInterface
 import okhttp3.ResponseBody
 import timber.log.Timber
@@ -22,7 +23,7 @@ abstract class EntityListViewModel<T>(
     application: Application,
     appDatabase: AppDatabaseInterface,
     apiService: ApiService,
-    private val tableName: String,
+    tableName: String,
     private val fromTableInterface: FromTableInterface
 ) :
     BaseViewModel<T>(application, appDatabase, apiService, tableName) {
@@ -33,6 +34,7 @@ abstract class EntityListViewModel<T>(
 
     private val authInfoHelper = AuthInfoHelper(application.applicationContext)
     private var hasGlobalStamp = fromTableInterface.hasGlobalStampPropertyFromTable(tableName)
+    private val gson = Gson()
 
     /**
      * LiveData
@@ -42,14 +44,12 @@ abstract class EntityListViewModel<T>(
 
     open val dataLoading = MutableLiveData<Boolean>().apply { value = false }
 
-    @Volatile
-    private var globalStamp = authInfoHelper.globalStamp
-        @Synchronized set(value) {
-            Timber.d("GlobalStamp updated, old value was $globalStamp, new value is $value")
-            field = value
-            authInfoHelper.globalStamp = value
-        }
+    val globalStamp = MutableLiveData<Int>().apply { value = authInfoHelper.globalStamp }
 
+    val dataSynchronized =
+        MutableLiveData<DataSyncState>().apply { value = DataSyncState.UNSYNCHRONIZED }
+
+    
     fun delete(item: EntityModel) {
         roomRepository.delete(item as T)
     }
@@ -66,31 +66,42 @@ abstract class EntityListViewModel<T>(
         roomRepository.insertAll(items as List<T>)
     }
 
-    fun getData() {
-        if (hasGlobalStamp)
-            if (tableName == "Employee") // test purpose, Service table has no __GlobalStamp
-                getMoreRecentEntities()
-            else
-                getAll()
-        else
-            getAll()
-    }
-
     /**
      * Gets all entities more recent than current globalStamp
      */
-    private fun getMoreRecentEntities() {
-        dataLoading.value = true
-        val predicate = buildGlobalStampPredicate()
+    fun getData(
+        onResult: (shouldSyncData: Boolean) -> Unit
+    ) {
+        val predicate = buildGlobalStampPredicate(globalStamp.value ?: authInfoHelper.globalStamp)
+        Timber.d("predicate = $predicate")
+
         restRepository.getMoreRecentEntities(predicate) { isSuccess, response, error ->
-            dataLoading.value = false
             if (isSuccess) {
                 response?.body()?.let {
-                    handleData(it)
+                    Timber.d("getDataAlt: going to handleData()")
+                    decodeGlobalStamp(it) { entities ->
+                        //                        decodeAndInsertEntityList(entities)
+
+                        // Todo : déplacer ci-dessous avant decodeAndInsert
+
+                        // Todo : zipper les résultats ici avec observable, insérer tout d'un coup
+
+                        val receivedGlobalStamp = entities?.__GlobalStamp ?: 0
+
+                        globalStamp.postValue(receivedGlobalStamp)
+//                        globalStamp.postValue(260)
+
+                        if (receivedGlobalStamp > authInfoHelper.globalStamp) {
+                            onResult(true)
+                        }
+
+                        decodeEntityList(entities)
+                    }
                 }
+                onResult(false)
             } else {
-                toastMessage.postValue("try_refresh_data")
                 RequestErrorHelper.handleError(error)
+                onResult(false)
             }
         }
     }
@@ -104,7 +115,7 @@ abstract class EntityListViewModel<T>(
             dataLoading.value = false
             if (isSuccess) {
                 response?.body()?.let {
-                    handleData(it)
+                    decodeGlobalStamp(it) { entities -> decodeEntityList(entities) }
                 }
             } else {
                 toastMessage.postValue("try_refresh_data")
@@ -116,13 +127,17 @@ abstract class EntityListViewModel<T>(
     /**
      * Retrieves data from response and insert it in database
      */
-    private fun handleData(responseBody: ResponseBody): Boolean {
+    private fun decodeGlobalStamp(
+        responseBody: ResponseBody,
+        onResult: (entities: Entities?) -> Unit
+    ) {
         val json = responseBody.string()
-        val gson = Gson()
         val entities = gson.parseJsonToType<Entities>(json)
+        onResult(entities)
+    }
 
+    private fun decodeEntityList(entities: Entities?) {
         val entityList: List<T>? = gson.parseJsonToType<List<T>>(entities?.__ENTITIES)
-        var isInserted = false
         entityList?.let {
             for (item in entityList) {
                 val itemJson = gson.toJson(item)
@@ -130,27 +145,16 @@ abstract class EntityListViewModel<T>(
                     fromTableInterface.parseEntityFromTable(dao.tableName, itemJson.toString())
                 entity.let {
                     this.insert(it as EntityModel)
-                    isInserted = true
-                    if (hasGlobalStamp) {
-                        Timber.i("[ Inserting entity with __GlobalStamp = ${it.__GlobalStamp} ]")
-                        it.__GlobalStamp?.let { stamp ->
-                            if (globalStamp < stamp)
-                                globalStamp = stamp
-                        }
-                    } else {
-                        Timber.i("[ Inserting entity with no __GlobalStamp ]")
-                    }
                 }
             }
         }
-        return isInserted
     }
 
     /**
      * Returns predicate for requests with __GlobalStamp
      */
-    private fun buildGlobalStampPredicate(): String {
-        return "\"__GlobalStamp > $globalStamp AND __GlobalStamp <= ${globalStamp + 2}\""
+    private fun buildGlobalStampPredicate(globalStamp: Int): String {
+        return "\"__GlobalStamp > $globalStamp\""
     }
 
     class EntityListViewModelFactory(

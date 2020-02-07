@@ -13,6 +13,11 @@ import kotlin.reflect.KClass
 interface FromTableInterface {
 
     /**
+     * Provides the list of table names
+     */
+    val tableNames: List<String>
+
+    /**
      * Provides the appropriate EntityListViewModel KClass
      */
     fun entityListViewModelClassFromTable(tableName: String): KClass<EntityListViewModel<*>>

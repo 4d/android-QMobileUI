@@ -33,4 +33,6 @@ interface FragmentCommunication {
     fun refreshApiClients()
 
     fun isConnected(): Boolean
+
+    fun requestDataSync(alreadyRefreshedTable: String)
 }
