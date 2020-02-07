@@ -11,7 +11,8 @@
 
         <variable
             name="viewModel"
-            type="com.qmarciset.androidmobileui.viewmodel.EntityListViewModel&lt;EntityModel>" />
+            type="com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel&lt;EntityModel>" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

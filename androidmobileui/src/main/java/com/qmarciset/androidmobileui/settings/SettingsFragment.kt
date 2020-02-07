@@ -21,12 +21,12 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
+import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
+import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.utils.displaySnackBar
-import com.qmarciset.androidmobileui.viewmodel.ConnectivityViewModel
-import com.qmarciset.androidmobileui.viewmodel.LoginViewModel
 import java.util.concurrent.atomic.AtomicBoolean
 import timber.log.Timber
 

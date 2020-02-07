@@ -11,6 +11,7 @@ import android.net.ConnectivityManager
 import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.network.LoginApiService
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
+import com.qmarciset.androidmobiledatasync.utils.FromTableForViewModel
 import com.qmarciset.androidmobileui.utils.FromTableInterface
 import com.qmarciset.androidmobileui.utils.NavigationInterface
 import com.qmarciset.androidmobileui.utils.ViewDataBindingInterface
@@ -27,6 +28,8 @@ interface FragmentCommunication {
     val loginApiService: LoginApiService
 
     val fromTableInterface: FromTableInterface
+
+    val fromTableForViewModel: FromTableForViewModel
 
     val viewDataBindingInterface: ViewDataBindingInterface
 

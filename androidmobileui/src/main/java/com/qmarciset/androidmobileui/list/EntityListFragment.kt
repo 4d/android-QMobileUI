@@ -26,16 +26,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileapi.connectivity.NetworkState
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
+import com.qmarciset.androidmobiledatasync.DataSyncState
+import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
+import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
+import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
-import com.qmarciset.androidmobiledatasync.DataSyncState
 import com.qmarciset.androidmobileui.utils.buildSnackBar
 import com.qmarciset.androidmobileui.utils.displaySnackBar
 import com.qmarciset.androidmobileui.utils.fetchResourceString
-import com.qmarciset.androidmobileui.viewmodel.ConnectivityViewModel
-import com.qmarciset.androidmobileui.viewmodel.EntityListViewModel
-import com.qmarciset.androidmobileui.viewmodel.LoginViewModel
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.android.synthetic.main.fragment_list_stub.*
 import timber.log.Timber
@@ -116,7 +116,7 @@ class EntityListFragment : Fragment(), BaseFragment {
                     delegate.appDatabaseInterface,
                     delegate.apiService,
                     tableName,
-                    delegate.fromTableInterface
+                    delegate.fromTableForViewModel
                 )
             )[kClazz.java]
         } ?: throw IllegalStateException("Invalid Activity")

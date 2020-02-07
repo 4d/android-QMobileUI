@@ -15,9 +15,9 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.qmarciset.androidmobiledatasync.viewmodel.EntityViewModel
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
-import com.qmarciset.androidmobileui.viewmodel.EntityViewModel
 
 class EntityDetailFragment : Fragment(), BaseFragment {
 

@@ -15,10 +15,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
+import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
-import com.qmarciset.androidmobileui.viewmodel.EntityListViewModel
 
 class EntityViewPagerFragment : Fragment(), BaseFragment {
 
@@ -75,7 +75,7 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
                     delegate.appDatabaseInterface,
                     delegate.apiService,
                     tableName,
-                    delegate.fromTableInterface
+                    delegate.fromTableForViewModel
                 )
             )[kClazz.java]
         } ?: throw IllegalStateException("Invalid Activity")

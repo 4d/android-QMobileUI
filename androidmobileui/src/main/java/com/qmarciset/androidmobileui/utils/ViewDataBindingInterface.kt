@@ -7,8 +7,8 @@
 package com.qmarciset.androidmobileui.utils
 
 import androidx.databinding.ViewDataBinding
-import com.qmarciset.androidmobileui.viewmodel.EntityListViewModel
-import com.qmarciset.androidmobileui.viewmodel.EntityViewModel
+import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
+import com.qmarciset.androidmobiledatasync.viewmodel.EntityViewModel
 
 /**
  * Interface implemented by MainActivity to provide different elements depending of the generated type
