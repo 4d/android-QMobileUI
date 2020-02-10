@@ -14,15 +14,14 @@ dependencies {
     // AndroidMobile libraries
 //    implementation project(':androidmobileapi')
 //    implementation project(':androidmobiledatastore')
+//    implementation project(':androidmobiledatasync')
     implementation(AndroidMobileLibs.androidmobileapi) { changing = true }
     implementation(AndroidMobileLibs.androidmobiledatastore) { changing = true }
+    implementation(AndroidMobileLibs.androidmobiledatasync) { changing = true }
 
     // Common
-    implementation Libs.androidx_appcompat
     implementation Libs.androidx_constraintlayout
-    implementation Libs.androidx_core
     implementation Libs.androidx_preference_ktx
-    implementation Libs.androidx_recyclerview
     implementation Libs.kotlin_stdlib
 
     // Navigation
@@ -31,9 +30,6 @@ dependencies {
 
     // Utils
     implementation Libs.material
-    implementation Libs.okhttp
-    implementation Libs.retrofit_converter_gson
-    implementation Libs.rxjava
     implementation Libs.timber
 
     // Testing

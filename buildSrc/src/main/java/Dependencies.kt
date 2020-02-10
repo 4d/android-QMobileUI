@@ -19,6 +19,7 @@ object Versions {
     val design = "1.0.0"
     val junit = "4.13"
     val kotlin = "1.3.61"
+    val lifecycle = "2.2.0"
     val mockito = "3.2.4"
     val navigation = "2.2.0"
     val okhttp = "4.3.1"
@@ -59,16 +60,10 @@ object AndroidMobileLibs {
 object Libs {
 
     // Common
-    val androidx_appcompat = "androidx.appcompat:appcompat:${Versions.support}"
     val androidx_constraintlayout =
         "androidx.constraintlayout:constraintlayout:${Versions.constraint_layout}"
-    val androidx_core = "androidx.core:core-ktx:${Versions.support}"
-    val androidx_recyclerview = "androidx.recyclerview:recyclerview:${Versions.support}"
+    val androidx_preference_ktx = "androidx.preference:preference-ktx:${Versions.preference}"
     val kotlin_stdlib = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
-
-    // Utils
-    val material = "com.google.android.material:material:${Versions.design}"
-    val timber = "com.jakewharton.timber:timber:${Versions.timber}"
 
     // Navigation
     val androidx_navigation_fragment =
@@ -76,12 +71,15 @@ object Libs {
     val androidx_navigation_ui =
         "androidx.navigation:navigation-ui-ktx:${Versions.navigation}"
 
+    // Utils
+    val material = "com.google.android.material:material:${Versions.design}"
+    val timber = "com.jakewharton.timber:timber:${Versions.timber}"
+
     // Testing
     val junit = "junit:junit:${Versions.junit}"
 
     // For AndroidMobileAPI
     val androidx_junit = "androidx.test.ext:junit:${Versions.atsl_junit}"
-    val androidx_preference_ktx = "androidx.preference:preference-ktx:${Versions.preference}"
     val mockito = "org.mockito:mockito-core:${Versions.mockito}"
     val okhttp = "com.squareup.okhttp3:okhttp:${Versions.okhttp}"
     val okhttp_logging_interceptor = "com.squareup.okhttp3:logging-interceptor:${Versions.okhttp}"
@@ -94,7 +92,9 @@ object Libs {
     val rxjava = "io.reactivex.rxjava2:rxjava:${Versions.rxjava2}"
 
     // For AndroidMobileDataStore
+    val androidx_appcompat = "androidx.appcompat:appcompat:${Versions.support}"
     val androidx_room = "androidx.room:room-ktx:${Versions.room}"
-    val androidx_room_runtime = "androidx.room:room-runtime:${Versions.room}"
-    val androidx_room_compiler = "androidx.room:room-compiler:${Versions.room}"
+
+    // For AndroidMobileDataSync
+    val lifecycle_extensions = "androidx.lifecycle:lifecycle-extensions:${Versions.lifecycle}"
 }
