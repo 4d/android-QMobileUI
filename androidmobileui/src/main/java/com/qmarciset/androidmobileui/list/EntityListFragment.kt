@@ -180,7 +180,7 @@ class EntityListFragment : Fragment(), BaseFragment {
                 when (authenticationState) {
                     AuthenticationState.AUTHENTICATED -> {
                         if (isReady()) {
-                            Timber.e("syncData() from AuthenticationState")
+                            Timber.d("syncData() from AuthenticationState")
                             syncData()
                         } else {
                             syncDataRequested.set(true)
@@ -199,7 +199,7 @@ class EntityListFragment : Fragment(), BaseFragment {
                     when (networkState) {
                         NetworkState.CONNECTED -> {
                             if (isReady()) {
-                                Timber.e("syncData() from NetworkState")
+                                Timber.d("syncData() from NetworkState")
                                 syncData()
                             } else {
                                 syncDataRequested.set(true)
@@ -314,7 +314,7 @@ class EntityListFragment : Fragment(), BaseFragment {
                         it.resources.getString(R.string.error_occurred_try_again)
                     )
                 }
-                Timber.d("Not authenticated yet, refreshDataRequested = $syncDataRequested")
+                Timber.d("Not authenticated yet, syncDataRequested = $syncDataRequested")
             }
         }
     }
