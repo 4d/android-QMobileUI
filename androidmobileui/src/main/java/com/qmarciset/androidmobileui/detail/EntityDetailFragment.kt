@@ -90,5 +90,7 @@ class EntityDetailFragment : Fragment(), BaseFragment {
         )[EntityViewModel::class.java]
     }
 
-    override fun setupObservers() {}
+    override fun setupObservers() {
+        return
+    }
 }

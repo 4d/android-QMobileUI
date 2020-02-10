@@ -44,4 +44,6 @@ interface FragmentCommunication {
     fun isConnected(): Boolean
 
     fun requestDataSync(alreadyRefreshedTable: String)
+
+    fun requestAuthentication()
 }

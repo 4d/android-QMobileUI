@@ -290,7 +290,13 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
     /**
      * Checks if environment is ready to perform an action
      */
-    private fun isReady(): Boolean =
-        loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
+    private fun isReady(): Boolean {
+        if (loginViewModel.authenticationState.value == AuthenticationState.INVALID_AUTHENTICATION) {
+            // For example server was not responding when trying to auto-login
+            delegate.requestAuthentication()
+            return false
+        }
+        return loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
                 delegate.isConnected()
+    }
 }
