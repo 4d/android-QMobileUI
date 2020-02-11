@@ -17,6 +17,7 @@ object Versions {
     val atsl_junit = "1.1.1"
     val constraint_layout = "2.0.0-beta4"
     val design = "1.0.0"
+    val glide = "4.11.0"
     val junit = "4.13"
     val kotlin = "1.3.61"
     val lifecycle = "2.2.0"
@@ -64,6 +65,10 @@ object Libs {
         "androidx.constraintlayout:constraintlayout:${Versions.constraint_layout}"
     val androidx_preference_ktx = "androidx.preference:preference-ktx:${Versions.preference}"
     val kotlin_stdlib = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
+
+    // Glide
+    val glide = "com.github.bumptech.glide:glide:${Versions.glide}"
+    val glide_compiler = "com.github.bumptech.glide:compiler:${Versions.glide}"
 
     // Navigation
     val androidx_navigation_fragment =

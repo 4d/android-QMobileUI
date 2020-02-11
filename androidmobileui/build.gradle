@@ -24,6 +24,10 @@ dependencies {
     implementation Libs.androidx_preference_ktx
     implementation Libs.kotlin_stdlib
 
+    // Glide
+    implementation Libs.glide
+    kapt Libs.glide_compiler
+
     // Navigation
     implementation Libs.androidx_navigation_fragment
     implementation Libs.androidx_navigation_ui
