@@ -203,6 +203,7 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
                     this.remoteUrl = newRemoteUrl
                     delegate.refreshApiClients()
                     remoteUrlPref?.setDefaultValue(newRemoteUrl)
+                    checkNetworkRequested.set(true)
                     checkNetwork()
                 }
             }

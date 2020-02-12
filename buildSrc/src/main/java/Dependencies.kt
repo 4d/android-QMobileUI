@@ -13,6 +13,7 @@ object Versions {
     val androidmobiledatasync = "0.0.1"
 
     val android_gradle_plugin = "3.5.2"
+    val arch_core = "2.1.0"
     val artifactory = "4.13.0"
     val atsl_junit = "1.1.1"
     val constraint_layout = "2.0.0-beta4"
@@ -101,5 +102,6 @@ object Libs {
     val androidx_room = "androidx.room:room-ktx:${Versions.room}"
 
     // For AndroidMobileDataSync
+    val androidx_core_testing = "androidx.arch.core:core-testing:${Versions.arch_core}"
     val lifecycle_extensions = "androidx.lifecycle:lifecycle-extensions:${Versions.lifecycle}"
 }

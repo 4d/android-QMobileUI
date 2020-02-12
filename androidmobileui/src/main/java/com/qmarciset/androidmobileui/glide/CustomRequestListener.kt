@@ -14,7 +14,7 @@ import com.bumptech.glide.request.target.Target
 import timber.log.Timber
 
 /**
- * Basic RequestListener (currently only watching where is the image fetched from)
+ * Basic RequestListener (currently only watching where the image is fetched from)
  */
 class CustomRequestListener : RequestListener<Drawable> {
 
@@ -35,6 +35,6 @@ class CustomRequestListener : RequestListener<Drawable> {
         isFirstResource: Boolean
     ): Boolean {
         Timber.d("[Image retrieved from $dataSource]")
-        return true
+        return false
     }
 }
