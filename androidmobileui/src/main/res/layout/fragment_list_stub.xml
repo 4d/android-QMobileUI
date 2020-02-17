@@ -62,7 +62,7 @@
             android:id="@+id/fragment_list_no_data_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/list_no_data_to_display_stub"
+            android:text="@string/no_data_to_display"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/text_color_grey"
             android:visibility="@{safeUnbox(viewModel.entityList.size()) > 0 ? View.GONE : View.VISIBLE}"

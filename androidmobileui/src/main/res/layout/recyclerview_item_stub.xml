@@ -25,26 +25,26 @@
             android:id="@+id/service_name_text"
             android:layout_width="228dp"
             android:layout_height="28dp"
-            android:layout_marginStart="@dimen/recycler_item_stub_margin"
-            android:layout_marginTop="@dimen/recycler_item_stub_margin"
+            android:layout_marginStart="@dimen/item_margin_large"
+            android:layout_marginTop="@dimen/item_margin_large"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:textSize="@dimen/recycler_item_stub_text_size_title"
+            android:textSize="@dimen/item_text_size_medium"
             app:layout_constraintBottom_toTopOf="@+id/id_text"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="@string/list_recycler_item_stub_title_text" />
+            tools:text="@string/placeholder_value" />
 
         <TextView
             android:id="@+id/id_text"
             android:layout_width="228dp"
             android:layout_height="21dp"
-            android:layout_marginStart="@dimen/recycler_item_stub_margin"
-            android:layout_marginBottom="@dimen/recycler_item_stub_margin"
-            android:textSize="@dimen/recycler_item_stub_text_size_content"
+            android:layout_marginStart="@dimen/item_margin_large"
+            android:layout_marginBottom="@dimen/item_margin_large"
+            android:textSize="@dimen/item_text_size_small"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/service_name_text"
-            tools:text="@string/list_recycler_item_stub_content_text" />
+            tools:text="@string/placeholder_id" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

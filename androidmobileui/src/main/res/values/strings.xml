@@ -1,6 +1,17 @@
 <resources>
     <string name="app_name">AndroidMobileUI</string>
 
+    <!--    Toolbar -->
+    <string name="title_table_service">Service</string>
+    <string name="title_table_employee">Employee</string>
+    <string name="title_table_office">Office</string>
+    <string name="title_table_settings">Settings</string>
+
+    <!--    Placeholders -->
+    <string name="placeholder_title">___TITLE___</string>
+    <string name="placeholder_id">___ID___</string>
+    <string name="placeholder_value">___VALUE___</string>
+
     <!--    Error Fragment -->
     <string name="label_sample_error">An error occurred. This is a sample error message</string>
     <string name="content_description_sample_error_image">sample_error_image</string>
@@ -9,10 +20,9 @@
     <string name="snackbar_remove">Item was removed from the list.</string>
     <string name="snackbar_undo">UNDO</string>
 
-    <!--    List Fragment Stub-->
-    <string name="list_no_data_to_display_stub">No data to display</string>
-    <string name="list_recycler_item_stub_title_text">___VALUE___</string>
-    <string name="list_recycler_item_stub_content_text">___ID___</string>
+    <!--    Detail and List -->
+    <string name="no_data_to_display">No data to display</string>
+    <string name="profile_image">Profile image</string>
     <string name="try_refresh_data">Please try refreshing data again</string>
 
     <!--    Settings Fragment -->
@@ -37,4 +47,12 @@
     <string name="server_accessible">Server is accessible</string>
     <string name="server_not_accessible">Server is not accessible</string>
     <string name="error_occurred_try_again">An error occurred, please try again later</string>
+
+    <!--    Login -->
+    <string name="login_button_text">Login</string>
+    <string name="login_placeholder_email">Email</string>
+    <string name="login_fail_snackbar">Login unsuccessful</string>
+    <string name="login_logged_out_snackbar">You have been logged out</string>
+    <string name="login_invalid_email">Invalid mail address</string>
+    <string name="login_image_content_description">Application logo</string>
 </resources>
