@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Created by Quentin Marciset on 13/2/2020.
+  ~ Created by Quentin Marciset on 17/2/2020.
   ~ 4D SAS
   ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
   -->
@@ -18,33 +18,39 @@
         <variable
             name="viewModel"
             type="com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel&lt;EntityModel>" />
-
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/fragment_list_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5" />
+
         <ProgressBar
             style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/list_margin_medium"
             android:visibility="@{safeUnbox(viewModel.dataLoading) ? View.VISIBLE : View.GONE}"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/fragment_list_guideline"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintRight_toRightOf="parent" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/fragment_list_swipe_to_refresh"
             android:layout_width="wrap_content"
             android:layout_height="0px"
             android:layout_weight="1"
-            android:visibility="@{safeUnbox(viewModel.dataLoading) ? View.GONE : View.VISIBLE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:visibleGone="@{!viewModel.dataLoading}">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/fragment_list_recycler_view"
@@ -62,14 +68,14 @@
             android:id="@+id/fragment_list_no_data_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/list_margin_medium"
             android:text="@string/no_data_to_display"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/text_color_grey"
             android:visibility="@{safeUnbox(viewModel.entityList.size()) > 0 ? View.GONE : View.VISIBLE}"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/fragment_list_guideline" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

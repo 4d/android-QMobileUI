@@ -6,6 +6,7 @@
 
 package com.qmarciset.androidmobileui.utils
 
+import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
 import kotlin.reflect.KClass
 
@@ -22,12 +23,12 @@ interface FromTableInterface {
     /**
      * Provides the appropriate EntityListViewModel KClass
      */
-    fun entityListViewModelClassFromTable(tableName: String): KClass<EntityListViewModel<*>>
+    fun entityListViewModelClassFromTable(tableName: String): KClass<EntityListViewModel<EntityModel>>
 
     /**
-     * Provides the appropriate list layout
+     * Provides the list layout
      */
-    fun listLayoutFromTable(tableName: String): Int
+    fun listLayout(): Int
 
     /**
      * Provides the appropriate RecyclerView item layout

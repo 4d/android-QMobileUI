@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
+import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
@@ -30,7 +31,7 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
     override lateinit var delegate: FragmentCommunication
 
     // ViewModel
-    private lateinit var entityListViewModel: EntityListViewModel<*>
+    private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
 
     override fun onCreateView(
         inflater: LayoutInflater,

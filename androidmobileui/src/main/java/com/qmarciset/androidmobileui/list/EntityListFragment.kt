@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileapi.connectivity.NetworkState
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
+import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobiledatasync.DataSyncState
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
@@ -33,6 +34,7 @@ import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
+import com.qmarciset.androidmobileui.databinding.FragmentListStubBinding
 import com.qmarciset.androidmobileui.utils.buildSnackBar
 import com.qmarciset.androidmobileui.utils.displaySnackBar
 import com.qmarciset.androidmobileui.utils.fetchResourceString
@@ -51,7 +53,7 @@ class EntityListFragment : Fragment(), BaseFragment {
 
     // ViewModels
     private lateinit var loginViewModel: LoginViewModel
-    private lateinit var entityListViewModel: EntityListViewModel<*>
+    private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
     private lateinit var connectivityViewModel: ConnectivityViewModel
 
     override fun onCreateView(
@@ -68,7 +70,7 @@ class EntityListFragment : Fragment(), BaseFragment {
 
         val dataBinding: ViewDataBinding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
-            delegate.fromTableInterface.listLayoutFromTable(tableName),
+            delegate.fromTableInterface.listLayout(),
             container,
             false
         ).apply {
