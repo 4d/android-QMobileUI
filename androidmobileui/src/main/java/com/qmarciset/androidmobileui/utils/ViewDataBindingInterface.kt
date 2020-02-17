@@ -7,6 +7,7 @@
 package com.qmarciset.androidmobileui.utils
 
 import androidx.databinding.ViewDataBinding
+import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityViewModel
 
@@ -20,11 +21,11 @@ interface ViewDataBindingInterface {
      */
     fun setEntityListViewModel(
         viewDataBinding: ViewDataBinding,
-        entityListViewModel: EntityListViewModel<*>
+        entityListViewModel: EntityListViewModel<EntityModel>
     )
 
     /**
      * Sets the appropriate EntityViewModel
      */
-    fun setEntityViewModel(viewDataBinding: ViewDataBinding, entityViewModel: EntityViewModel<*>)
+    fun setEntityViewModel(viewDataBinding: ViewDataBinding, entityViewModel: EntityViewModel<EntityModel>)
 }

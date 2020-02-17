@@ -15,9 +15,11 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityViewModel
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
+import kotlin.reflect.KClass
 
 class EntityDetailFragment : Fragment(), BaseFragment {
 
@@ -28,7 +30,7 @@ class EntityDetailFragment : Fragment(), BaseFragment {
     override lateinit var delegate: FragmentCommunication
 
     // ViewModels
-    private lateinit var entityViewModel: EntityViewModel<*>
+    private lateinit var entityViewModel: EntityViewModel<EntityModel>
 
     companion object {
         fun newInstance(itemId: String, tableName: String) = EntityDetailFragment().apply {
@@ -78,6 +80,8 @@ class EntityDetailFragment : Fragment(), BaseFragment {
     override fun getViewModel() {
 
         // Get EntityViewModel
+        @Suppress("UNCHECKED_CAST")
+        val kClazz = EntityViewModel::class as KClass<EntityViewModel<EntityModel>>
         entityViewModel = ViewModelProvider(
             this,
             EntityViewModel.EntityViewModelFactory(
@@ -87,7 +91,7 @@ class EntityDetailFragment : Fragment(), BaseFragment {
                 itemId,
                 tableName
             )
-        )[EntityViewModel::class.java]
+        )[kClazz.java]
     }
 
     override fun setupObservers() {

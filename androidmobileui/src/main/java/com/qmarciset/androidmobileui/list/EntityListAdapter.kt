@@ -44,9 +44,8 @@ class EntityListAdapter internal constructor(
 
     override fun getItemCount() = entities.size
 
-    @Suppress("UNCHECKED_CAST")
-    internal fun setEntities(entities: List<*>) {
-        this.entities = entities as List<EntityModel>
+    internal fun setEntities(entities: List<EntityModel>) {
+        this.entities = entities
         notifyDataSetChanged()
     }
 

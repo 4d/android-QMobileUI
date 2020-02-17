@@ -34,7 +34,6 @@ import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
-import com.qmarciset.androidmobileui.databinding.FragmentListStubBinding
 import com.qmarciset.androidmobileui.utils.buildSnackBar
 import com.qmarciset.androidmobileui.utils.displaySnackBar
 import com.qmarciset.androidmobileui.utils.fetchResourceString
