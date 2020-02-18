@@ -73,9 +73,9 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
                 this,
                 EntityListViewModel.EntityListViewModelFactory(
                     delegate.appInstance,
+                    tableName,
                     delegate.appDatabaseInterface,
                     delegate.apiService,
-                    tableName,
                     delegate.fromTableForViewModel
                 )
             )[kClazz.java]

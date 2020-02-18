@@ -38,7 +38,7 @@ import com.qmarciset.androidmobileui.utils.buildSnackBar
 import com.qmarciset.androidmobileui.utils.displaySnackBar
 import com.qmarciset.androidmobileui.utils.fetchResourceString
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlinx.android.synthetic.main.fragment_list_stub.*
+import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 
 class EntityListFragment : Fragment(), BaseFragment {
@@ -114,9 +114,9 @@ class EntityListFragment : Fragment(), BaseFragment {
                 this,
                 EntityListViewModel.EntityListViewModelFactory(
                     delegate.appInstance,
+                    tableName,
                     delegate.appDatabaseInterface,
                     delegate.apiService,
-                    tableName,
                     delegate.fromTableForViewModel
                 )
             )[kClazz.java]

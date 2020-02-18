@@ -86,10 +86,11 @@ class EntityDetailFragment : Fragment(), BaseFragment {
             this,
             EntityViewModel.EntityViewModelFactory(
                 delegate.appInstance,
+                tableName,
+                itemId,
                 delegate.appDatabaseInterface,
                 delegate.apiService,
-                itemId,
-                tableName
+                delegate.fromTableForViewModel
             )
         )[kClazz.java]
     }
