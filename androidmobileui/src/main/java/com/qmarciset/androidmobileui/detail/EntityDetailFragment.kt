@@ -19,7 +19,6 @@ import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityViewModel
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
-import kotlin.reflect.KClass
 
 class EntityDetailFragment : Fragment(), BaseFragment {
 
@@ -80,8 +79,7 @@ class EntityDetailFragment : Fragment(), BaseFragment {
     override fun getViewModel() {
 
         // Get EntityViewModel
-        @Suppress("UNCHECKED_CAST")
-        val kClazz = EntityViewModel::class as KClass<EntityViewModel<EntityModel>>
+        val kClazz = delegate.fromTableInterface.entityViewModelClass()
         entityViewModel = ViewModelProvider(
             this,
             EntityViewModel.EntityViewModelFactory(

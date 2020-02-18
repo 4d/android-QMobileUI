@@ -8,6 +8,7 @@ package com.qmarciset.androidmobileui.utils
 
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
+import com.qmarciset.androidmobiledatasync.viewmodel.EntityViewModel
 import kotlin.reflect.KClass
 
 /**
@@ -24,6 +25,11 @@ interface FromTableInterface {
      * Provides the appropriate EntityListViewModel KClass
      */
     fun entityListViewModelClassFromTable(tableName: String): KClass<EntityListViewModel<EntityModel>>
+
+    /**
+     * Provides the EntityViewModel KClass
+     */
+    fun entityViewModelClass(): KClass<EntityViewModel<EntityModel>>
 
     /**
      * Provides the list layout

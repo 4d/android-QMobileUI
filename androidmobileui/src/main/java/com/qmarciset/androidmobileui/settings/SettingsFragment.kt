@@ -106,7 +106,7 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
         findPreference<Preference>(logoutPrefKey)?.onPreferenceClickListener = this
 
         remoteUrlPref =
-            findPreference<Preference>(resources.getString(R.string.pref_remote_url_key))
+            findPreference(resources.getString(R.string.pref_remote_url_key))
         remoteUrlPref?.setDefaultValue(this.remoteUrl)
         remoteUrlPref?.onPreferenceChangeListener = this
     }
