@@ -67,6 +67,11 @@ object Libs {
     val androidx_preference_ktx = "androidx.preference:preference-ktx:${Versions.preference}"
     val kotlin_stdlib = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
 
+    // Lifecycle
+    val lifecycle_compiler =  "androidx.lifecycle:lifecycle-compiler:${Versions.lifecycle}"
+    val lifecycle_extensions = "androidx.lifecycle:lifecycle-extensions:${Versions.lifecycle}"
+    val lifecycle_runtime = "androidx.lifecycle:lifecycle-runtime:${Versions.lifecycle}"
+
     // Glide
     val glide = "com.github.bumptech.glide:glide:${Versions.glide}"
     val glide_compiler = "com.github.bumptech.glide:compiler:${Versions.glide}"
@@ -103,5 +108,4 @@ object Libs {
 
     // For AndroidMobileDataSync
     val androidx_core_testing = "androidx.arch.core:core-testing:${Versions.arch_core}"
-    val lifecycle_extensions = "androidx.lifecycle:lifecycle-extensions:${Versions.lifecycle}"
 }

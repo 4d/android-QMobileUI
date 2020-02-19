@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Created by Quentin Marciset on 18/2/2020.
+  ~ 4D SAS
+  ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
+  -->
+
+<resources>
+    <style name="ErrorTextAppearance" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+</resources>

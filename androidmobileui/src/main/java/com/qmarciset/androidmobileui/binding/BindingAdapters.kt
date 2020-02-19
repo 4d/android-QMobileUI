@@ -62,7 +62,10 @@ fun bindImageFromUrl(view: ImageView, imageUrl: String?, listener: RequestListen
  * Use Glide to load image drawable in a view
  */
 @BindingAdapter("imageDrawable")
-fun bindImageFromDrawable(view: ImageView, imageDrawable: Drawable) {
+fun bindImageFromDrawable(view: ImageView, imageDrawable: Int?) {
+    if (imageDrawable == null)
+        return
+
     val factory =
         DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
 
