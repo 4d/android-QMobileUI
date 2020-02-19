@@ -1,12 +1,6 @@
 <resources>
     <string name="app_name">AndroidMobileUI</string>
 
-    <!--    Toolbar -->
-    <string name="title_table_service">Service</string>
-    <string name="title_table_employee">Employee</string>
-    <string name="title_table_office">Office</string>
-    <string name="title_table_settings">Settings</string>
-
     <!--    Placeholders -->
     <string name="placeholder_title">___TITLE___</string>
     <string name="placeholder_id">___ID___</string>
