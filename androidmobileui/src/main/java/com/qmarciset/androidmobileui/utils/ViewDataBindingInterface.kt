@@ -27,5 +27,8 @@ interface ViewDataBindingInterface {
     /**
      * Sets the appropriate EntityViewModel
      */
-    fun setEntityViewModel(viewDataBinding: ViewDataBinding, entityViewModel: EntityViewModel<EntityModel>)
+    fun setEntityViewModel(
+        viewDataBinding: ViewDataBinding,
+        entityViewModel: EntityViewModel<EntityModel>
+    )
 }

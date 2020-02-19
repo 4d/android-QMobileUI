@@ -23,6 +23,7 @@ object Versions {
     val kotlin = "1.3.61"
     val lifecycle = "2.2.0"
     val mockito = "3.2.4"
+    val multidex = "2.0.1"
     val navigation = "2.2.0"
     val okhttp = "4.3.1"
     val preference = "1.1.0"
@@ -84,6 +85,7 @@ object Libs {
 
     // Utils
     val material = "com.google.android.material:material:${Versions.design}"
+    val multidex = "androidx.multidex:multidex:${Versions.multidex}"
     val timber = "com.jakewharton.timber:timber:${Versions.timber}"
 
     // Testing

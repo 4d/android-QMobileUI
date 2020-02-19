@@ -18,7 +18,7 @@ open class BaseApp : MultiDexApplication() {
     companion object {
 
         // Provides Application instance
-        lateinit var instance: BaseApp
+        lateinit var instance: MultiDexApplication
 
         // Provides the drawable resource id for login page logo
         var loginLogoDrawable: Int? = null

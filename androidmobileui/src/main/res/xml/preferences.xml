@@ -12,11 +12,11 @@
 
         <EditTextPreference
             android:defaultValue="@string/pref_remote_url_default_value"
+            android:icon="@drawable/network_nok_circle"
             android:key="@string/pref_remote_url_key"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:summary="@string/pref_remote_url_summary"
-            android:icon="@drawable/network_nok_circle"
             android:title="@string/pref_remote_url_title" />
 
 
