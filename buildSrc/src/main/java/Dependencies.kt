@@ -69,7 +69,7 @@ object Libs {
     val kotlin_stdlib = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
 
     // Lifecycle
-    val lifecycle_compiler =  "androidx.lifecycle:lifecycle-compiler:${Versions.lifecycle}"
+    val lifecycle_compiler = "androidx.lifecycle:lifecycle-compiler:${Versions.lifecycle}"
     val lifecycle_extensions = "androidx.lifecycle:lifecycle-extensions:${Versions.lifecycle}"
     val lifecycle_runtime = "androidx.lifecycle:lifecycle-runtime:${Versions.lifecycle}"
 

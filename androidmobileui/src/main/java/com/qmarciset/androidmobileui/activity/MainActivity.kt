@@ -85,8 +85,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         setContentView(R.layout.activity_main)
 
         // Init data sync class
-        dataSync =
-            DataSync(this, authInfoHelper)
+        dataSync = DataSync(this, authInfoHelper)
 
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -331,7 +330,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     private fun setDataSyncObserver(alreadyRefreshedTable: String?) {
         entityViewModelIsToSyncList.map { it.isToSync = true }
         alreadyRefreshedTable?.let {
-            entityViewModelIsToSyncList.filter { it.vm.dao.tableName == alreadyRefreshedTable }[0].isToSync =
+            entityViewModelIsToSyncList.filter { it.vm.getAssociatedTableName() == alreadyRefreshedTable }[0].isToSync =
                 false
         }
         dataSync.setObserver(entityViewModelIsToSyncList)
