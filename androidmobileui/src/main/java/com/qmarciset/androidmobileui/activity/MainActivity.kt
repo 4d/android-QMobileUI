@@ -25,6 +25,7 @@ import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileapi.auth.LoginRequiredCallback
 import com.qmarciset.androidmobileapi.connectivity.NetworkState
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
+import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobileapi.network.ApiClient
 import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.network.LoginApiService
@@ -72,6 +73,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var connectivityViewModel: ConnectivityViewModel
     private lateinit var entityViewModelIsToSyncList: MutableList<EntityViewModelIsToSync>
+    private lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
     private val loginRequiredCallback: LoginRequiredCallback = object : LoginRequiredCallback {
         override fun loginRequired() {
@@ -173,6 +175,25 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
                 ConnectivityViewModel.ConnectivityViewModelFactory(appInstance, connectivityManager)
             )[ConnectivityViewModel::class.java]
         }
+
+        // Get EntityListViewModel list
+        entityListViewModelList = mutableListOf()
+        for (tableName in fromTableInterface.tableNames) {
+            val kClazz = fromTableInterface.entityListViewModelClassFromTable(tableName)
+
+            entityListViewModelList.add(
+                ViewModelProvider(
+                    this,
+                    EntityListViewModel.EntityListViewModelFactory(
+                        appInstance,
+                        tableName,
+                        appDatabaseInterface,
+                        apiService,
+                        fromTableForViewModel
+                    )
+                )[kClazz.java]
+            )
+        }
     }
 
     override fun setupObservers() {
@@ -222,6 +243,13 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
                 }
             })
         }
+
+        // Observe when data are synchronized
+        for (entityListViewModel in entityListViewModelList) {
+            entityListViewModel.dataSynchronized.observe(this, Observer { dataSyncState ->
+                Timber.i("[DataSyncState : $dataSyncState, Table : ${entityListViewModel.getAssociatedTableName()}, Instance : $entityListViewModel]")
+            })
+        }
     }
 
     /**
@@ -266,7 +294,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     private fun applyOnForegroundEvent() {
         if (onLaunch) {
             onLaunch = false
-            getEntityListViewModels()
+            getEntityListViewModelsForSync()
         }
         setDataSyncObserver(null)
     }
@@ -293,7 +321,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             Timber.d("No Internet connection, authenticationRequested")
             displaySnackBar(
                 this,
-                resources.getString(com.qmarciset.androidmobileui.R.string.no_internet_auto_login)
+                resources.getString(R.string.no_internet_auto_login)
             )
         }
     }
@@ -305,25 +333,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         setDataSyncObserver(alreadyRefreshedTable)
     }
 
-    private fun getEntityListViewModels() {
+    private fun getEntityListViewModelsForSync() {
         entityViewModelIsToSyncList = mutableListOf()
-        for (tableName in fromTableInterface.tableNames) {
-            val kClazz = fromTableInterface.entityListViewModelClassFromTable(tableName)
 
-            entityViewModelIsToSyncList.add(
-                EntityViewModelIsToSync(
-                    ViewModelProvider(
-                        this,
-                        EntityListViewModel.EntityListViewModelFactory(
-                            appInstance,
-                            tableName,
-                            appDatabaseInterface,
-                            apiService,
-                            fromTableForViewModel
-                        )
-                    )[kClazz.java], true
-                )
-            )
+        for (entityListViewModel in entityListViewModelList) {
+            entityViewModelIsToSyncList.add(EntityViewModelIsToSync(entityListViewModel, true))
         }
     }
 

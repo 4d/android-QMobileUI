@@ -171,7 +171,8 @@ class EntityListFragment : Fragment(), BaseFragment {
         })
 
         // Observe when data are synchronized
-        entityListViewModel.dataSynchronized.observe(viewLifecycleOwner, Observer {
+        entityListViewModel.dataSynchronized.observe(viewLifecycleOwner, Observer { dataSyncState ->
+            Timber.i("[DataSyncState : $dataSyncState, Table : ${entityListViewModel.getAssociatedTableName()}, Instance : $entityListViewModel]")
         })
 
         // Observe authentication state
@@ -181,7 +182,6 @@ class EntityListFragment : Fragment(), BaseFragment {
                 when (authenticationState) {
                     AuthenticationState.AUTHENTICATED -> {
                         if (isReady()) {
-                            Timber.d("syncData() from AuthenticationState")
                             syncData()
                         } else {
                             syncDataRequested.set(true)
@@ -200,7 +200,6 @@ class EntityListFragment : Fragment(), BaseFragment {
                     when (networkState) {
                         NetworkState.CONNECTED -> {
                             if (isReady()) {
-                                Timber.d("syncData() from NetworkState")
                                 syncData()
                             } else {
                                 syncDataRequested.set(true)
@@ -299,7 +298,10 @@ class EntityListFragment : Fragment(), BaseFragment {
         if (isReady()) {
             entityListViewModel.getData { shouldSyncData ->
                 if (shouldSyncData) {
+                    Timber.i("GlobalStamp changed, synchronization is required")
                     delegate.requestDataSync(tableName)
+                } else {
+                    Timber.i("GlobalStamp unchanged, no synchronization is required")
                 }
             }
         } else {
