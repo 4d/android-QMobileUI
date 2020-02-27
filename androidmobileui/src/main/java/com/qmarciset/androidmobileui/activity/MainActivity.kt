@@ -347,6 +347,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             entityViewModelIsToSyncList.filter { it.vm.getAssociatedTableName() == alreadyRefreshedTable }[0].isToSync =
                 false
         }
-        dataSync.setObserver(entityViewModelIsToSyncList)
+        dataSync.setObserver(entityViewModelIsToSyncList, alreadyRefreshedTable)
     }
 }
