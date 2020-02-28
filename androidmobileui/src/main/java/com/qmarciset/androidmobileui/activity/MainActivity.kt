@@ -271,7 +271,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      */
     @Suppress("unused")
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    private fun onBackground() {
+    fun onBackground() {
         Timber.i("[${Lifecycle.Event.ON_STOP}]")
         shouldDelayOnForegroundEvent.set(false)
     }
@@ -281,7 +281,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      */
     @Suppress("unused")
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    private fun onForeground() {
+    fun onForeground() {
         if (loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED) {
             Timber.i("[${Lifecycle.Event.ON_START}]")
             applyOnForegroundEvent()

@@ -27,7 +27,7 @@ dependencies {
     // Lifecycle
     implementation Libs.lifecycle_extensions
     implementation Libs.lifecycle_runtime
-    annotationProcessor Libs.lifecycle_compiler
+    kapt Libs.lifecycle_compiler
 
     // Glide
     implementation Libs.glide
