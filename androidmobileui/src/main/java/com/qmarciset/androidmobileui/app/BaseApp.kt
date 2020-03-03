@@ -36,4 +36,11 @@ open class BaseApp : MultiDexApplication() {
         lateinit var navigationInterface: NavigationInterface
         lateinit var viewDataBindingInterface: ViewDataBindingInterface
     }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        // Sets Application instance
+        instance = this
+    }
 }

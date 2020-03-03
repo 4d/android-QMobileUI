@@ -239,7 +239,7 @@ class EntityListFragment : Fragment(), BaseFragment {
     private fun initOnRefreshListener() {
         fragment_list_swipe_to_refresh.setProgressBackgroundColorSchemeColor(
             ContextCompat.getColor(
-                requireContext(), R.color.list_swipe_to_refresh
+                requireContext(), R.color.colorPrimary
             )
         )
         fragment_list_swipe_to_refresh.setColorSchemeColors(Color.WHITE)
@@ -267,7 +267,7 @@ class EntityListFragment : Fragment(), BaseFragment {
                             entityListViewModel.insert(item)
 //                            rv_main.scrollToPosition(position)
                         }
-                        snackBar.setActionTextColor(Color.YELLOW)
+                        snackBar.setActionTextColor(ContextCompat.getColor(delegate.appInstance, R.color.colorAccent))
                         snackBar.show()
                     }
                 }

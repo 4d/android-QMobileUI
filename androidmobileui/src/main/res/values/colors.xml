@@ -7,15 +7,18 @@
 
 <resources>
 
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#D81B60</color>
+<!--    <color name="colorPrimary">#6200EE</color>-->
+<!--    <color name="colorPrimaryDark">#3700B3</color>-->
+<!--    <color name="colorAccent">#D81B60</color>-->
+
+    <color name="colorPrimary">#344955</color>
+    <color name="colorPrimaryDark">#232F34</color>
+    <color name="colorPrimaryLight">#4A6572</color>
+    <color name="colorAccent">#F9AA33</color>
+    <color name="colorText">#B4C1CC</color>
 
     <!--    Swipe to delete -->
     <color name="backgroundSwipeToDelete">#f44336</color>
-
-    <!--    Swipe to refresh -->
-    <color name="list_swipe_to_refresh">#6200EE</color>
 
     <!--    Error fragment -->
     <color name="error_fragment_soft_error">#CFCFCF</color>
