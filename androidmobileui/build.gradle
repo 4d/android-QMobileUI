@@ -96,8 +96,8 @@ task generateMySources(type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 task addMySourcesToAar(type: Jar) {
-    archiveName "${libraryArtifactId}WithSources.aar"
-    destinationDir file("build")
+    archiveFileName.set("${libraryArtifactId}WithSources.aar")
+    destinationDirectory.set(file("build"))
     from zipTree("build/outputs/aar/${libraryArtifactId}-${buildVariant}.aar")
     from fileTree("build").include("libs/${libraryArtifactId}-sources.jar")
 }

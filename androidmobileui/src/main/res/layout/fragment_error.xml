@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Created by Quentin Marciset on 13/2/2020.
   ~ 4D SAS
   ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
@@ -11,19 +10,19 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/fragment_error_iv"
+        android:id="@+id/fragment_error_image"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:contentDescription="@string/content_description_sample_error_image"
         android:tint="@color/error_fragment_soft_error"
-        app:layout_constraintBottom_toTopOf="@+id/fragment_error_tv"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/fragment_error_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_error_black_24dp" />
 
     <TextView
-        android:id="@+id/fragment_error_tv"
+        android:id="@+id/fragment_error_text"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:gravity="center_horizontal"
@@ -36,8 +35,8 @@
         android:textColor="@color/text_color_grey"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_error_iv" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_error_image" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

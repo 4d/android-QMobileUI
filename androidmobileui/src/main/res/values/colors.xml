@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Created by Quentin Marciset on 19/2/2020.
   ~ 4D SAS
   ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
@@ -7,9 +6,9 @@
 
 <resources>
 
-<!--    <color name="colorPrimary">#6200EE</color>-->
-<!--    <color name="colorPrimaryDark">#3700B3</color>-->
-<!--    <color name="colorAccent">#D81B60</color>-->
+    <!--    <color name="colorPrimary">#6200EE</color>-->
+    <!--    <color name="colorPrimaryDark">#3700B3</color>-->
+    <!--    <color name="colorAccent">#D81B60</color>-->
 
     <color name="colorPrimary">#344955</color>
     <color name="colorPrimaryDark">#232F34</color>

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Created by Quentin Marciset on 13/2/2020.
   ~ 4D SAS
   ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
@@ -24,38 +23,38 @@
         tools:context=".ui.LoginActivity">
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline"
+            android:id="@+id/login_guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.25" />
 
         <ImageView
-            android:id="@+id/logo_iv"
+            android:id="@+id/login_logo"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/login_image_content_description"
-            app:layout_constraintBottom_toTopOf="@+id/guideline"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/login_guideline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <!--  Email Label -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/email_container"
+            android:id="@+id/login_email_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/login_layout_margin"
             android:layout_marginBottom="@dimen/login_layout_margin_small"
             app:errorEnabled="true"
             app:errorTextAppearance="@style/ErrorTextAppearance"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/guideline">
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/login_guideline">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/input_email"
+                android:id="@+id/login_email_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/login_placeholder_email"
@@ -67,13 +66,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="@{safeUnbox(viewModel.dataLoading) ? View.VISIBLE : View.GONE}"
-            app:layout_constraintBottom_toTopOf="@+id/auth_button"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/email_container" />
+            app:layout_constraintBottom_toTopOf="@+id/login_button_auth"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/login_email_container" />
 
         <Button
-            android:id="@+id/auth_button"
+            android:id="@+id/login_button_auth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:enabled="@{safeUnbox(viewModel.emailValid) ? true : false}"
@@ -81,8 +80,8 @@
             android:text="@string/login_button_text"
             android:textColor="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

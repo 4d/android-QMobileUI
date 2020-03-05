@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Created by Quentin Marciset on 13/2/2020.
   ~ 4D SAS
   ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
@@ -8,10 +7,10 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
 
-    <solid android:color="#00FF00"/>
+    <solid android:color="#00FF00" />
 
     <size
         android:width="18dp"
-        android:height="18dp"/>
+        android:height="18dp" />
 
 </shape>

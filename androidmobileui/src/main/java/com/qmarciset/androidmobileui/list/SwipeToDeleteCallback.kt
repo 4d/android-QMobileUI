@@ -47,7 +47,7 @@ abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.Callbac
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
     ): Int {
-        return makeMovementFlags(0, ItemTouchHelper.LEFT)
+        return makeMovementFlags(0, ItemTouchHelper.START)
     }
 
     override fun onMove(

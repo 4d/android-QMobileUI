@@ -82,21 +82,21 @@ class LoginActivity : BaseActivity() {
      */
     private fun initLayout() {
 
-        bindImageFromDrawable(logo_iv, BaseApp.loginLogoDrawable)
+        bindImageFromDrawable(login_logo, BaseApp.loginLogoDrawable)
 
         if (loggedOut) {
             displaySnackBar(this, resources.getString(R.string.login_logged_out_snackbar))
         }
 
         // Login button
-        auth_button.setOnClickListener {
+        login_button_auth.setOnClickListener {
             if (NetworkUtils.isConnected(
                     connectivityViewModel.networkStateMonitor.value,
                     connectivityManager
                 )
             ) {
-                auth_button.isEnabled = false
-                loginViewModel.login(email = input_email.text.toString())
+                login_button_auth.isEnabled = false
+                loginViewModel.login(email = login_email_input.text.toString())
             } else {
                 displaySnackBar(
                     this,
@@ -108,18 +108,18 @@ class LoginActivity : BaseActivity() {
         // Define a shake animation for when mail is not valid
         val shakeAnimation = AnimationUtils.loadAnimation(this, R.anim.shake)
 
-        input_email.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+        login_email_input.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                if (input_email.text.toString().isEmailValid()) {
+                if (login_email_input.text.toString().isEmailValid()) {
                     loginViewModel.emailValid.postValue(true)
-                    email_container.error = null
+                    login_email_container.error = null
                 } else {
-                    input_email.startAnimation(shakeAnimation)
-                    email_container.error = resources.getString(R.string.login_invalid_email)
+                    login_email_input.startAnimation(shakeAnimation)
+                    login_email_container.error = resources.getString(R.string.login_invalid_email)
                     loginViewModel.emailValid.postValue(false)
                 }
             } else {
-                email_container.error = null
+                login_email_container.error = null
             }
         }
     }
@@ -151,19 +151,19 @@ class LoginActivity : BaseActivity() {
                     startMainActivity(false)
                 }
                 AuthenticationState.INVALID_AUTHENTICATION -> {
-                    auth_button.isEnabled = true
+                    login_button_auth.isEnabled = true
                     displaySnackBar(this, resources.getString(R.string.login_fail_snackbar))
                 }
                 else -> {
                     // Default state in LoginActivity
-                    auth_button.isEnabled = true
+                    login_button_auth.isEnabled = true
                 }
             }
         })
 
         // Observe if email is valid
         loginViewModel.emailValid.observe(this, Observer { emailValid ->
-            auth_button.isEnabled = emailValid
+            login_button_auth.isEnabled = emailValid
         })
 
         // Observe network status

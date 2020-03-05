@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Created by Quentin Marciset on 13/2/2020.
   ~ 4D SAS
   ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
@@ -22,28 +21,28 @@
         android:background="@android:color/background_light">
 
         <TextView
-            android:id="@+id/name_text"
+            android:id="@+id/stub_name_text"
             android:layout_width="228dp"
             android:layout_height="28dp"
             android:layout_marginStart="@dimen/item_margin_large"
             android:layout_marginTop="@dimen/item_margin_large"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             android:textSize="@dimen/item_text_size_medium"
-            app:layout_constraintBottom_toTopOf="@+id/id_text"
-            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/stub_text_1"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@string/placeholder_value" />
 
         <TextView
-            android:id="@+id/id_text"
+            android:id="@+id/stub_text_1"
             android:layout_width="228dp"
             android:layout_height="21dp"
             android:layout_marginStart="@dimen/item_margin_large"
             android:layout_marginBottom="@dimen/item_margin_large"
             android:textSize="@dimen/item_text_size_small"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/name_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/stub_name_text"
             tools:text="@string/placeholder_id" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
