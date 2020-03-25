@@ -6,6 +6,7 @@
 
 package com.qmarciset.androidmobileui.list
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
@@ -41,6 +42,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 
+@SuppressLint("BinaryOperationInTimber")
 class EntityListFragment : Fragment(), BaseFragment {
 
     private var tableName: String = ""
@@ -172,7 +174,9 @@ class EntityListFragment : Fragment(), BaseFragment {
 
         // Observe when data are synchronized
         entityListViewModel.dataSynchronized.observe(viewLifecycleOwner, Observer { dataSyncState ->
-            Timber.i("[DataSyncState : $dataSyncState, Table : ${entityListViewModel.getAssociatedTableName()}, Instance : $entityListViewModel]")
+            Timber.i("[DataSyncState : $dataSyncState, " +
+                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+                    "Instance : $entityListViewModel]")
         })
 
         // Observe authentication state

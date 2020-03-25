@@ -6,6 +6,7 @@
 
 package com.qmarciset.androidmobileui.activity
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -48,6 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 
+@SuppressLint("BinaryOperationInTimber")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
 
     private var onLaunch = true
@@ -247,7 +249,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         // Observe when data are synchronized
         for (entityListViewModel in entityListViewModelList) {
             entityListViewModel.dataSynchronized.observe(this, Observer { dataSyncState ->
-                Timber.i("[DataSyncState : $dataSyncState, Table : ${entityListViewModel.getAssociatedTableName()}, Instance : $entityListViewModel]")
+                Timber.i("[DataSyncState : $dataSyncState, " +
+                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+                        "Instance : $entityListViewModel]")
             })
         }
     }
