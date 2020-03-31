@@ -23,6 +23,8 @@ import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
+import com.qmarciset.androidmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
+import com.qmarciset.androidmobiledatasync.viewmodel.factory.LoginViewModelFactory
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
@@ -116,7 +118,7 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
         loginViewModel = activity?.run {
             ViewModelProvider(
                 this,
-                LoginViewModel.LoginViewModelFactory(delegate.appInstance, delegate.loginApiService)
+                LoginViewModelFactory(delegate.appInstance, delegate.loginApiService)
             )[LoginViewModel::class.java]
         } ?: throw IllegalStateException("Invalid Activity")
 
@@ -124,7 +126,7 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
         connectivityViewModel = activity?.run {
             ViewModelProvider(
                 this,
-                ConnectivityViewModel.ConnectivityViewModelFactory(
+                ConnectivityViewModelFactory(
                     delegate.appInstance,
                     delegate.connectivityManager
                 )
@@ -165,7 +167,7 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
 
         // Observe authentication state
         loginViewModel.authenticationState.observe(
-            this,
+            viewLifecycleOwner,
             Observer { authenticationState ->
                 when (authenticationState) {
                     AuthenticationState.AUTHENTICATED -> {

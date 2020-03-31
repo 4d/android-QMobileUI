@@ -1,10 +1,10 @@
 /*
- * Created by Quentin Marciset on 19/2/2020.
+ * Created by Quentin Marciset on 31/3/2020.
  * 4D SAS
  * Copyright (c) 2020 Quentin Marciset. All rights reserved.
  */
 
-package com.qmarciset.androidmobileui.activity
+package com.qmarciset.androidmobileui.activity.mainactivity
 
 import android.annotation.SuppressLint
 import android.app.Application
@@ -18,9 +18,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
-import androidx.navigation.ui.setupActionBarWithNavController
 import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
 import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileapi.auth.LoginRequiredCallback
@@ -31,22 +29,22 @@ import com.qmarciset.androidmobileapi.network.ApiClient
 import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.network.LoginApiService
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
-import com.qmarciset.androidmobiledatasync.DataSync
-import com.qmarciset.androidmobiledatasync.model.EntityViewModelIsToSync
+import com.qmarciset.androidmobiledatasync.sync.DataSync
+import com.qmarciset.androidmobiledatasync.sync.EntityViewModelIsToSync
 import com.qmarciset.androidmobiledatasync.utils.FromTableForViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
+import com.qmarciset.androidmobileui.activity.BaseActivity
+import com.qmarciset.androidmobileui.activity.loginactivity.LoginActivity
 import com.qmarciset.androidmobileui.app.BaseApp
 import com.qmarciset.androidmobileui.utils.FromTableInterface
 import com.qmarciset.androidmobileui.utils.NavigationInterface
 import com.qmarciset.androidmobileui.utils.ViewDataBindingInterface
 import com.qmarciset.androidmobileui.utils.displaySnackBar
-import com.qmarciset.androidmobileui.utils.setupWithNavController
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 
 @SuppressLint("BinaryOperationInTimber")
@@ -56,8 +54,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     private var authenticationRequested = true
     private var shouldDelayOnForegroundEvent = AtomicBoolean(false)
     private val authInfoHelper = AuthInfoHelper.getInstance(this)
-    private var currentNavController: LiveData<NavController>? = null
-    private lateinit var dataSync: DataSync
+    var currentNavController: LiveData<NavController>? = null
+    lateinit var dataSync: DataSync
 
     // FragmentCommunication
     override val appInstance: Application = BaseApp.instance
@@ -72,10 +70,10 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     override lateinit var connectivityManager: ConnectivityManager
 
     // ViewModels
-    private lateinit var loginViewModel: LoginViewModel
-    private lateinit var connectivityViewModel: ConnectivityViewModel
-    private lateinit var entityViewModelIsToSyncList: MutableList<EntityViewModelIsToSync>
-    private lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
+    lateinit var loginViewModel: LoginViewModel
+    lateinit var connectivityViewModel: ConnectivityViewModel
+    lateinit var entityViewModelIsToSyncList: MutableList<EntityViewModelIsToSync>
+    lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
     private val loginRequiredCallback: LoginRequiredCallback = object : LoginRequiredCallback {
         override fun loginRequired() {
@@ -89,7 +87,10 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         setContentView(R.layout.activity_main)
 
         // Init data sync class
-        dataSync = DataSync(this, authInfoHelper)
+        dataSync = DataSync(
+            this,
+            authInfoHelper
+        )
 
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -120,30 +121,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         setupBottomNavigationBar()
     }
 
-    /**
-     * Called on first creation and when restoring state.
-     */
-    private fun setupBottomNavigationBar() {
-        bottom_nav.menu.clear() // clear old inflated items.
-        BaseApp.bottomNavigationMenu?.let {
-            bottom_nav.inflateMenu(it)
-        }
-        val navGraphIds = BaseApp.navGraphIds
-
-        // Setup the bottom navigation view with a list of navigation graphs
-        val controller = bottom_nav.setupWithNavController(
-            navGraphIds = navGraphIds,
-            fragmentManager = supportFragmentManager,
-            containerId = R.id.nav_host_container,
-            intent = intent
-        )
-        // Whenever the selected controller changes, setup the action bar.
-        controller.observe(this, Observer { navController ->
-            setupActionBarWithNavController(navController)
-        })
-        currentNavController = controller
-    }
-
     override fun onSupportNavigateUp(): Boolean {
         return currentNavController?.value?.navigateUp() ?: false
     }
@@ -163,39 +140,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     }
 
     override fun getViewModel() {
-
-        // Get LoginViewModel
-        loginViewModel = ViewModelProvider(
-            this,
-            LoginViewModel.LoginViewModelFactory(appInstance, loginApiService)
-        )[LoginViewModel::class.java]
-
-        // Get ConnectivityViewModel
-        if (NetworkUtils.sdkNewerThanKitKat) {
-            connectivityViewModel = ViewModelProvider(
-                this,
-                ConnectivityViewModel.ConnectivityViewModelFactory(appInstance, connectivityManager)
-            )[ConnectivityViewModel::class.java]
-        }
-
-        // Get EntityListViewModel list
-        entityListViewModelList = mutableListOf()
-        for (tableName in fromTableInterface.tableNames) {
-            val kClazz = fromTableInterface.entityListViewModelClassFromTable(tableName)
-
-            entityListViewModelList.add(
-                ViewModelProvider(
-                    this,
-                    EntityListViewModel.EntityListViewModelFactory(
-                        appInstance,
-                        tableName,
-                        appDatabaseInterface,
-                        apiService,
-                        fromTableForViewModel
-                    )
-                )[kClazz.java]
-            )
-        }
+        getMainActivityViewModel()
     }
 
     override fun setupObservers() {
@@ -335,22 +280,5 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      */
     override fun requestDataSync(alreadyRefreshedTable: String) {
         setDataSyncObserver(alreadyRefreshedTable)
-    }
-
-    private fun getEntityListViewModelsForSync() {
-        entityViewModelIsToSyncList = mutableListOf()
-
-        for (entityListViewModel in entityListViewModelList) {
-            entityViewModelIsToSyncList.add(EntityViewModelIsToSync(entityListViewModel, true))
-        }
-    }
-
-    private fun setDataSyncObserver(alreadyRefreshedTable: String?) {
-        entityViewModelIsToSyncList.map { it.isToSync = true }
-        alreadyRefreshedTable?.let {
-            entityViewModelIsToSyncList.filter { it.vm.getAssociatedTableName() == alreadyRefreshedTable }[0].isToSync =
-                false
-        }
-        dataSync.setObserver(entityViewModelIsToSyncList, alreadyRefreshedTable)
     }
 }

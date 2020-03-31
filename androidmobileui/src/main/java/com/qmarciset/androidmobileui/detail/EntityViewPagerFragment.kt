@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
+import com.qmarciset.androidmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
@@ -71,7 +72,7 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
         entityListViewModel = activity?.run {
             ViewModelProvider(
                 this,
-                EntityListViewModel.EntityListViewModelFactory(
+                EntityListViewModelFactory(
                     delegate.appInstance,
                     tableName,
                     delegate.appDatabaseInterface,

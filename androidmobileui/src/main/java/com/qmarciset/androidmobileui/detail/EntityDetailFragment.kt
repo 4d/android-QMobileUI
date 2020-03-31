@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityViewModel
+import com.qmarciset.androidmobiledatasync.viewmodel.factory.EntityViewModelFactory
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 
@@ -82,7 +83,7 @@ class EntityDetailFragment : Fragment(), BaseFragment {
         val kClazz = delegate.fromTableInterface.entityViewModelClass()
         entityViewModel = ViewModelProvider(
             this,
-            EntityViewModel.EntityViewModelFactory(
+            EntityViewModelFactory(
                 delegate.appInstance,
                 tableName,
                 itemId,

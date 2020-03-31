@@ -1,10 +1,10 @@
 /*
- * Created by Quentin Marciset on 18/2/2020.
+ * Created by Quentin Marciset on 31/3/2020.
  * 4D SAS
  * Copyright (c) 2020 Quentin Marciset. All rights reserved.
  */
 
-package com.qmarciset.androidmobileui.activity
+package com.qmarciset.androidmobileui.activity.loginactivity
 
 import android.app.Application
 import android.content.Context
@@ -19,7 +19,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
 import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileapi.auth.isEmailValid
@@ -29,6 +28,8 @@ import com.qmarciset.androidmobileapi.network.LoginApiService
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
 import com.qmarciset.androidmobileui.R
+import com.qmarciset.androidmobileui.activity.BaseActivity
+import com.qmarciset.androidmobileui.activity.mainactivity.MainActivity
 import com.qmarciset.androidmobileui.app.BaseApp
 import com.qmarciset.androidmobileui.binding.bindImageFromDrawable
 import com.qmarciset.androidmobileui.databinding.ActivityLoginBinding
@@ -38,14 +39,14 @@ import timber.log.Timber
 
 class LoginActivity : BaseActivity() {
 
-    private var loggedOut = false
-    private val appInstance: Application = BaseApp.instance
-    private lateinit var connectivityManager: ConnectivityManager
-    private lateinit var loginApiService: LoginApiService
+    var loggedOut = false
+    val appInstance: Application = BaseApp.instance
+    lateinit var connectivityManager: ConnectivityManager
+    lateinit var loginApiService: LoginApiService
 
     // ViewModels
-    private lateinit var loginViewModel: LoginViewModel
-    private lateinit var connectivityViewModel: ConnectivityViewModel
+    lateinit var loginViewModel: LoginViewModel
+    lateinit var connectivityViewModel: ConnectivityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -125,20 +126,7 @@ class LoginActivity : BaseActivity() {
     }
 
     override fun getViewModel() {
-
-        // Get LoginViewModel
-        loginViewModel = ViewModelProvider(
-            this,
-            LoginViewModel.LoginViewModelFactory(appInstance, loginApiService)
-        )[LoginViewModel::class.java]
-
-        // Get ConnectivityViewModel
-        if (NetworkUtils.sdkNewerThanKitKat) {
-            connectivityViewModel = ViewModelProvider(
-                this,
-                ConnectivityViewModel.ConnectivityViewModelFactory(appInstance, connectivityManager)
-            )[ConnectivityViewModel::class.java]
-        }
+        getLoginActivityViewModel()
     }
 
     override fun setupObservers() {

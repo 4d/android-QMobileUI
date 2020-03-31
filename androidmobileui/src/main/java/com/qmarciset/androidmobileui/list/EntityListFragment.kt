@@ -19,7 +19,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,7 +27,7 @@ import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileapi.connectivity.NetworkState
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
-import com.qmarciset.androidmobiledatasync.DataSyncState
+import com.qmarciset.androidmobiledatasync.sync.DataSyncState
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
@@ -45,7 +44,7 @@ import timber.log.Timber
 @SuppressLint("BinaryOperationInTimber")
 class EntityListFragment : Fragment(), BaseFragment {
 
-    private var tableName: String = ""
+    var tableName: String = ""
     private lateinit var syncDataRequested: AtomicBoolean
     private lateinit var adapter: EntityListAdapter
 
@@ -53,9 +52,9 @@ class EntityListFragment : Fragment(), BaseFragment {
     override lateinit var delegate: FragmentCommunication
 
     // ViewModels
-    private lateinit var loginViewModel: LoginViewModel
-    private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
-    private lateinit var connectivityViewModel: ConnectivityViewModel
+    lateinit var loginViewModel: LoginViewModel
+    lateinit var entityListViewModel: EntityListViewModel<EntityModel>
+    lateinit var connectivityViewModel: ConnectivityViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -108,44 +107,7 @@ class EntityListFragment : Fragment(), BaseFragment {
      * Retrieve viewModels from MainActivity lifecycle
      */
     override fun getViewModel() {
-
-        // Get EntityListViewModel
-        val kClazz = delegate.fromTableInterface.entityListViewModelClassFromTable(tableName)
-        entityListViewModel = activity?.run {
-            ViewModelProvider(
-                this,
-                EntityListViewModel.EntityListViewModelFactory(
-                    delegate.appInstance,
-                    tableName,
-                    delegate.appDatabaseInterface,
-                    delegate.apiService,
-                    delegate.fromTableForViewModel
-                )
-            )[kClazz.java]
-        } ?: throw IllegalStateException("Invalid Activity")
-
-        // Get ConnectivityViewModel
-        if (NetworkUtils.sdkNewerThanKitKat) {
-            connectivityViewModel = activity?.run {
-                ViewModelProvider(
-                    this,
-                    ConnectivityViewModel.ConnectivityViewModelFactory(
-                        delegate.appInstance,
-                        delegate.connectivityManager
-                    )
-                )[ConnectivityViewModel::class.java]
-            } ?: throw IllegalStateException("Invalid Activity")
-        }
-
-        // Get LoginViewModel
-        // We need this ViewModel to know when MainActivity has performed its $authenticate so that
-        // we don't trigger the initial sync if we are not authenticated yet
-        loginViewModel = activity?.run {
-            ViewModelProvider(
-                this,
-                LoginViewModel.LoginViewModelFactory(delegate.appInstance, delegate.loginApiService)
-            )[LoginViewModel::class.java]
-        } ?: throw IllegalStateException("Invalid Activity")
+        getEntityListFragmentViewModel()
     }
 
     /**
