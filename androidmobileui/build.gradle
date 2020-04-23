@@ -7,7 +7,7 @@ apply from: "$rootDir/buildscripts/ktlint.gradle"
 apply from: "$rootDir/buildscripts/testlog.gradle"
 apply from: "$rootDir/buildscripts/detekt.gradle"
 apply from: "$rootDir/buildscripts/jacoco.gradle"
-apply from: "https://raw.githubusercontent.com/JakeWharton/SdkSearch/master/gradle/projectDependencyGraph.gradle"
+apply from: "$rootDir/buildscripts/projectDependencyGraph.gradle"
 
 dependencies {
 

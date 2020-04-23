@@ -25,7 +25,7 @@ object Versions {
     val mockito = "3.3.3"
     val multidex = "2.0.1"
     val navigation = "2.2.0"
-    val okhttp = "4.4.0"
+    val okhttp = "4.5.0"
     val preference = "1.1.0"
     val retrofit = "2.8.0"
     val robolectric = "4.3.1"
