@@ -31,6 +31,8 @@ import com.qmarciset.androidmobileapi.network.LoginApiService
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobiledatasync.sync.DataSync
 import com.qmarciset.androidmobiledatasync.sync.EntityViewModelIsToSync
+import com.qmarciset.androidmobiledatasync.sync.unsuccessfulSynchronization
+import com.qmarciset.androidmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
 import com.qmarciset.androidmobiledatasync.utils.FromTableForViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
@@ -75,10 +77,21 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     lateinit var entityViewModelIsToSyncList: MutableList<EntityViewModelIsToSync>
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
-    private val loginRequiredCallback: LoginRequiredCallback = object : LoginRequiredCallback {
+    // Interceptor notifies the MainActivity that we need to go to login page. First, stop syncing
+    private val loginRequiredCallbackForInterceptor: LoginRequiredCallback = object : LoginRequiredCallback {
         override fun loginRequired() {
             if (!authInfoHelper.guestLogin)
+                dataSync.loginRequired.set(true)
+        }
+    }
+
+    // DataSync notifies MainActivity to go to login page
+    private val loginRequiredCallbackForDataSync: LoginRequiredCallback = object : LoginRequiredCallback {
+        override fun loginRequired() {
+            if (!authInfoHelper.guestLogin) {
+                dataSync.unsuccessfulSynchronizationNeedsLogin(entityViewModelIsToSyncList)
                 startLoginActivity()
+            }
         }
     }
 
@@ -87,10 +100,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         setContentView(R.layout.activity_main)
 
         // Init data sync class
-        dataSync = DataSync(
-            this,
-            authInfoHelper
-        )
+        dataSync = DataSync(this, authInfoHelper, loginRequiredCallbackForDataSync)
 
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -135,7 +145,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         apiService = ApiClient.getApiService(
             context = this,
             loginApiService = loginApiService,
-            loginRequiredCallback = loginRequiredCallback
+            loginRequiredCallback = loginRequiredCallbackForInterceptor
         )
     }
 
