@@ -141,6 +141,11 @@ class EntityListFragment : Fragment(), BaseFragment {
                     "Instance : $entityListViewModel]")
         })
 
+        // Observe when there is a new related entity to be inserted in a dao
+        entityListViewModel.newRelatedEntity.observe(viewLifecycleOwner, Observer { newRelatedEntity ->
+            delegate.dispatchNewRelatedEntity(tableName, newRelatedEntity)
+        })
+
         // Observe authentication state
         loginViewModel.authenticationState.observe(
             viewLifecycleOwner,
@@ -244,7 +249,7 @@ class EntityListFragment : Fragment(), BaseFragment {
     }
 
     /**
-     * Requests data sync to MainActivity  if requested
+     * Requests data sync to MainActivity if requested
      */
     private fun syncData() {
         if (syncDataRequested.compareAndSet(true, false)) {

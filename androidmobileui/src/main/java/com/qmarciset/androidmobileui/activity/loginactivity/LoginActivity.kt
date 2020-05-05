@@ -39,7 +39,7 @@ import timber.log.Timber
 
 class LoginActivity : BaseActivity() {
 
-    var loggedOut = false
+    private var loggedOut = false
     val appInstance: Application = BaseApp.instance
     lateinit var connectivityManager: ConnectivityManager
     lateinit var loginApiService: LoginApiService

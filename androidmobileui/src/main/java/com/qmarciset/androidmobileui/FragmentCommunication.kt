@@ -8,6 +8,7 @@ package com.qmarciset.androidmobileui
 
 import android.app.Application
 import android.net.ConnectivityManager
+import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.network.LoginApiService
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
@@ -46,4 +47,6 @@ interface FragmentCommunication {
     fun requestDataSync(alreadyRefreshedTable: String)
 
     fun requestAuthentication()
+
+    fun dispatchNewRelatedEntity(tableName: String, entity: EntityModel)
 }

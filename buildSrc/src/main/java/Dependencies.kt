@@ -25,7 +25,7 @@ object Versions {
     val mockito = "3.3.3"
     val multidex = "2.0.1"
     val navigation = "2.2.0"
-    val okhttp = "4.5.0"
+    val okhttp = "4.6.0"
     val preference = "1.1.0"
     val retrofit = "2.8.0"
     val robolectric = "4.3.1"
@@ -110,4 +110,5 @@ object Libs {
 
     // For AndroidMobileDataSync
     val androidx_core_testing = "androidx.arch.core:core-testing:${Versions.arch_core}"
+    val kotlin_reflect = "org.jetbrains.kotlin:kotlin-reflect:${Versions.kotlin}"
 }

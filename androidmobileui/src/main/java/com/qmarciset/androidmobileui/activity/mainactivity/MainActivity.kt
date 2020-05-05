@@ -31,7 +31,6 @@ import com.qmarciset.androidmobileapi.network.LoginApiService
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobiledatasync.sync.DataSync
 import com.qmarciset.androidmobiledatasync.sync.EntityViewModelIsToSync
-import com.qmarciset.androidmobiledatasync.sync.unsuccessfulSynchronization
 import com.qmarciset.androidmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
 import com.qmarciset.androidmobiledatasync.utils.FromTableForViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
@@ -290,5 +289,13 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      */
     override fun requestDataSync(alreadyRefreshedTable: String) {
         setDataSyncObserver(alreadyRefreshedTable)
+    }
+
+    /**
+     * Commands the appropriate EntityListViewModel to add the related entity in its dao
+     */
+    override fun dispatchNewRelatedEntity(tableName: String, entity: EntityModel) {
+        val entityListViewModel = entityListViewModelList.first { it.getAssociatedTableName() == tableName }
+        entityListViewModel.insert(entity)
     }
 }
