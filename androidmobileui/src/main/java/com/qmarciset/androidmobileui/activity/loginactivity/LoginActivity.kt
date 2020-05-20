@@ -97,7 +97,7 @@ class LoginActivity : BaseActivity() {
                 )
             ) {
                 login_button_auth.isEnabled = false
-                loginViewModel.login(email = login_email_input.text.toString())
+                loginViewModel.login(email = login_email_input.text.toString()) { }
             } else {
                 displaySnackBar(
                     this,

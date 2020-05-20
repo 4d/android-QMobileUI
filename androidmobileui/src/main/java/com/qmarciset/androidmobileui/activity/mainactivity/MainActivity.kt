@@ -273,7 +273,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      */
     private fun tryAutoLogin() {
         if (isConnected()) {
-            loginViewModel.login()
+            loginViewModel.login { }
         } else {
             authenticationRequested = true
             Timber.d("No Internet connection, authenticationRequested")
