@@ -29,6 +29,8 @@ import com.qmarciset.androidmobileapi.network.ApiClient
 import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.network.LoginApiService
 import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
+import com.qmarciset.androidmobiledatasync.relation.ManyToOneRelation
+import com.qmarciset.androidmobiledatasync.relation.OneToManyRelation
 import com.qmarciset.androidmobiledatasync.sync.DataSync
 import com.qmarciset.androidmobiledatasync.sync.EntityViewModelIsToSync
 import com.qmarciset.androidmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
@@ -77,22 +79,24 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
     // Interceptor notifies the MainActivity that we need to go to login page. First, stop syncing
-    private val loginRequiredCallbackForInterceptor: LoginRequiredCallback = object : LoginRequiredCallback {
-        override fun loginRequired() {
-            if (!authInfoHelper.guestLogin)
-                dataSync.loginRequired.set(true)
-        }
-    }
-
-    // DataSync notifies MainActivity to go to login page
-    private val loginRequiredCallbackForDataSync: LoginRequiredCallback = object : LoginRequiredCallback {
-        override fun loginRequired() {
-            if (!authInfoHelper.guestLogin) {
-                dataSync.unsuccessfulSynchronizationNeedsLogin(entityViewModelIsToSyncList)
-                startLoginActivity()
+    private val loginRequiredCallbackForInterceptor: LoginRequiredCallback =
+        object : LoginRequiredCallback {
+            override fun loginRequired() {
+                if (!authInfoHelper.guestLogin)
+                    dataSync.loginRequired.set(true)
             }
         }
-    }
+
+    // DataSync notifies MainActivity to go to login page
+    private val loginRequiredCallbackForDataSync: LoginRequiredCallback =
+        object : LoginRequiredCallback {
+            override fun loginRequired() {
+                if (!authInfoHelper.guestLogin) {
+                    dataSync.unsuccessfulSynchronizationNeedsLogin(entityViewModelIsToSyncList)
+                    startLoginActivity()
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -200,12 +204,25 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             })
         }
 
-        // Observe when data are synchronized
         for (entityListViewModel in entityListViewModelList) {
+
+            // Observe when data are synchronized
             entityListViewModel.dataSynchronized.observe(this, Observer { dataSyncState ->
-                Timber.i("[DataSyncState : $dataSyncState, " +
-                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                        "Instance : $entityListViewModel]")
+                Timber.i(
+                    "[DataSyncState : $dataSyncState, " +
+                            "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+                            "Instance : $entityListViewModel]"
+                )
+            })
+
+            // Observe when there is a new related entity to be inserted in a dao
+            entityListViewModel.newRelatedEntity.observe(this, Observer { manyToOneRelation ->
+                dispatchNewRelatedEntity(manyToOneRelation)
+            })
+
+            // Observe when there is a related entities to be inserted in a dao
+            entityListViewModel.newRelatedEntities.observe(this, Observer { oneToManyRelation ->
+                dispatchNewRelatedEntities(oneToManyRelation)
             })
         }
     }
@@ -294,8 +311,18 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     /**
      * Commands the appropriate EntityListViewModel to add the related entity in its dao
      */
-    override fun dispatchNewRelatedEntity(tableName: String, entity: EntityModel) {
-        val entityListViewModel = entityListViewModelList.first { it.getAssociatedTableName() == tableName }
-        entityListViewModel.insert(entity)
+    private fun dispatchNewRelatedEntity(manyToOneRelation: ManyToOneRelation) {
+        val entityListViewModel =
+            entityListViewModelList.first { it.getAssociatedTableName() == manyToOneRelation.className }
+        entityListViewModel.insert(manyToOneRelation.entity)
+    }
+
+    /**
+     * Commands the appropriate EntityListViewModel to add the related entities in its dao
+     */
+    private fun dispatchNewRelatedEntities(oneToManyRelation: OneToManyRelation) {
+        val entityListViewModel =
+            entityListViewModelList.first { it.getAssociatedTableName() == oneToManyRelation.className }
+        entityListViewModel.decodeEntityModel(oneToManyRelation.entities, true)
     }
 }

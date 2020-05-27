@@ -141,11 +141,6 @@ class EntityListFragment : Fragment(), BaseFragment {
                     "Instance : $entityListViewModel]")
         })
 
-        // Observe when there is a new related entity to be inserted in a dao
-        entityListViewModel.newRelatedEntity.observe(viewLifecycleOwner, Observer { newRelatedEntity ->
-            delegate.dispatchNewRelatedEntity(tableName, newRelatedEntity)
-        })
-
         // Observe authentication state
         loginViewModel.authenticationState.observe(
             viewLifecycleOwner,
