@@ -20,7 +20,7 @@ import java.io.InputStream
 class HeaderLoader(context: Context, concreteLoader: ModelLoader<GlideUrl, InputStream>) :
     BaseGlideUrlLoader<String>(concreteLoader) {
 
-    private val authInfoHelper = AuthInfoHelper(context)
+    private val authInfoHelper = AuthInfoHelper.getInstance(context)
 
     /**
      * Adjusts image url depending on what is given in remoteUrl

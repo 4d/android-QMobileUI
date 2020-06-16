@@ -30,6 +30,7 @@ object Versions {
     val retrofit = "2.9.0"
     val robolectric = "4.3.1"
     val room = "2.2.5"
+    val runner = "1.1.0"
     val rx_android = "2.1.1"
     val rxjava2 = "2.2.19"
     val support = "1.1.0"
@@ -93,6 +94,7 @@ object Libs {
 
     // For AndroidMobileAPI
     val androidx_junit = "androidx.test.ext:junit:${Versions.atsl_junit}"
+    val androidx_runner = "androidx.test:runner:${Versions.runner}"
     val mockito = "org.mockito:mockito-core:${Versions.mockito}"
     val okhttp = "com.squareup.okhttp3:okhttp:${Versions.okhttp}"
     val okhttp_logging_interceptor = "com.squareup.okhttp3:logging-interceptor:${Versions.okhttp}"

@@ -37,9 +37,9 @@ import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.utils.buildSnackBar
 import com.qmarciset.androidmobileui.utils.displaySnackBar
 import com.qmarciset.androidmobileui.utils.fetchResourceString
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 
 @SuppressLint("BinaryOperationInTimber")
 class EntityListFragment : Fragment(), BaseFragment {
@@ -116,30 +116,41 @@ class EntityListFragment : Fragment(), BaseFragment {
     override fun setupObservers() {
 
         // Observe entity list
-        entityListViewModel.entityList.observe(viewLifecycleOwner, Observer { entities ->
-            entities?.let {
-                adapter.setEntities(it)
+        entityListViewModel.entityList.observe(
+            viewLifecycleOwner,
+            Observer { entities ->
+                entities?.let {
+                    adapter.setEntities(it)
+                }
             }
-        })
+        )
 
         // Observe any toast message
-        entityListViewModel.toastMessage.observe(viewLifecycleOwner, Observer { message ->
-            val toastMessage = context?.fetchResourceString(message) ?: ""
-            if (toastMessage.isNotEmpty()) {
-                activity?.let {
-                    Toast.makeText(it, toastMessage, Toast.LENGTH_LONG).show()
+        entityListViewModel.toastMessage.observe(
+            viewLifecycleOwner,
+            Observer { message ->
+                val toastMessage = context?.fetchResourceString(message) ?: ""
+                if (toastMessage.isNotEmpty()) {
+                    activity?.let {
+                        Toast.makeText(it, toastMessage, Toast.LENGTH_LONG).show()
+                    }
+                    // To avoid the error toast to be displayed without performing a refresh again
+                    entityListViewModel.toastMessage.postValue("")
                 }
-                // To avoid the error toast to be displayed without performing a refresh again
-                entityListViewModel.toastMessage.postValue("")
             }
-        })
+        )
 
         // Observe when data are synchronized
-        entityListViewModel.dataSynchronized.observe(viewLifecycleOwner, Observer { dataSyncState ->
-            Timber.i("[DataSyncState : $dataSyncState, " +
-                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                    "Instance : $entityListViewModel]")
-        })
+        entityListViewModel.dataSynchronized.observe(
+            viewLifecycleOwner,
+            Observer { dataSyncState ->
+                Timber.i(
+                    "[DataSyncState : $dataSyncState, " +
+                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+                        "Instance : $entityListViewModel]"
+                )
+            }
+        )
 
         // Observe authentication state
         loginViewModel.authenticationState.observe(
@@ -156,7 +167,8 @@ class EntityListFragment : Fragment(), BaseFragment {
                     else -> {
                     }
                 }
-            })
+            }
+        )
 
         // Observe network status
         if (NetworkUtils.sdkNewerThanKitKat) {
@@ -174,7 +186,8 @@ class EntityListFragment : Fragment(), BaseFragment {
                         else -> {
                         }
                     }
-                })
+                }
+            )
         }
     }
 
@@ -298,7 +311,7 @@ class EntityListFragment : Fragment(), BaseFragment {
             return false
         }
         return loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
-                entityListViewModel.dataSynchronized.value == DataSyncState.SYNCHRONIZED &&
-                delegate.isConnected()
+            entityListViewModel.dataSynchronized.value == DataSyncState.SYNCHRONIZED &&
+            delegate.isConnected()
     }
 }

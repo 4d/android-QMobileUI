@@ -92,9 +92,9 @@ class LoginActivity : BaseActivity() {
         // Login button
         login_button_auth.setOnClickListener {
             if (NetworkUtils.isConnected(
-                    connectivityViewModel.networkStateMonitor.value,
-                    connectivityManager
-                )
+                connectivityViewModel.networkStateMonitor.value,
+                connectivityManager
+            )
             ) {
                 login_button_auth.isEnabled = false
                 loginViewModel.login(email = login_email_input.text.toString()) { }
@@ -132,32 +132,41 @@ class LoginActivity : BaseActivity() {
     override fun setupObservers() {
 
         // Observe authentication state
-        loginViewModel.authenticationState.observe(this, Observer { authenticationState ->
-            Timber.i("[AuthenticationState : $authenticationState]")
-            when (authenticationState) {
-                AuthenticationState.AUTHENTICATED -> {
-                    startMainActivity(false)
-                }
-                AuthenticationState.INVALID_AUTHENTICATION -> {
-                    login_button_auth.isEnabled = true
-                    displaySnackBar(this, resources.getString(R.string.login_fail_snackbar))
-                }
-                else -> {
-                    // Default state in LoginActivity
-                    login_button_auth.isEnabled = true
+        loginViewModel.authenticationState.observe(
+            this,
+            Observer { authenticationState ->
+                Timber.i("[AuthenticationState : $authenticationState]")
+                when (authenticationState) {
+                    AuthenticationState.AUTHENTICATED -> {
+                        startMainActivity(false)
+                    }
+                    AuthenticationState.INVALID_AUTHENTICATION -> {
+                        login_button_auth.isEnabled = true
+                        displaySnackBar(this, resources.getString(R.string.login_fail_snackbar))
+                    }
+                    else -> {
+                        // Default state in LoginActivity
+                        login_button_auth.isEnabled = true
+                    }
                 }
             }
-        })
+        )
 
         // Observe if email is valid
-        loginViewModel.emailValid.observe(this, Observer { emailValid ->
-            login_button_auth.isEnabled = emailValid
-        })
+        loginViewModel.emailValid.observe(
+            this,
+            Observer { emailValid ->
+                login_button_auth.isEnabled = emailValid
+            }
+        )
 
         // Observe network status
         if (NetworkUtils.sdkNewerThanKitKat) {
-            connectivityViewModel.networkStateMonitor.observe(this, Observer {
-            })
+            connectivityViewModel.networkStateMonitor.observe(
+                this,
+                Observer {
+                }
+            )
         }
     }
 

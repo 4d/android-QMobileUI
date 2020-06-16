@@ -29,10 +29,12 @@ import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.utils.displaySnackBar
-import java.util.concurrent.atomic.AtomicBoolean
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 
-class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
+class SettingsFragment :
+    PreferenceFragmentCompat(),
+    BaseFragment,
     Preference.OnPreferenceClickListener,
     Preference.OnPreferenceChangeListener {
 
@@ -147,7 +149,8 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
                     } else {
                         firstTime = false
                     }
-                })
+                }
+            )
         }
 
         // Observe if server is accessible
@@ -163,7 +166,8 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
                 } else {
                     setLayoutNoInternet()
                 }
-            })
+            }
+        )
 
         // Observe authentication state
         loginViewModel.authenticationState.observe(
@@ -176,7 +180,8 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
                     else -> {
                     }
                 }
-            })
+            }
+        )
     }
 
     override fun onPreferenceClick(preference: Preference?): Boolean {
@@ -300,6 +305,6 @@ class SettingsFragment : PreferenceFragmentCompat(), BaseFragment,
             return false
         }
         return loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
-                delegate.isConnected()
+            delegate.isConnected()
     }
 }

@@ -47,8 +47,8 @@ import com.qmarciset.androidmobileui.utils.FromTableInterface
 import com.qmarciset.androidmobileui.utils.NavigationInterface
 import com.qmarciset.androidmobileui.utils.ViewDataBindingInterface
 import com.qmarciset.androidmobileui.utils.displaySnackBar
-import java.util.concurrent.atomic.AtomicBoolean
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 
 @SuppressLint("BinaryOperationInTimber")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
@@ -177,53 +177,66 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
                     else -> {
                     }
                 }
-            })
+            }
+        )
 
         // Observe network status
         if (NetworkUtils.sdkNewerThanKitKat) {
-            connectivityViewModel.networkStateMonitor.observe(this, Observer { networkState ->
-                Timber.i("[NetworkState : $networkState]")
-                when (networkState) {
-                    NetworkState.CONNECTED -> {
-                        // Setting the authenticationState to its initial value
-                        if (authInfoHelper.sessionToken.isNotEmpty())
-                            loginViewModel.authenticationState.postValue(AuthenticationState.AUTHENTICATED)
+            connectivityViewModel.networkStateMonitor.observe(
+                this,
+                Observer { networkState ->
+                    Timber.i("[NetworkState : $networkState]")
+                    when (networkState) {
+                        NetworkState.CONNECTED -> {
+                            // Setting the authenticationState to its initial value
+                            if (authInfoHelper.sessionToken.isNotEmpty())
+                                loginViewModel.authenticationState.postValue(AuthenticationState.AUTHENTICATED)
 
-                        // If guest and not yet logged in, auto login
-                        if (authInfoHelper.sessionToken.isEmpty() &&
-                            authInfoHelper.guestLogin &&
-                            authenticationRequested
-                        ) {
-                            authenticationRequested = false
-                            tryAutoLogin()
+                            // If guest and not yet logged in, auto login
+                            if (authInfoHelper.sessionToken.isEmpty() &&
+                                authInfoHelper.guestLogin &&
+                                authenticationRequested
+                            ) {
+                                authenticationRequested = false
+                                tryAutoLogin()
+                            }
+                        }
+                        else -> {
                         }
                     }
-                    else -> {
-                    }
                 }
-            })
+            )
         }
 
         for (entityListViewModel in entityListViewModelList) {
 
             // Observe when data are synchronized
-            entityListViewModel.dataSynchronized.observe(this, Observer { dataSyncState ->
-                Timber.i(
-                    "[DataSyncState : $dataSyncState, " +
+            entityListViewModel.dataSynchronized.observe(
+                this,
+                Observer { dataSyncState ->
+                    Timber.i(
+                        "[DataSyncState : $dataSyncState, " +
                             "Table : ${entityListViewModel.getAssociatedTableName()}, " +
                             "Instance : $entityListViewModel]"
-                )
-            })
+                    )
+                }
+            )
 
             // Observe when there is a new related entity to be inserted in a dao
-            entityListViewModel.newRelatedEntity.observe(this, Observer { manyToOneRelation ->
-                dispatchNewRelatedEntity(manyToOneRelation)
-            })
+            entityListViewModel.newRelatedEntity.observe(
+                this,
+                Observer { manyToOneRelation ->
+                    dispatchNewRelatedEntity(manyToOneRelation)
+                }
+            )
 
             // Observe when there is a related entities to be inserted in a dao
-            entityListViewModel.newRelatedEntities.observe(this, Observer { oneToManyRelation ->
-                dispatchNewRelatedEntities(oneToManyRelation)
-            })
+            entityListViewModel.newRelatedEntities.observe(
+                this,
+                Observer { oneToManyRelation ->
+                    dispatchNewRelatedEntities(oneToManyRelation)
+                }
+            )
         }
     }
 
@@ -235,7 +248,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         intent.putExtra(LOGGED_OUT, true)
         intent.addFlags(
             Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    Intent.FLAG_ACTIVITY_NEW_TASK
+                Intent.FLAG_ACTIVITY_NEW_TASK
         )
         startActivity(intent)
         finish()

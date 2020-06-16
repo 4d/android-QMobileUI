@@ -86,17 +86,20 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
     override fun setupObservers() {
 
         // Observe entity list
-        entityListViewModel.entityList.observe(viewLifecycleOwner, Observer { entities ->
-            entities?.let {
-                // When entity list data changed, refresh the displayed list
-                viewPager?.adapter =
-                    EntityViewPagerAdapter(
-                        this,
-                        tableName,
-                        it
-                    )
-                viewPager?.currentItem = position
+        entityListViewModel.entityList.observe(
+            viewLifecycleOwner,
+            Observer { entities ->
+                entities?.let {
+                    // When entity list data changed, refresh the displayed list
+                    viewPager?.adapter =
+                        EntityViewPagerAdapter(
+                            this,
+                            tableName,
+                            it
+                        )
+                    viewPager?.currentItem = position
+                }
             }
-        })
+        )
     }
 }
