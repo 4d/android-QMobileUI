@@ -10,6 +10,7 @@ import android.content.Context
 import android.os.Build
 import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
 import org.json.JSONObject
+import timber.log.Timber
 import java.lang.IllegalArgumentException
 import java.util.Locale
 
@@ -76,6 +77,7 @@ object DeviceUtils {
             try {
                 buildVersion = it.getInt(Build.VERSION_CODES::class)
             } catch (e: IllegalArgumentException) {
+                Timber.d("Couldn't get Build.VERSION_CODES")
             }
             buildVersion == Build.VERSION.SDK_INT
         }

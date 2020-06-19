@@ -16,37 +16,32 @@ import com.qmarciset.androidmobiledatasync.viewmodel.factory.EntityListViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.factory.LoginViewModelFactory
 
 fun EntityListFragment.getEntityListFragmentViewModel() {
-
-    // Get EntityListViewModel
-    val clazz = BaseApp.fromTableForViewModel.entityListViewModelClassFromTable(tableName)
-    entityListViewModel = activity?.run {
-        ViewModelProvider(
+    activity?.run {
+        // Get EntityListViewModel
+        val clazz = BaseApp.fromTableForViewModel.entityListViewModelClassFromTable(tableName)
+        entityListViewModel = ViewModelProvider(
             this,
             EntityListViewModelFactory(
                 tableName,
                 delegate.apiService
             )
         )[clazz]
-    } ?: throw IllegalStateException("Invalid Activity")
 
-    // Get ConnectivityViewModel
-    if (NetworkUtils.sdkNewerThanKitKat) {
-        connectivityViewModel = activity?.run {
-            ViewModelProvider(
+        // Get ConnectivityViewModel
+        if (NetworkUtils.sdkNewerThanKitKat) {
+            connectivityViewModel = ViewModelProvider(
                 this,
                 ConnectivityViewModelFactory(
                     BaseApp.instance,
                     delegate.connectivityManager
                 )
             )[ConnectivityViewModel::class.java]
-        } ?: throw IllegalStateException("Invalid Activity")
-    }
+        }
 
-    // Get LoginViewModel
-    // We need this ViewModel to know when MainActivity has performed its $authenticate so that
-    // we don't trigger the initial sync if we are not authenticated yet
-    loginViewModel = activity?.run {
-        ViewModelProvider(
+        // Get LoginViewModel
+        // We need this ViewModel to know when MainActivity has performed its $authenticate so that
+        // we don't trigger the initial sync if we are not authenticated yet
+        loginViewModel = ViewModelProvider(
             this,
             LoginViewModelFactory(BaseApp.instance, delegate.loginApiService)
         )[LoginViewModel::class.java]

@@ -117,17 +117,16 @@ class SettingsFragment :
     }
 
     override fun getViewModel() {
-        // LoginViewModel
-        loginViewModel = activity?.run {
-            ViewModelProvider(
+
+        activity?.run {
+            // LoginViewModel
+            loginViewModel = ViewModelProvider(
                 this,
                 LoginViewModelFactory(BaseApp.instance, delegate.loginApiService)
             )[LoginViewModel::class.java]
-        } ?: throw IllegalStateException("Invalid Activity")
 
-        // ConnectivityViewModel
-        connectivityViewModel = activity?.run {
-            ViewModelProvider(
+            // ConnectivityViewModel
+            connectivityViewModel = ViewModelProvider(
                 this,
                 ConnectivityViewModelFactory(
                     BaseApp.instance,

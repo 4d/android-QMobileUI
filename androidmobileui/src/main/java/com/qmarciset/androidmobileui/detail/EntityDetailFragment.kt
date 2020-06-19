@@ -84,7 +84,8 @@ class EntityDetailFragment : Fragment(), BaseFragment {
     override fun getViewModel() {
 
         // Get EntityViewModel
-        val kClazz: KClass<EntityViewModel<EntityModel>> = EntityViewModel::class as KClass<EntityViewModel<EntityModel>>
+        val kClazz: KClass<EntityViewModel<EntityModel>> =
+            EntityViewModel::class as KClass<EntityViewModel<EntityModel>>
         entityViewModel = ViewModelProvider(
             this,
             EntityViewModelFactory(
