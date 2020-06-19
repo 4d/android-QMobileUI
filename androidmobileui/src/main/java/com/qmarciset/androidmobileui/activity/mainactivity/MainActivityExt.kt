@@ -10,13 +10,13 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
+import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
 import com.qmarciset.androidmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmarciset.androidmobiledatasync.viewmodel.factory.LoginViewModelFactory
 import com.qmarciset.androidmobileui.R
-import com.qmarciset.androidmobileui.app.BaseApp
 import com.qmarciset.androidmobileui.utils.setupWithNavController
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -24,33 +24,30 @@ fun MainActivity.getMainActivityViewModel() {
     // Get LoginViewModel
     loginViewModel = ViewModelProvider(
         this,
-        LoginViewModelFactory(appInstance, loginApiService)
+        LoginViewModelFactory(BaseApp.instance, loginApiService)
     )[LoginViewModel::class.java]
 
     // Get ConnectivityViewModel
     if (NetworkUtils.sdkNewerThanKitKat) {
         connectivityViewModel = ViewModelProvider(
             this,
-            ConnectivityViewModelFactory(appInstance, connectivityManager)
+            ConnectivityViewModelFactory(BaseApp.instance, connectivityManager)
         )[ConnectivityViewModel::class.java]
     }
 
     // Get EntityListViewModel list
     entityListViewModelList = mutableListOf()
-    for (tableName in fromTableInterface.tableNames) {
-        val kClazz = fromTableInterface.entityListViewModelClassFromTable(tableName)
+    for (tableName in BaseApp.fromTableForViewModel.tableNames) {
+        val clazz = BaseApp.fromTableForViewModel.entityListViewModelClassFromTable(tableName)
 
         entityListViewModelList.add(
             ViewModelProvider(
                 this,
                 EntityListViewModelFactory(
-                    appInstance,
                     tableName,
-                    appDatabaseInterface,
-                    apiService,
-                    fromTableForViewModel
+                    apiService
                 )
-            )[kClazz.java]
+            )[clazz]
         )
     }
 }

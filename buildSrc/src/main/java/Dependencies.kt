@@ -87,6 +87,7 @@ object Libs {
     // Utils
     val material = "com.google.android.material:material:${Versions.design}"
     val multidex = "androidx.multidex:multidex:${Versions.multidex}"
+    val retrofit_converter_gson = "com.squareup.retrofit2:converter-gson:${Versions.retrofit}"
     val timber = "com.jakewharton.timber:timber:${Versions.timber}"
 
     // Testing
@@ -101,7 +102,6 @@ object Libs {
     val okhttp_mockwebserver = "com.squareup.okhttp3:mockwebserver:${Versions.okhttp}"
     val retrofit = "com.squareup.retrofit2:retrofit:${Versions.retrofit}"
     val retrofit_adapter_rxjava2 = "com.squareup.retrofit2:adapter-rxjava2:${Versions.retrofit}"
-    val retrofit_converter_gson = "com.squareup.retrofit2:converter-gson:${Versions.retrofit}"
     val robolectric = "org.robolectric:robolectric:${Versions.robolectric}"
     val rxandroid = "io.reactivex.rxjava2:rxandroid:${Versions.rx_android}"
     val rxjava = "io.reactivex.rxjava2:rxjava:${Versions.rxjava2}"

@@ -6,7 +6,6 @@
 
 package com.qmarciset.androidmobileui.activity.loginactivity
 
-import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
@@ -25,12 +24,12 @@ import com.qmarciset.androidmobileapi.auth.isEmailValid
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
 import com.qmarciset.androidmobileapi.network.ApiClient
 import com.qmarciset.androidmobileapi.network.LoginApiService
+import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
 import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.activity.BaseActivity
 import com.qmarciset.androidmobileui.activity.mainactivity.MainActivity
-import com.qmarciset.androidmobileui.app.BaseApp
 import com.qmarciset.androidmobileui.binding.bindImageFromDrawable
 import com.qmarciset.androidmobileui.databinding.ActivityLoginBinding
 import com.qmarciset.androidmobileui.utils.displaySnackBar
@@ -40,7 +39,6 @@ import timber.log.Timber
 class LoginActivity : BaseActivity() {
 
     private var loggedOut = false
-    val appInstance: Application = BaseApp.instance
     lateinit var connectivityManager: ConnectivityManager
     lateinit var loginApiService: LoginApiService
 
@@ -54,7 +52,7 @@ class LoginActivity : BaseActivity() {
         // Retrieve bundled parameter to know if we are coming from a logout action
         loggedOut = intent.getBooleanExtra(LOGGED_OUT, false)
 
-        val authInfoHelper = AuthInfoHelper.getInstance(appInstance)
+        val authInfoHelper = AuthInfoHelper.getInstance(BaseApp.instance)
 
         // If guest or already logged in, skip LoginActivity
         if (authInfoHelper.sessionToken.isNotEmpty() || authInfoHelper.guestLogin) {

@@ -13,13 +13,10 @@ import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobileui.list.viewholder.BaseViewHolder
-import com.qmarciset.androidmobileui.utils.FromTableInterface
-import com.qmarciset.androidmobileui.utils.NavigationInterface
+import com.qmarciset.androidmobileui.utils.itemLayoutFromTable
 
 class EntityListAdapter internal constructor(
-    private val tableName: String,
-    private val fromTableInterface: FromTableInterface,
-    private val navigationInterface: NavigationInterface
+    private val tableName: String
 ) :
     RecyclerView.Adapter<BaseViewHolder>() {
 
@@ -30,11 +27,11 @@ class EntityListAdapter internal constructor(
         val dataBinding: ViewDataBinding =
             DataBindingUtil.inflate(
                 inflater,
-                fromTableInterface.itemLayoutFromTable(tableName),
+                itemLayoutFromTable(parent.context, tableName),
                 parent,
                 false
             )
-        return BaseViewHolder(dataBinding, tableName, navigationInterface)
+        return BaseViewHolder(dataBinding, tableName)
     }
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {

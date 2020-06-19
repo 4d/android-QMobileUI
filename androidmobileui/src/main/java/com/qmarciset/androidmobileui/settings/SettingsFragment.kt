@@ -21,6 +21,7 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
+import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
@@ -120,7 +121,7 @@ class SettingsFragment :
         loginViewModel = activity?.run {
             ViewModelProvider(
                 this,
-                LoginViewModelFactory(delegate.appInstance, delegate.loginApiService)
+                LoginViewModelFactory(BaseApp.instance, delegate.loginApiService)
             )[LoginViewModel::class.java]
         } ?: throw IllegalStateException("Invalid Activity")
 
@@ -129,7 +130,7 @@ class SettingsFragment :
             ViewModelProvider(
                 this,
                 ConnectivityViewModelFactory(
-                    delegate.appInstance,
+                    BaseApp.instance,
                     delegate.connectivityManager
                 )
             )[ConnectivityViewModel::class.java]

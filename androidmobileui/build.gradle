@@ -40,6 +40,7 @@ dependencies {
     // Utils
     implementation Libs.material
     implementation Libs.multidex
+    implementation Libs.retrofit_converter_gson
     implementation Libs.timber
 
     // Testing

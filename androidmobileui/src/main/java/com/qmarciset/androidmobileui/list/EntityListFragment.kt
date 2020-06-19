@@ -27,6 +27,7 @@ import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileapi.connectivity.NetworkState
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
+import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.sync.DataSyncState
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
@@ -70,14 +71,13 @@ class EntityListFragment : Fragment(), BaseFragment {
 
         val dataBinding: ViewDataBinding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
-            delegate.fromTableInterface.listLayout(),
+            R.layout.fragment_list,
             container,
             false
         ).apply {
-            delegate.viewDataBindingInterface.setEntityListViewModel(this, entityListViewModel)
+            BaseApp.viewDataBindingInterface.setEntityListViewModel(this, entityListViewModel)
             lifecycleOwner = viewLifecycleOwner
         }
-
         return dataBinding.root
     }
 
@@ -195,11 +195,7 @@ class EntityListFragment : Fragment(), BaseFragment {
      * Initialize recyclerView
      */
     private fun initRecyclerView() {
-        adapter = EntityListAdapter(
-            tableName,
-            delegate.fromTableInterface,
-            delegate.navigationInterface
-        )
+        adapter = EntityListAdapter(tableName)
 
         fragment_list_recycler_view.layoutManager =
             LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
@@ -246,7 +242,7 @@ class EntityListFragment : Fragment(), BaseFragment {
                             entityListViewModel.insert(item)
 //                            rv_main.scrollToPosition(position)
                         }
-                        snackBar.setActionTextColor(ContextCompat.getColor(delegate.appInstance, R.color.colorAccent))
+                        snackBar.setActionTextColor(ContextCompat.getColor(BaseApp.instance, R.color.colorAccent))
                         snackBar.show()
                     }
                 }

@@ -16,10 +16,13 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
+import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.factory.EntityViewModelFactory
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
+import com.qmarciset.androidmobileui.utils.detailLayoutFromTable
+import kotlin.reflect.KClass
 
 class EntityDetailFragment : Fragment(), BaseFragment {
 
@@ -53,11 +56,11 @@ class EntityDetailFragment : Fragment(), BaseFragment {
 
         val dataBinding: ViewDataBinding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
-            delegate.fromTableInterface.detailLayoutFromTable(tableName),
+            detailLayoutFromTable(inflater.context, tableName),
             container,
             false
         ).apply {
-            delegate.viewDataBindingInterface.setEntityViewModel(this, entityViewModel)
+            BaseApp.viewDataBindingInterface.setEntityViewModel(this, entityViewModel)
             lifecycleOwner = viewLifecycleOwner
         }
         return dataBinding.root
@@ -77,19 +80,17 @@ class EntityDetailFragment : Fragment(), BaseFragment {
         setupObservers()
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun getViewModel() {
 
         // Get EntityViewModel
-        val kClazz = delegate.fromTableInterface.entityViewModelClass()
+        val kClazz: KClass<EntityViewModel<EntityModel>> = EntityViewModel::class as KClass<EntityViewModel<EntityModel>>
         entityViewModel = ViewModelProvider(
             this,
             EntityViewModelFactory(
-                delegate.appInstance,
                 tableName,
                 itemId,
-                delegate.appDatabaseInterface,
-                delegate.apiService,
-                delegate.fromTableForViewModel
+                delegate.apiService
             )
         )[kClazz.java]
     }

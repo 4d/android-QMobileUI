@@ -7,7 +7,6 @@
 package com.qmarciset.androidmobileui.activity.mainactivity
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -28,13 +27,11 @@ import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobileapi.network.ApiClient
 import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.network.LoginApiService
-import com.qmarciset.androidmobiledatastore.db.AppDatabaseInterface
 import com.qmarciset.androidmobiledatasync.relation.ManyToOneRelation
 import com.qmarciset.androidmobiledatasync.relation.OneToManyRelation
 import com.qmarciset.androidmobiledatasync.sync.DataSync
 import com.qmarciset.androidmobiledatasync.sync.EntityViewModelIsToSync
 import com.qmarciset.androidmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
-import com.qmarciset.androidmobiledatasync.utils.FromTableForViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
@@ -42,10 +39,6 @@ import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.activity.BaseActivity
 import com.qmarciset.androidmobileui.activity.loginactivity.LoginActivity
-import com.qmarciset.androidmobileui.app.BaseApp
-import com.qmarciset.androidmobileui.utils.FromTableInterface
-import com.qmarciset.androidmobileui.utils.NavigationInterface
-import com.qmarciset.androidmobileui.utils.ViewDataBindingInterface
 import com.qmarciset.androidmobileui.utils.displaySnackBar
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
@@ -61,13 +54,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     lateinit var dataSync: DataSync
 
     // FragmentCommunication
-    override val appInstance: Application = BaseApp.instance
-    override val appDatabaseInterface: AppDatabaseInterface = BaseApp.appDatabaseInterface
-    override val fromTableInterface: FromTableInterface = BaseApp.fromTableInterface
-    override val fromTableForViewModel: FromTableForViewModel = BaseApp.fromTableForViewModel
-    override val navigationInterface: NavigationInterface = BaseApp.navigationInterface
-    override val viewDataBindingInterface: ViewDataBindingInterface =
-        BaseApp.viewDataBindingInterface
     override lateinit var apiService: ApiService
     override lateinit var loginApiService: LoginApiService
     override lateinit var connectivityManager: ConnectivityManager

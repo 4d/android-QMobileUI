@@ -8,13 +8,12 @@ package com.qmarciset.androidmobileui.list.viewholder
 
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
+import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobileui.BR
-import com.qmarciset.androidmobileui.utils.NavigationInterface
 
 class BaseViewHolder(
     private val dataBinding: ViewDataBinding,
-    private val tableName: String,
-    private val navigationInterface: NavigationInterface
+    private val tableName: String
 ) :
     RecyclerView.ViewHolder(dataBinding.root) {
 
@@ -23,7 +22,7 @@ class BaseViewHolder(
         dataBinding.setVariable(BR.entityData, entity)
         dataBinding.executePendingBindings()
         itemView.setOnClickListener {
-            navigationInterface.navigateFromListToViewPager(dataBinding.root, position, tableName)
+            BaseApp.navigationInterface.navigateFromListToViewPager(dataBinding.root, position, tableName)
         }
     }
 }

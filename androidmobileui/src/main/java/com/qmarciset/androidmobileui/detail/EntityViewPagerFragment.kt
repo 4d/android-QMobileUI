@@ -16,6 +16,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
+import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmarciset.androidmobileui.BaseFragment
@@ -68,18 +69,15 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
     override fun getViewModel() {
 
         // Get EntityListViewModel
-        val kClazz = delegate.fromTableInterface.entityListViewModelClassFromTable(tableName)
+        val clazz = BaseApp.fromTableForViewModel.entityListViewModelClassFromTable(tableName)
         entityListViewModel = activity?.run {
             ViewModelProvider(
                 this,
                 EntityListViewModelFactory(
-                    delegate.appInstance,
                     tableName,
-                    delegate.appDatabaseInterface,
-                    delegate.apiService,
-                    delegate.fromTableForViewModel
+                    delegate.apiService
                 )
-            )[kClazz.java]
+            )[clazz]
         } ?: throw IllegalStateException("Invalid Activity")
     }
 

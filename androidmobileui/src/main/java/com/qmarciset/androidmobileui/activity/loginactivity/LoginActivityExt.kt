@@ -8,6 +8,7 @@ package com.qmarciset.androidmobileui.activity.loginactivity
 
 import androidx.lifecycle.ViewModelProvider
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
+import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
@@ -18,14 +19,14 @@ fun LoginActivity.getLoginActivityViewModel() {
     // Get LoginViewModel
     loginViewModel = ViewModelProvider(
         this,
-        LoginViewModelFactory(appInstance, loginApiService)
+        LoginViewModelFactory(BaseApp.instance, loginApiService)
     )[LoginViewModel::class.java]
 
     // Get ConnectivityViewModel
     if (NetworkUtils.sdkNewerThanKitKat) {
         connectivityViewModel = ViewModelProvider(
             this,
-            ConnectivityViewModelFactory(appInstance, connectivityManager)
+            ConnectivityViewModelFactory(BaseApp.instance, connectivityManager)
         )[ConnectivityViewModel::class.java]
     }
 }

@@ -8,6 +8,7 @@ package com.qmarciset.androidmobileui.list
 
 import androidx.lifecycle.ViewModelProvider
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
+import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
@@ -17,18 +18,15 @@ import com.qmarciset.androidmobiledatasync.viewmodel.factory.LoginViewModelFacto
 fun EntityListFragment.getEntityListFragmentViewModel() {
 
     // Get EntityListViewModel
-    val kClazz = delegate.fromTableInterface.entityListViewModelClassFromTable(tableName)
+    val clazz = BaseApp.fromTableForViewModel.entityListViewModelClassFromTable(tableName)
     entityListViewModel = activity?.run {
         ViewModelProvider(
             this,
             EntityListViewModelFactory(
-                delegate.appInstance,
                 tableName,
-                delegate.appDatabaseInterface,
-                delegate.apiService,
-                delegate.fromTableForViewModel
+                delegate.apiService
             )
-        )[kClazz.java]
+        )[clazz]
     } ?: throw IllegalStateException("Invalid Activity")
 
     // Get ConnectivityViewModel
@@ -37,7 +35,7 @@ fun EntityListFragment.getEntityListFragmentViewModel() {
             ViewModelProvider(
                 this,
                 ConnectivityViewModelFactory(
-                    delegate.appInstance,
+                    BaseApp.instance,
                     delegate.connectivityManager
                 )
             )[ConnectivityViewModel::class.java]
@@ -50,7 +48,7 @@ fun EntityListFragment.getEntityListFragmentViewModel() {
     loginViewModel = activity?.run {
         ViewModelProvider(
             this,
-            LoginViewModelFactory(delegate.appInstance, delegate.loginApiService)
+            LoginViewModelFactory(BaseApp.instance, delegate.loginApiService)
         )[LoginViewModel::class.java]
     } ?: throw IllegalStateException("Invalid Activity")
 }
