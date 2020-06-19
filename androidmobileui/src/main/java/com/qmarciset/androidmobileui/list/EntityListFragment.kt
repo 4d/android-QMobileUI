@@ -242,7 +242,12 @@ class EntityListFragment : Fragment(), BaseFragment {
                             entityListViewModel.insert(item)
 //                            rv_main.scrollToPosition(position)
                         }
-                        snackBar.setActionTextColor(ContextCompat.getColor(BaseApp.instance, R.color.colorAccent))
+                        snackBar.setActionTextColor(
+                            ContextCompat.getColor(
+                                BaseApp.instance,
+                                R.color.colorAccent
+                            )
+                        )
                         snackBar.show()
                     }
                 }

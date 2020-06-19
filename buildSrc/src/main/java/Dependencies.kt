@@ -86,7 +86,6 @@ object Libs {
 
     // Utils
     val material = "com.google.android.material:material:${Versions.design}"
-    val multidex = "androidx.multidex:multidex:${Versions.multidex}"
     val retrofit_converter_gson = "com.squareup.retrofit2:converter-gson:${Versions.retrofit}"
     val timber = "com.jakewharton.timber:timber:${Versions.timber}"
 
@@ -113,4 +112,5 @@ object Libs {
     // For AndroidMobileDataSync
     val androidx_core_testing = "androidx.arch.core:core-testing:${Versions.arch_core}"
     val kotlin_reflect = "org.jetbrains.kotlin:kotlin-reflect:${Versions.kotlin}"
+    val multidex = "androidx.multidex:multidex:${Versions.multidex}"
 }

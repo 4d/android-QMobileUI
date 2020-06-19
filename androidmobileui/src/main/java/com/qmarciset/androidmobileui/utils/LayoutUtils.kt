@@ -9,13 +9,17 @@ package com.qmarciset.androidmobileui.utils
 import android.content.Context
 import java.util.Locale
 
+private const val LAYOUT_RES_TYPE = "layout"
+private const val RV_ITEM_PREFIX = "recyclerview_item_"
+private const val FRAGMENT_DETAIL_PREFIX = "fragment_detail_"
+
 /**
  * Provides the appropriate RecyclerView item layout
  */
 fun itemLayoutFromTable(context: Context, tableName: String): Int =
     context.resources.getIdentifier(
-        "recyclerview_item_${tableName.toLowerCase(Locale.getDefault())}",
-        "layout",
+        "$RV_ITEM_PREFIX${tableName.toLowerCase(Locale.getDefault())}",
+        LAYOUT_RES_TYPE,
         context.packageName
     )
 
@@ -24,7 +28,7 @@ fun itemLayoutFromTable(context: Context, tableName: String): Int =
  */
 fun detailLayoutFromTable(context: Context, tableName: String): Int =
     context.resources.getIdentifier(
-        "fragment_detail_${tableName.toLowerCase(Locale.getDefault())}",
-        "layout",
+        "$FRAGMENT_DETAIL_PREFIX${tableName.toLowerCase(Locale.getDefault())}",
+        LAYOUT_RES_TYPE,
         context.packageName
     )

@@ -22,7 +22,11 @@ class BaseViewHolder(
         dataBinding.setVariable(BR.entityData, entity)
         dataBinding.executePendingBindings()
         itemView.setOnClickListener {
-            BaseApp.navigationInterface.navigateFromListToViewPager(dataBinding.root, position, tableName)
+            BaseApp.navigationInterface.navigateFromListToViewPager(
+                dataBinding.root,
+                position,
+                tableName
+            )
         }
     }
 }

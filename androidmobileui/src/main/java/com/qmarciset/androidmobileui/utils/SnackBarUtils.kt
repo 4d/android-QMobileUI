@@ -23,5 +23,9 @@ fun displaySnackBar(activity: Activity?, message: String) {
  * Builds a simple SnackBar
  */
 fun buildSnackBar(activity: Activity, message: String): Snackbar {
-    return Snackbar.make(activity.findViewById<View>(android.R.id.content), message, Snackbar.LENGTH_LONG)
+    return Snackbar.make(
+        activity.findViewById<View>(android.R.id.content),
+        message,
+        Snackbar.LENGTH_LONG
+    )
 }

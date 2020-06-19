@@ -11,7 +11,6 @@ import android.os.Build
 import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
 import org.json.JSONObject
 import timber.log.Timber
-import java.lang.IllegalArgumentException
 import java.util.Locale
 
 object DeviceUtils {
