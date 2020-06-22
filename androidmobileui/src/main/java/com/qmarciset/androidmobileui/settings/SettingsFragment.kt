@@ -305,6 +305,6 @@ class SettingsFragment :
             return false
         }
         return loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
-                delegate.isConnected()
+            delegate.isConnected()
     }
 }

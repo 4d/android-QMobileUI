@@ -23,15 +23,21 @@ task jacocoTestReport(type:JacocoReport, dependsOn: "testDebugUnitTest") {
     def excludes = [
             '**/R.class',
             '**/R$*.class',
+            '**/*$ViewInjector*.*',
             '**/BuildConfig.*',
             '**/Manifest*.*',
             '**/*Test*.*',
-            'android/**/*.*'
+            'android/**/*.*',
+            '**/*Fragment.*',
+            '**/*Activity.*'
     ]
+
+    // generated classes
     def javaClasses = fileTree(dir: "$buildDir/intermediates/classes/debug", excludes: excludes)
     def kotlinClasses = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: excludes)
     classDirectories.from = files([javaClasses, kotlinClasses])
 
+    // sources
     additionalSourceDirs.from = files()
     sourceDirectories.from = files([android.sourceSets.main.java.srcDirs])
 
