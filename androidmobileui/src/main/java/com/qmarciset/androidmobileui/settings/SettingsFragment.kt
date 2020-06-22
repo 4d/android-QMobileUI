@@ -239,7 +239,7 @@ class SettingsFragment :
      */
     private fun logout() {
         if (isReady()) {
-            loginViewModel.disconnectUser()
+            loginViewModel.disconnectUser {}
         } else {
             if (!delegate.isConnected()) {
                 activity?.let {
@@ -305,6 +305,6 @@ class SettingsFragment :
             return false
         }
         return loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
-            delegate.isConnected()
+                delegate.isConnected()
     }
 }
