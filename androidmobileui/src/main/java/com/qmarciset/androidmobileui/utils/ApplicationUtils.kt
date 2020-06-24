@@ -61,4 +61,7 @@ object ApplicationUtils {
 
     fun getQueries(context: Context): JSONObject =
         JSONObject(FileUtils.readContentFromFilePath(context, "queries.json"))
+
+    fun getRelations(context: Context): String =
+        FileUtils.readContentFromFilePath(context, "relations.json")
 }

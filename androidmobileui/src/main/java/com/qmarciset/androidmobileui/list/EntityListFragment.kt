@@ -262,7 +262,7 @@ class EntityListFragment : Fragment(), BaseFragment {
      */
     private fun syncData() {
         if (syncDataRequested.compareAndSet(true, false)) {
-            entityListViewModel.getData { shouldSyncData ->
+            entityListViewModel.getEntities { shouldSyncData ->
                 if (shouldSyncData) {
                     delegate.requestDataSync(tableName)
                 }
@@ -276,7 +276,7 @@ class EntityListFragment : Fragment(), BaseFragment {
     private fun forceSyncData() {
         syncDataRequested.set(false)
         if (isReady()) {
-            entityListViewModel.getData { shouldSyncData ->
+            entityListViewModel.getEntities { shouldSyncData ->
                 if (shouldSyncData) {
                     Timber.i("GlobalStamp changed, synchronization is required")
                     delegate.requestDataSync(tableName)
