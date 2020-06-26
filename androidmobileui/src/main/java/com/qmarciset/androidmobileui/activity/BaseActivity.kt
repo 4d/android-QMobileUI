@@ -17,8 +17,4 @@ abstract class BaseActivity : AppCompatActivity() {
         // Constant used when returning to LoginActivity to display a toast message about logout
         const val LOGGED_OUT = "logged_out"
     }
-
-    abstract fun getViewModel()
-
-    abstract fun setupObservers()
 }

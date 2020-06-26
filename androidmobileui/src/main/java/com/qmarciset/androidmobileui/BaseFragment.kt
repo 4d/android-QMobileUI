@@ -12,8 +12,4 @@ package com.qmarciset.androidmobileui
 interface BaseFragment {
 
     var delegate: FragmentCommunication
-
-    fun getViewModel()
-
-    fun setupObservers()
 }

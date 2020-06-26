@@ -17,9 +17,7 @@ import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
-import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileapi.auth.isEmailValid
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
 import com.qmarciset.androidmobileapi.network.ApiClient
@@ -34,7 +32,6 @@ import com.qmarciset.androidmobileui.binding.bindImageFromDrawable
 import com.qmarciset.androidmobileui.databinding.ActivityLoginBinding
 import com.qmarciset.androidmobileui.utils.displaySnackBar
 import kotlinx.android.synthetic.main.activity_login.*
-import timber.log.Timber
 
 class LoginActivity : BaseActivity() {
 
@@ -123,55 +120,10 @@ class LoginActivity : BaseActivity() {
         }
     }
 
-    override fun getViewModel() {
-        getLoginActivityViewModel()
-    }
-
-    override fun setupObservers() {
-
-        // Observe authentication state
-        loginViewModel.authenticationState.observe(
-            this,
-            Observer { authenticationState ->
-                Timber.i("[AuthenticationState : $authenticationState]")
-                when (authenticationState) {
-                    AuthenticationState.AUTHENTICATED -> {
-                        startMainActivity(false)
-                    }
-                    AuthenticationState.INVALID_AUTHENTICATION -> {
-                        login_button_auth.isEnabled = true
-                        displaySnackBar(this, resources.getString(R.string.login_fail_snackbar))
-                    }
-                    else -> {
-                        // Default state in LoginActivity
-                        login_button_auth.isEnabled = true
-                    }
-                }
-            }
-        )
-
-        // Observe if email is valid
-        loginViewModel.emailValid.observe(
-            this,
-            Observer { emailValid ->
-                login_button_auth.isEnabled = emailValid
-            }
-        )
-
-        // Observe network status
-        if (NetworkUtils.sdkNewerThanKitKat) {
-            connectivityViewModel.networkStateMonitor.observe(
-                this,
-                Observer {
-                }
-            )
-        }
-    }
-
     /**
      * Goes to MainActivity, and finishes LoginActivity
      */
-    private fun startMainActivity(skipAnimation: Boolean) {
+    fun startMainActivity(skipAnimation: Boolean) {
         val intent = Intent(this, MainActivity::class.java)
         if (skipAnimation)
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)

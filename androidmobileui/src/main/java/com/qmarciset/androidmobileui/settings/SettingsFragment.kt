@@ -14,18 +14,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.qmarciset.androidmobileapi.auth.AuthenticationState
-import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
-import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
-import com.qmarciset.androidmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
-import com.qmarciset.androidmobiledatasync.viewmodel.factory.LoginViewModelFactory
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
@@ -39,7 +33,7 @@ class SettingsFragment :
     Preference.OnPreferenceClickListener,
     Preference.OnPreferenceChangeListener {
 
-    private var firstTime = true
+    var firstTime = true
     private var remoteUrlPref: Preference? = null
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
@@ -58,8 +52,8 @@ class SettingsFragment :
     private lateinit var serverNotAccessibleString: String
 
     // ViewModels
-    private lateinit var loginViewModel: LoginViewModel
-    private lateinit var connectivityViewModel: ConnectivityViewModel
+    lateinit var loginViewModel: LoginViewModel
+    lateinit var connectivityViewModel: ConnectivityViewModel
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preferences)
@@ -114,74 +108,6 @@ class SettingsFragment :
             findPreference(resources.getString(R.string.pref_remote_url_key))
         remoteUrlPref?.setDefaultValue(this.remoteUrl)
         remoteUrlPref?.onPreferenceChangeListener = this
-    }
-
-    override fun getViewModel() {
-
-        activity?.run {
-            // LoginViewModel
-            loginViewModel = ViewModelProvider(
-                this,
-                LoginViewModelFactory(BaseApp.instance, delegate.loginApiService)
-            )[LoginViewModel::class.java]
-
-            // ConnectivityViewModel
-            connectivityViewModel = ViewModelProvider(
-                this,
-                ConnectivityViewModelFactory(
-                    BaseApp.instance,
-                    delegate.connectivityManager
-                )
-            )[ConnectivityViewModel::class.java]
-        } ?: throw IllegalStateException("Invalid Activity")
-    }
-
-    override fun setupObservers() {
-
-        // Observe network status
-        if (NetworkUtils.sdkNewerThanKitKat) {
-            connectivityViewModel.networkStateMonitor.observe(
-                viewLifecycleOwner,
-                Observer {
-                    if (!firstTime) {
-                        // first time, checkNetwork() is called in authentication observer event
-                        checkNetwork()
-                    } else {
-                        firstTime = false
-                    }
-                }
-            )
-        }
-
-        // Observe if server is accessible
-        connectivityViewModel.serverAccessible.observe(
-            viewLifecycleOwner,
-            Observer { isAccessible ->
-                if (delegate.isConnected()) {
-                    if (isAccessible) {
-                        setLayoutServerAccessible()
-                    } else {
-                        setLayoutServerNotAccessible()
-                    }
-                } else {
-                    setLayoutNoInternet()
-                }
-            }
-        )
-
-        // Observe authentication state
-        loginViewModel.authenticationState.observe(
-            viewLifecycleOwner,
-            Observer { authenticationState ->
-                when (authenticationState) {
-                    AuthenticationState.AUTHENTICATED -> {
-                        checkNetwork()
-                    }
-                    else -> {
-                    }
-                }
-            }
-        )
     }
 
     override fun onPreferenceClick(preference: Preference?): Boolean {
@@ -261,7 +187,7 @@ class SettingsFragment :
     /**
      * Checks network state, and adjust the indicator icon color
      */
-    private fun checkNetwork() {
+    fun checkNetwork() {
         if (checkNetworkRequested.compareAndSet(true, false)) {
             if (delegate.isConnected()) {
                 connectivityViewModel.checkAccessibility(this.remoteUrl)
@@ -274,7 +200,7 @@ class SettingsFragment :
     /**
      * Sets the indicator icon color and text to no Internet status
      */
-    private fun setLayoutNoInternet() {
+    fun setLayoutNoInternet() {
         remoteUrlPref?.summary = "$remoteUrl - $noInternetString"
         remoteUrlPref?.icon = serverNotAccessibleDrawable
     }
@@ -282,7 +208,7 @@ class SettingsFragment :
     /**
      * Sets the indicator icon color and text to server not accessible
      */
-    private fun setLayoutServerNotAccessible() {
+    fun setLayoutServerNotAccessible() {
         remoteUrlPref?.summary = "$remoteUrl - $serverNotAccessibleString"
         remoteUrlPref?.icon = serverNotAccessibleDrawable
     }
@@ -290,7 +216,7 @@ class SettingsFragment :
     /**
      * Sets the indicator icon color and text to server accessible
      */
-    private fun setLayoutServerAccessible() {
+    fun setLayoutServerAccessible() {
         remoteUrlPref?.summary = "$remoteUrl - $serverAccessibleString"
         remoteUrlPref?.icon = serverAccessibleDrawable
     }

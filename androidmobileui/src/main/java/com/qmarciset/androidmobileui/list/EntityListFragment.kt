@@ -6,48 +6,43 @@
 
 package com.qmarciset.androidmobileui.list
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmarciset.androidmobileapi.auth.AuthenticationState
-import com.qmarciset.androidmobileapi.connectivity.NetworkState
-import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.sync.DataSyncState
 import com.qmarciset.androidmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
 import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
+import com.qmarciset.androidmobiledatasync.viewmodel.delete
+import com.qmarciset.androidmobiledatasync.viewmodel.insert
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.utils.buildSnackBar
 import com.qmarciset.androidmobileui.utils.displaySnackBar
-import com.qmarciset.androidmobileui.utils.fetchResourceString
 import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
-@SuppressLint("BinaryOperationInTimber")
 class EntityListFragment : Fragment(), BaseFragment {
 
     var tableName: String = ""
-    private lateinit var syncDataRequested: AtomicBoolean
-    private lateinit var adapter: EntityListAdapter
+    lateinit var syncDataRequested: AtomicBoolean
+    lateinit var adapter: EntityListAdapter
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -101,94 +96,6 @@ class EntityListFragment : Fragment(), BaseFragment {
     override fun onDestroyView() {
         fragment_list_recycler_view.adapter = null
         super.onDestroyView()
-    }
-
-    /**
-     * Retrieve viewModels from MainActivity lifecycle
-     */
-    override fun getViewModel() {
-        getEntityListFragmentViewModel()
-    }
-
-    /**
-     * Setup observers
-     */
-    override fun setupObservers() {
-
-        // Observe entity list
-        entityListViewModel.entityList.observe(
-            viewLifecycleOwner,
-            Observer { entities ->
-                entities?.let {
-                    adapter.setEntities(it)
-                }
-            }
-        )
-
-        // Observe any toast message
-        entityListViewModel.toastMessage.observe(
-            viewLifecycleOwner,
-            Observer { message ->
-                val toastMessage = context?.fetchResourceString(message) ?: ""
-                if (toastMessage.isNotEmpty()) {
-                    activity?.let {
-                        Toast.makeText(it, toastMessage, Toast.LENGTH_LONG).show()
-                    }
-                    // To avoid the error toast to be displayed without performing a refresh again
-                    entityListViewModel.toastMessage.postValue("")
-                }
-            }
-        )
-
-        // Observe when data are synchronized
-        entityListViewModel.dataSynchronized.observe(
-            viewLifecycleOwner,
-            Observer { dataSyncState ->
-                Timber.i(
-                    "[DataSyncState : $dataSyncState, " +
-                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                        "Instance : $entityListViewModel]"
-                )
-            }
-        )
-
-        // Observe authentication state
-        loginViewModel.authenticationState.observe(
-            viewLifecycleOwner,
-            Observer { authenticationState ->
-                when (authenticationState) {
-                    AuthenticationState.AUTHENTICATED -> {
-                        if (isReady()) {
-                            syncData()
-                        } else {
-                            syncDataRequested.set(true)
-                        }
-                    }
-                    else -> {
-                    }
-                }
-            }
-        )
-
-        // Observe network status
-        if (NetworkUtils.sdkNewerThanKitKat) {
-            connectivityViewModel.networkStateMonitor.observe(
-                viewLifecycleOwner,
-                Observer { networkState ->
-                    when (networkState) {
-                        NetworkState.CONNECTED -> {
-                            if (isReady()) {
-                                syncData()
-                            } else {
-                                syncDataRequested.set(true)
-                            }
-                        }
-                        else -> {
-                        }
-                    }
-                }
-            )
-        }
     }
 
     /**
@@ -260,7 +167,7 @@ class EntityListFragment : Fragment(), BaseFragment {
     /**
      * Requests data sync to MainActivity if requested
      */
-    private fun syncData() {
+    fun syncData() {
         if (syncDataRequested.compareAndSet(true, false)) {
             entityListViewModel.getEntities { shouldSyncData ->
                 if (shouldSyncData) {
@@ -305,7 +212,7 @@ class EntityListFragment : Fragment(), BaseFragment {
     /**
      * Checks if environment is ready to perform an action
      */
-    private fun isReady(): Boolean {
+    fun isReady(): Boolean {
         if (loginViewModel.authenticationState.value == AuthenticationState.INVALID_AUTHENTICATION) {
             // For example server was not responding when trying to auto-login
             delegate.requestAuthentication()

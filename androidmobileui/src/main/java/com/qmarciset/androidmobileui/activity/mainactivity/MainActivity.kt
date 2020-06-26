@@ -6,29 +6,23 @@
 
 package com.qmarciset.androidmobileui.activity.mainactivity
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.NavController
 import com.qmarciset.androidmobileapi.auth.AuthInfoHelper
 import com.qmarciset.androidmobileapi.auth.AuthenticationState
 import com.qmarciset.androidmobileapi.auth.LoginRequiredCallback
-import com.qmarciset.androidmobileapi.connectivity.NetworkState
 import com.qmarciset.androidmobileapi.connectivity.NetworkUtils
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobileapi.network.ApiClient
 import com.qmarciset.androidmobileapi.network.ApiService
 import com.qmarciset.androidmobileapi.network.LoginApiService
-import com.qmarciset.androidmobiledatasync.relation.ManyToOneRelation
-import com.qmarciset.androidmobiledatasync.relation.OneToManyRelation
 import com.qmarciset.androidmobiledatasync.sync.DataSync
 import com.qmarciset.androidmobiledatasync.sync.EntityViewModelIsToSync
 import com.qmarciset.androidmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
@@ -38,18 +32,15 @@ import com.qmarciset.androidmobiledatasync.viewmodel.LoginViewModel
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
 import com.qmarciset.androidmobileui.activity.BaseActivity
-import com.qmarciset.androidmobileui.activity.loginactivity.LoginActivity
-import com.qmarciset.androidmobileui.utils.displaySnackBar
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
-@SuppressLint("BinaryOperationInTimber")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
 
     private var onLaunch = true
-    private var authenticationRequested = true
-    private var shouldDelayOnForegroundEvent = AtomicBoolean(false)
-    private val authInfoHelper = AuthInfoHelper.getInstance(this)
+    var authenticationRequested = true
+    var shouldDelayOnForegroundEvent = AtomicBoolean(false)
+    val authInfoHelper = AuthInfoHelper.getInstance(this)
     var currentNavController: LiveData<NavController>? = null
     lateinit var dataSync: DataSync
 
@@ -138,108 +129,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         )
     }
 
-    override fun getViewModel() {
-        getMainActivityViewModel()
-    }
-
-    override fun setupObservers() {
-
-        // Observe authentication state
-        loginViewModel.authenticationState.observe(
-            this,
-            Observer { authenticationState ->
-                Timber.i("[AuthenticationState : $authenticationState]")
-                when (authenticationState) {
-                    AuthenticationState.AUTHENTICATED -> {
-                        if (shouldDelayOnForegroundEvent.compareAndSet(true, false)) {
-                            applyOnForegroundEvent()
-                        }
-                    }
-                    AuthenticationState.LOGOUT -> {
-                        // Logout performed
-                        if (!authInfoHelper.guestLogin)
-                            startLoginActivity()
-                    }
-                    else -> {
-                    }
-                }
-            }
-        )
-
-        // Observe network status
-        if (NetworkUtils.sdkNewerThanKitKat) {
-            connectivityViewModel.networkStateMonitor.observe(
-                this,
-                Observer { networkState ->
-                    Timber.i("[NetworkState : $networkState]")
-                    when (networkState) {
-                        NetworkState.CONNECTED -> {
-                            // Setting the authenticationState to its initial value
-                            if (authInfoHelper.sessionToken.isNotEmpty())
-                                loginViewModel.authenticationState.postValue(AuthenticationState.AUTHENTICATED)
-
-                            // If guest and not yet logged in, auto login
-                            if (authInfoHelper.sessionToken.isEmpty() &&
-                                authInfoHelper.guestLogin &&
-                                authenticationRequested
-                            ) {
-                                authenticationRequested = false
-                                tryAutoLogin()
-                            }
-                        }
-                        else -> {
-                        }
-                    }
-                }
-            )
-        }
-
-        for (entityListViewModel in entityListViewModelList) {
-
-            // Observe when data are synchronized
-            entityListViewModel.dataSynchronized.observe(
-                this,
-                Observer { dataSyncState ->
-                    Timber.i(
-                        "[DataSyncState : $dataSyncState, " +
-                            "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                            "Instance : $entityListViewModel]"
-                    )
-                }
-            )
-
-            // Observe when there is a new related entity to be inserted in a dao
-            entityListViewModel.newRelatedEntity.observe(
-                this,
-                Observer { manyToOneRelation ->
-                    dispatchNewRelatedEntity(manyToOneRelation)
-                }
-            )
-
-            // Observe when there is a related entities to be inserted in a dao
-            entityListViewModel.newRelatedEntities.observe(
-                this,
-                Observer { oneToManyRelation ->
-                    dispatchNewRelatedEntities(oneToManyRelation)
-                }
-            )
-        }
-    }
-
-    /**
-     * Goes back to login page
-     */
-    private fun startLoginActivity() {
-        val intent = Intent(this, LoginActivity::class.java)
-        intent.putExtra(LOGGED_OUT, true)
-        intent.addFlags(
-            Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                Intent.FLAG_ACTIVITY_NEW_TASK
-        )
-        startActivity(intent)
-        finish()
-    }
-
     /**
      * Listens to event ON_STOP - app going in background
      */
@@ -265,7 +154,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         }
     }
 
-    private fun applyOnForegroundEvent() {
+    fun applyOnForegroundEvent() {
         if (onLaunch) {
             onLaunch = false
             getEntityListViewModelsForSync()
@@ -285,43 +174,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     }
 
     /**
-     * Tries to login while in guest mode. Might fail if no Internet connection
-     */
-    private fun tryAutoLogin() {
-        if (isConnected()) {
-            loginViewModel.login { }
-        } else {
-            authenticationRequested = true
-            Timber.d("No Internet connection, authenticationRequested")
-            displaySnackBar(
-                this,
-                resources.getString(R.string.no_internet_auto_login)
-            )
-        }
-    }
-
-    /**
      * Performs data sync, requested by a table request
      */
     override fun requestDataSync(alreadyRefreshedTable: String) {
         setDataSyncObserver(alreadyRefreshedTable)
-    }
-
-    /**
-     * Commands the appropriate EntityListViewModel to add the related entity in its dao
-     */
-    private fun dispatchNewRelatedEntity(manyToOneRelation: ManyToOneRelation) {
-        val entityListViewModel =
-            entityListViewModelList.first { it.getAssociatedTableName() == manyToOneRelation.className }
-        entityListViewModel.insert(manyToOneRelation.entity)
-    }
-
-    /**
-     * Commands the appropriate EntityListViewModel to add the related entities in its dao
-     */
-    private fun dispatchNewRelatedEntities(oneToManyRelation: OneToManyRelation) {
-        val entityListViewModel =
-            entityListViewModelList.first { it.getAssociatedTableName() == oneToManyRelation.className }
-        entityListViewModel.decodeEntityModel(oneToManyRelation.entities, true)
     }
 }

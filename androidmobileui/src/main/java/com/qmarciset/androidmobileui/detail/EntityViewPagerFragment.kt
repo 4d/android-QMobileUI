@@ -12,28 +12,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
-import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityListViewModel
-import com.qmarciset.androidmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.R
 
 class EntityViewPagerFragment : Fragment(), BaseFragment {
 
-    private var position: Int = 0
-    private var tableName: String = ""
-    private var viewPager: ViewPager? = null
+    var position: Int = 0
+    var tableName: String = ""
+    var viewPager: ViewPager? = null
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
 
     // ViewModel
-    private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
+    lateinit var entityListViewModel: EntityListViewModel<EntityModel>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,40 +60,5 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
     override fun onDestroyView() {
         super.onDestroyView()
         viewPager = null
-    }
-
-    override fun getViewModel() {
-
-        // Get EntityListViewModel
-        val clazz = BaseApp.fromTableForViewModel.entityListViewModelClassFromTable(tableName)
-        entityListViewModel = activity?.run {
-            ViewModelProvider(
-                this,
-                EntityListViewModelFactory(
-                    tableName,
-                    delegate.apiService
-                )
-            )[clazz]
-        } ?: throw IllegalStateException("Invalid Activity")
-    }
-
-    override fun setupObservers() {
-
-        // Observe entity list
-        entityListViewModel.entityList.observe(
-            viewLifecycleOwner,
-            Observer { entities ->
-                entities?.let {
-                    // When entity list data changed, refresh the displayed list
-                    viewPager?.adapter =
-                        EntityViewPagerAdapter(
-                            this,
-                            tableName,
-                            it
-                        )
-                    viewPager?.currentItem = position
-                }
-            }
-        )
     }
 }

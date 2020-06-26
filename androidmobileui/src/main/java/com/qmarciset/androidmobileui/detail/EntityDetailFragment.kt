@@ -14,26 +14,23 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
 import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.viewmodel.EntityViewModel
-import com.qmarciset.androidmobiledatasync.viewmodel.factory.EntityViewModelFactory
 import com.qmarciset.androidmobileui.BaseFragment
 import com.qmarciset.androidmobileui.FragmentCommunication
 import com.qmarciset.androidmobileui.utils.detailLayoutFromTable
-import kotlin.reflect.KClass
 
 class EntityDetailFragment : Fragment(), BaseFragment {
 
-    private var itemId: String = "0"
-    private var tableName: String = ""
+    var itemId: String = "0"
+    var tableName: String = ""
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
 
     // ViewModels
-    private lateinit var entityViewModel: EntityViewModel<EntityModel>
+    lateinit var entityViewModel: EntityViewModel<EntityModel>
 
     companion object {
         fun newInstance(itemId: String, tableName: String) = EntityDetailFragment().apply {
@@ -72,31 +69,5 @@ class EntityDetailFragment : Fragment(), BaseFragment {
             delegate = context
         }
         // Access resources elements
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        setupObservers()
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override fun getViewModel() {
-
-        // Get EntityViewModel
-        val kClazz: KClass<EntityViewModel<EntityModel>> =
-            EntityViewModel::class as KClass<EntityViewModel<EntityModel>>
-        entityViewModel = ViewModelProvider(
-            this,
-            EntityViewModelFactory(
-                tableName,
-                itemId,
-                delegate.apiService
-            )
-        )[kClazz.java]
-    }
-
-    override fun setupObservers() {
-        return
     }
 }
