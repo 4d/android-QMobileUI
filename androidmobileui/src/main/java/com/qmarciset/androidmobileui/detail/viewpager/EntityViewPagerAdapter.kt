@@ -1,14 +1,15 @@
 /*
- * Created by Quentin Marciset on 7/2/2020.
+ * Created by Quentin Marciset on 29/6/2020.
  * 4D SAS
  * Copyright (c) 2020 Quentin Marciset. All rights reserved.
  */
 
-package com.qmarciset.androidmobileui.detail
+package com.qmarciset.androidmobileui.detail.viewpager
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.qmarciset.androidmobileapi.model.entity.EntityModel
+import com.qmarciset.androidmobileui.detail.EntityDetailFragment
 
 class EntityViewPagerAdapter(
     fragment: Fragment,
@@ -22,7 +23,10 @@ class EntityViewPagerAdapter(
     override fun getItem(position: Int): Fragment {
         val entity: EntityModel? = list[position] as EntityModel?
         val itemId = entity?.__KEY ?: "0"
-        return EntityDetailFragment.newInstance(itemId, tableName)
+        return EntityDetailFragment.newInstance(
+            itemId,
+            tableName
+        )
     }
 
     override fun getCount(): Int {

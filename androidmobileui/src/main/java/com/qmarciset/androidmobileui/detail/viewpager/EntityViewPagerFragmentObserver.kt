@@ -1,10 +1,10 @@
 /*
- * Created by Quentin Marciset on 26/6/2020.
+ * Created by Quentin Marciset on 29/6/2020.
  * 4D SAS
  * Copyright (c) 2020 Quentin Marciset. All rights reserved.
  */
 
-package com.qmarciset.androidmobileui.detail
+package com.qmarciset.androidmobileui.detail.viewpager
 
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -46,6 +46,7 @@ fun EntityViewPagerFragment.observeEntityList() {
                         tableName,
                         it
                     )
+                viewPager?.addOnPageChangeListener(this)
                 viewPager?.currentItem = position
             }
         }
