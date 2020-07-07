@@ -55,7 +55,7 @@ fun MainActivity.getConnectivityViewModel() {
 // Get EntityListViewModel list
 fun MainActivity.getEntityListViewModelList() {
     entityListViewModelList = mutableListOf()
-    for (tableName in BaseApp.fromTableForViewModel.tableNames) {
+    for (tableName in BaseApp.fromTableForViewModel.tableNames()) {
         val clazz = BaseApp.fromTableForViewModel.entityListViewModelClassFromTable(tableName)
 
         entityListViewModelList.add(
