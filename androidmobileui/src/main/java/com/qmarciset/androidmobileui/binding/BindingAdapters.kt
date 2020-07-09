@@ -9,6 +9,7 @@ package com.qmarciset.androidmobileui.binding
 import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -81,3 +82,44 @@ fun bindImageFromDrawable(view: ImageView, imageDrawable: Int?) {
 fun showHide(view: View, show: Boolean) {
     view.visibility = if (show) View.VISIBLE else View.GONE
 }
+
+@BindingAdapter("concatStringWithSpace_1", "concatStringWithSpace_2")
+fun concatStringWithSpace(view: TextView, str1: String?, str2: String?) {
+    view.text = if (str1.isNullOrEmpty()) {
+        str2
+    } else {
+        if (str2.isNullOrEmpty())
+            str1
+        else
+            "$str1 $str2"
+    }
+}
+
+@BindingAdapter("concatStringRatio_1", "concatStringRatio_2")
+fun concatStringRatio(view: TextView, str1: String? = "0", str2: String? = "0") {
+    view.text = "$str1/$str2"
+}
+
+/*@BindingAdapter("setPersonName")
+fun bindPersonName(view: TextView, person: Employee?) {
+    person?.let {
+        view.text = if (person.LastName.isNullOrEmpty()) {
+            person.FirstName
+        } else {
+            if (person.FirstName.isNullOrEmpty())
+                person.LastName
+            else
+                "${person.FirstName} ${person.LastName}"
+        }
+    }
+}*/
+
+/*@BindingAdapter("setRatio")
+fun bindRatio(view: TextView, office: Office?) {
+    office?.let {
+        view.text = if (it.deskNumber != null && it.deskTaken != null)
+            "${it.deskTaken}/${it.deskNumber}"
+        else
+            ""
+    }
+}*/
