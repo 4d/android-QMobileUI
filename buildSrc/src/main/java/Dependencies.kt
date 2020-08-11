@@ -84,6 +84,9 @@ object Libs {
     val androidx_navigation_ui =
         "androidx.navigation:navigation-ui-ktx:${Versions.navigation}"
 
+    // Rx
+    val rxjava = "io.reactivex.rxjava2:rxjava:${Versions.rxjava2}"
+
     // Utils
     val material = "com.google.android.material:material:${Versions.design}"
     val retrofit_converter_gson = "com.squareup.retrofit2:converter-gson:${Versions.retrofit}"
@@ -103,7 +106,6 @@ object Libs {
     val retrofit_adapter_rxjava2 = "com.squareup.retrofit2:adapter-rxjava2:${Versions.retrofit}"
     val robolectric = "org.robolectric:robolectric:${Versions.robolectric}"
     val rxandroid = "io.reactivex.rxjava2:rxandroid:${Versions.rx_android}"
-    val rxjava = "io.reactivex.rxjava2:rxjava:${Versions.rxjava2}"
 
     // For AndroidMobileDataStore
     val androidx_appcompat = "androidx.appcompat:appcompat:${Versions.support}"

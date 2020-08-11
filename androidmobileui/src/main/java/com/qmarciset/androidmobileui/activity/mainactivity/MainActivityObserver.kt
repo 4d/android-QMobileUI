@@ -3,6 +3,7 @@
  * 4D SAS
  * Copyright (c) 2020 Quentin Marciset. All rights reserved.
  */
+@file:Suppress("TooManyFunctions")
 
 package com.qmarciset.androidmobileui.activity.mainactivity
 

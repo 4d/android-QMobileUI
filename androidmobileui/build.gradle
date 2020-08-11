@@ -37,6 +37,9 @@ dependencies {
     implementation Libs.androidx_navigation_fragment
     implementation Libs.androidx_navigation_ui
 
+    // Rx
+    implementation Libs.rxjava
+
     // Utils
     implementation Libs.material
     implementation Libs.retrofit_converter_gson

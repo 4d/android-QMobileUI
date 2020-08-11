@@ -17,10 +17,8 @@ import com.qmarciset.androidmobiledatasync.viewmodel.factory.ConnectivityViewMod
 import com.qmarciset.androidmobiledatasync.viewmodel.factory.LoginViewModelFactory
 
 fun SettingsFragment.getViewModel() {
-    activity?.run {
-        getLoginViewModel()
-        getConnectivityViewModel()
-    } ?: throw IllegalStateException("Invalid Activity")
+    getLoginViewModel()
+    getConnectivityViewModel()
 }
 
 fun SettingsFragment.setupObservers() {
@@ -31,21 +29,25 @@ fun SettingsFragment.setupObservers() {
 
 // LoginViewModel
 fun SettingsFragment.getLoginViewModel() {
-    loginViewModel = ViewModelProvider(
-        this,
-        LoginViewModelFactory(BaseApp.instance, delegate.loginApiService)
-    )[LoginViewModel::class.java]
+    activity?.run {
+        loginViewModel = ViewModelProvider(
+            this,
+            LoginViewModelFactory(BaseApp.instance, delegate.loginApiService)
+        )[LoginViewModel::class.java]
+    } ?: throw IllegalStateException("Invalid Activity")
 }
 
 // ConnectivityViewModel
 fun SettingsFragment.getConnectivityViewModel() {
-    connectivityViewModel = ViewModelProvider(
-        this,
-        ConnectivityViewModelFactory(
-            BaseApp.instance,
-            delegate.connectivityManager
-        )
-    )[ConnectivityViewModel::class.java]
+    activity?.run {
+        connectivityViewModel = ViewModelProvider(
+            this,
+            ConnectivityViewModelFactory(
+                BaseApp.instance,
+                delegate.connectivityManager
+            )
+        )[ConnectivityViewModel::class.java]
+    } ?: throw IllegalStateException("Invalid Activity")
 }
 
 // Observe network status

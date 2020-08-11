@@ -26,11 +26,9 @@ import timber.log.Timber
  * Retrieve viewModels from MainActivity lifecycle
  */
 fun EntityListFragment.getViewModel() {
-    activity?.run {
-        getEntityListViewModel()
-        getConnectivityViewModel()
-        getLoginViewModel()
-    } ?: throw IllegalStateException("Invalid Activity")
+    getEntityListViewModel()
+    getConnectivityViewModel()
+    getLoginViewModel()
 }
 
 /**
@@ -58,25 +56,29 @@ fun EntityListFragment.getEntityListViewModel() {
 
 // Get ConnectivityViewModel
 fun EntityListFragment.getConnectivityViewModel() {
-    if (NetworkUtils.sdkNewerThanKitKat) {
-        connectivityViewModel = ViewModelProvider(
-            this,
-            ConnectivityViewModelFactory(
-                BaseApp.instance,
-                delegate.connectivityManager
-            )
-        )[ConnectivityViewModel::class.java]
-    }
+    activity?.run {
+        if (NetworkUtils.sdkNewerThanKitKat) {
+            connectivityViewModel = ViewModelProvider(
+                this,
+                ConnectivityViewModelFactory(
+                    BaseApp.instance,
+                    delegate.connectivityManager
+                )
+            )[ConnectivityViewModel::class.java]
+        }
+    } ?: throw IllegalStateException("Invalid Activity")
 }
 
 // Get LoginViewModel
 fun EntityListFragment.getLoginViewModel() {
     // We need this ViewModel to know when MainActivity has performed its $authenticate so that
     // we don't trigger the initial sync if we are not authenticated yet
-    loginViewModel = ViewModelProvider(
-        this,
-        LoginViewModelFactory(BaseApp.instance, delegate.loginApiService)
-    )[LoginViewModel::class.java]
+    activity?.run {
+        loginViewModel = ViewModelProvider(
+            this,
+            LoginViewModelFactory(BaseApp.instance, delegate.loginApiService)
+        )[LoginViewModel::class.java]
+    } ?: throw IllegalStateException("Invalid Activity")
 }
 
 // Observe entity list

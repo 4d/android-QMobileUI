@@ -27,6 +27,7 @@ import com.qmarciset.androidmobileui.utils.displaySnackBar
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
+@Suppress("TooManyFunctions")
 class SettingsFragment :
     PreferenceFragmentCompat(),
     BaseFragment,
