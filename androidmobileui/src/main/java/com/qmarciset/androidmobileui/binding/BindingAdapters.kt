@@ -39,7 +39,7 @@ private fun randomAvatar(): Int =
     listOfAvatars[(listOfAvatars.indices).random() % listOfAvatars.size]
 
 /**
- * Use Glide to load image drawable in a view
+ * Use Glide to load image url in a view
  */
 @BindingAdapter(value = ["imageUrl", "requestListener"], requireAll = false)
 fun bindImageFromUrl(view: ImageView, imageUrl: String?, listener: RequestListener<Drawable?>?) {
@@ -48,6 +48,27 @@ fun bindImageFromUrl(view: ImageView, imageUrl: String?, listener: RequestListen
 
     Glide.with(view.context.applicationContext)
         .load(if (imageUrl.isNullOrEmpty()) randomAvatar() else imageUrl)
+        .transition(DrawableTransitionOptions.withCrossFade(factory))
+        .diskCacheStrategy(DiskCacheStrategy.ALL)
+        .centerCrop()
+//        .listener(listener)
+        .listener(CustomRequestListener())
+        .error(R.drawable.ic_error_black_24dp)
+//        .placeholder(R.drawable.profile_placeholder)
+        .transform(CircleCrop())
+        .into(view)
+}
+
+/**
+ * Use Glide to load image drawable in a view
+ */
+@BindingAdapter(value = ["imageUrl", "requestListener"], requireAll = false)
+fun bindImageFromUrl(view: ImageView, drawable: Drawable?, listener: RequestListener<Drawable?>?) {
+    val factory =
+        DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
+
+    Glide.with(view.context.applicationContext)
+        .load(drawable ?: randomAvatar())
         .transition(DrawableTransitionOptions.withCrossFade(factory))
         .diskCacheStrategy(DiskCacheStrategy.ALL)
         .centerCrop()
