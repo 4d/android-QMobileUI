@@ -127,6 +127,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             loginApiService = loginApiService,
             loginRequiredCallback = loginRequiredCallbackForInterceptor
         )
+        if (this::entityListViewModelList.isInitialized) {
+            entityListViewModelList.forEach { it.refreshRestRepository(apiService) }
+        }
     }
 
     /**
