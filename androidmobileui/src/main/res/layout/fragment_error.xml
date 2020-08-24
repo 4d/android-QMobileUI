@@ -32,7 +32,7 @@
         android:paddingBottom="@dimen/fragment_error_text_vertical_padding"
         android:text="@string/label_sample_error"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/text_color_grey"
+        android:textColor="@color/colorPrimaryLight"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
