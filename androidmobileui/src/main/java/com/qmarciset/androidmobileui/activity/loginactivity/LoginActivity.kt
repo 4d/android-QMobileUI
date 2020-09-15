@@ -86,18 +86,11 @@ class LoginActivity : BaseActivity() {
 
         // Login button
         login_button_auth.setOnClickListener {
-            if (NetworkUtils.isConnected(
-                connectivityViewModel.networkStateMonitor.value,
-                connectivityManager
-            )
-            ) {
+            if (NetworkUtils.isConnected(connectivityViewModel.networkStateMonitor.value, connectivityManager)) {
                 login_button_auth.isEnabled = false
                 loginViewModel.login(email = login_email_input.text.toString()) { }
             } else {
-                displaySnackBar(
-                    this,
-                    resources.getString(R.string.no_internet)
-                )
+                displaySnackBar(this, resources.getString(R.string.no_internet))
             }
         }
 

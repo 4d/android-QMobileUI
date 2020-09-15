@@ -6,21 +6,21 @@
 
 package com.qmarciset.androidmobileui.detail
 
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.qmarciset.androidmobileapi.model.entity.EntityModel
-import com.qmarciset.androidmobiledatasync.viewmodel.EntityViewModel
+import com.google.gson.Gson
+import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.viewmodel.factory.EntityViewModelFactory
-import kotlin.reflect.KClass
+import timber.log.Timber
 
 fun EntityDetailFragment.getViewModel() {
     getEntityViewModel()
+    observeEntity()
 }
 
 // Get EntityViewModel
-@Suppress("UNCHECKED_CAST")
 fun EntityDetailFragment.getEntityViewModel() {
-    val kClazz: KClass<EntityViewModel<EntityModel>> =
-        EntityViewModel::class as KClass<EntityViewModel<EntityModel>>
+    val clazz = BaseApp.fromTableForViewModel.entityViewModelClassFromTable(tableName)
     entityViewModel = ViewModelProvider(
         this,
         EntityViewModelFactory(
@@ -28,5 +28,34 @@ fun EntityDetailFragment.getEntityViewModel() {
             itemId,
             delegate.apiService
         )
-    )[kClazz.java]
+    )[clazz]
+}
+
+// Observe entity list
+fun EntityDetailFragment.observeEntity() {
+    entityViewModel.entity.observe(
+        viewLifecycleOwner,
+        Observer { entity ->
+            Timber.d("Observed entity from Room, json = ${Gson().toJson(entity)}")
+
+            val relationKeysMap = entityViewModel.getManyToOneRelationKeysFromEntity(entity)
+            for ((relationName, liveDateListRoomRelation) in relationKeysMap) {
+                liveDateListRoomRelation.observe(
+                    viewLifecycleOwner,
+                    Observer { list ->
+                        for (item in list) {
+                            Timber.d(
+                                "Many to one relation fetched, relationName is $relationName and relation json = ${
+                                Gson().toJson(
+                                    item.first
+                                )
+                                }"
+                            )
+                        }
+                        entityViewModel.setRelationToLayout(relationName, list.first())
+                    }
+                )
+            }
+        }
+    )
 }

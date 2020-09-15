@@ -47,7 +47,9 @@ object LogController {
     private var flushCompleted = BehaviorSubject.create<Long>()
 
     private var LOG_LEVELS = arrayOf(
-        "", "", "VERBOSE",
+        "",
+        "",
+        "VERBOSE",
         "DEBUG",
         "INFO",
         "WARN",
@@ -116,7 +118,14 @@ object LogController {
                 }
                 // Merge the signal from flush and the signal from
                 // the interval observer to create a dual signal.
-                .buffer(flush.mergeWith(Observable.interval(INTERVAL_SIGNAL_MINUTES, TimeUnit.MINUTES)))
+                .buffer(
+                    flush.mergeWith(
+                        Observable.interval(
+                            INTERVAL_SIGNAL_MINUTES,
+                            TimeUnit.MINUTES
+                        )
+                    )
+                )
                 .subscribeOn(Schedulers.io())
                 .subscribe { // it: LogElement
                     try {

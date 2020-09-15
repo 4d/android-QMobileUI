@@ -23,6 +23,7 @@ dependencies {
     implementation Libs.androidx_constraintlayout
     implementation Libs.androidx_preference_ktx
     implementation Libs.kotlin_stdlib
+    implementation Libs.swiperefreshlayout
 
     // Lifecycle
     implementation Libs.lifecycle_extensions

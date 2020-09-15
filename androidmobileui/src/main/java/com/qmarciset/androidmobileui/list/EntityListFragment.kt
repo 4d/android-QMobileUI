@@ -121,7 +121,8 @@ class EntityListFragment : Fragment(), BaseFragment {
     private fun initOnRefreshListener() {
         fragment_list_swipe_to_refresh.setProgressBackgroundColorSchemeColor(
             ContextCompat.getColor(
-                requireContext(), R.color.colorPrimary
+                requireContext(),
+                R.color.colorPrimary
             )
         )
         fragment_list_swipe_to_refresh.setColorSchemeColors(Color.WHITE)

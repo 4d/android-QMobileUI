@@ -18,7 +18,8 @@ class AppGlideModule : AppGlideModule() {
 
     override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
         registry.append(
-            String::class.java, InputStream::class.java,
+            String::class.java,
+            InputStream::class.java,
             HeaderLoaderFactory(context.applicationContext)
         )
     }
