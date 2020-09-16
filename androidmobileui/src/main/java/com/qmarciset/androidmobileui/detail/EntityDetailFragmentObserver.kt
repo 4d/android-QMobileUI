@@ -44,13 +44,8 @@ fun EntityDetailFragment.observeEntity() {
                     viewLifecycleOwner,
                     Observer { list ->
                         for (item in list) {
-                            Timber.d(
-                                "Many to one relation fetched, relationName is $relationName and relation json = ${
-                                Gson().toJson(
-                                    item.first
-                                )
-                                }"
-                            )
+                            val jsonValue = Gson().toJson(item.first)
+                            Timber.d("Many-to-one relation fetched, relationName is $relationName and relation json = $jsonValue")
                         }
                         entityViewModel.setRelationToLayout(relationName, list.first())
                     }

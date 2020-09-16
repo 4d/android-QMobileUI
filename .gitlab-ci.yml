@@ -72,20 +72,6 @@ buildLinux:
     paths:
      - androidmobileui/build/outputs/aar/
 
-buildOsx:
-  stage: build
-  script:
-    - *download_sdk_osx
-    - *build_sdk
-    - ./gradlew clean --console=rich
-    - ./gradlew assemble --console=rich
-    - ./gradlew artifactoryPublish --console=rich
-  tags:
-    - osx
-  artifacts:
-    paths:
-     - androidmobileui/build/outputs/aar/
-
 unitTests:
   stage: test
   script:
