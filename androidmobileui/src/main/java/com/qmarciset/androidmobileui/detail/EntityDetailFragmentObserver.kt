@@ -43,9 +43,9 @@ fun EntityDetailFragment.observeEntity() {
                 liveDateListRoomRelation.observe(
                     viewLifecycleOwner,
                     Observer { roomRelation ->
-                        val jsonValue = Gson().toJson(roomRelation.first)
-                        Timber.d("Many-to-one relation fetched, relationName is $relationName and relation json = $jsonValue")
-                        entityViewModel.setRelationToLayout(relationName, roomRelation)
+                        roomRelation?.let {
+                            entityViewModel.setRelationToLayout(relationName, roomRelation)
+                        }
                     }
                 )
             }

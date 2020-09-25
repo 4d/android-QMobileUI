@@ -6,6 +6,8 @@
 
 package com.qmarciset.androidmobileui.activity.mainactivity
 
+import com.qmarciset.androidmobileapi.utils.getStringList
+import com.qmarciset.androidmobiledatasync.app.BaseApp
 import com.qmarciset.androidmobiledatasync.relation.ManyToOneRelation
 import com.qmarciset.androidmobiledatasync.relation.OneToManyRelation
 import com.qmarciset.androidmobiledatasync.viewmodel.insert
@@ -16,7 +18,14 @@ import com.qmarciset.androidmobiledatasync.viewmodel.insert
 fun MainActivity.dispatchNewRelatedEntity(manyToOneRelation: ManyToOneRelation) {
     val entityListViewModel =
         entityListViewModelList.first { it.getAssociatedTableName() == manyToOneRelation.className }
-    entityListViewModel.insert(manyToOneRelation.entity)
+    val entity = BaseApp.fromTableForViewModel.parseEntityFromTable(
+        manyToOneRelation.className,
+        manyToOneRelation.entity.toString(),
+        true
+    )
+    entity?.let {
+        entityListViewModel.insert(entity)
+    }
 }
 
 /**
@@ -25,5 +34,14 @@ fun MainActivity.dispatchNewRelatedEntity(manyToOneRelation: ManyToOneRelation) 
 fun MainActivity.dispatchNewRelatedEntities(oneToManyRelation: OneToManyRelation) {
     val entityListViewModel =
         entityListViewModelList.first { it.getAssociatedTableName() == oneToManyRelation.className }
-    entityListViewModel.decodeEntityModel(oneToManyRelation.entities, true)
+    for (entityString in oneToManyRelation.entities.getStringList()) {
+        val entity = BaseApp.fromTableForViewModel.parseEntityFromTable(
+            oneToManyRelation.className,
+            entityString,
+            true
+        )
+        entity?.let {
+            entityListViewModel.insert(entity)
+        }
+    }
 }
