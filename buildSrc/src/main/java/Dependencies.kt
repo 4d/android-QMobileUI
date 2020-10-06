@@ -7,10 +7,10 @@
 import org.gradle.api.JavaVersion
 
 object Versions {
-    // AndroidMobile libraries
-    val androidmobileapi = "0.0.1"
-    val androidmobiledatastore = "0.0.1"
-    val androidmobiledatasync = "0.0.1"
+    // QMobile libraries
+    val qmobileapi = "0.0.1"
+    val qmobiledatastore = "0.0.1"
+    val qmobiledatasync = "0.0.1"
 
     val android_gradle_plugin = "3.5.2"
     val arch_core = "2.1.0"
@@ -53,13 +53,13 @@ object Tools {
     val kotlin_gradle_plugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}"
 }
 
-object AndroidMobileLibs {
-    val androidmobileapi =
-        "com.qmarciset.androidmobileapi:androidmobileapi:${Versions.androidmobileapi}"
-    val androidmobiledatastore =
-        "com.qmarciset.androidmobiledatastore:androidmobiledatastore:${Versions.androidmobiledatastore}"
-    val androidmobiledatasync =
-        "com.qmarciset.androidmobiledatasync:androidmobiledatasync:${Versions.androidmobiledatasync}"
+object QMobileLibs {
+    val qmobileapi =
+        "com.qmobile.qmobileapi:qmobileapi:${Versions.qmobileapi}"
+    val qmobiledatastore =
+        "com.qmobile.qmobiledatastore:qmobiledatastore:${Versions.qmobiledatastore}"
+    val qmobiledatasync =
+        "com.qmobile.qmobiledatasync:qmobiledatasync:${Versions.qmobiledatasync}"
 }
 
 object Libs {
@@ -97,7 +97,7 @@ object Libs {
     // Testing
     val junit = "junit:junit:${Versions.junit}"
 
-    // For AndroidMobileAPI
+    // For QMobileAPI
     val androidx_junit = "androidx.test.ext:junit:${Versions.atsl_junit}"
     val androidx_runner = "androidx.test:runner:${Versions.runner}"
     val mockito = "org.mockito:mockito-core:${Versions.mockito}"
@@ -109,11 +109,11 @@ object Libs {
     val robolectric = "org.robolectric:robolectric:${Versions.robolectric}"
     val rxandroid = "io.reactivex.rxjava2:rxandroid:${Versions.rx_android}"
 
-    // For AndroidMobileDataStore
+    // For QMobileDataStore
     val androidx_appcompat = "androidx.appcompat:appcompat:${Versions.support}"
     val androidx_room = "androidx.room:room-ktx:${Versions.room}"
 
-    // For AndroidMobileDataSync
+    // For QMobileDataSync
     val androidx_core_testing = "androidx.arch.core:core-testing:${Versions.arch_core}"
     val kotlin_reflect = "org.jetbrains.kotlin:kotlin-reflect:${Versions.kotlin}"
     val multidex = "androidx.multidex:multidex:${Versions.multidex}"

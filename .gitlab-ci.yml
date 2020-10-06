@@ -28,7 +28,7 @@ lint:
     when: on_failure
     expire_in: 4 days
     paths:
-    - androidmobileui/build/reports/
+    - qmobileui/build/reports/
 
 # OSX PLATFORM
 
@@ -70,7 +70,7 @@ buildLinux:
     - linux
   artifacts:
     paths:
-     - androidmobileui/build/outputs/aar/
+     - qmobileui/build/outputs/aar/
 
 unitTests:
   stage: test
@@ -79,4 +79,4 @@ unitTests:
   tags:
     - linux
     #- ./gradlew jacocoTestReport
-    #- awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print 100*covered/instructions, "% covered" }' androidmobileui/build/reports/jacoco/jacocoTestReport/jacocoTestReport.csv
+    #- awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print 100*covered/instructions, "% covered" }' qmobileui/build/reports/jacoco/jacocoTestReport/jacocoTestReport.csv

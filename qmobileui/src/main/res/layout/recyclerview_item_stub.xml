@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by Quentin Marciset on 13/2/2020.
+  ~ 4D SAS
+  ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
+  -->
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="entityData"
+            type="com.qmobile.qmobileapi.model.entity.EntityModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/background_light">
+
+        <TextView
+            android:id="@+id/stub_name_text"
+            android:layout_width="228dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="56dp"
+            android:layout_marginTop="56dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:textSize="22sp"
+            app:layout_constraintBottom_toTopOf="@+id/stub_text_1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/placeholder_value" />
+
+        <TextView
+            android:id="@+id/stub_text_1"
+            android:layout_width="228dp"
+            android:layout_height="21dp"
+            android:layout_marginStart="56dp"
+            android:layout_marginBottom="56dp"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/stub_name_text"
+            tools:text="@string/placeholder_id" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

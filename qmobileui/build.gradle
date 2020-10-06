@@ -1,0 +1,114 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+apply from: "$rootDir/buildscripts/ktlint.gradle"
+apply from: "$rootDir/buildscripts/testlog.gradle"
+apply from: "$rootDir/buildscripts/detekt.gradle"
+apply from: "$rootDir/buildscripts/jacoco.gradle"
+apply from: "$rootDir/buildscripts/projectDependencyGraph.gradle"
+
+dependencies {
+
+    // QMobile libraries
+//    implementation project(':qmobileapi')
+//    implementation project(':qmobiledatastore')
+//    implementation project(':qmobiledatasync')
+    implementation(QMobileLibs.qmobileapi) { changing = true }
+    implementation(QMobileLibs.qmobiledatastore) { changing = true }
+    implementation(QMobileLibs.qmobiledatasync) { changing = true }
+
+    // Common
+    implementation Libs.androidx_constraintlayout
+    implementation Libs.androidx_preference_ktx
+    implementation Libs.kotlin_stdlib
+    implementation Libs.swiperefreshlayout
+
+    // Lifecycle
+    implementation Libs.lifecycle_extensions
+    implementation Libs.lifecycle_runtime
+    kapt Libs.lifecycle_compiler
+
+    // Glide
+    implementation Libs.glide
+    kapt Libs.glide_compiler
+
+    // Navigation
+    implementation Libs.androidx_navigation_fragment
+    implementation Libs.androidx_navigation_ui
+
+    // Rx
+    implementation Libs.rxjava
+
+    // Utils
+    implementation Libs.material
+    implementation Libs.retrofit_converter_gson
+    implementation Libs.timber
+
+    // Testing
+    testImplementation Libs.junit
+}
+
+def libraryGroupId = 'com.qmobile.qmobileui'
+def libraryArtifactId = 'qmobileui'
+def libraryVersion = '0.0.1'
+def buildVariant = 'release'
+
+publishing {
+    publications {
+        aar(MavenPublication) {
+            groupId libraryGroupId
+            version libraryVersion
+
+            artifactId libraryArtifactId
+            artifact("$buildDir/outputs/aar/${artifactId}-${buildVariant}.aar")
+
+            pom.withXml {
+                def dependencies = asNode().appendNode('dependencies')
+                configurations.getByName("${buildVariant}CompileClasspath").getResolvedConfiguration().getFirstLevelModuleDependencies().each {
+                    def dependency = dependencies.appendNode('dependency')
+                    dependency.appendNode('groupId', it.moduleGroup)
+                    dependency.appendNode('artifactId', it.moduleName)
+                    dependency.appendNode('version', it.moduleVersion)
+                }
+            }
+        }
+    }
+}
+
+artifactory {
+    def machineIP = System.getenv('ARTIFACTORY_MACHINE_IP')
+    contextUrl = "http://${machineIP}:8081/artifactory"
+    publish {
+        repository {
+            repoKey = "libs-release-local"
+            username = System.getenv('ARTIFACTORY_USERNAME')
+            password = System.getenv('ARTIFACTORY_PASSWORD')
+        }
+        defaults {
+            publications('aar')
+            publishArtifacts = true
+            publishPom = true
+            properties = ['qa.level': 'basic', 'q.os': 'android', 'dev.team': 'core']
+        }
+    }
+}
+
+task generateMySources(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+task addMySourcesToAar(type: Jar) {
+    archiveFileName.set("${libraryArtifactId}WithSources.aar")
+    destinationDirectory.set(file("build"))
+    from zipTree("build/outputs/aar/${libraryArtifactId}-${buildVariant}.aar")
+    from fileTree("build").include("libs/${libraryArtifactId}-sources.jar")
+}
+afterEvaluate { project ->
+    project.tasks.preBuild.dependsOn generateMySources
+    project.addMySourcesToAar.dependsOn build
+}
+artifacts {
+    archives addMySourcesToAar.archivePath
+}
