@@ -51,6 +51,14 @@ object ApplicationUtils {
         throw JsonParseException("Couldn't parse GuestLogin")
     }
 
+    fun getEmbeddedData(manifestJson: JSONObject): Boolean {
+        val manifest = Gson().parseJsonToType<Manifest>(manifestJson.toString())
+        manifest?.let {
+            return manifest.embeddedData
+        }
+        throw JsonParseException("Couldn't parse EmbeddedData")
+    }
+
     fun getRemoteUrl(manifestJson: JSONObject): String {
         val manifest = Gson().parseJsonToType<Manifest>(manifestJson.toString())
         manifest?.let {
