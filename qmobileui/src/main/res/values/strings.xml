@@ -5,7 +5,7 @@
   -->
 
 <resources>
-    <string name="app_name">QMobileUI</string>
+    <string name="qmobileui_app_name">QMobileUI</string>
 
     <!--    Placeholders -->
     <string name="placeholder_title">___TITLE___</string>
