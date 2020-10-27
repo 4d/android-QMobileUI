@@ -24,7 +24,7 @@ fun MainActivity.getEntityListViewModelsForSync() {
 fun MainActivity.setDataSyncObserver(alreadyRefreshedTable: String?) {
     entityViewModelIsToSyncList.map { it.isToSync = true }
     alreadyRefreshedTable?.let {
-        entityViewModelIsToSyncList.first { it.vm.getAssociatedTableName() == alreadyRefreshedTable }.isToSync =
+        entityViewModelIsToSyncList.find { it.vm.getAssociatedTableName() == alreadyRefreshedTable }?.isToSync =
             false
     }
     dataSync.setObserver(entityViewModelIsToSyncList, alreadyRefreshedTable)

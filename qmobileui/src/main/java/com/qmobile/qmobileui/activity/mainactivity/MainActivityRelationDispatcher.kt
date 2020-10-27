@@ -17,14 +17,14 @@ import com.qmobile.qmobiledatasync.viewmodel.insert
  */
 fun MainActivity.dispatchNewRelatedEntity(manyToOneRelation: ManyToOneRelation) {
     val entityListViewModel =
-        entityListViewModelList.first { it.getAssociatedTableName() == manyToOneRelation.className }
+        entityListViewModelList.find { it.getAssociatedTableName() == manyToOneRelation.className }
     val entity = BaseApp.fromTableForViewModel.parseEntityFromTable(
         manyToOneRelation.className,
         manyToOneRelation.entity.toString(),
         true
     )
     entity?.let {
-        entityListViewModel.insert(entity)
+        entityListViewModel?.insert(entity)
     }
 }
 
@@ -33,7 +33,7 @@ fun MainActivity.dispatchNewRelatedEntity(manyToOneRelation: ManyToOneRelation) 
  */
 fun MainActivity.dispatchNewRelatedEntities(oneToManyRelation: OneToManyRelation) {
     val entityListViewModel =
-        entityListViewModelList.first { it.getAssociatedTableName() == oneToManyRelation.className }
+        entityListViewModelList.find { it.getAssociatedTableName() == oneToManyRelation.className }
     for (entityString in oneToManyRelation.entities.getStringList()) {
         val entity = BaseApp.fromTableForViewModel.parseEntityFromTable(
             oneToManyRelation.className,
@@ -41,7 +41,7 @@ fun MainActivity.dispatchNewRelatedEntities(oneToManyRelation: OneToManyRelation
             true
         )
         entity?.let {
-            entityListViewModel.insert(entity)
+            entityListViewModel?.insert(entity)
         }
     }
 }
