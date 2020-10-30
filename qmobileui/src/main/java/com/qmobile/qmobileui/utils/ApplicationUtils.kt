@@ -59,6 +59,14 @@ object ApplicationUtils {
         throw JsonParseException("Couldn't parse EmbeddedData")
     }
 
+    fun getInitialGlobalStamp(manifestJson: JSONObject): Int {
+        val manifest = Gson().parseJsonToType<Manifest>(manifestJson.toString())
+        manifest?.let {
+            return manifest.initialGlobalStamp
+        }
+        throw JsonParseException("Couldn't parse InitialGlobalStamp")
+    }
+
     fun getRemoteUrl(manifestJson: JSONObject): String {
         val manifest = Gson().parseJsonToType<Manifest>(manifestJson.toString())
         manifest?.let {

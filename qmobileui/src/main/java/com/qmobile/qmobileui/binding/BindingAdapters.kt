@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.binding
 
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -17,8 +18,11 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
+import timber.log.Timber
+import java.io.File
 
 /**
  * Sample avatar list
@@ -41,13 +45,28 @@ private fun randomAvatar(): Int =
 /**
  * Use Glide to load image url in a view
  */
-@BindingAdapter(value = ["imageUrl", "requestListener"], requireAll = false)
-fun bindImageFromUrl(view: ImageView, imageUrl: String?, listener: RequestListener<Drawable?>?) {
+@BindingAdapter(
+    value = ["imageUrl", "key", "tableName", "fieldName"],
+    requireAll = false
+)
+fun bindImageFromUrl(
+    view: ImageView,
+    imageUrl: String?,
+    key: String?,
+    tableName: String?,
+    fieldName: String?
+) {
     val factory =
         DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
 
     Glide.with(view.context.applicationContext)
-        .load(if (imageUrl.isNullOrEmpty()) randomAvatar() else imageUrl)
+        .load(
+            if (imageUrl.isNullOrEmpty()) tryImageFromAssets(
+                tableName,
+                key,
+                fieldName
+            ) else imageUrl
+        )
         .transition(DrawableTransitionOptions.withCrossFade(factory))
         .diskCacheStrategy(DiskCacheStrategy.ALL)
         .centerCrop()
@@ -57,6 +76,15 @@ fun bindImageFromUrl(view: ImageView, imageUrl: String?, listener: RequestListen
 //        .placeholder(R.drawable.profile_placeholder)
         .transform(CircleCrop())
         .into(view)
+}
+
+fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Any {
+    BaseApp.embeddedFiles.find { it.contains(tableName + File.separator + "$tableName($key)_${fieldName}_") }
+        ?.let { path ->
+            Timber.d("file = $path")
+            return Uri.parse("file:///android_asset/$path")
+        }
+    return randomAvatar()
 }
 
 /**

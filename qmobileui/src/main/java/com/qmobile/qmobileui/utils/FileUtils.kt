@@ -13,6 +13,10 @@ import android.content.Context
  */
 object FileUtils {
 
+    const val EMBEDDED_PICTURES_PARENT = "Assets.xcassets"
+    const val EMBEDDED_PICTURES = "Pictures"
+    const val JSON_EXT = ".json"
+
     /**
      * Reads content from assets json files
      */
@@ -20,5 +24,21 @@ object FileUtils {
         return context.assets.open(filename).bufferedReader().use {
             it.readText()
         }
+    }
+
+    /**
+     * Returns the list of asset files found at [path]
+     */
+    fun listAssetFiles(path: String, context: Context): List<String> {
+        val result = ArrayList<String>()
+        context.assets.list(path)?.forEach { file ->
+            val innerFiles = listAssetFiles("$path/$file", context)
+            if (innerFiles.isNotEmpty()) {
+                result.addAll(innerFiles)
+            } else {
+                result.add("$path/$file")
+            }
+        }
+        return result
     }
 }
