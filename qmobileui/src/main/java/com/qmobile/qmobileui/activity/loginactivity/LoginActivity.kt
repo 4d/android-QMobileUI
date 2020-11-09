@@ -19,7 +19,7 @@ import android.widget.EditText
 import androidx.databinding.DataBindingUtil
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
 import com.qmobile.qmobileapi.auth.isEmailValid
-import com.qmobile.qmobileapi.connectivity.NetworkUtils
+import com.qmobile.qmobileapi.connectivity.isConnected
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobiledatasync.app.BaseApp
@@ -86,7 +86,7 @@ class LoginActivity : BaseActivity() {
 
         // Login button
         login_button_auth.setOnClickListener {
-            if (NetworkUtils.isConnected(connectivityViewModel.networkStateMonitor.value, connectivityManager)) {
+            if (connectivityManager.isConnected(connectivityViewModel.networkStateMonitor.value)) {
                 login_button_auth.isEnabled = false
                 loginViewModel.login(email = login_email_input.text.toString()) { }
             } else {

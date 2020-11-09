@@ -17,7 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
-import com.qmobile.qmobileapi.auth.AuthenticationState
+import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.BaseFragment
@@ -173,7 +173,7 @@ class SettingsFragment :
                     displaySnackBar(it, it.resources.getString(R.string.no_internet))
                 }
                 Timber.d("No Internet connection")
-            } else if (loginViewModel.authenticationState.value != AuthenticationState.AUTHENTICATED) {
+            } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
                 activity?.let {
                     displaySnackBar(
                         it,
@@ -226,12 +226,12 @@ class SettingsFragment :
      * Checks if environment is ready to perform an action
      */
     private fun isReady(): Boolean {
-        if (loginViewModel.authenticationState.value == AuthenticationState.INVALID_AUTHENTICATION) {
+        if (loginViewModel.authenticationState.value == AuthenticationStateEnum.INVALID_AUTHENTICATION) {
             // For example server was not responding when trying to auto-login
             delegate.requestAuthentication()
             return false
         }
-        return loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
+        return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
             delegate.isConnected()
     }
 }

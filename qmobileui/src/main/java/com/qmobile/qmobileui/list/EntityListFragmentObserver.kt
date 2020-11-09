@@ -10,9 +10,9 @@ import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.qmobile.qmobileapi.auth.AuthenticationState
-import com.qmobile.qmobileapi.connectivity.NetworkState
-import com.qmobile.qmobileapi.connectivity.NetworkUtils
+import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
+import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
@@ -57,7 +57,7 @@ fun EntityListFragment.getEntityListViewModel() {
 // Get ConnectivityViewModel
 fun EntityListFragment.getConnectivityViewModel() {
     activity?.run {
-        if (NetworkUtils.sdkNewerThanKitKat) {
+        if (sdkNewerThanKitKat) {
             connectivityViewModel = ViewModelProvider(
                 this,
                 ConnectivityViewModelFactory(
@@ -131,7 +131,7 @@ fun EntityListFragment.observeAuthenticationState() {
         viewLifecycleOwner,
         Observer { authenticationState ->
             when (authenticationState) {
-                AuthenticationState.AUTHENTICATED -> {
+                AuthenticationStateEnum.AUTHENTICATED -> {
                     if (isReady()) {
                         syncData()
                     } else {
@@ -147,12 +147,12 @@ fun EntityListFragment.observeAuthenticationState() {
 
 // Observe network status
 fun EntityListFragment.observeNetworkStatus() {
-    if (NetworkUtils.sdkNewerThanKitKat) {
+    if (sdkNewerThanKitKat) {
         connectivityViewModel.networkStateMonitor.observe(
             viewLifecycleOwner,
             Observer { networkState ->
                 when (networkState) {
-                    NetworkState.CONNECTED -> {
+                    NetworkStateEnum.CONNECTED -> {
                         if (isReady()) {
                             syncData()
                         } else {

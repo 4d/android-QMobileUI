@@ -29,7 +29,8 @@ task jacocoTestReport(type:JacocoReport, dependsOn: "testDebugUnitTest") {
             '**/*Test*.*',
             'android/**/*.*',
             '**/*Fragment.*',
-            '**/*Activity.*'
+            '**/*Activity.*',
+            '**/*Enum.*'
     ]
 
     // generated classes
@@ -41,5 +42,5 @@ task jacocoTestReport(type:JacocoReport, dependsOn: "testDebugUnitTest") {
     additionalSourceDirs.from = files()
     sourceDirectories.from = files([android.sourceSets.main.java.srcDirs])
 
-    executionData.from = files("$buildDir/jacoco/testDebugUnitTest.exec", "outputs/code-coverage/connected/*coverage.ec")
+    executionData.from = files("$buildDir/jacoco/testDebugUnitTest.exec")
 }

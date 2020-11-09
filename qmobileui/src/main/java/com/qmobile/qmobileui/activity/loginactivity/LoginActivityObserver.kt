@@ -8,8 +8,8 @@ package com.qmobile.qmobileui.activity.loginactivity
 
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.qmobile.qmobileapi.auth.AuthenticationState
-import com.qmobile.qmobileapi.connectivity.NetworkUtils
+import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
@@ -41,7 +41,7 @@ fun LoginActivity.getLoginViewModel() {
 
 // Get ConnectivityViewModel
 fun LoginActivity.getConnectivityViewModel() {
-    if (NetworkUtils.sdkNewerThanKitKat) {
+    if (sdkNewerThanKitKat) {
         connectivityViewModel = ViewModelProvider(
             this,
             ConnectivityViewModelFactory(BaseApp.instance, connectivityManager)
@@ -56,10 +56,10 @@ fun LoginActivity.observeAuthenticationState() {
         Observer { authenticationState ->
             Timber.i("[AuthenticationState : $authenticationState]")
             when (authenticationState) {
-                AuthenticationState.AUTHENTICATED -> {
+                AuthenticationStateEnum.AUTHENTICATED -> {
                     startMainActivity(false)
                 }
-                AuthenticationState.INVALID_AUTHENTICATION -> {
+                AuthenticationStateEnum.INVALID_AUTHENTICATION -> {
                     login_button_auth.isEnabled = true
                     displaySnackBar(this, resources.getString(R.string.login_fail_snackbar))
                 }
@@ -84,7 +84,7 @@ fun LoginActivity.observeEmailValid() {
 
 // Observe network status
 fun LoginActivity.observeNetworkStatus() {
-    if (NetworkUtils.sdkNewerThanKitKat) {
+    if (sdkNewerThanKitKat) {
         connectivityViewModel.networkStateMonitor.observe(
             this,
             Observer {

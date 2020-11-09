@@ -20,10 +20,10 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.qmobile.qmobileapi.auth.AuthenticationState
+import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.sync.DataSyncState
+import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
@@ -198,7 +198,7 @@ class EntityListFragment : Fragment(), BaseFragment {
                     displaySnackBar(it, it.resources.getString(R.string.no_internet))
                 }
                 Timber.d("No Internet connection, syncDataRequested")
-            } else if (loginViewModel.authenticationState.value != AuthenticationState.AUTHENTICATED) {
+            } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
                 activity?.let {
                     displaySnackBar(
                         it,
@@ -214,13 +214,13 @@ class EntityListFragment : Fragment(), BaseFragment {
      * Checks if environment is ready to perform an action
      */
     fun isReady(): Boolean {
-        if (loginViewModel.authenticationState.value == AuthenticationState.INVALID_AUTHENTICATION) {
+        if (loginViewModel.authenticationState.value == AuthenticationStateEnum.INVALID_AUTHENTICATION) {
             // For example server was not responding when trying to auto-login
             delegate.requestAuthentication()
             return false
         }
-        return loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
-            entityListViewModel.dataSynchronized.value == DataSyncState.SYNCHRONIZED &&
+        return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
+            entityListViewModel.dataSynchronized.value == DataSyncStateEnum.SYNCHRONIZED &&
             delegate.isConnected()
     }
 }

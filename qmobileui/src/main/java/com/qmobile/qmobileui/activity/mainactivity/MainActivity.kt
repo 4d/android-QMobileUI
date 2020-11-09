@@ -16,9 +16,9 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.NavController
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
-import com.qmobile.qmobileapi.auth.AuthenticationState
+import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.LoginRequiredCallback
-import com.qmobile.qmobileapi.connectivity.NetworkUtils
+import com.qmobile.qmobileapi.connectivity.isConnected
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
@@ -148,7 +148,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     @Suppress("unused")
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onForeground() {
-        if (loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED) {
+        if (loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED) {
             Timber.i("[${Lifecycle.Event.ON_START}]")
             applyOnForegroundEvent()
         } else {
@@ -166,10 +166,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     }
 
     override fun isConnected(): Boolean =
-        NetworkUtils.isConnected(
-            connectivityViewModel.networkStateMonitor.value,
-            connectivityManager
-        )
+        connectivityManager.isConnected(connectivityViewModel.networkStateMonitor.value)
 
     override fun requestAuthentication() {
         authenticationRequested = false

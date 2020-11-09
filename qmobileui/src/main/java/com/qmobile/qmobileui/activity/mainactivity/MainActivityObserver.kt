@@ -10,9 +10,9 @@ package com.qmobile.qmobileui.activity.mainactivity
 import android.annotation.SuppressLint
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.qmobile.qmobileapi.auth.AuthenticationState
-import com.qmobile.qmobileapi.connectivity.NetworkState
-import com.qmobile.qmobileapi.connectivity.NetworkUtils
+import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
+import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
@@ -45,7 +45,7 @@ fun MainActivity.getLoginViewModel() {
 
 // Get ConnectivityViewModel
 fun MainActivity.getConnectivityViewModel() {
-    if (NetworkUtils.sdkNewerThanKitKat) {
+    if (sdkNewerThanKitKat) {
         connectivityViewModel = ViewModelProvider(
             this,
             ConnectivityViewModelFactory(BaseApp.instance, connectivityManager)
@@ -78,12 +78,12 @@ fun MainActivity.observeAuthenticationState() {
         Observer { authenticationState ->
             Timber.i("[AuthenticationState : $authenticationState]")
             when (authenticationState) {
-                AuthenticationState.AUTHENTICATED -> {
+                AuthenticationStateEnum.AUTHENTICATED -> {
                     if (shouldDelayOnForegroundEvent.compareAndSet(true, false)) {
                         applyOnForegroundEvent()
                     }
                 }
-                AuthenticationState.LOGOUT -> {
+                AuthenticationStateEnum.LOGOUT -> {
                     // Logout performed
                     if (!authInfoHelper.guestLogin)
                         startLoginActivity()
@@ -97,16 +97,16 @@ fun MainActivity.observeAuthenticationState() {
 
 // Observe network status
 fun MainActivity.observeNetworkStatus() {
-    if (NetworkUtils.sdkNewerThanKitKat) {
+    if (sdkNewerThanKitKat) {
         connectivityViewModel.networkStateMonitor.observe(
             this,
             Observer { networkState ->
                 Timber.i("[NetworkState : $networkState]")
                 when (networkState) {
-                    NetworkState.CONNECTED -> {
+                    NetworkStateEnum.CONNECTED -> {
                         // Setting the authenticationState to its initial value
                         if (authInfoHelper.sessionToken.isNotEmpty())
-                            loginViewModel.authenticationState.postValue(AuthenticationState.AUTHENTICATED)
+                            loginViewModel.authenticationState.postValue(AuthenticationStateEnum.AUTHENTICATED)
 
                         // If guest and not yet logged in, auto login
                         if (authInfoHelper.sessionToken.isEmpty() &&

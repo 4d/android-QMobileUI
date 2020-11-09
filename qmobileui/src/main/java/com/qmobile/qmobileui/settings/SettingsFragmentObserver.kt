@@ -8,8 +8,8 @@ package com.qmobile.qmobileui.settings
 
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.qmobile.qmobileapi.auth.AuthenticationState
-import com.qmobile.qmobileapi.connectivity.NetworkUtils
+import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
@@ -52,7 +52,7 @@ fun SettingsFragment.getConnectivityViewModel() {
 
 // Observe network status
 fun SettingsFragment.observeNetworkStatus() {
-    if (NetworkUtils.sdkNewerThanKitKat) {
+    if (sdkNewerThanKitKat) {
         connectivityViewModel.networkStateMonitor.observe(
             viewLifecycleOwner,
             Observer {
@@ -91,7 +91,7 @@ fun SettingsFragment.observeAuthenticationState() {
         viewLifecycleOwner,
         Observer { authenticationState ->
             when (authenticationState) {
-                AuthenticationState.AUTHENTICATED -> {
+                AuthenticationStateEnum.AUTHENTICATED -> {
                     checkNetwork()
                 }
                 else -> {
