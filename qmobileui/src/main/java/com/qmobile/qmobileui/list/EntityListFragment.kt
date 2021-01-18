@@ -199,12 +199,12 @@ class EntityListFragment : Fragment(), BaseFragment {
                 }
                 Timber.d("No Internet connection, syncDataRequested")
             } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
-                activity?.let {
+                /*activity?.let {
                     displaySnackBar(
                         it,
                         it.resources.getString(R.string.error_occurred_try_again)
                     )
-                }
+                }*/
                 Timber.d("Not authenticated yet, syncDataRequested = $syncDataRequested")
             }
         }

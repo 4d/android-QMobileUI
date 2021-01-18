@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.activity.loginactivity
 
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
@@ -17,6 +18,7 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.ConnectivityViewModelFactor
 import com.qmobile.qmobiledatasync.viewmodel.factory.LoginViewModelFactory
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.displaySnackBar
+import com.qmobile.qmobileui.utils.fetchResourceString
 import kotlinx.android.synthetic.main.activity_login.*
 import timber.log.Timber
 
@@ -27,6 +29,7 @@ fun LoginActivity.getViewModel() {
 
 fun LoginActivity.setupObservers() {
     observeAuthenticationState()
+    observeToastMessage()
     observeEmailValid()
     observeNetworkStatus()
 }
@@ -67,6 +70,21 @@ fun LoginActivity.observeAuthenticationState() {
                     // Default state in LoginActivity
                     login_button_auth.isEnabled = true
                 }
+            }
+        }
+    )
+}
+
+// Observe any toast message
+fun LoginActivity.observeToastMessage() {
+    loginViewModel.toastMessage.observe(
+        this,
+        Observer { message ->
+            val toastMessage = this.baseContext.fetchResourceString(message)
+            if (toastMessage.isNotEmpty()) {
+                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
+                // To avoid the error toast to be displayed without performing a refresh again
+                loginViewModel.toastMessage.postValue("")
             }
         }
     )
