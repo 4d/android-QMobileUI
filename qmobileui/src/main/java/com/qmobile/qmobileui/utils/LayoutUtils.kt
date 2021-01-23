@@ -7,28 +7,18 @@
 package com.qmobile.qmobileui.utils
 
 import android.content.Context
-import java.util.Locale
+import com.qmobile.qmobileui.model.QMobileUiConstants
 
-private const val LAYOUT_RES_TYPE = "layout"
-private const val RV_ITEM_PREFIX = "recyclerview_item_"
-private const val FRAGMENT_DETAIL_PREFIX = "fragment_detail_"
+// Generic Layout Inflater
+fun layoutFromTable(context: Context, tableName: String, defType: String = QMobileUiConstants.LAYOUT): Int {
+    when ((tableName.split("_"))[0]) {
+        "recyclerview" -> {
+            return context.resources.getIdentifier(tableName, defType, context.packageName)
+        }
+        "fragment" -> {
+            return context.resources.getIdentifier(tableName, defType, context.packageName)
+        }
 
-/**
- * Provides the appropriate RecyclerView item layout
- */
-fun itemLayoutFromTable(context: Context, tableName: String): Int =
-    context.resources.getIdentifier(
-        "$RV_ITEM_PREFIX${tableName.toLowerCase(Locale.getDefault())}",
-        LAYOUT_RES_TYPE,
-        context.packageName
-    )
-
-/**
- * Provides the appropriate detail layout
- */
-fun detailLayoutFromTable(context: Context, tableName: String): Int =
-    context.resources.getIdentifier(
-        "$FRAGMENT_DETAIL_PREFIX${tableName.toLowerCase(Locale.getDefault())}",
-        LAYOUT_RES_TYPE,
-        context.packageName
-    )
+    }
+    return 0
+}

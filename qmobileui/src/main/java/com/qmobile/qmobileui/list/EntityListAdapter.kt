@@ -13,7 +13,9 @@ import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileui.list.viewholder.BaseViewHolder
-import com.qmobile.qmobileui.utils.itemLayoutFromTable
+import com.qmobile.qmobileui.model.QMobileUiConstants
+import com.qmobile.qmobileui.utils.layoutFromTable
+import java.util.*
 
 class EntityListAdapter internal constructor(
     private val tableName: String
@@ -27,7 +29,10 @@ class EntityListAdapter internal constructor(
         val dataBinding: ViewDataBinding =
             DataBindingUtil.inflate(
                 inflater,
-                itemLayoutFromTable(parent.context, tableName),
+                layoutFromTable(
+                    parent.context,
+                    "${QMobileUiConstants.RECYCLER_PREFIX}$tableName".toLowerCase(Locale.getDefault())
+                ),
                 parent,
                 false
             )
