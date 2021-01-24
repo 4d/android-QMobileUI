@@ -87,6 +87,7 @@ fun EntityListFragment.observeEntityList() {
         viewLifecycleOwner,
         Observer { entities ->
             entities?.let {
+                Timber.d("Enityt >>>>> $it")
                 adapter.setEntities(it)
             }
         }

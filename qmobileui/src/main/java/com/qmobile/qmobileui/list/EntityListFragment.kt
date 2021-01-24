@@ -24,16 +24,11 @@ import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
-import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
-import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
-import com.qmobile.qmobiledatasync.viewmodel.delete
-import com.qmobile.qmobiledatasync.viewmodel.insert
+import com.qmobile.qmobiledatasync.viewmodel.*
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.utils.buildSnackBar
-import com.qmobile.qmobileui.utils.displaySnackBar
+import com.qmobile.qmobileui.utils.customSnackBar
 import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
@@ -144,19 +139,14 @@ class EntityListFragment : Fragment(), BaseFragment {
                     val item = adapter.getEntities()[position]
                     entityListViewModel.delete(item)
                     activity?.let {
-                        val snackBar =
-                            buildSnackBar(it, it.resources.getString(R.string.snackbar_remove))
-                        snackBar.setAction(it.resources.getString(R.string.snackbar_undo)) {
-                            entityListViewModel.insert(item)
-//                            rv_main.scrollToPosition(position)
-                        }
-                        snackBar.setActionTextColor(
-                            ContextCompat.getColor(
-                                BaseApp.instance,
-                                R.color.colorAccent
-                            )
-                        )
-                        snackBar.show()
+
+                        customSnackBar(
+                            it,
+                            it.resources.getString(R.string.snackbar_remove),
+                            View.OnClickListener {
+                                entityListViewModel.insert(item)
+                                //rv_main.scrollToPosition(position)
+                            })
                     }
                 }
             }
@@ -195,7 +185,7 @@ class EntityListFragment : Fragment(), BaseFragment {
         } else {
             if (!delegate.isConnected()) {
                 activity?.let {
-                    displaySnackBar(it, it.resources.getString(R.string.no_internet))
+                customSnackBar(it,it.resources.getString(R.string.no_internet),null)
                 }
                 Timber.d("No Internet connection, syncDataRequested")
             } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
@@ -220,7 +210,7 @@ class EntityListFragment : Fragment(), BaseFragment {
             return false
         }
         return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
-            entityListViewModel.dataSynchronized.value == DataSyncStateEnum.SYNCHRONIZED &&
-            delegate.isConnected()
+                entityListViewModel.dataSynchronized.value == DataSyncStateEnum.SYNCHRONIZED &&
+                delegate.isConnected()
     }
 }

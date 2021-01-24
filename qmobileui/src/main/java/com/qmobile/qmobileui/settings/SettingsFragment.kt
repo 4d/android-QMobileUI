@@ -23,7 +23,7 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.utils.displaySnackBar
+import com.qmobile.qmobileui.utils.customSnackBar
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -170,7 +170,7 @@ class SettingsFragment :
         } else {
             if (!delegate.isConnected()) {
                 activity?.let {
-                    displaySnackBar(it, it.resources.getString(R.string.no_internet))
+                 customSnackBar(it,it.resources.getString(R.string.no_internet),null)
                 }
                 Timber.d("No Internet connection")
             } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {

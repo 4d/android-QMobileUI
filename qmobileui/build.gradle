@@ -14,10 +14,10 @@ dependencies {
     // QMobile libraries
     implementation project(':qmobileapi')
     implementation project(':qmobiledatastore')
-    implementation project(':qmobiledatasync')
-  //  implementation(QMobileLibs.qmobileapi) { changing = true }
-  //  implementation(QMobileLibs.qmobiledatastore) { changing = true }
-  //  implementation(QMobileLibs.qmobiledatasync) { changing = true }
+   implementation project(':qmobiledatasync')
+     // implementation(QMobileLibs.qmobileapi) { changing = true }
+     // implementation(QMobileLibs.qmobiledatastore) { changing = true }
+    //implementation(QMobileLibs.qmobiledatasync) { changing = true }
 
     // Common
     implementation Libs.androidx_constraintlayout

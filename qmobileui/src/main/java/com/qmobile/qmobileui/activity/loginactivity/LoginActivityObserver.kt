@@ -17,7 +17,7 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.LoginViewModelFactory
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.utils.displaySnackBar
+import com.qmobile.qmobileui.utils.customSnackBar
 import com.qmobile.qmobileui.utils.fetchResourceString
 import kotlinx.android.synthetic.main.activity_login.*
 import timber.log.Timber
@@ -64,7 +64,7 @@ fun LoginActivity.observeAuthenticationState() {
                 }
                 AuthenticationStateEnum.INVALID_AUTHENTICATION -> {
                     login_button_auth.isEnabled = true
-                    displaySnackBar(this, resources.getString(R.string.login_fail_snackbar))
+                    customSnackBar(this, resources.getString(R.string.login_fail_snackbar), null)
                 }
                 else -> {
                     // Default state in LoginActivity
