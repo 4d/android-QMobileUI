@@ -12,8 +12,8 @@ apply from: "$rootDir/buildscripts/projectDependencyGraph.gradle"
 dependencies {
 
     // QMobile libraries
-    //implementation project(':qmobileapi')
-   // implementation project(':qmobiledatastore')
+   // implementation project(':qmobileapi')
+   //implementation project(':qmobiledatastore')
    //implementation project(':qmobiledatasync')
       implementation(QMobileLibs.qmobileapi) { changing = true }
       implementation(QMobileLibs.qmobiledatastore) { changing = true }
