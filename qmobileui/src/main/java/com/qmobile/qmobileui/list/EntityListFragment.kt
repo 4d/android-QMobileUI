@@ -138,6 +138,7 @@ class EntityListFragment : Fragment(), BaseFragment {
                     val position = viewHolder.adapterPosition
                     val item = adapter.getEntities()[position]
                     entityListViewModel.delete(item)
+
                     activity?.let {
 
                         customSnackBar(
@@ -145,8 +146,9 @@ class EntityListFragment : Fragment(), BaseFragment {
                             it.resources.getString(R.string.snackbar_remove),
                             View.OnClickListener {
                                 entityListViewModel.insert(item)
-                                //rv_main.scrollToPosition(position)
-                            })
+                                // rv_main.scrollToPosition(position)
+                            }
+                        )
                     }
                 }
             }
@@ -185,7 +187,7 @@ class EntityListFragment : Fragment(), BaseFragment {
         } else {
             if (!delegate.isConnected()) {
                 activity?.let {
-                customSnackBar(it,it.resources.getString(R.string.no_internet),null)
+                    customSnackBar(it, it.resources.getString(R.string.no_internet), null)
                 }
                 Timber.d("No Internet connection, syncDataRequested")
             } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
@@ -210,7 +212,7 @@ class EntityListFragment : Fragment(), BaseFragment {
             return false
         }
         return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
-                entityListViewModel.dataSynchronized.value == DataSyncStateEnum.SYNCHRONIZED &&
-                delegate.isConnected()
+            entityListViewModel.dataSynchronized.value == DataSyncStateEnum.SYNCHRONIZED &&
+            delegate.isConnected()
     }
 }

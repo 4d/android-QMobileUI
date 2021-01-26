@@ -170,7 +170,7 @@ class SettingsFragment :
         } else {
             if (!delegate.isConnected()) {
                 activity?.let {
-                 customSnackBar(it,it.resources.getString(R.string.no_internet),null)
+                    customSnackBar(it, it.resources.getString(R.string.no_internet), null)
                 }
                 Timber.d("No Internet connection")
             } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {

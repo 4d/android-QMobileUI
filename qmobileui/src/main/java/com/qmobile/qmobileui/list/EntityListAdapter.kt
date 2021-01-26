@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.list
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -15,7 +16,7 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileui.list.viewholder.BaseViewHolder
 import com.qmobile.qmobileui.model.QMobileUiConstants
 import com.qmobile.qmobileui.utils.layoutFromTable
-import java.util.*
+import java.util.Locale
 
 class EntityListAdapter internal constructor(
     private val tableName: String
@@ -48,6 +49,8 @@ class EntityListAdapter internal constructor(
 
     internal fun setEntities(entities: List<EntityModel>) {
         this.entities = entities
+        Log.w("TEST", ">>> ${entities[0].__TIMESTAMP}")
+        Log.w("TEST", ">>> ${entities[1].__KEY}")
         notifyDataSetChanged()
     }
 

@@ -8,14 +8,13 @@ package com.qmobile.qmobileui.ui
 
 import android.app.SearchableInfo
 import android.content.Context
-import android.util.Log
 import android.view.MenuItem
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.core.view.MenuItemCompat
 import timber.log.Timber
 
-class CustomSearchView(var context: Context,  menuItem: MenuItem) {
+class CustomSearchView(var context: Context, menuItem: MenuItem) {
     private val searchView = MenuItemCompat.getActionView(menuItem) as SearchView
 
     val addListener = { searchableInfo: SearchableInfo? ->
@@ -28,12 +27,10 @@ class CustomSearchView(var context: Context,  menuItem: MenuItem) {
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 Timber.d("onTextchange :: $newText")
-               return false
+                return false
             }
-
         })
         searchView.setSearchableInfo(searchableInfo)
         searchView
     }
-
 }

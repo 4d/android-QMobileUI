@@ -21,7 +21,7 @@ fun MainActivity.startLoginActivity() {
     intent.putExtra(BaseActivity.LOGGED_OUT, true)
     intent.addFlags(
         Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                Intent.FLAG_ACTIVITY_NEW_TASK
+            Intent.FLAG_ACTIVITY_NEW_TASK
     )
     startActivity(intent)
     finish()

@@ -11,7 +11,6 @@ import android.content.Intent
 import android.graphics.Rect
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -32,7 +31,6 @@ import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.binding.bindImageFromDrawable
 import com.qmobile.qmobileui.databinding.ActivityLoginBinding
 import com.qmobile.qmobileui.utils.customSnackBar
-
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : BaseActivity() {
@@ -83,7 +81,7 @@ class LoginActivity : BaseActivity() {
         bindImageFromDrawable(login_logo, BaseApp.loginLogoDrawable)
 
         if (loggedOut) {
-          customSnackBar(this, resources.getString(R.string.login_logged_out_snackbar),null)
+            customSnackBar(this, resources.getString(R.string.login_logged_out_snackbar), null)
         }
 
         // Login button
@@ -92,7 +90,7 @@ class LoginActivity : BaseActivity() {
                 login_button_auth.isEnabled = false
                 loginViewModel.login(email = login_email_input.text.toString()) { }
             } else {
-             customSnackBar(this, resources.getString(R.string.no_internet),null)
+                customSnackBar(this, resources.getString(R.string.no_internet), null)
             }
         }
 
@@ -149,6 +147,4 @@ class LoginActivity : BaseActivity() {
         }
         return super.dispatchTouchEvent(event)
     }
-
-
 }

@@ -42,5 +42,4 @@ abstract class BaseActivity : AppCompatActivity() {
     } else {
         super.onBackPressed()
     }
-
 }

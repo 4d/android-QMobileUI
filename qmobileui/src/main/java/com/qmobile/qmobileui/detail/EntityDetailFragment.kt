@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.detail
 
 import android.content.Context
-import android.content.QuickViewConstants
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,9 +20,8 @@ import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.model.QMobileUiConstants
-
 import com.qmobile.qmobileui.utils.layoutFromTable
-import java.util.*
+import java.util.Locale
 
 class EntityDetailFragment : Fragment(), BaseFragment {
 

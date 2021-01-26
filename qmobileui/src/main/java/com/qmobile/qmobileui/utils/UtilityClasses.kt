@@ -14,13 +14,15 @@ import com.qmobile.qmobileui.model.DeviceUtility
 import com.qmobile.qmobileui.model.HardwareUtil
 import com.qmobile.qmobileui.model.QMobileUiConstants
 import org.json.JSONObject
-import java.util.*
+import java.util.Locale
 import kotlin.collections.ArrayList
 // Kotlin File To Hold Utility classes
-internal open class FileUtilsUp(var context: Context){ // scope restricted to this module
-    var readContentFromFile = {fileName: String -> context.assets.open(fileName).bufferedReader().use {
-        it.readText()
-    }}
+internal open class FileUtilsUp(var context: Context) { // scope restricted to this module
+    var readContentFromFile = { fileName: String ->
+        context.assets.open(fileName).bufferedReader().use {
+            it.readText()
+        }
+    }
 
     fun listAssetFiles(path: String): List<String> {
         val result = ArrayList<String>()
@@ -36,7 +38,7 @@ internal open class FileUtilsUp(var context: Context){ // scope restricted to th
     }
 }
 
-internal class BridgeUtility(context: Context) : FileUtilsUp(context) {  // scope restricted to this module
+internal class BridgeUtility(context: Context) : FileUtilsUp(context) { // scope restricted to this module
     fun getAppUtil(): AppUtilities {
         val jsonObj = JSONObject(readContentFromFile("appinfo.json"))
         return AppUtilities(
@@ -54,19 +56,21 @@ internal class BridgeUtility(context: Context) : FileUtilsUp(context) {  // scop
     }
 }
 
-internal class DeviceUtilitiesGenerator(context: Context){
+internal class DeviceUtilitiesGenerator(context: Context) {
     private val locale = Locale.getDefault()
-    val  getDeviceUtility =
-         DeviceUtility(langauge = JSONObject().apply {
-             put(QMobileUiConstants.LANGUAGE_ID, locale.toString())
-             put(QMobileUiConstants.LANGUAGE_CODE, locale.language)
-             put(QMobileUiConstants.LANGUAGE_REGION, locale.country)
-         },deviceInfo = JSONObject().apply {
-             put(QMobileUiConstants.DEVICE_ID, AuthInfoHelper.getInstance(context).deviceUUID)
-             put(QMobileUiConstants.DEVICE_SIMULATOR, HardwareUtil.isEmulator) // false
-             put(QMobileUiConstants.DEVICE_DESCRIPTION, Build.MODEL) // SM-G950F
-             put(QMobileUiConstants.DEVICE_VERSION, Build.VERSION.SDK_INT) // 28
-             put(QMobileUiConstants.DEVICE_OS, HardwareUtil.versionName()) // Android P
-         })
-
+    val getDeviceUtility =
+        DeviceUtility(
+            langauge = JSONObject().apply {
+                put(QMobileUiConstants.LANGUAGE_ID, locale.toString())
+                put(QMobileUiConstants.LANGUAGE_CODE, locale.language)
+                put(QMobileUiConstants.LANGUAGE_REGION, locale.country)
+            },
+            deviceInfo = JSONObject().apply {
+                put(QMobileUiConstants.DEVICE_ID, AuthInfoHelper.getInstance(context).deviceUUID)
+                put(QMobileUiConstants.DEVICE_SIMULATOR, HardwareUtil.isEmulator) // false
+                put(QMobileUiConstants.DEVICE_DESCRIPTION, Build.MODEL) // SM-G950F
+                put(QMobileUiConstants.DEVICE_VERSION, Build.VERSION.SDK_INT) // 28
+                put(QMobileUiConstants.DEVICE_OS, HardwareUtil.versionName()) // Android P
+            }
+        )
 }

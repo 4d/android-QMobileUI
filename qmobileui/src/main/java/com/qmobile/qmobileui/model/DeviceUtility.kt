@@ -8,4 +8,4 @@ package com.qmobile.qmobileui.model
 
 import org.json.JSONObject
 
-data class DeviceUtility(var  langauge: JSONObject, var deviceInfo : JSONObject )
+data class DeviceUtility(var langauge: JSONObject, var deviceInfo: JSONObject)

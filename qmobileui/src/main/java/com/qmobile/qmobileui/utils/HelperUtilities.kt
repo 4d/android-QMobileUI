@@ -28,7 +28,6 @@ fun layoutFromTable(
         "fragment" -> {
             return context.resources.getIdentifier(tableName, defType, context.packageName)
         }
-
     }
     return 0
 }
@@ -42,7 +41,7 @@ fun customSnackBar(
 ) {
     Snackbar.make(activity.findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
         .apply {
-            clickListener ?: this.show() //If listener is null
+            clickListener ?: this.show() // If listener is null
             setAction(actionName, clickListener)
             setActionTextColor(
                 ContextCompat.getColor(
