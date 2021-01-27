@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.list
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -32,7 +31,7 @@ class EntityListAdapter internal constructor(
                 inflater,
                 layoutFromTable(
                     parent.context,
-                    "${QMobileUiConstants.RECYCLER_PREFIX}$tableName".toLowerCase(Locale.getDefault())
+                    "${QMobileUiConstants.Prefix.RECYCLER_PREFIX}$tableName".toLowerCase(Locale.getDefault())
                 ),
                 parent,
                 false
@@ -49,8 +48,6 @@ class EntityListAdapter internal constructor(
 
     internal fun setEntities(entities: List<EntityModel>) {
         this.entities = entities
-        Log.w("TEST", ">>> ${entities[0].__TIMESTAMP}")
-        Log.w("TEST", ">>> ${entities[1].__KEY}")
         notifyDataSetChanged()
     }
 

@@ -57,7 +57,7 @@ class EntityDetailFragment : Fragment(), BaseFragment {
             inflater,
             layoutFromTable(
                 inflater.context,
-                "${QMobileUiConstants.FRAGMENT_DETAIL_PREFIX}$tableName".toLowerCase(Locale.getDefault())
+                "${QMobileUiConstants.Prefix.FRAGMENT_DETAIL_PREFIX}$tableName".toLowerCase(Locale.getDefault())
             ),
             container,
             false

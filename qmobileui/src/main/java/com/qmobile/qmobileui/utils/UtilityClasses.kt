@@ -60,17 +60,17 @@ internal class DeviceUtilitiesGenerator(context: Context) {
     private val locale = Locale.getDefault()
     val getDeviceUtility =
         DeviceUtility(
-            langauge = JSONObject().apply {
-                put(QMobileUiConstants.LANGUAGE_ID, locale.toString())
-                put(QMobileUiConstants.LANGUAGE_CODE, locale.language)
-                put(QMobileUiConstants.LANGUAGE_REGION, locale.country)
+            language = JSONObject().apply {
+                put(QMobileUiConstants.Language.LANGUAGE_ID, locale.toString())
+                put(QMobileUiConstants.Language.LANGUAGE_CODE, locale.language)
+                put(QMobileUiConstants.Language.LANGUAGE_REGION, locale.country)
             },
             deviceInfo = JSONObject().apply {
-                put(QMobileUiConstants.DEVICE_ID, AuthInfoHelper.getInstance(context).deviceUUID)
-                put(QMobileUiConstants.DEVICE_SIMULATOR, HardwareUtil.isEmulator) // false
-                put(QMobileUiConstants.DEVICE_DESCRIPTION, Build.MODEL) // SM-G950F
-                put(QMobileUiConstants.DEVICE_VERSION, Build.VERSION.SDK_INT) // 28
-                put(QMobileUiConstants.DEVICE_OS, HardwareUtil.versionName()) // Android P
+                put(QMobileUiConstants.Device.ID, AuthInfoHelper.getInstance(context).deviceUUID)
+                put(QMobileUiConstants.Device.SIMULATOR, HardwareUtil.isEmulator) // false
+                put(QMobileUiConstants.Device.DESCRIPTION, Build.MODEL) // SM-G950F
+                put(QMobileUiConstants.Device.VERSION, Build.VERSION.SDK_INT) // 28
+                put(QMobileUiConstants.Device.OS, HardwareUtil.versionName()) // Android P
             }
         )
 }

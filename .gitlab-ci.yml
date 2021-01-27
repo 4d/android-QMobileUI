@@ -65,7 +65,6 @@ buildLinux:
     - *build_sdk
     - ./gradlew clean --console=rich
     - ./gradlew assemble --console=rich
-    - ./gradlew artifactoryPublish --console=rich
   tags:
     - linux
   artifacts:
