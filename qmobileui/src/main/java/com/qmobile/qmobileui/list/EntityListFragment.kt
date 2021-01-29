@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.list
 
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -119,13 +118,6 @@ class EntityListFragment : Fragment(), BaseFragment {
      * Initialize Pull to refresh
      */
     private fun initOnRefreshListener() {
-        fragment_list_swipe_to_refresh.setProgressBackgroundColorSchemeColor(
-            ContextCompat.getColor(
-                requireContext(),
-                R.color.colorPrimary
-            )
-        )
-        fragment_list_swipe_to_refresh.setColorSchemeColors(Color.WHITE)
         fragment_list_swipe_to_refresh.setOnRefreshListener {
             forceSyncData()
             fragment_list_recycler_view.adapter = adapter
@@ -153,7 +145,7 @@ class EntityListFragment : Fragment(), BaseFragment {
                         snackBar.setActionTextColor(
                             ContextCompat.getColor(
                                 BaseApp.instance,
-                                R.color.colorAccent
+                                R.color.design_default_color_secondary
                             )
                         )
                         snackBar.show()

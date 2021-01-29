@@ -20,6 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/login_layout_margin"
+        android:background="@android:color/white"
         tools:context=".ui.LoginActivity">
 
         <androidx.constraintlayout.widget.Guideline

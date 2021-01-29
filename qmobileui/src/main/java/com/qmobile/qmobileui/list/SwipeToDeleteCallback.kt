@@ -27,7 +27,7 @@ abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.Callbac
     private val backgroundColor: Int =
         ContextCompat.getColor(
             context,
-            R.color.backgroundSwipeToDelete
+            android.R.color.holo_red_light
         )
     private val deleteDrawable: Drawable?
     private val intrinsicWidth: Int
