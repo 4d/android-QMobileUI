@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by Quentin Marciset on 28/1/2021.
+  ~ 4D SAS
+  ~ Copyright (c) 2021 Quentin Marciset. All rights reserved.
+  -->
+
+<resources>
+    <color name="error_dark">#FFCF6679</color>
+    <color name="error_light">#FFB00020</color>
+</resources>
