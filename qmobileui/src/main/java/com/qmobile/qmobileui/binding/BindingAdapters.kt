@@ -14,6 +14,7 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
@@ -45,7 +46,7 @@ private fun randomAvatar(): Int = listOfAvatars.random()
  * Use Glide to load image url in a view
  */
 @BindingAdapter(
-    value = ["imageUrl", "key", "tableName", "fieldName"],
+    value = ["imageUrl", "key", "tableName", "fieldName", "transform"],
     requireAll = false
 )
 fun bindImageFromUrl(
@@ -53,12 +54,13 @@ fun bindImageFromUrl(
     imageUrl: String?,
     key: String?,
     tableName: String?,
-    fieldName: String?
+    fieldName: String?,
+    transform: String? = null
 ) {
     val factory =
         DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
 
-    Glide.with(view.context.applicationContext)
+    val glideRequest = Glide.with(view.context.applicationContext)
         .load(
             if (imageUrl.isNullOrEmpty()) tryImageFromAssets(
                 tableName,
@@ -73,8 +75,19 @@ fun bindImageFromUrl(
         .listener(CustomRequestListener())
         .error(R.drawable.ic_error_black_24dp)
 //        .placeholder(R.drawable.profile_placeholder)
-        .transform(CircleCrop())
-        .into(view)
+
+    getTransformation(transform)?.let {
+        glideRequest.transform(it)
+    }
+
+    glideRequest.into(view)
+}
+
+fun getTransformation(transform: String?): BitmapTransformation? {
+    return when (transform) {
+        "CircleCrop" -> CircleCrop()
+        else -> null
+    }
 }
 
 fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Any {
@@ -83,18 +96,23 @@ fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): An
             Timber.d("file = $path")
             return Uri.parse("file:///android_asset/$path")
         }
-    return android.R.drawable.ic_menu_gallery
+    return R.drawable.ic_placeholder
 }
 
 /**
  * Use Glide to load image drawable in a view
  */
-@BindingAdapter(value = ["imageUrl", "requestListener"], requireAll = false)
-fun bindImageFromUrl(view: ImageView, drawable: Drawable?, listener: RequestListener<Drawable?>?) {
+@BindingAdapter(value = ["imageUrl", "transform", "requestListener"], requireAll = false)
+fun bindImageFromUrl(
+    view: ImageView,
+    drawable: Drawable?,
+    transform: String? = null,
+    listener: RequestListener<Drawable?>?
+) {
     val factory =
         DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
 
-    Glide.with(view.context.applicationContext)
+    val glideRequest = Glide.with(view.context.applicationContext)
         .load(drawable ?: randomAvatar())
         .transition(DrawableTransitionOptions.withCrossFade(factory))
         .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -103,8 +121,12 @@ fun bindImageFromUrl(view: ImageView, drawable: Drawable?, listener: RequestList
         .listener(CustomRequestListener())
         .error(R.drawable.ic_error_black_24dp)
 //        .placeholder(R.drawable.profile_placeholder)
-        .transform(CircleCrop())
-        .into(view)
+
+    getTransformation(transform)?.let {
+        glideRequest.transform(it)
+    }
+
+    glideRequest.into(view)
 }
 
 /**
