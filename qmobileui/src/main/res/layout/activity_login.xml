@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/login_layout_margin"
-        android:background="@android:color/white"
+        android:background="?colorSurface"
         tools:context=".ui.LoginActivity">
 
         <androidx.constraintlayout.widget.Guideline
@@ -79,7 +79,6 @@
             android:enabled="@{safeUnbox(viewModel.emailValid) ? true : false}"
             android:padding="@dimen/login_button_padding"
             android:text="@string/login_button_text"
-            android:textColor="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />

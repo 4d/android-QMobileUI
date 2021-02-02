@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -130,7 +129,7 @@ class EntityListFragment : Fragment(), BaseFragment {
      */
     private fun initSwipeToDeleteAndUndo() {
         val swipeToDeleteCallback: SwipeToDeleteCallback =
-            object : SwipeToDeleteCallback(requireContext()) {
+            object : SwipeToDeleteCallback(requireContext(), delegate.darkModeEnabled()) {
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     val position = viewHolder.adapterPosition
                     val item = adapter.getEntities()[position]
@@ -142,12 +141,6 @@ class EntityListFragment : Fragment(), BaseFragment {
                             entityListViewModel.insert(item)
 //                            rv_main.scrollToPosition(position)
                         }
-                        snackBar.setActionTextColor(
-                            ContextCompat.getColor(
-                                BaseApp.instance,
-                                R.color.design_default_color_secondary
-                            )
-                        )
                         snackBar.show()
                     }
                 }

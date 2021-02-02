@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.activity.mainactivity
 
 import android.content.Context
+import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.os.Bundle
 import androidx.lifecycle.Lifecycle
@@ -181,5 +182,14 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      */
     override fun requestDataSync(alreadyRefreshedTable: String) {
         setDataSyncObserver(alreadyRefreshedTable)
+    }
+
+    override fun darkModeEnabled(): Boolean {
+        return when (resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
+            Configuration.UI_MODE_NIGHT_YES -> true
+            Configuration.UI_MODE_NIGHT_NO -> false
+            Configuration.UI_MODE_NIGHT_UNDEFINED -> false
+            else -> false
+        }
     }
 }

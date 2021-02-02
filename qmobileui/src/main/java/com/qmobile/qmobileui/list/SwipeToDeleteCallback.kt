@@ -20,15 +20,21 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.R
 
-abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.Callback() {
+abstract class SwipeToDeleteCallback(context: Context, darkMode: Boolean) : ItemTouchHelper.Callback() {
 
     private val mClearPaint: Paint = Paint()
     private val mBackground: ColorDrawable = ColorDrawable()
-    private val backgroundColor: Int =
-        ContextCompat.getColor(
-            context,
-            android.R.color.holo_red_light
-        )
+
+    private val colorBackground: Int = ContextCompat.getColor(
+        context,
+        if (darkMode) R.color.error_dark else R.color.error_light
+    )
+
+    private val colorOnBackground: Int = ContextCompat.getColor(
+        context,
+        if (darkMode) android.R.color.black else android.R.color.white
+    )
+
     private val deleteDrawable: Drawable?
     private val intrinsicWidth: Int
     private val intrinsicHeight: Int
@@ -39,6 +45,7 @@ abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.Callbac
             context,
             R.drawable.ic_delete_white_24dp
         )
+        deleteDrawable?.setTint(colorOnBackground)
         intrinsicWidth = deleteDrawable!!.intrinsicWidth
         intrinsicHeight = deleteDrawable.intrinsicHeight
     }
@@ -82,7 +89,7 @@ abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.Callbac
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             return
         }
-        mBackground.color = backgroundColor
+        mBackground.color = colorBackground
         mBackground.setBounds(
             itemView.right + dX.toInt(),
             itemView.top,

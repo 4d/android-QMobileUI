@@ -39,8 +39,7 @@ private val listOfAvatars = listOf(
 /**
  * Provides one random avatar from the sample avatar list
  */
-private fun randomAvatar(): Int =
-    listOfAvatars[(listOfAvatars.indices).random() % listOfAvatars.size]
+private fun randomAvatar(): Int = listOfAvatars.random()
 
 /**
  * Use Glide to load image url in a view
@@ -84,7 +83,7 @@ fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): An
             Timber.d("file = $path")
             return Uri.parse("file:///android_asset/$path")
         }
-    return randomAvatar()
+    return android.R.drawable.ic_menu_gallery
 }
 
 /**
