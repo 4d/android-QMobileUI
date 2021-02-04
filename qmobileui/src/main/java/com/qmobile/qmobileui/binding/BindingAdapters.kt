@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.binding
 
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.View
 import android.widget.ImageView
@@ -17,7 +16,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
@@ -46,15 +44,15 @@ private fun randomAvatar(): Int = listOfAvatars.random()
  * Use Glide to load image url in a view
  */
 @BindingAdapter(
-    value = ["imageUrl", "key", "tableName", "fieldName", "transform"],
+    value = ["imageUrl", "imageFieldName", "imageKey", "imageTableName", "imageTransform"],
     requireAll = false
 )
 fun bindImageFromUrl(
     view: ImageView,
     imageUrl: String?,
+    fieldName: String?,
     key: String?,
     tableName: String?,
-    fieldName: String?,
     transform: String? = null
 ) {
     val factory =
@@ -73,7 +71,7 @@ fun bindImageFromUrl(
         .centerCrop()
 //        .listener(listener)
         .listener(CustomRequestListener())
-        .error(R.drawable.ic_error_black_24dp)
+        .error(R.drawable.ic_error_outline)
 //        .placeholder(R.drawable.profile_placeholder)
 
     getTransformation(transform)?.let {
@@ -102,7 +100,7 @@ fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): An
 /**
  * Use Glide to load image drawable in a view
  */
-@BindingAdapter(value = ["imageUrl", "transform", "requestListener"], requireAll = false)
+/*@BindingAdapter(value = ["imageUrl", "imageTransform", "imageRequestListener"], requireAll = false)
 fun bindImageFromUrl(
     view: ImageView,
     drawable: Drawable?,
@@ -119,7 +117,7 @@ fun bindImageFromUrl(
         .centerCrop()
 //        .listener(listener)
         .listener(CustomRequestListener())
-        .error(R.drawable.ic_error_black_24dp)
+        .error(R.drawable.ic_error_outline)
 //        .placeholder(R.drawable.profile_placeholder)
 
     getTransformation(transform)?.let {
@@ -127,7 +125,7 @@ fun bindImageFromUrl(
     }
 
     glideRequest.into(view)
-}
+}*/
 
 /**
  * Use Glide to load image drawable in a view
@@ -144,7 +142,7 @@ fun bindImageFromDrawable(view: ImageView, imageDrawable: Int?) {
         .load(imageDrawable)
         .transition(DrawableTransitionOptions.withCrossFade(factory))
         .diskCacheStrategy(DiskCacheStrategy.ALL)
-        .error(R.drawable.ic_error_black_24dp)
+        .error(R.drawable.ic_error_outline)
         .into(view)
 }
 
