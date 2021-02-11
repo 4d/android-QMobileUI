@@ -14,5 +14,6 @@ data class AppUtilities(
     var embeddedData: Boolean,
     var remoteUrl: String,
     var teams: JSONObject,
-    var queryJson: JSONObject
+    var queryJson: JSONObject,
+    var searchField: JSONObject
 )

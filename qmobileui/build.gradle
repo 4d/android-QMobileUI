@@ -19,6 +19,11 @@ dependencies {
     //  implementation(QMobileLibs.qmobiledatastore) { changing = true }
      // implementation(QMobileLibs.qmobiledatasync) { changing = true }
 
+    // Room
+    implementation Libs.androidx_room
+    implementation Libs.androidx_room_runtime
+    kapt Libs.androidx_room_compiler
+
     // Common
     implementation Libs.androidx_constraintlayout
     implementation Libs.androidx_preference_ktx

@@ -51,7 +51,8 @@ internal class BridgeUtility(context: Context) : FileUtilsUp(context) { // scope
                 this.put("id", newTeam.getString("TeamName"))
                 this.put("name", newTeam.getString("TeamID"))
             },
-            JSONObject(readContentFromFile("queries.json"))
+            JSONObject(readContentFromFile("queries.json")),
+            jsonObj.getJSONObject("searchableField")
         )
     }
 }
