@@ -30,29 +30,10 @@ lint:
     paths:
     - qmobileui/build/reports/
 
-# OSX PLATFORM
-
-.download_sdk_osx: &download_sdk_osx |
-  echo "Starting download_sdk_osx"
-  curl -o android-sdk.zip https://dl.google.com/android/repository/sdk-tools-darwin-${ANDROID_SDK_TOOLS}.zip
-
-# LINUX PLATFORM
-
-.download_sdk_linux: &download_sdk_linux |
-  echo "Starting download_sdk_linux"
-  curl -o android-sdk.zip https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip
-
-.build_sdk: &build_sdk |
-  echo "Starting build_sdk"
-  unzip -q android-sdk.zip -d android-sdk
-  rm android-sdk.zip
-  echo y | android-sdk/tools/bin/sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null
-  echo y | android-sdk/tools/bin/sdkmanager "platform-tools" >/dev/null
-  echo y | android-sdk/tools/bin/sdkmanager "tools" >/dev/null
-  echo y | android-sdk/tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}" >/dev/null
-  export ANDROID_HOME=$PWD/android-sdk
-  export ANDROID_SDK_HOME=$PWD/android-sdk
-  export ANDROID_SDK_ROOT=$PWD/android-sdk
+.prepare_sdk: &prepare_sdk |
+  export ANDROID_HOME=$PWD/../android-sdk
+  export ANDROID_SDK_HOME=$PWD/../android-sdk
+  export ANDROID_SDK_ROOT=$PWD/../android-sdk
   export PATH=$PATH:$ANDROID_HOME/platform-tools/
   export PATH=$PATH:$ANDROID_HOME/tools/
   export PATH=$PATH:$ANDROID_HOME/tools/bin/
@@ -61,8 +42,7 @@ lint:
 buildLinux:
   stage: build
   script:
-    - *download_sdk_linux
-    - *build_sdk
+    - *prepare_sdk
     - ./gradlew clean --console=rich
     - ./gradlew assemble --console=rich
   tags:
@@ -74,8 +54,7 @@ buildLinux:
 unitTests:
   stage: test
   script:
-    - *download_sdk_linux
-    - *build_sdk
+    - *prepare_sdk
     - ./gradlew -x lint jacocoTestReport --console=rich
     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print 100*covered/instructions, "% covered" }' qmobileui/build/reports/jacoco/jacocoTestReport/jacocoTestReport.csv
   tags:

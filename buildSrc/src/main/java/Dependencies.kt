@@ -28,7 +28,7 @@ object Versions {
     val lifecycle = "2.2.0"
     val mockito = "3.7.7"
     val multidex = "2.0.1"
-    val navigation = "2.3.3"
+    val navigation = "2.3.0"
     val okhttp = "4.9.0"
     val preference = "1.1.1"
     val retrofit = "2.9.0"

@@ -12,12 +12,12 @@ apply from: "$rootDir/buildscripts/projectDependencyGraph.gradle"
 dependencies {
 
     // QMobile libraries
-//    implementation project(':qmobileapi')
-//    implementation project(':qmobiledatastore')
-//    implementation project(':qmobiledatasync')
-    implementation(QMobileLibs.qmobileapi) { changing = true }
-    implementation(QMobileLibs.qmobiledatastore) { changing = true }
-    implementation(QMobileLibs.qmobiledatasync) { changing = true }
+    implementation project(':qmobileapi')
+    implementation project(':qmobiledatastore')
+    implementation project(':qmobiledatasync')
+//    implementation(QMobileLibs.qmobileapi + '-' + gitBranch()) { changing = true }
+//    implementation(QMobileLibs.qmobiledatastore + '-' + gitBranch()) { changing = true }
+//    implementation(QMobileLibs.qmobiledatasync + '-' + gitBranch()) { changing = true }
 
     // Common
     implementation Libs.androidx_constraintlayout
@@ -52,7 +52,7 @@ dependencies {
 
 def libraryGroupId = 'com.qmobile.qmobileui'
 def libraryArtifactId = 'qmobileui'
-def libraryVersion = '0.0.1'
+def libraryVersion = Versions.qmobileui + '-' + gitBranch()
 def buildVariant = 'release'
 
 publishing {
