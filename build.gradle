@@ -46,6 +46,13 @@ static def gitBranch() {
     branch
 }
 
+ext {
+    QMobileAPI = QMobileLibs.qmobileapi + '-' + gitBranch().replace("/", "_")
+    QMobileDataStore = QMobileLibs.qmobiledatastore + '-' + gitBranch().replace("/", "_")
+    QMobileDataSync = QMobileLibs.qmobiledatasync + '-' + gitBranch().replace("/", "_")
+    QMobileUI = QMobileLibs.qmobileui + '-' + gitBranch().replace("/", "_")
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
