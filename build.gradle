@@ -39,10 +39,13 @@ allprojects {
 
 static def gitBranch() {
     def branch = ""
-    def proc = "git rev-parse --abbrev-ref HEAD".execute()
-    proc.in.eachLine { line -> branch = line }
-    proc.err.eachLine { line -> println line }
-    proc.waitFor()
+    branch = System.getenv('CI_COMMIT_REF_NAME')
+    if (branch == null) {
+        def proc = "git rev-parse --abbrev-ref HEAD".execute()
+        proc.in.eachLine { line -> branch = line }
+        proc.err.eachLine { line -> println line }
+        proc.waitFor()
+    }
     branch
 }
 
