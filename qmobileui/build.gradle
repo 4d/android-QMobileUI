@@ -12,12 +12,12 @@ apply from: "$rootDir/buildscripts/projectDependencyGraph.gradle"
 dependencies {
 
     // QMobile libraries
-    implementation project(':qmobileapi')
-    implementation project(':qmobiledatastore')
-    implementation project(':qmobiledatasync')
-//    implementation(QMobileLibs.qmobileapi + '-' + gitBranch()) { changing = true }
-//    implementation(QMobileLibs.qmobiledatastore + '-' + gitBranch()) { changing = true }
-//    implementation(QMobileLibs.qmobiledatasync + '-' + gitBranch()) { changing = true }
+//    implementation project(':qmobileapi')
+//    implementation project(':qmobiledatastore')
+//    implementation project(':qmobiledatasync')
+    implementation(QMobileAPI) { changing = true }
+    implementation(QMobileDataStore) { changing = true }
+    implementation(QMobileDataSync) { changing = true }
 
     // Common
     implementation Libs.androidx_constraintlayout
@@ -52,14 +52,18 @@ dependencies {
 
 def libraryGroupId = 'com.qmobile.qmobileui'
 def libraryArtifactId = 'qmobileui'
-def libraryVersion = Versions.qmobileui + '-' + gitBranch()
+def libraryVersion = Versions.qmobileui
 def buildVariant = 'release'
 
 publishing {
     publications {
         aar(MavenPublication) {
             groupId libraryGroupId
-            version libraryVersion
+            def branchName = System.getenv('CI_COMMIT_REF_NAME')
+            if (branchName != null) {
+                branchName = branchName.replace("/", "_")
+            }
+            version libraryVersion + '-' + branchName
 
             artifactId libraryArtifactId
             artifact("$buildDir/outputs/aar/${artifactId}-${buildVariant}.aar")
