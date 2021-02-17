@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.binding
 
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.View
 import android.widget.ImageView
@@ -14,9 +13,9 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
@@ -39,27 +38,27 @@ private val listOfAvatars = listOf(
 /**
  * Provides one random avatar from the sample avatar list
  */
-private fun randomAvatar(): Int =
-    listOfAvatars[(listOfAvatars.indices).random() % listOfAvatars.size]
+private fun randomAvatar(): Int = listOfAvatars.random()
 
 /**
  * Use Glide to load image url in a view
  */
 @BindingAdapter(
-    value = ["imageUrl", "key", "tableName", "fieldName"],
+    value = ["imageUrl", "imageFieldName", "imageKey", "imageTableName", "imageTransform"],
     requireAll = false
 )
 fun bindImageFromUrl(
     view: ImageView,
     imageUrl: String?,
+    fieldName: String?,
     key: String?,
     tableName: String?,
-    fieldName: String?
+    transform: String? = null
 ) {
     val factory =
         DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
 
-    Glide.with(view.context.applicationContext)
+    val glideRequest = Glide.with(view.context.applicationContext)
         .load(
             if (imageUrl.isNullOrEmpty()) tryImageFromAssets(
                 tableName,
@@ -72,10 +71,21 @@ fun bindImageFromUrl(
         .centerCrop()
 //        .listener(listener)
         .listener(CustomRequestListener())
-        .error(R.drawable.ic_error_black_24dp)
+        .error(R.drawable.ic_error_outline)
 //        .placeholder(R.drawable.profile_placeholder)
-        .transform(CircleCrop())
-        .into(view)
+
+    getTransformation(transform)?.let {
+        glideRequest.transform(it)
+    }
+
+    glideRequest.into(view)
+}
+
+fun getTransformation(transform: String?): BitmapTransformation? {
+    return when (transform) {
+        "CircleCrop" -> CircleCrop()
+        else -> null
+    }
 }
 
 fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Any {
@@ -84,29 +94,38 @@ fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): An
             Timber.d("file = $path")
             return Uri.parse("file:///android_asset/$path")
         }
-    return randomAvatar()
+    return R.drawable.ic_placeholder
 }
 
 /**
  * Use Glide to load image drawable in a view
  */
-@BindingAdapter(value = ["imageUrl", "requestListener"], requireAll = false)
-fun bindImageFromUrl(view: ImageView, drawable: Drawable?, listener: RequestListener<Drawable?>?) {
+/*@BindingAdapter(value = ["imageUrl", "imageTransform", "imageRequestListener"], requireAll = false)
+fun bindImageFromUrl(
+    view: ImageView,
+    drawable: Drawable?,
+    transform: String? = null,
+    listener: RequestListener<Drawable?>?
+) {
     val factory =
         DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
 
-    Glide.with(view.context.applicationContext)
+    val glideRequest = Glide.with(view.context.applicationContext)
         .load(drawable ?: randomAvatar())
         .transition(DrawableTransitionOptions.withCrossFade(factory))
         .diskCacheStrategy(DiskCacheStrategy.ALL)
         .centerCrop()
 //        .listener(listener)
         .listener(CustomRequestListener())
-        .error(R.drawable.ic_error_black_24dp)
+        .error(R.drawable.ic_error_outline)
 //        .placeholder(R.drawable.profile_placeholder)
-        .transform(CircleCrop())
-        .into(view)
-}
+
+    getTransformation(transform)?.let {
+        glideRequest.transform(it)
+    }
+
+    glideRequest.into(view)
+}*/
 
 /**
  * Use Glide to load image drawable in a view
@@ -123,7 +142,7 @@ fun bindImageFromDrawable(view: ImageView, imageDrawable: Int?) {
         .load(imageDrawable)
         .transition(DrawableTransitionOptions.withCrossFade(factory))
         .diskCacheStrategy(DiskCacheStrategy.ALL)
-        .error(R.drawable.ic_error_black_24dp)
+        .error(R.drawable.ic_error_outline)
         .into(view)
 }
 

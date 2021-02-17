@@ -28,4 +28,6 @@ interface FragmentCommunication {
     fun requestDataSync(alreadyRefreshedTable: String)
 
     fun requestAuthentication()
+
+    fun darkModeEnabled(): Boolean
 }

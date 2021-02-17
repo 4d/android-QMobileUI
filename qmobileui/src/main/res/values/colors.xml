@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Created by Quentin Marciset on 19/2/2020.
+  ~ Created by Quentin Marciset on 28/1/2021.
   ~ 4D SAS
-  ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
+  ~ Copyright (c) 2021 Quentin Marciset. All rights reserved.
   -->
 
 <resources>
-
-    <color name="colorPrimary">#344955</color>
-    <color name="colorPrimaryDark">#232F34</color>
-    <color name="colorPrimaryLight">#4A6572</color>
-    <color name="colorAccent">#F9AA33</color>
-
-    <!--    Swipe to delete -->
-    <color name="backgroundSwipeToDelete">#f44336</color>
-
-    <!--    Error fragment -->
-    <color name="error_fragment_soft_error">#CFCFCF</color>
+    <color name="error_dark">#FFCF6679</color>
+    <color name="error_light">#FFB00020</color>
 </resources>

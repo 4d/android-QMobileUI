@@ -9,7 +9,6 @@ package com.qmobile.qmobileui.list
 import android.app.SearchManager
 import android.content.Context
 import android.content.Context.SEARCH_SERVICE
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -17,7 +16,6 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -137,13 +135,6 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
      * Initialize Pull to refresh
      */
     private fun initOnRefreshListener() {
-        fragment_list_swipe_to_refresh.setProgressBackgroundColorSchemeColor(
-            ContextCompat.getColor(
-                requireContext(),
-                R.color.colorPrimary
-            )
-        )
-        fragment_list_swipe_to_refresh.setColorSchemeColors(Color.WHITE)
         fragment_list_swipe_to_refresh.setOnRefreshListener {
             forceSyncData()
             fragment_list_recycler_view.adapter = adapter
@@ -156,14 +147,13 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
      */
     private fun initSwipeToDeleteAndUndo() {
         val swipeToDeleteCallback: SwipeToDeleteCallback =
-            object : SwipeToDeleteCallback(requireContext()) {
+            object : SwipeToDeleteCallback(requireContext(), delegate.darkModeEnabled()) {
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     val position = viewHolder.adapterPosition
                     val item = adapter.getEntities()[position]
                     entityListViewModel.delete(item)
 
                     activity?.let {
-
                         customSnackBar(
                             it,
                             it.resources.getString(R.string.snackbar_remove),
