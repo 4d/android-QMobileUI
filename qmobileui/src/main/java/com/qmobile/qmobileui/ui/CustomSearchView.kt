@@ -10,9 +10,7 @@ import android.app.SearchableInfo
 import android.content.Context
 import android.view.MenuItem
 import android.widget.SearchView
-import android.widget.Toast
 import androidx.core.view.MenuItemCompat
-import timber.log.Timber
 
 class CustomSearchView(var context: Context?, menuItem: MenuItem, searchListener: SearchListener) {
     private val searchView = MenuItemCompat.getActionView(menuItem) as SearchView
@@ -20,13 +18,11 @@ class CustomSearchView(var context: Context?, menuItem: MenuItem, searchListener
         searchView.setOnCloseListener { true }
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                Toast.makeText(context, "Submit :: $query", Toast.LENGTH_LONG).show()
                 searchListener.dataToSearch(query)
                 return false
             }
 
             override fun onQueryTextChange(queryText: String): Boolean {
-                Timber.d("onTextchange :: $queryText")
                 searchListener.dataToSearch(queryText)
                 return false
             }

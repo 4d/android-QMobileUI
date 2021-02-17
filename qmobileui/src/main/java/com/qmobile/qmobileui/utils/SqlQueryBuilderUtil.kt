@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.utils
 
 import androidx.sqlite.db.SimpleSQLiteQuery
+import org.json.JSONArray
 import org.json.JSONObject
 
 class SqlQueryBuilderUtil(
@@ -19,15 +20,22 @@ class SqlQueryBuilderUtil(
     fun sortQuery(dataToSort: String): SimpleSQLiteQuery {
         val stringBuffer = StringBuffer("SELECT * FROM $tableName")
         if (searchField.has(tableName)) {
-            val columnsToFilter = searchField.getJSONArray(tableName)
-            (0 until columnsToFilter.length()).forEach {
-                when {
-                    (columnsToFilter.length() == 1) -> stringBuffer.append(" WHERE ${columnsToFilter[it]} LIKE  \'%$dataToSort%\' ")
-                    (it == (columnsToFilter.length() - 1)) -> stringBuffer.append("${columnsToFilter[it]} LIKE  \'%$dataToSort%\' ")
-                    else -> stringBuffer.append(" WHERE ${columnsToFilter[it]} LIKE  \'%$dataToSort%\'  OR ")
-                }
-            }
+            conditionAdder(searchField.getJSONArray(tableName), stringBuffer, dataToSort)
         }
         return SimpleSQLiteQuery(stringBuffer.toString())
+    }
+
+    private fun conditionAdder(
+        columnsToFilter: JSONArray,
+        stringBuffer: StringBuffer,
+        dataToSort: String
+    ) {
+        (0 until columnsToFilter.length()).forEach {
+            when {
+                (columnsToFilter.length() == 1) -> stringBuffer.append(" WHERE ${columnsToFilter[it]} LIKE  \'%$dataToSort%\' ")
+                (it == (columnsToFilter.length() - 1)) -> stringBuffer.append("${columnsToFilter[it]} LIKE  \'%$dataToSort%\' ")
+                else -> stringBuffer.append(" WHERE ${columnsToFilter[it]} LIKE  \'%$dataToSort%\'  OR ")
+            }
+        }
     }
 }
