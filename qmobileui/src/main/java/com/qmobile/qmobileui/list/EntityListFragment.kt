@@ -231,7 +231,8 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
 
     // Custom Search bar Listener
     override fun dataToSearch(data: String) {
-        if (data.isEmpty()) observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll()) else observeEntityListDynamicSearch(
+        if (data.isEmpty()) observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll())
+        else observeEntityListDynamicSearch(
             sqlQueryBuilderUtil.sortQuery(data)
         )
     }

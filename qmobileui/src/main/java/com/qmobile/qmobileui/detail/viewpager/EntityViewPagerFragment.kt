@@ -18,6 +18,7 @@ import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 
 class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChangeListener {
 
@@ -25,6 +26,7 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
     var tableName: String = ""
     var viewPager: ViewPager? = null
     private var onFragmentCreation = true
+    private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -46,6 +48,9 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
         if (onFragmentCreation)
             arguments?.getInt("position")?.let { position = it }
         arguments?.getString("tableName")?.let { tableName = it }
+
+        sqlQueryBuilderUtil = SqlQueryBuilderUtil(tableName)
+
         onFragmentCreation = false
         return viewPager
     }
@@ -62,7 +67,8 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
         super.onActivityCreated(savedInstanceState)
 
         getViewModel()
-        setupObservers()
+//        setupObservers()
+        observeEntityList(sqlQueryBuilderUtil.getAll())
     }
 
     override fun onDestroyView() {

@@ -9,9 +9,7 @@ package com.qmobile.qmobileui.utils
 import android.app.Activity
 import android.content.Context
 import android.view.View
-import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
-import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.model.QMobileUiConstants
 
@@ -21,15 +19,15 @@ fun layoutFromTable(
     tableName: String,
     defType: String = QMobileUiConstants.LAYOUT
 ): Int {
-    when ((tableName.split("_"))[0]) {
+    return when ((tableName.split("_"))[0]) {
         "recyclerview" -> {
-            return context.resources.getIdentifier(tableName, defType, context.packageName)
+            context.resources.getIdentifier(tableName, defType, context.packageName)
         }
         "fragment" -> {
-            return context.resources.getIdentifier(tableName, defType, context.packageName)
+            context.resources.getIdentifier(tableName, defType, context.packageName)
         }
+        else -> 0
     }
-    return 0
 }
 
 // custom snackbar
@@ -43,12 +41,6 @@ fun customSnackBar(
         .apply {
             clickListener ?: this.show() // If listener is null
             setAction(actionName, clickListener)
-            setActionTextColor(
-                ContextCompat.getColor(
-                    BaseApp.instance,
-                    R.color.colorAccent
-                )
-            )
             show()
         }
 }

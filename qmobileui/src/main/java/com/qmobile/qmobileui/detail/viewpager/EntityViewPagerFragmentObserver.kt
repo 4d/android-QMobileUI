@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.detail.viewpager
 
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 
@@ -15,9 +16,9 @@ fun EntityViewPagerFragment.getViewModel() {
     getEntityListViewModel()
 }
 
-fun EntityViewPagerFragment.setupObservers() {
-    observeEntityList()
-}
+// fun EntityViewPagerFragment.setupObservers() {
+//    observeEntityList()
+// }
 
 // Get EntityListViewModel
 fun EntityViewPagerFragment.getEntityListViewModel() {
@@ -34,8 +35,8 @@ fun EntityViewPagerFragment.getEntityListViewModel() {
 }
 
 // Observe entity list
-fun EntityViewPagerFragment.observeEntityList() {
-    entityListViewModel.entityList.observe(
+fun EntityViewPagerFragment.observeEntityList(sqLiteQuery: SupportSQLiteQuery) {
+    entityListViewModel.getAllDynamicQuery(sqLiteQuery).observe(
         viewLifecycleOwner,
         Observer { entities ->
             entities?.let {
