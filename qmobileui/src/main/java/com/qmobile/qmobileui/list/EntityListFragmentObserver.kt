@@ -7,9 +7,11 @@
 package com.qmobile.qmobileui.list
 
 import android.annotation.SuppressLint
+import android.view.Gravity
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
@@ -35,7 +37,6 @@ fun EntityListFragment.getViewModel() {
  * Setup observers
  */
 fun EntityListFragment.setupObservers() {
-    observeEntityList()
     observeToastMessage()
     observeDataSynchronized()
     observeAuthenticationState()
@@ -81,13 +82,17 @@ fun EntityListFragment.getLoginViewModel() {
     } ?: throw IllegalStateException("Invalid Activity")
 }
 
-// Observe entity list
-fun EntityListFragment.observeEntityList() {
-    entityListViewModel.entityList.observe(
+// Sql Dynamic Query Support
+fun EntityListFragment.observeEntityListDynamicSearch(sqLiteQuery: SupportSQLiteQuery) {
+    entityListViewModel.getAllDynamicQuery(sqLiteQuery).observe(
         viewLifecycleOwner,
-        Observer { entities ->
-            entities?.let {
+        {
+            it.let {
                 adapter.setEntities(it)
+                if (it.isEmpty()) Toast.makeText(this.context, "No data Found", Toast.LENGTH_SHORT).apply {
+                    setGravity(Gravity.CENTER, 0, 0)
+                    show()
+                }
             }
         }
     )

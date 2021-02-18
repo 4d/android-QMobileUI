@@ -50,7 +50,7 @@ static def gitBranch() {
 }
 
 ext {
-    QMobileAPI = QMobileLibs.qmobileapi + '-' + gitBranch().replace("/", "_")
+    QMobileAPI = QMobileLibs.qmobileapi + '-' + "master"
     QMobileDataStore = QMobileLibs.qmobiledatastore + '-' + gitBranch().replace("/", "_")
     QMobileDataSync = QMobileLibs.qmobiledatasync + '-' + gitBranch().replace("/", "_")
     QMobileUI = QMobileLibs.qmobileui + '-' + gitBranch().replace("/", "_")

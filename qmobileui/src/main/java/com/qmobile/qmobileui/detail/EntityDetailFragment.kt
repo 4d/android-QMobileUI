@@ -19,7 +19,9 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
-import com.qmobile.qmobileui.utils.detailLayoutFromTable
+import com.qmobile.qmobileui.model.QMobileUiConstants
+import com.qmobile.qmobileui.utils.layoutFromTable
+import java.util.Locale
 
 class EntityDetailFragment : Fragment(), BaseFragment {
 
@@ -53,7 +55,10 @@ class EntityDetailFragment : Fragment(), BaseFragment {
 
         val dataBinding: ViewDataBinding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
-            detailLayoutFromTable(inflater.context, tableName),
+            layoutFromTable(
+                inflater.context,
+                "${QMobileUiConstants.Prefix.FRAGMENT_DETAIL_PREFIX}$tableName".toLowerCase(Locale.getDefault())
+            ),
             container,
             false
         ).apply {

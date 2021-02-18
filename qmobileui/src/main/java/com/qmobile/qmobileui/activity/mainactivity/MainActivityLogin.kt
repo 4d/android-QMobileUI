@@ -10,7 +10,7 @@ import android.content.Intent
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
-import com.qmobile.qmobileui.utils.displaySnackBar
+import com.qmobile.qmobileui.utils.customSnackBar
 import timber.log.Timber
 
 /**
@@ -36,9 +36,6 @@ fun MainActivity.tryAutoLogin() {
     } else {
         authenticationRequested = true
         Timber.d("No Internet connection, authenticationRequested")
-        displaySnackBar(
-            this,
-            resources.getString(R.string.no_internet_auto_login)
-        )
+        customSnackBar(this, resources.getString(R.string.no_internet_auto_login), null)
     }
 }

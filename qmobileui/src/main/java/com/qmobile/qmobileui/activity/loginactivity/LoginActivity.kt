@@ -30,7 +30,7 @@ import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.binding.bindImageFromDrawable
 import com.qmobile.qmobileui.databinding.ActivityLoginBinding
-import com.qmobile.qmobileui.utils.displaySnackBar
+import com.qmobile.qmobileui.utils.customSnackBar
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : BaseActivity() {
@@ -81,7 +81,7 @@ class LoginActivity : BaseActivity() {
         bindImageFromDrawable(login_logo, BaseApp.loginLogoDrawable)
 
         if (loggedOut) {
-            displaySnackBar(this, resources.getString(R.string.login_logged_out_snackbar))
+            customSnackBar(this, resources.getString(R.string.login_logged_out_snackbar), null)
         }
 
         // Login button
@@ -90,7 +90,7 @@ class LoginActivity : BaseActivity() {
                 login_button_auth.isEnabled = false
                 loginViewModel.login(email = login_email_input.text.toString()) { }
             } else {
-                displaySnackBar(this, resources.getString(R.string.no_internet))
+                customSnackBar(this, resources.getString(R.string.no_internet), null)
             }
         }
 

@@ -6,11 +6,16 @@
 
 package com.qmobile.qmobileui.list
 
+import android.app.SearchManager
 import android.content.Context
+import android.content.Context.SEARCH_SERVICE
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SearchView
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -30,17 +35,23 @@ import com.qmobile.qmobiledatasync.viewmodel.insert
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.utils.buildSnackBar
-import com.qmobile.qmobileui.utils.displaySnackBar
+import com.qmobile.qmobileui.ui.CustomSearchView
+import com.qmobile.qmobileui.ui.SearchListener
+import com.qmobile.qmobileui.utils.QMobileUiUtil
+import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
+import com.qmobile.qmobileui.utils.customSnackBar
 import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
-class EntityListFragment : Fragment(), BaseFragment {
+class EntityListFragment : Fragment(), BaseFragment, SearchListener {
 
     var tableName: String = ""
     lateinit var syncDataRequested: AtomicBoolean
     lateinit var adapter: EntityListAdapter
+    private lateinit var searchView: SearchView
+    private var searchableFields = QMobileUiUtil.appUtilities.searchField
+    private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -56,11 +67,14 @@ class EntityListFragment : Fragment(), BaseFragment {
         savedInstanceState: Bundle?
     ): View? {
         arguments?.getString("tableName")?.let { tableName = it }
-
+        sqlQueryBuilderUtil = SqlQueryBuilderUtil(tableName)
         // Every time we land on the fragment, we want refreshed data
         syncDataRequested = AtomicBoolean(true)
 
+        displaySearchBarOnNavigationBar() // set has option Menu
         getViewModel()
+        observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll())
+        // observeEntityList()
 
         val dataBinding: ViewDataBinding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
@@ -71,7 +85,12 @@ class EntityListFragment : Fragment(), BaseFragment {
             BaseApp.viewDataBindingInterface.setEntityListViewModel(this, entityListViewModel)
             lifecycleOwner = viewLifecycleOwner
         }
+
         return dataBinding.root
+    }
+
+    private fun displaySearchBarOnNavigationBar() {
+        if (searchableFields.has(tableName)) this.setHasOptionsMenu(true)
     }
 
     override fun onAttach(context: Context) {
@@ -84,7 +103,6 @@ class EntityListFragment : Fragment(), BaseFragment {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
         initRecyclerView()
         initOnRefreshListener()
         initSwipeToDeleteAndUndo()
@@ -134,14 +152,16 @@ class EntityListFragment : Fragment(), BaseFragment {
                     val position = viewHolder.adapterPosition
                     val item = adapter.getEntities()[position]
                     entityListViewModel.delete(item)
+
                     activity?.let {
-                        val snackBar =
-                            buildSnackBar(it, it.resources.getString(R.string.snackbar_remove))
-                        snackBar.setAction(it.resources.getString(R.string.snackbar_undo)) {
-                            entityListViewModel.insert(item)
-//                            rv_main.scrollToPosition(position)
-                        }
-                        snackBar.show()
+                        customSnackBar(
+                            it,
+                            it.resources.getString(R.string.snackbar_remove),
+                            View.OnClickListener {
+                                entityListViewModel.insert(item)
+                                // rv_main.scrollToPosition(position)
+                            }
+                        )
                     }
                 }
             }
@@ -180,7 +200,7 @@ class EntityListFragment : Fragment(), BaseFragment {
         } else {
             if (!delegate.isConnected()) {
                 activity?.let {
-                    displaySnackBar(it, it.resources.getString(R.string.no_internet))
+                    customSnackBar(it, it.resources.getString(R.string.no_internet), null)
                 }
                 Timber.d("No Internet connection, syncDataRequested")
             } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
@@ -207,5 +227,24 @@ class EntityListFragment : Fragment(), BaseFragment {
         return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
             entityListViewModel.dataSynchronized.value == DataSyncStateEnum.SYNCHRONIZED &&
             delegate.isConnected()
+    }
+
+    // Custom Search bar Listener
+    override fun dataToSearch(data: String) {
+        if (data.isEmpty()) observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll()) else observeEntityListDynamicSearch(
+            sqlQueryBuilderUtil.sortQuery(data)
+        )
+    }
+
+    // Searchable implementation
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu, menu)
+        searchView = CustomSearchView(
+            context,
+            menu.findItem(R.id.search), this
+        ).addListener(
+            (activity?.getSystemService(SEARCH_SERVICE) as SearchManager).getSearchableInfo(activity?.componentName)
+        )
+        super.onCreateOptionsMenu(menu, inflater)
     }
 }

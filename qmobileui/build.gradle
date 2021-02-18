@@ -12,12 +12,20 @@ apply from: "$rootDir/buildscripts/projectDependencyGraph.gradle"
 dependencies {
 
     // QMobile libraries
-//    implementation project(':qmobileapi')
-//    implementation project(':qmobiledatastore')
-//    implementation project(':qmobiledatasync')
-    implementation(QMobileAPI) { changing = true }
-    implementation(QMobileDataStore) { changing = true }
-    implementation(QMobileDataSync) { changing = true }
+
+       //implementation project(':qmobileapi')
+       //implementation project(':qmobiledatastore')
+       //implementation project(':qmobiledatasync')
+
+       implementation(QMobileAPI) { changing = true }
+       implementation(QMobileDataStore) { changing = true }
+       implementation(QMobileDataSync) { changing = true }
+
+    // Room
+    implementation Libs.androidx_room
+    implementation Libs.androidx_room_runtime
+    kapt Libs.androidx_room_compiler
+
 
     // Common
     implementation Libs.androidx_constraintlayout
