@@ -65,11 +65,7 @@ publishing {
     publications {
         aar(MavenPublication) {
             groupId libraryGroupId
-            def branchName = System.getenv('CI_COMMIT_REF_NAME')
-            if (branchName != null) {
-                branchName = branchName.replace("/", "_")
-            }
-            version libraryVersion + '-' + branchName
+            version libraryVersion + '-' + gitBranch().replace("/", "_")
 
             artifactId libraryArtifactId
             artifact("$buildDir/outputs/aar/${artifactId}-${buildVariant}.aar")
