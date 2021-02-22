@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by Quentin Marciset on 24/1/2021.
+  ~ 4D SAS
+  ~ Copyright (c) 2021 Quentin Marciset. All rights reserved.
+  -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_previous"
+        android:icon="@drawable/baseline_chevron_left_24"
+        android:title="Previous"
+        app:showAsAction="collapseActionView|ifRoom" />
+
+    <item
+        android:id="@+id/action_next"
+        android:icon="@drawable/baseline_chevron_right_24"
+        android:title="Previous"
+        app:showAsAction="collapseActionView|ifRoom" />
+</menu>

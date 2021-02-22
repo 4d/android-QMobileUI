@@ -10,10 +10,9 @@ import android.app.SearchableInfo
 import android.content.Context
 import android.view.MenuItem
 import android.widget.SearchView
-import androidx.core.view.MenuItemCompat
 
 class CustomSearchView(var context: Context?, menuItem: MenuItem, searchListener: SearchListener) {
-    private val searchView = MenuItemCompat.getActionView(menuItem) as SearchView
+    private val searchView = menuItem.actionView as SearchView
     val addListener = { searchableInfo: SearchableInfo? ->
         searchView.setOnCloseListener { true }
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {

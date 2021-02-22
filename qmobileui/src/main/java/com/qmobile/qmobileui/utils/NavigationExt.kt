@@ -111,12 +111,6 @@ fun BottomNavigationView.setupWithNavController(
                             R.anim.nav_default_pop_enter_anim,
                             R.anim.nav_default_pop_exit_anim
                         )
-                        /*.setCustomAnimations(
-                            R.anim.slide_in_bottom,
-                            R.anim.slide_out_top,
-                            R.anim.slide_in_top,
-                            R.anim.slide_out_bottom
-                        )*/
                         .attach(selectedFragment)
                         .setPrimaryNavigationFragment(selectedFragment)
                         .apply {

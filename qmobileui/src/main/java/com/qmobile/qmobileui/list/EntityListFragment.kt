@@ -239,7 +239,7 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
 
     // Searchable implementation
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu, menu)
+        inflater.inflate(R.menu.menu_search, menu)
         searchView = CustomSearchView(
             context,
             menu.findItem(R.id.search), this

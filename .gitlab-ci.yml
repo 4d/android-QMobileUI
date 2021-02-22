@@ -46,8 +46,6 @@ buildLinux:
     - ./gradlew clean --console=rich
     - ./gradlew assemble --console=rich
     - ./gradlew artifactoryPublish --console=rich
-  tags:
-    - linux
   artifacts:
     paths:
      - qmobileui/build/outputs/aar/
@@ -58,5 +56,3 @@ unitTests:
     - *prepare_sdk
     - ./gradlew -x lint jacocoTestReport --console=rich
     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print 100*covered/instructions, "% covered" }' qmobileui/build/reports/jacoco/jacocoTestReport/jacocoTestReport.csv
-  tags:
-    - linux

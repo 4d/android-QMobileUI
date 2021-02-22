@@ -46,14 +46,14 @@ static def gitBranch() {
         proc.err.eachLine { line -> println line }
         proc.waitFor()
     }
-    branch
+    branch.replace("/", "_")
 }
 
 ext {
-    QMobileAPI = QMobileLibs.qmobileapi + '-' + "master"
-    QMobileDataStore = QMobileLibs.qmobiledatastore + '-' + "master"
-    QMobileDataSync = QMobileLibs.qmobiledatasync + '-' + "master"
-    QMobileUI = QMobileLibs.qmobileui + '-' + "master"
+    QMobileAPI = QMobileLibs.qmobileapi + '-' + gitBranch()
+    QMobileDataStore = QMobileLibs.qmobiledatastore + '-' + gitBranch()
+    QMobileDataSync = QMobileLibs.qmobiledatasync + '-' + gitBranch()
+    QMobileUI = QMobileLibs.qmobileui + '-' + gitBranch()
 }
 
 task clean(type: Delete) {

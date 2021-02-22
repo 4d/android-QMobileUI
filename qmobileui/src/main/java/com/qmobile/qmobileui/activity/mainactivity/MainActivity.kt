@@ -112,6 +112,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         setupBottomNavigationBar()
     }
 
+    // Back button from appbar
     override fun onSupportNavigateUp(): Boolean {
         return currentNavController?.value?.navigateUp() ?: false
     }

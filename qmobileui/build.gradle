@@ -65,7 +65,7 @@ publishing {
     publications {
         aar(MavenPublication) {
             groupId libraryGroupId
-            version libraryVersion + '-' + gitBranch().replace("/", "_")
+            version libraryVersion + '-' + gitBranch()
 
             artifactId libraryArtifactId
             artifact("$buildDir/outputs/aar/${artifactId}-${buildVariant}.aar")

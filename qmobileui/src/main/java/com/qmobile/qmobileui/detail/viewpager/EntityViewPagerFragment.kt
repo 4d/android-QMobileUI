@@ -9,6 +9,9 @@ package com.qmobile.qmobileui.detail.viewpager
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -51,6 +54,8 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
 
         sqlQueryBuilderUtil = SqlQueryBuilderUtil(tableName)
 
+        this.setHasOptionsMenu(true)
+
         onFragmentCreation = false
         return viewPager
     }
@@ -90,5 +95,22 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
 
     override fun onPageSelected(position: Int) {
         this@EntityViewPagerFragment.position = position
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_viewpager, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val currPosition = viewPager?.currentItem
+        currPosition?.let {
+            when (item.itemId) {
+                R.id.action_previous -> viewPager?.setCurrentItem(currPosition - 1, true)
+                R.id.action_next -> viewPager?.setCurrentItem(currPosition + 1, true)
+                else -> super.onOptionsItemSelected(item)
+            }
+        }
+        return false
     }
 }

@@ -42,17 +42,17 @@ internal class BridgeUtility(context: Context) : FileUtilsUp(context) { // scope
     fun getAppUtil(): AppUtilities {
         val jsonObj = JSONObject(readContentFromFile("appinfo.json"))
         return AppUtilities(
-            (jsonObj.getString("initialGlobalStamp")).toInt(),
-            (jsonObj.getString("guestLogin")).toBoolean(),
-            (jsonObj.getString("embeddedData")).toBoolean(),
-            jsonObj.getString("remoteUrl"),
-            JSONObject().apply {
+            globalStamp = (jsonObj.getString("initialGlobalStamp")).toInt(),
+            guestLogin = (jsonObj.getString("guestLogin")).toBoolean(),
+            embeddedData = (jsonObj.getString("embeddedData")).toBoolean(),
+            remoteUrl = jsonObj.getString("remoteUrl"),
+            teams = JSONObject().apply {
                 val newTeam = jsonObj.getJSONObject("team")
                 this.put("id", newTeam.getString("TeamName"))
                 this.put("name", newTeam.getString("TeamID"))
             },
-            JSONObject(readContentFromFile("queries.json")),
-            jsonObj.getJSONObject("searchableField")
+            queryJson = JSONObject(readContentFromFile("queries.json")),
+            searchField = jsonObj.getJSONObject("searchableField")
         )
     }
 }
