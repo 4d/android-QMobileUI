@@ -17,14 +17,14 @@ import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
+import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.isEmailValid
+import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.connectivity.isConnected
 import com.qmobile.qmobileapi.network.ApiClient
-import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
-import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
@@ -36,12 +36,6 @@ import kotlinx.android.synthetic.main.activity_login.*
 class LoginActivity : BaseActivity() {
 
     private var loggedOut = false
-    lateinit var connectivityManager: ConnectivityManager
-    lateinit var loginApiService: LoginApiService
-
-    // ViewModels
-    lateinit var loginViewModel: LoginViewModel
-    lateinit var connectivityViewModel: ConnectivityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,10 +61,49 @@ class LoginActivity : BaseActivity() {
                 DataBindingUtil.setContentView(this, R.layout.activity_login)
             binding.lifecycleOwner = this
 
-            getViewModel()
+            this.getViewModels()
             initLayout()
-            setupObservers()
+            this.observe()
         }
+    }
+
+    override fun getViewModels() {
+        super.getViewModels()
+    }
+
+    override fun observe() {
+        super.observe()
+        observeEmailValid()
+    }
+
+    override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
+        when (authenticationState) {
+            AuthenticationStateEnum.AUTHENTICATED -> {
+                startMainActivity(false)
+            }
+            AuthenticationStateEnum.INVALID_AUTHENTICATION -> {
+                login_button_auth.isEnabled = true
+                customSnackBar(this, resources.getString(R.string.login_fail_snackbar), null)
+            }
+            else -> {
+                // Default state in LoginActivity
+                login_button_auth.isEnabled = true
+            }
+        }
+    }
+
+    override fun handleNetworkState(networkState: NetworkStateEnum) {
+        // Nothing to do
+    }
+
+    // Observe if email is valid
+    fun observeEmailValid() {
+        loginViewModel.emailValid.observe(
+            this,
+            Observer { emailValid ->
+                login_button_auth.isEnabled = emailValid
+            }
+        )
     }
 
     /**

@@ -14,12 +14,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -80,9 +84,9 @@ class SettingsFragment :
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        getViewModel()
+        getViewModels()
         initLayout()
-        setupObservers()
+        observe()
     }
 
     override fun onCreateView(
@@ -93,6 +97,17 @@ class SettingsFragment :
         // Every time we land on the fragment, we want refreshed data
         checkNetworkRequested = AtomicBoolean(true)
         return super.onCreateView(inflater, container, savedInstanceState)
+    }
+
+    override fun getViewModels() {
+        loginViewModel = getLoginViewModel(activity, delegate.loginApiService)
+        getConnectivityViewModel(activity, delegate.connectivityManager)?.let { connectivityViewModel = it }
+    }
+
+    override fun observe() {
+        observeNetworkStatus()
+        observeServerAccessible()
+        observeAuthenticationState()
     }
 
     /**
@@ -233,5 +248,56 @@ class SettingsFragment :
         }
         return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
             delegate.isConnected()
+    }
+
+    // Observe network status
+    fun observeNetworkStatus() {
+        if (sdkNewerThanKitKat) {
+            connectivityViewModel.networkStateMonitor.observe(
+                viewLifecycleOwner,
+                Observer {
+                    if (!firstTime) {
+                        // first time, checkNetwork() is called in authentication observer event
+                        checkNetwork()
+                    } else {
+                        firstTime = false
+                    }
+                }
+            )
+        }
+    }
+
+    // Observe if server is accessible
+    fun observeServerAccessible() {
+        connectivityViewModel.serverAccessible.observe(
+            viewLifecycleOwner,
+            Observer { isAccessible ->
+                if (delegate.isConnected()) {
+                    if (isAccessible) {
+                        setLayoutServerAccessible()
+                    } else {
+                        setLayoutServerNotAccessible()
+                    }
+                } else {
+                    setLayoutNoInternet()
+                }
+            }
+        )
+    }
+
+    // Observe authentication state
+    fun observeAuthenticationState() {
+        loginViewModel.authenticationState.observe(
+            viewLifecycleOwner,
+            Observer { authenticationState ->
+                when (authenticationState) {
+                    AuthenticationStateEnum.AUTHENTICATED -> {
+                        checkNetwork()
+                    }
+                    else -> {
+                    }
+                }
+            }
+        )
     }
 }

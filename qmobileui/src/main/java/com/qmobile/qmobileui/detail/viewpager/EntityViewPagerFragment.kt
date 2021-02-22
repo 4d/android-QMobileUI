@@ -15,14 +15,17 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.viewpager.widget.ViewPager
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 
+@Suppress("TooManyFunctions")
 class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChangeListener {
 
     var position: Int = 0
@@ -71,14 +74,36 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        getViewModel()
-//        setupObservers()
-        observeEntityList(sqlQueryBuilderUtil.getAll())
+        getViewModels()
+        observe()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         viewPager = null
+    }
+
+    override fun getViewModels() {
+        entityListViewModel = getEntityListViewModel(activity, delegate.apiService, tableName)
+    }
+
+    override fun observe() {
+        entityListViewModel.getAllDynamicQuery(sqlQueryBuilderUtil.getAll()).observe(
+            viewLifecycleOwner,
+            Observer { entities ->
+                entities?.let {
+                    // When entity list data changed, refresh the displayed list
+                    viewPager?.adapter =
+                        EntityViewPagerAdapter(
+                            this,
+                            tableName,
+                            it
+                        )
+                    viewPager?.addOnPageChangeListener(this)
+                    viewPager?.currentItem = position
+                }
+            }
+        )
     }
 
     override fun onPageScrollStateChanged(state: Int) {
