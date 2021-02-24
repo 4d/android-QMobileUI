@@ -88,7 +88,6 @@ fun LoginActivity.observeToastMessage() {
                 }
             }
 
-
 //            val toastMessage = this.baseContext.fetchResourceString(message)
 //            if (toastMessage.isNotEmpty()) {
 //                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()

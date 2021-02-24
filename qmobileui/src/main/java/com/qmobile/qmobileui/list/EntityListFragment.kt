@@ -44,6 +44,7 @@ import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
+@Suppress("TooManyFunctions")
 class EntityListFragment : Fragment(), BaseFragment, SearchListener {
 
     var tableName: String = ""

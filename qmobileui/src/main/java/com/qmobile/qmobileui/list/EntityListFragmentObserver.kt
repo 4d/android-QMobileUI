@@ -109,9 +109,7 @@ fun EntityListFragment.observeToastMessage() {
                 activity?.let {
                     Toast.makeText(it, toastMessage, Toast.LENGTH_LONG).show()
                 }
-
             }
-
 
 //            val toastMessage = context?.fetchResourceString(message) ?: ""
 //            if (toastMessage.isNotEmpty()) {
@@ -133,8 +131,8 @@ fun EntityListFragment.observeDataSynchronized() {
         Observer { dataSyncState ->
             Timber.i(
                 "[DataSyncState : $dataSyncState, " +
-                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                        "Instance : $entityListViewModel]"
+                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+                    "Instance : $entityListViewModel]"
             )
         }
     )

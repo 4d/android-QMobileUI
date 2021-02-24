@@ -110,9 +110,6 @@ fun MainActivity.observeToastMessage() {
                 }
             }
 
-
-
-
 //            val toastMessage = this.baseContext.fetchResourceString(message.)
 //            if (toastMessage.isNotEmpty()) {
 //                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
@@ -169,8 +166,8 @@ fun MainActivity.observeDataSynchronized(entityListViewModel: EntityListViewMode
         Observer { dataSyncState ->
             Timber.i(
                 "[DataSyncState : $dataSyncState, " +
-                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                        "Instance : $entityListViewModel]"
+                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+                    "Instance : $entityListViewModel]"
             )
         }
     )

@@ -36,6 +36,7 @@ import com.qmobile.qmobileui.activity.BaseActivity
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
+@Suppress("TooManyFunctions")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
 
     private var onLaunch = true
