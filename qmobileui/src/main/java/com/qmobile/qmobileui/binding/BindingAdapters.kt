@@ -43,7 +43,6 @@ private fun randomAvatar(): Int = listOfAvatars.random()
 /**
  * Use Glide to load image url in a view
  */
-@Suppress("LongParameterList")
 @BindingAdapter(
     value = ["imageUrl", "imageFieldName", "imageKey", "imageTableName", "imageTransform"],
     requireAll = false

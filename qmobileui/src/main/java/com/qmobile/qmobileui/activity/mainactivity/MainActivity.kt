@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.activity.mainactivity
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.net.ConnectivityManager
@@ -14,31 +13,29 @@ import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.NavController
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.LoginRequiredCallback
-import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.connectivity.isConnected
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
-import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.sync.EntityViewModelIsToSync
 import com.qmobile.qmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
+import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
-@Suppress("TooManyFunctions")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
 
     private var onLaunch = true
@@ -50,8 +47,12 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
+    override lateinit var loginApiService: LoginApiService
+    override lateinit var connectivityManager: ConnectivityManager
 
     // ViewModels
+    lateinit var loginViewModel: LoginViewModel
+    lateinit var connectivityViewModel: ConnectivityViewModel
     lateinit var entityViewModelIsToSyncList: MutableList<EntityViewModelIsToSync>
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
@@ -96,74 +97,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         // Init ApiClients
         refreshApiClients()
 
-        this.getViewModels()
-        this.observe()
+        getViewModel()
+        setupObservers()
 
         // Follow activity lifecycle and check when activity enters foreground for data sync
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-    }
-
-    override fun getViewModels() {
-        super.getViewModels()
-        getEntityListViewModelList()
-    }
-
-    // Get EntityListViewModel list
-    private fun getEntityListViewModelList() {
-        entityListViewModelList = mutableListOf()
-        for (tableName in BaseApp.fromTableForViewModel.tableNames()) {
-            entityListViewModelList.add(
-                getEntityListViewModel(this, apiService, tableName)
-            )
-        }
-    }
-
-    override fun observe() {
-        super.observe()
-        for (entityListViewModel in entityListViewModelList) {
-            observeDataSynchronized(entityListViewModel)
-            observeNewRelatedEntity(entityListViewModel)
-            observeNewRelatedEntities(entityListViewModel)
-            observeToastMessage(entityListViewModel)
-        }
-    }
-
-    override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
-        when (authenticationState) {
-            AuthenticationStateEnum.AUTHENTICATED -> {
-                if (shouldDelayOnForegroundEvent.compareAndSet(true, false)) {
-                    applyOnForegroundEvent()
-                }
-            }
-            AuthenticationStateEnum.LOGOUT -> {
-                // Logout performed
-                if (!authInfoHelper.guestLogin)
-                    startLoginActivity()
-            }
-            else -> {
-            }
-        }
-    }
-
-    override fun handleNetworkState(networkState: NetworkStateEnum) {
-        when (networkState) {
-            NetworkStateEnum.CONNECTED -> {
-                // Setting the authenticationState to its initial value
-                if (authInfoHelper.sessionToken.isNotEmpty())
-                    loginViewModel.authenticationState.postValue(AuthenticationStateEnum.AUTHENTICATED)
-
-                // If guest and not yet logged in, auto login
-                if (authInfoHelper.sessionToken.isEmpty() &&
-                    authInfoHelper.guestLogin &&
-                    authenticationRequested
-                ) {
-                    authenticationRequested = false
-                    tryAutoLogin()
-                }
-            }
-            else -> {
-            }
-        }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -191,7 +129,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             loginApiService = loginApiService,
             loginRequiredCallback = loginRequiredCallbackForInterceptor
         )
-        if (super.loginViewModelInitialized()) {
+        if (this::loginViewModel.isInitialized) {
             loginViewModel.refreshAuthRepository(loginApiService)
         }
         if (this::entityListViewModelList.isInitialized) {
@@ -254,44 +192,5 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             Configuration.UI_MODE_NIGHT_UNDEFINED -> false
             else -> false
         }
-    }
-
-    // Observe when data are synchronized
-    @SuppressLint("BinaryOperationInTimber")
-    fun observeDataSynchronized(entityListViewModel: EntityListViewModel<EntityModel>) {
-        entityListViewModel.dataSynchronized.observe(
-            this,
-            Observer { dataSyncState ->
-                Timber.i(
-                    "[DataSyncState : $dataSyncState, " +
-                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                        "Instance : $entityListViewModel]"
-                )
-            }
-        )
-    }
-
-    // Observe when there is a new related entity to be inserted in a dao
-    fun observeNewRelatedEntity(entityListViewModel: EntityListViewModel<EntityModel>) {
-        entityListViewModel.newRelatedEntity.observe(
-            this,
-            Observer { manyToOneRelation ->
-                dispatchNewRelatedEntity(manyToOneRelation)
-            }
-        )
-    }
-
-    // Observe when there is a related entities to be inserted in a dao
-    fun observeNewRelatedEntities(entityListViewModel: EntityListViewModel<EntityModel>) {
-        entityListViewModel.newRelatedEntities.observe(
-            this,
-            Observer { oneToManyRelation ->
-                dispatchNewRelatedEntities(oneToManyRelation)
-            }
-        )
-    }
-
-    fun observeToastMessage(entityListViewModel: EntityListViewModel<EntityModel>) {
-        observeMessage(entityListViewModel.toastMessage.message)
     }
 }

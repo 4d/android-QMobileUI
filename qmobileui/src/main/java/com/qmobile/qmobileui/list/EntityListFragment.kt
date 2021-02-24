@@ -6,31 +6,24 @@
 
 package com.qmobile.qmobileui.list
 
-import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Context
 import android.content.Context.SEARCH_SERVICE
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.sqlite.db.SupportSQLiteQuery
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
-import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
-import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
@@ -38,9 +31,6 @@ import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.delete
-import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.insert
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
@@ -54,7 +44,6 @@ import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
-@Suppress("TooManyFunctions")
 class EntityListFragment : Fragment(), BaseFragment, SearchListener {
 
     var tableName: String = ""
@@ -83,8 +72,9 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
         syncDataRequested = AtomicBoolean(true)
 
         displaySearchBarOnNavigationBar() // set has option Menu
-        getViewModels()
-        observe()
+        getViewModel()
+        observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll())
+        // observeEntityList()
 
         val dataBinding: ViewDataBinding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
@@ -111,25 +101,12 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
         // Access resources elements
     }
 
-    override fun getViewModels() {
-        entityListViewModel = getEntityListViewModel(activity, delegate.apiService, tableName)
-        getConnectivityViewModel(activity, delegate.connectivityManager)?.let { connectivityViewModel = it }
-        loginViewModel = getLoginViewModel(activity, delegate.loginApiService)
-    }
-
-    override fun observe() {
-        observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll())
-        observeDataSynchronized()
-        observeAuthenticationState()
-        observeNetworkStatus()
-    }
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initRecyclerView()
         initOnRefreshListener()
         initSwipeToDeleteAndUndo()
-        observe()
+        setupObservers()
     }
 
     override fun onDestroyView() {
@@ -270,78 +247,5 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
             (activity?.getSystemService(SEARCH_SERVICE) as SearchManager).getSearchableInfo(activity?.componentName)
         )
         super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    // Sql Dynamic Query Support
-    fun observeEntityListDynamicSearch(sqLiteQuery: SupportSQLiteQuery) {
-        entityListViewModel.getAllDynamicQuery(sqLiteQuery).observe(
-            viewLifecycleOwner,
-            {
-                it.let {
-                    adapter.setEntities(it)
-                    if (it.isEmpty()) Toast.makeText(this.context, "No data Found", Toast.LENGTH_SHORT).apply {
-                        setGravity(Gravity.CENTER, 0, 0)
-                        show()
-                    }
-                }
-            }
-        )
-    }
-
-    // Observe when data are synchronized
-    @SuppressLint("BinaryOperationInTimber")
-    fun observeDataSynchronized() {
-        entityListViewModel.dataSynchronized.observe(
-            viewLifecycleOwner,
-            Observer { dataSyncState ->
-                Timber.i(
-                    "[DataSyncState : $dataSyncState, " +
-                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                        "Instance : $entityListViewModel]"
-                )
-            }
-        )
-    }
-
-    // Observe authentication state
-    fun observeAuthenticationState() {
-        loginViewModel.authenticationState.observe(
-            viewLifecycleOwner,
-            Observer { authenticationState ->
-                when (authenticationState) {
-                    AuthenticationStateEnum.AUTHENTICATED -> {
-                        if (isReady()) {
-                            syncData()
-                        } else {
-                            syncDataRequested.set(true)
-                        }
-                    }
-                    else -> {
-                    }
-                }
-            }
-        )
-    }
-
-    // Observe network status
-    fun observeNetworkStatus() {
-        if (sdkNewerThanKitKat) {
-            connectivityViewModel.networkStateMonitor.observe(
-                viewLifecycleOwner,
-                Observer { networkState ->
-                    when (networkState) {
-                        NetworkStateEnum.CONNECTED -> {
-                            if (isReady()) {
-                                syncData()
-                            } else {
-                                syncDataRequested.set(true)
-                            }
-                        }
-                        else -> {
-                        }
-                    }
-                }
-            )
-        }
     }
 }

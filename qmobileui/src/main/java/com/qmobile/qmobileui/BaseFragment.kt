@@ -12,8 +12,4 @@ package com.qmobile.qmobileui
 interface BaseFragment {
 
     var delegate: FragmentCommunication
-
-    fun getViewModels()
-
-    fun observe()
 }
