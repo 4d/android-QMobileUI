@@ -18,7 +18,7 @@ class SqlQueryBuilderUtil(
     val getAll = { SimpleSQLiteQuery("SELECT * FROM $tableName") }
 
     fun sortQuery(dataToSort: String): SimpleSQLiteQuery {
-        val stringBuffer = StringBuffer("SELECT * FROM $tableName")
+        val stringBuffer = StringBuffer("SELECT * FROM $tableName WHERE  ")
         if (searchField.has(tableName)) {
             conditionAdder(searchField.getJSONArray(tableName), stringBuffer, dataToSort)
         }
@@ -33,11 +33,11 @@ class SqlQueryBuilderUtil(
         (0 until columnsToFilter.length()).forEach {
             when {
                 (columnsToFilter.length() == 1) ->
-                    stringBuffer.append(" WHERE ${columnsToFilter[it]} LIKE  \'%$dataToSort%\' ")
+                    stringBuffer.append("${columnsToFilter[it]} LIKE  \'%$dataToSort%\' ")
                 (it == (columnsToFilter.length() - 1)) ->
                     stringBuffer.append("${columnsToFilter[it]} LIKE  \'%$dataToSort%\' ")
                 else ->
-                    stringBuffer.append(" WHERE ${columnsToFilter[it]} LIKE  \'%$dataToSort%\'  OR ")
+                    stringBuffer.append("${columnsToFilter[it]} LIKE  \'%$dataToSort%\'  OR ")
             }
         }
     }
