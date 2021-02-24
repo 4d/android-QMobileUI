@@ -1,8 +1,10 @@
 include ':qmobileui'
 rootProject.name = 'QMobileUI'
-include ':qmobileapi'
-project(':qmobileapi').projectDir = new File(settingsDir, '../QMobileAPI/qmobileapi')
-include ':qmobiledatastore'
-project(':qmobiledatastore').projectDir = new File(settingsDir, '../QMobileDataStore/qmobiledatastore')
-include ':qmobiledatasync'
-project(':qmobiledatasync').projectDir = new File(settingsDir, '../QMobileDataSync/qmobiledatasync')
+if (System.getenv('CI_DEPS_TO_BE_FETCHED') == null) {
+    include ':qmobileapi'
+    project(':qmobileapi').projectDir = new File(settingsDir, '../QMobileAPI/qmobileapi')
+    include ':qmobiledatastore'
+    project(':qmobiledatastore').projectDir = new File(settingsDir, '../QMobileDataStore/qmobiledatastore')
+    include ':qmobiledatasync'
+    project(':qmobiledatasync').projectDir = new File(settingsDir, '../QMobileDataSync/qmobiledatasync')
+}
