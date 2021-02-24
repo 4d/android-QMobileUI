@@ -7,24 +7,30 @@
 package com.qmobile.qmobileui.utils.converter
 
 import com.qmobile.qmobileui.model.NumberToWordConstants
+import com.qmobile.qmobileui.model.QMobileUiConstants.INT_10
+import com.qmobile.qmobileui.model.QMobileUiConstants.INT_100
+import com.qmobile.qmobileui.model.QMobileUiConstants.INT_12
+import com.qmobile.qmobileui.model.QMobileUiConstants.INT_20
+import com.qmobile.qmobileui.model.QMobileUiConstants.INT_3
+import com.qmobile.qmobileui.model.QMobileUiConstants.INT_6
+import com.qmobile.qmobileui.model.QMobileUiConstants.INT_9
 import java.text.DecimalFormat
 
 internal class NumberToWordHelperFunction {
-
     companion object {
         private fun convertLessThanOneThousand(_number: Int): String {
             var number: Int = _number
             var soFar: String
             when {
-                (number % 100 < 20) -> {
-                    soFar = NumberToWordConstants.numNames[number % 100]
-                    number /= 100
+                (number % INT_100 < INT_20) -> {
+                    soFar = NumberToWordConstants.numNames[number % INT_100]
+                    number /= INT_100
                 }
                 else -> {
-                    soFar = NumberToWordConstants.numNames[number % 10]
-                    number /= 10
-                    soFar = NumberToWordConstants.tensNames[number % 10] + soFar
-                    number /= 10
+                    soFar = NumberToWordConstants.numNames[number % INT_10]
+                    number /= INT_10
+                    soFar = NumberToWordConstants.tensNames[number % INT_10] + soFar
+                    number /= INT_10
                 }
             }
             return if (number == 0) soFar else NumberToWordConstants.numNames[number] + " hundred" + soFar
@@ -36,10 +42,10 @@ internal class NumberToWordHelperFunction {
             val mask = "000000000000"
             val df = DecimalFormat(mask)
             val snumber = df.format(number)
-            val billions = snumber.substring(0, 3).toInt()
-            val millions = snumber.substring(3, 6).toInt()
-            val hundredThousands = snumber.substring(6, 9).toInt()
-            val thousands = snumber.substring(9, 12).toInt()
+            val billions = snumber.substring(0, INT_3).toInt()
+            val millions = snumber.substring(INT_3, INT_6).toInt()
+            val hundredThousands = snumber.substring(INT_6, INT_9).toInt()
+            val thousands = snumber.substring(INT_9, INT_12).toInt()
             val tradBillions: String
             tradBillions = when (billions) {
                 0 -> ""

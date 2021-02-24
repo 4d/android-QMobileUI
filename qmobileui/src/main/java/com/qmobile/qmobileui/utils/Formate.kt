@@ -30,5 +30,5 @@ fun date(format: String, date: String) =
     FormatterUtil.formatDate(format, Locale.getDefault(), date).toString()
 
 fun getTime(): String = "00:26:89" // Only For Test
-fun getDate(): String = "02-07-2021" // Only For Test
+fun getDate(): String = "24-02-2021" // Only For Test
 fun getNumber(): String = "24.468" // Only For Test

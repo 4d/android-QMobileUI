@@ -8,6 +8,9 @@ package com.qmobile.qmobileui.utils
 
 import android.annotation.SuppressLint
 import com.qmobile.qmobileui.model.QMobileFormatterConstants
+import com.qmobile.qmobileui.model.QMobileUiConstants.INT_100
+import com.qmobile.qmobileui.model.QMobileUiConstants.INT_3600
+import com.qmobile.qmobileui.model.QMobileUiConstants.INT_60
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
@@ -30,9 +33,9 @@ internal object FormatterUtil {
         "integer" -> {
             val newTimeArray = time.split(":")
             (
-                newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * 60) + Integer.parseInt(
+                newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
                     newTimeArray[1]
-                ) * 3600
+                ) * INT_3600
                 )
         }
         else -> QMobileFormatterConstants.timeFormat[format]?.let {
@@ -54,7 +57,7 @@ internal object FormatterUtil {
             (
                 DecimalFormat("0.00").format(value.toDouble())
                     .toDouble()
-                ) * 100
+                ) * INT_100
             ).toString() + "%"
         "currencyDollar" -> "$" + DecimalFormat("0.00").format(value.toDouble())
         "currencyEuro" -> DecimalFormat("0.00").format(value.toDouble()) + "€"

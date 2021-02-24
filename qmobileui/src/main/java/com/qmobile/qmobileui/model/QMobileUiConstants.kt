@@ -12,6 +12,15 @@ object QMobileUiConstants { // Compiled at stack-level
     const val EMBEDDED_PICTURES = "Pictures"
     const val JSON_EXT = ".json"
     const val LAYOUT = "layout"
+    const val INT_100: Int = 100
+    const val INT_20: Int = 20
+    const val INT_10: Int = 10
+    const val INT_3: Int = 3
+    const val INT_6: Int = 6
+    const val INT_9: Int = 9
+    const val INT_12: Int = 12
+    const val INT_3600 = 3600
+    const val INT_60: Int = 60
 
     object Language {
         const val LANGUAGE_ID = Device.ID
