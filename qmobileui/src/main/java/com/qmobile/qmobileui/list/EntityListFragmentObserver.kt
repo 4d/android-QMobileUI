@@ -21,6 +21,7 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.LoginViewModelFactory
+import com.qmobile.qmobileui.activity.mainactivity.observeToastMessage
 import com.qmobile.qmobileui.utils.fetchResourceString
 import timber.log.Timber
 
@@ -100,17 +101,26 @@ fun EntityListFragment.observeEntityListDynamicSearch(sqLiteQuery: SupportSQLite
 
 // Observe any toast message
 fun EntityListFragment.observeToastMessage() {
-    entityListViewModel.toastMessage.observe(
+    entityListViewModel.toastMessage.message.observe(
         viewLifecycleOwner,
-        Observer { message ->
-            val toastMessage = context?.fetchResourceString(message) ?: ""
-            if (toastMessage.isNotEmpty()) {
+        Observer { event ->
+            event.getContentIfNotHandled()?.let { message ->
+                val toastMessage = context?.fetchResourceString(message)
                 activity?.let {
                     Toast.makeText(it, toastMessage, Toast.LENGTH_LONG).show()
                 }
-                // To avoid the error toast to be displayed without performing a refresh again
-                entityListViewModel.toastMessage.postValue("")
+
             }
+
+
+//            val toastMessage = context?.fetchResourceString(message) ?: ""
+//            if (toastMessage.isNotEmpty()) {
+//                activity?.let {
+//                    Toast.makeText(it, toastMessage, Toast.LENGTH_LONG).show()
+//                }
+//                // To avoid the error toast to be displayed without performing a refresh again
+//                entityListViewModel.toastMessage.postValue("")
+//            }
         }
     )
 }
@@ -123,8 +133,8 @@ fun EntityListFragment.observeDataSynchronized() {
         Observer { dataSyncState ->
             Timber.i(
                 "[DataSyncState : $dataSyncState, " +
-                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                    "Instance : $entityListViewModel]"
+                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+                        "Instance : $entityListViewModel]"
             )
         }
     )

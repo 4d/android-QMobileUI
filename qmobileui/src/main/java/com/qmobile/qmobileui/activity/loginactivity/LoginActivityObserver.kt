@@ -17,6 +17,7 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.LoginViewModelFactory
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.activity.mainactivity.observeToastMessage
 import com.qmobile.qmobileui.utils.customSnackBar
 import com.qmobile.qmobileui.utils.fetchResourceString
 import kotlinx.android.synthetic.main.activity_login.*
@@ -77,15 +78,23 @@ fun LoginActivity.observeAuthenticationState() {
 
 // Observe any toast message
 fun LoginActivity.observeToastMessage() {
-    loginViewModel.toastMessage.observe(
+    loginViewModel.toastMessage.message.observe(
         this,
-        Observer { message ->
-            val toastMessage = this.baseContext.fetchResourceString(message)
-            if (toastMessage.isNotEmpty()) {
-                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
-                // To avoid the error toast to be displayed without performing a refresh again
-                loginViewModel.toastMessage.postValue("")
+        Observer { event ->
+            event.getContentIfNotHandled()?.let { message ->
+                val toastMessage = this.baseContext.fetchResourceString(message)
+                if (toastMessage.isNotEmpty()) {
+                    Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
+                }
             }
+
+
+//            val toastMessage = this.baseContext.fetchResourceString(message)
+//            if (toastMessage.isNotEmpty()) {
+//                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
+//                // To avoid the error toast to be displayed without performing a refresh again
+//                loginViewModel.toastMessage.postValue("")
+//            }
         }
     )
 }

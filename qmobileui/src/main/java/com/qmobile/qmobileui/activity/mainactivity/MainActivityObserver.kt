@@ -100,15 +100,25 @@ fun MainActivity.observeAuthenticationState() {
 
 // Observe any toast message
 fun MainActivity.observeToastMessage() {
-    loginViewModel.toastMessage.observe(
+    loginViewModel.toastMessage.message.observe(
         this,
-        Observer { message ->
-            val toastMessage = this.baseContext.fetchResourceString(message)
-            if (toastMessage.isNotEmpty()) {
-                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
-                // To avoid the error toast to be displayed without performing a refresh again
-                loginViewModel.toastMessage.postValue("")
+        Observer { event ->
+            event.getContentIfNotHandled()?.let { message ->
+                val toastMessage = this.baseContext.fetchResourceString(message)
+                if (toastMessage.isNotEmpty()) {
+                    Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
+                }
             }
+
+
+
+
+//            val toastMessage = this.baseContext.fetchResourceString(message.)
+//            if (toastMessage.isNotEmpty()) {
+//                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
+//                // To avoid the error toast to be displayed without performing a refresh again
+//                loginViewModel.toastMessage.postValue("")
+//            }
         }
     )
 }
@@ -159,8 +169,8 @@ fun MainActivity.observeDataSynchronized(entityListViewModel: EntityListViewMode
         Observer { dataSyncState ->
             Timber.i(
                 "[DataSyncState : $dataSyncState, " +
-                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                    "Instance : $entityListViewModel]"
+                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+                        "Instance : $entityListViewModel]"
             )
         }
     )
