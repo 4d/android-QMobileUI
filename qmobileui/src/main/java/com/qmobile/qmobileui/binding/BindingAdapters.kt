@@ -69,7 +69,7 @@ fun bindImageFromUrl(
         )
         .transition(DrawableTransitionOptions.withCrossFade(factory))
         .diskCacheStrategy(DiskCacheStrategy.ALL)
-        .centerCrop()
+//        .centerCrop()
 //        .listener(listener)
         .listener(CustomRequestListener())
         .error(R.drawable.ic_error_outline)
