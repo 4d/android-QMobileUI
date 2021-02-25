@@ -3,7 +3,7 @@
  * 4D SAS
  * Copyright (c) 2021 Quentin Marciset. All rights reserved.
  */
-@file:JvmName("Formate")
+@file:JvmName("Format")
 package com.qmobile.qmobileui.utils
 
 import java.util.Locale
@@ -14,8 +14,8 @@ fun number(format: String, value: String): String {
 }
 
 // FormatBoolean
-fun boolean(format: String, value: Boolean): String {
-    return FormatterUtil.formatBoolean(format, value).toString()
+fun formatBoolean(format: String, value: String): String {
+    return FormatterUtil.formatBoolean(format, value.toBoolean()).toString()
 }
 
 // FormatTime
@@ -28,7 +28,3 @@ fun time(format: String, time: String) = FormatterUtil.formatTime(
 // FormatDate
 fun date(format: String, date: String) =
     FormatterUtil.formatDate(format, Locale.getDefault(), date).toString()
-
-fun getTime(): String = "00:26:89" // Only For Test
-fun getDate(): String = "24-02-2021" // Only For Test
-fun getNumber(): String = "24.468" // Only For Test

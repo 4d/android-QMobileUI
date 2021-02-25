@@ -8,13 +8,16 @@ package com.qmobile.qmobileui.utils
 
 import android.annotation.SuppressLint
 import com.qmobile.qmobileui.model.QMobileFormatterConstants
+import com.qmobile.qmobileui.model.QMobileUiConstants.INT_0
 import com.qmobile.qmobileui.model.QMobileUiConstants.INT_100
+import com.qmobile.qmobileui.model.QMobileUiConstants.INT_2
 import com.qmobile.qmobileui.model.QMobileUiConstants.INT_3600
 import com.qmobile.qmobileui.model.QMobileUiConstants.INT_60
+import com.qmobile.qmobileui.utils.converter.getDateFromString
+import com.qmobile.qmobileui.utils.converter.getTimeFromLong
+import com.qmobile.qmobileui.utils.converter.getTimeFromString
 import java.text.DateFormat
 import java.text.DecimalFormat
-import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Locale
 
 @SuppressLint("SimpleDateFormat")
@@ -28,10 +31,11 @@ internal object FormatterUtil {
     fun formatTime(format: String, local: Locale, time: String) = when (format) {
 
         "duration" -> QMobileFormatterConstants.timeFormat[format]?.let {
-            DateFormat.getTimeInstance(it, local).format(getTimeFromString(time).time)
+            val time = DateFormat.getTimeInstance(it, local).format(getTimeFromString(time).time)
+            time.substring(INT_0, time.length - INT_2)
         }
         "integer" -> {
-            val newTimeArray = time.split(":")
+            val newTimeArray = getTimeFromLong(time.toLong()).split(":")
             (
                 newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
                     newTimeArray[1]
@@ -45,7 +49,8 @@ internal object FormatterUtil {
 
     fun formatBoolean(format: String, value: Boolean) = when (format) {
         "integer" -> if (value) 1 else 0
-        else -> QMobileFormatterConstants.booleanFormat[format]
+        "localizedText,noOrYes" -> if (value) "Yes" else "No"
+        else -> if (value) "True" else "False"
     }
 
     fun formatNumber(format: String, value: String): Any = when (format) {
@@ -64,13 +69,5 @@ internal object FormatterUtil {
         "currencyYen" -> "¥" + DecimalFormat("0.00").format(value.toDouble())
         "spellOut" -> QMobileUiUtil.WordFormatter(value)
         else -> "test"
-    }
-
-    private fun getTimeFromString(time: String): Calendar = Calendar.getInstance().apply {
-        setTime(SimpleDateFormat("hh:mm:ss").parse(time)!!)
-    }
-
-    private fun getDateFromString(date: String): Calendar = Calendar.getInstance().apply {
-        time = SimpleDateFormat("MM-dd-yyyy").parse(date)!!
     }
 }

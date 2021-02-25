@@ -21,10 +21,4 @@ object QMobileFormatterConstants {
         "mediumTime" to DateFormat.MEDIUM,
         "duration" to DateFormat.MEDIUM,
     )
-    val booleanFormat = hashMapOf<String, String>(
-        "localizedText.no" to "No",
-        "localizedText.Yes" to "Yes",
-        "localizedText.false" to "False",
-        "localizedText.true" to "True"
-    )
 }
