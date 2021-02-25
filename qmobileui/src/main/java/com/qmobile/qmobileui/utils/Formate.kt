@@ -3,7 +3,7 @@
  * 4D SAS
  * Copyright (c) 2021 Quentin Marciset. All rights reserved.
  */
-@file:JvmName("Formate")
+@file:JvmName("Format")
 package com.qmobile.qmobileui.utils
 
 import java.util.Locale
