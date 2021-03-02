@@ -62,7 +62,7 @@ class EntityDetailFragment : Fragment(), BaseFragment {
             container,
             false
         ).apply {
-            BaseApp.viewDataBindingInterface.setEntityViewModel(this, entityViewModel)
+            BaseApp.fragmentUtil.setEntityViewModel(this, entityViewModel)
             lifecycleOwner = viewLifecycleOwner
         }
         return dataBinding.root

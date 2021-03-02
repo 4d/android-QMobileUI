@@ -20,6 +20,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -83,7 +84,7 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
             container,
             false
         ).apply {
-            BaseApp.viewDataBindingInterface.setEntityListViewModel(this, entityListViewModel)
+            BaseApp.fragmentUtil.setEntityListViewModel(this, entityListViewModel)
             lifecycleOwner = viewLifecycleOwner
         }
 
@@ -122,7 +123,11 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
         adapter = EntityListAdapter(tableName)
 
         fragment_list_recycler_view.layoutManager =
-            LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+            when (BaseApp.fragmentUtil.layoutType(tableName)) {
+                "GRID" -> GridLayoutManager(activity, 2, GridLayoutManager.VERTICAL, false)
+                else -> LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
+            }
+
         fragment_list_recycler_view.addItemDecoration(
             DividerItemDecoration(
                 activity,
