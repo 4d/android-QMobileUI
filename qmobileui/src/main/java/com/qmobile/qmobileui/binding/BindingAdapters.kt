@@ -6,20 +6,26 @@
 
 package com.qmobile.qmobileui.binding
 
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.Transformation
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
-import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
+import jp.wasabeef.glide.transformations.BlurTransformation
+import jp.wasabeef.glide.transformations.CropCircleTransformation
+import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import timber.log.Timber
 import java.io.File
 
@@ -69,22 +75,33 @@ fun bindImageFromUrl(
         )
         .transition(DrawableTransitionOptions.withCrossFade(factory))
         .diskCacheStrategy(DiskCacheStrategy.ALL)
-//        .centerCrop()
 //        .listener(listener)
         .listener(CustomRequestListener())
         .error(R.drawable.ic_error_outline)
 //        .placeholder(R.drawable.profile_placeholder)
 
     getTransformation(transform)?.let {
-        glideRequest.transform(it)
+        glideRequest.apply {
+            RequestOptions.bitmapTransform(it)
+        }
     }
 
     glideRequest.into(view)
 }
 
-fun getTransformation(transform: String?): BitmapTransformation? {
+fun getTransformation(transform: String?): Transformation<Bitmap>? {
     return when (transform) {
-        "CircleCrop" -> CircleCrop()
+        "CropCircle" -> CropCircleTransformation()
+        "CropCircleWithBorder" -> CropCircleWithBorderTransformation(4, Color.WHITE)
+        "Blur" -> BlurTransformation(50, 3)
+        "RoundedCorners" -> RoundedCornersTransformation(
+            128,
+            0,
+            RoundedCornersTransformation.CornerType.BOTTOM
+        )
+//        "CropSquare" -> CropSquareTransformation()
+//        "ColorFilter" -> ColorFilterTransformation()
+//        "Grayscale" -> GrayscaleTransformation()
         else -> null
     }
 }
@@ -97,36 +114,6 @@ fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): An
         }
     return R.drawable.ic_placeholder
 }
-
-/**
- * Use Glide to load image drawable in a view
- */
-/*@BindingAdapter(value = ["imageUrl", "imageTransform", "imageRequestListener"], requireAll = false)
-fun bindImageFromUrl(
-    view: ImageView,
-    drawable: Drawable?,
-    transform: String? = null,
-    listener: RequestListener<Drawable?>?
-) {
-    val factory =
-        DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
-
-    val glideRequest = Glide.with(view.context.applicationContext)
-        .load(drawable ?: randomAvatar())
-        .transition(DrawableTransitionOptions.withCrossFade(factory))
-        .diskCacheStrategy(DiskCacheStrategy.ALL)
-        .centerCrop()
-//        .listener(listener)
-        .listener(CustomRequestListener())
-        .error(R.drawable.ic_error_outline)
-//        .placeholder(R.drawable.profile_placeholder)
-
-    getTransformation(transform)?.let {
-        glideRequest.transform(it)
-    }
-
-    glideRequest.into(view)
-}*/
 
 /**
  * Use Glide to load image drawable in a view
@@ -152,43 +139,7 @@ fun showHide(view: View, show: Boolean) {
     view.visibility = if (show) View.VISIBLE else View.GONE
 }
 
-@BindingAdapter("concatStringWithSpace_1", "concatStringWithSpace_2")
-fun concatStringWithSpace(view: TextView, str1: String?, str2: String?) {
-    view.text = if (str1.isNullOrEmpty()) {
-        str2
-    } else {
-        if (str2.isNullOrEmpty())
-            str1
-        else
-            "$str1 $str2"
-    }
-}
-
 @BindingAdapter("concatStringRatio_1", "concatStringRatio_2")
 fun concatStringRatio(view: TextView, str1: String? = "0", str2: String? = "0") {
     view.text = "$str1/$str2"
 }
-
-/*@BindingAdapter("setPersonName")
-fun bindPersonName(view: TextView, person: Employee?) {
-    person?.let {
-        view.text = if (person.LastName.isNullOrEmpty()) {
-            person.FirstName
-        } else {
-            if (person.FirstName.isNullOrEmpty())
-                person.LastName
-            else
-                "${person.FirstName} ${person.LastName}"
-        }
-    }
-}*/
-
-/*@BindingAdapter("setRatio")
-fun bindRatio(view: TextView, office: Office?) {
-    office?.let {
-        view.text = if (it.deskNumber != null && it.deskTaken != null)
-            "${it.deskTaken}/${it.deskNumber}"
-        else
-            ""
-    }
-}*/

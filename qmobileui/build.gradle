@@ -41,6 +41,7 @@ dependencies {
 
     // Glide
     implementation Libs.glide
+    implementation Libs.glide_transformations
     kapt Libs.glide_compiler
 
     // Navigation
