@@ -76,7 +76,7 @@ fun bindImageFromUrl(
         .diskCacheStrategy(DiskCacheStrategy.ALL)
 //        .listener(listener)
         .listener(CustomRequestListener())
-        .error(R.drawable.ic_error_outline)
+        .error(R.drawable.ic_placeholder)
 //        .placeholder(R.drawable.profile_placeholder)
 
     getTransformation(transform)?.let {

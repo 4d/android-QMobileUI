@@ -11,7 +11,6 @@ import android.content.Context
 import android.content.Context.SEARCH_SERVICE
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,6 +36,7 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.ui.CustomSearchView
+import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.ui.SearchListener
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
@@ -124,16 +124,28 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
 
         fragment_list_recycler_view.layoutManager =
             when (BaseApp.fragmentUtil.layoutType(tableName)) {
-                "GRID" -> GridLayoutManager(activity, 2, GridLayoutManager.VERTICAL, false)
-                else -> LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
+                "GRID" -> {
+                    fragment_list_recycler_view.addItemDecoration(
+                        ItemDecorationSimpleCollection(
+                            resources.getDimensionPixelSize(
+                                R.dimen.simple_collection_spacing
+                            ),
+                            resources.getInteger(R.integer.simple_collection_columns)
+                        )
+                    )
+                    GridLayoutManager(activity, 2, GridLayoutManager.VERTICAL, false)
+                }
+                else -> {
+                    fragment_list_recycler_view.addItemDecoration(
+                        DividerItemDecoration(
+                            activity,
+                            RecyclerView.VERTICAL
+                        )
+                    )
+                    LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
+                }
             }
 
-        fragment_list_recycler_view.addItemDecoration(
-            DividerItemDecoration(
-                activity,
-                RecyclerView.VERTICAL
-            )
-        )
         fragment_list_recycler_view.adapter = adapter
     }
 

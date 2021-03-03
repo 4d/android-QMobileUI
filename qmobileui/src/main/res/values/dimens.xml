@@ -13,6 +13,10 @@
     <!--    List -->
     <dimen name="list_margin_medium">24dp</dimen>
 
+    <!--    Grid -->
+    <integer name="simple_collection_columns">2</integer>
+    <dimen name="simple_collection_spacing">10dp</dimen>
+
     <!--    Error Fragment -->
     <dimen name="fragment_error_text_vertical_padding">24dp</dimen>
     <dimen name="fragment_error_text_horizontal_padding">56dp</dimen>
