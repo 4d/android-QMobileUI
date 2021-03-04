@@ -15,7 +15,7 @@
 
     <!--    Grid -->
     <integer name="simple_collection_columns">2</integer>
-    <dimen name="simple_collection_spacing">10dp</dimen>
+    <dimen name="simple_collection_spacing">5dp</dimen>
 
     <!--    Error Fragment -->
     <dimen name="fragment_error_text_vertical_padding">24dp</dimen>
