@@ -7,7 +7,7 @@
 package com.qmobile.qmobileui.list
 
 import android.annotation.SuppressLint
-import android.view.Gravity
+import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -21,8 +21,8 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.LoginViewModelFactory
-import com.qmobile.qmobileui.activity.mainactivity.observeToastMessage
 import com.qmobile.qmobileui.utils.fetchResourceString
+import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 
 /**
@@ -90,10 +90,10 @@ fun EntityListFragment.observeEntityListDynamicSearch(sqLiteQuery: SupportSQLite
         {
             it.let {
                 adapter.setEntities(it)
-                if (it.isEmpty()) Toast.makeText(this.context, "No data Found", Toast.LENGTH_SHORT).apply {
-                    setGravity(Gravity.CENTER, 0, 0)
-                    show()
-                }
+                if (it.isNullOrEmpty())
+                    fragment_list_no_data_tv.visibility = View.VISIBLE
+                else
+                    fragment_list_no_data_tv.visibility = View.GONE
             }
         }
     )
@@ -110,15 +110,6 @@ fun EntityListFragment.observeToastMessage() {
                     Toast.makeText(it, toastMessage, Toast.LENGTH_LONG).show()
                 }
             }
-
-//            val toastMessage = context?.fetchResourceString(message) ?: ""
-//            if (toastMessage.isNotEmpty()) {
-//                activity?.let {
-//                    Toast.makeText(it, toastMessage, Toast.LENGTH_LONG).show()
-//                }
-//                // To avoid the error toast to be displayed without performing a refresh again
-//                entityListViewModel.toastMessage.postValue("")
-//            }
         }
     )
 }
