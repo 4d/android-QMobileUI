@@ -26,17 +26,17 @@ class ItemDecorationSimpleCollection(private val gridSpacingPx: Int, private val
         val padding: Int = parent.width / gridSize - frameWidth
         val itemPosition: Int = (view.layoutParams as RecyclerView.LayoutParams).viewAdapterPosition
         if (itemPosition < gridSize) {
-            outRect.top = 0
+            outRect.top = padding
         } else {
             outRect.top = gridSpacingPx
         }
         if (itemPosition % gridSize == 0) {
-            outRect.left = 0
+            outRect.left = padding
             outRect.right = padding
             mNeedLeftSpacing = true
         } else if ((itemPosition + 1) % gridSize == 0) {
             mNeedLeftSpacing = false
-            outRect.right = 0
+            outRect.right = padding
             outRect.left = padding
         } else if (mNeedLeftSpacing) {
             mNeedLeftSpacing = false
