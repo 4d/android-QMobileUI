@@ -265,6 +265,7 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
         ).addListener(
             (activity?.getSystemService(SEARCH_SERVICE) as SearchManager).getSearchableInfo(activity?.componentName)
         )
+        searchView.isIconified = false
         super.onCreateOptionsMenu(menu, inflater)
     }
 }
