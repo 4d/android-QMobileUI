@@ -21,6 +21,7 @@ import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 
 class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChangeListener {
@@ -73,7 +74,8 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
 
         getViewModel()
 //        setupObservers()
-        observeEntityList(sqlQueryBuilderUtil.getAll())
+        if (QMobileUiUtil.queryHolder.isSearchActive) observeEntityList(QMobileUiUtil.queryHolder.query!!) else  observeEntityList(
+            QMobileUiUtil.queryHolder.query!!)
     }
 
     override fun onDestroyView() {
