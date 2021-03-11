@@ -14,7 +14,9 @@ import android.widget.SearchView
 class CustomSearchView(var context: Context?, menuItem: MenuItem, searchListener: SearchListener) {
     private val searchView = menuItem.actionView as SearchView
     val addListener = { searchableInfo: SearchableInfo? ->
-        searchView.setOnCloseListener { true }
+        searchView.setOnCloseListener {
+            searchView.onActionViewCollapsed()
+            true }
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 searchListener.dataToSearch(query)

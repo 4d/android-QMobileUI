@@ -40,6 +40,7 @@ import com.qmobile.qmobileui.ui.CustomSearchView
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.ui.SearchListener
 import com.qmobile.qmobileui.utils.QMobileUiUtil
+import com.qmobile.qmobileui.utils.SearchQueryStateHelper
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 import com.qmobile.qmobileui.utils.customSnackBar
 import kotlinx.android.synthetic.main.fragment_list.*
@@ -88,7 +89,7 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
             BaseApp.fragmentUtil.setEntityListViewModel(this, entityListViewModel)
             lifecycleOwner = viewLifecycleOwner
         }
-
+        QMobileUiUtil.setQuery(sqlQueryBuilderUtil.getAll(),false)
         return dataBinding.root
     }
 
@@ -250,10 +251,19 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
 
     // Custom Search bar Listener
     override fun dataToSearch(data: String) {
-        if (data.isEmpty()) observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll())
-        else observeEntityListDynamicSearch(
-            sqlQueryBuilderUtil.sortQuery(data)
-        )
+        when{
+            (data.isEmpty()) -> {
+                QMobileUiUtil.setQuery(sqlQueryBuilderUtil.getAll(),false)
+                observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll())
+            }
+            else ->{
+                observeEntityListDynamicSearch(
+                    sqlQueryBuilderUtil.sortQuery(data)
+                )
+                QMobileUiUtil.setQuery(sqlQueryBuilderUtil.sortQuery(data),true)
+                SearchQueryStateHelper.setString(data)
+            }
+        }
     }
 
     // Searchable implementation
@@ -265,7 +275,12 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
         ).addListener(
             (activity?.getSystemService(SEARCH_SERVICE) as SearchManager).getSearchableInfo(activity?.componentName)
         )
-        searchView.isIconified = false
+        if (SearchQueryStateHelper.getString() != "empty" && SearchQueryStateHelper.getString()
+                .isNotEmpty()
+        ) {
+            searchView.isIconified = false
+            searchView.setQuery(SearchQueryStateHelper.getString(),true)
+        }
         super.onCreateOptionsMenu(menu, inflater)
     }
 }
