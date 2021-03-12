@@ -109,7 +109,6 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
         super.onActivityCreated(savedInstanceState)
         initRecyclerView()
         initOnRefreshListener()
-        initSwipeToDeleteAndUndo()
         setupObservers()
     }
 
