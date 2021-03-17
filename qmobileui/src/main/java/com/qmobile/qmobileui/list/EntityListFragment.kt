@@ -254,6 +254,7 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
             (data.isEmpty()) -> {
                 QMobileUiUtil.setQuery(sqlQueryBuilderUtil.getAll(),false)
                 observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll())
+                SearchQueryStateHelper.setString(data)
             }
             else ->{
                 observeEntityListDynamicSearch(
