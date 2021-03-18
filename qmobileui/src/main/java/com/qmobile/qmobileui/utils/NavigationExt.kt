@@ -92,6 +92,17 @@ fun BottomNavigationView.setupWithNavController(
         } else {
             val newlySelectedItemTag = graphIdToTagMap[item.itemId]
             if (selectedItemTag != newlySelectedItemTag) {
+
+                // When clicking on an item, go back to first level
+                val previousSelectedFragment = fragmentManager.findFragmentByTag(selectedItemTag)
+                    as NavHostFragment
+                val previousNavController = previousSelectedFragment.navController
+                // Pop the back stack to the start destination of the current navController graph
+                previousNavController.popBackStack(
+                    previousNavController.graph.startDestination,
+                    false
+                )
+
                 // Pop everything above the first fragment (the "fixed start destination")
                 fragmentManager.popBackStack(
                     firstFragmentTag,
