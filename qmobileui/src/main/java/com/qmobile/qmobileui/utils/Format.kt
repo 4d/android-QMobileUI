@@ -30,7 +30,6 @@ fun time(format: String, time: String?) = when {
     ).toString()
 }
 
-
 // FormatDate
 fun date(format: String, date: String?) = when {
     (date == null) -> "null"
@@ -39,4 +38,3 @@ fun date(format: String, date: String?) = when {
         Locale.getDefault(), date
     ).toString()
 }
-

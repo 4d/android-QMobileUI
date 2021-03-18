@@ -33,7 +33,7 @@ object QMobileUiUtil {
     var WordFormatter =
         { number: String -> numberToWord.convertNumberToWord(number) } // convert number To literal word
 
-    fun setQuery(sqlQuery: SimpleSQLiteQuery, isSearchActive : Boolean) { // this part has tobe added
+    fun setQuery(sqlQuery: SimpleSQLiteQuery, isSearchActive: Boolean) { // this part has tobe added
         queryHolder = QueryHolder(
             sqlQuery,
             isSearchActive = isSearchActive

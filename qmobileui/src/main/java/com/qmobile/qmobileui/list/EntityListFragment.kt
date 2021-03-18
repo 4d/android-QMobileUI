@@ -89,7 +89,7 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
             BaseApp.fragmentUtil.setEntityListViewModel(this, entityListViewModel)
             lifecycleOwner = viewLifecycleOwner
         }
-        QMobileUiUtil.setQuery(sqlQueryBuilderUtil.getAll(),false)
+        QMobileUiUtil.setQuery(sqlQueryBuilderUtil.getAll(), false)
         return dataBinding.root
     }
 
@@ -250,17 +250,17 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
 
     // Custom Search bar Listener
     override fun dataToSearch(data: String) {
-        when{
+        when {
             (data.isEmpty()) -> {
-                QMobileUiUtil.setQuery(sqlQueryBuilderUtil.getAll(),false)
+                QMobileUiUtil.setQuery(sqlQueryBuilderUtil.getAll(), false)
                 observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll())
                 SearchQueryStateHelper.setString(data)
             }
-            else ->{
+            else -> {
                 observeEntityListDynamicSearch(
                     sqlQueryBuilderUtil.sortQuery(data)
                 )
-                QMobileUiUtil.setQuery(sqlQueryBuilderUtil.sortQuery(data),true)
+                QMobileUiUtil.setQuery(sqlQueryBuilderUtil.sortQuery(data), true)
                 SearchQueryStateHelper.setString(data)
             }
         }
@@ -276,10 +276,10 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
             (activity?.getSystemService(SEARCH_SERVICE) as SearchManager).getSearchableInfo(activity?.componentName)
         )
         if (SearchQueryStateHelper.getString() != "empty" && SearchQueryStateHelper.getString()
-                .isNotEmpty()
+            .isNotEmpty()
         ) {
             searchView.isIconified = false
-            searchView.setQuery(SearchQueryStateHelper.getString(),true)
+            searchView.setQuery(SearchQueryStateHelper.getString(), true)
         }
         super.onCreateOptionsMenu(menu, inflater)
     }

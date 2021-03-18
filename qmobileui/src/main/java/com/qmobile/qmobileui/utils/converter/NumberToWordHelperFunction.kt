@@ -18,22 +18,22 @@ import java.text.DecimalFormat
 
 internal class NumberToWordHelperFunction {
     companion object {
-        private fun convertLessThanOneThousand(_number: Int): String {
-            var number: Int = _number
+        private fun convertLessThanOneThousand(nb: Int): String {
+            var pnumber: Int = nb
             var soFar: String
             when {
-                (number % INT_100 < INT_20) -> {
-                    soFar = NumberToWordConstants.numNames[number % INT_100]
-                    number /= INT_100
+                (pnumber % INT_100 < INT_20) -> {
+                    soFar = NumberToWordConstants.numNames[pnumber % INT_100]
+                    pnumber /= INT_100
                 }
                 else -> {
-                    soFar = NumberToWordConstants.numNames[number % INT_10]
-                    number /= INT_10
-                    soFar = NumberToWordConstants.tensNames[number % INT_10] + soFar
-                    number /= INT_10
+                    soFar = NumberToWordConstants.numNames[pnumber % INT_10]
+                    pnumber /= INT_10
+                    soFar = NumberToWordConstants.tensNames[pnumber % INT_10] + soFar
+                    pnumber /= INT_10
                 }
             }
-            return if (number == 0) soFar else NumberToWordConstants.numNames[number] + " hundred" + soFar
+            return if (pnumber == 0) soFar else NumberToWordConstants.numNames[pnumber] + " hundred" + soFar
         }
 
         fun convertFromDoubleToWord(number: Double): String {

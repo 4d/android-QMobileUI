@@ -74,8 +74,10 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
 
         getViewModel()
 //        setupObservers()
-        if (QMobileUiUtil.queryHolder.isSearchActive) observeEntityList(QMobileUiUtil.queryHolder.query!!) else  observeEntityList(
-            QMobileUiUtil.queryHolder.query!!)
+        if (QMobileUiUtil.queryHolder.isSearchActive)
+            observeEntityList(QMobileUiUtil.queryHolder.query!!)
+        else
+            observeEntityList(QMobileUiUtil.queryHolder.query!!)
     }
 
     override fun onDestroyView() {

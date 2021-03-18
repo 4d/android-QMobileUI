@@ -16,7 +16,8 @@ class CustomSearchView(var context: Context?, menuItem: MenuItem, searchListener
     val addListener = { searchableInfo: SearchableInfo? ->
         searchView.setOnCloseListener {
             searchView.onActionViewCollapsed()
-            true }
+            true
+        }
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 searchListener.dataToSearch(query)

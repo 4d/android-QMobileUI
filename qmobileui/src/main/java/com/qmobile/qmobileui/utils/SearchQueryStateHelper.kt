@@ -7,7 +7,7 @@
 package com.qmobile.qmobileui.utils
 //
 object SearchQueryStateHelper {
-    private  var stringToSearch : String ="empty"
-    fun setString(string: String) {this.stringToSearch = string}
+    private var stringToSearch: String = "empty"
+    fun setString(string: String) { this.stringToSearch = string }
     fun getString() = this.stringToSearch
 }
