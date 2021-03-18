@@ -38,16 +38,18 @@ fun EntityDetailFragment.observeEntity() {
         Observer { entity ->
             Timber.d("Observed entity from Room, json = ${Gson().toJson(entity)}")
 
-            val relationKeysMap = entityViewModel.getManyToOneRelationKeysFromEntity(entity)
-            for ((relationName, liveDateListRoomRelation) in relationKeysMap) {
-                liveDateListRoomRelation.observe(
-                    viewLifecycleOwner,
-                    Observer { roomRelation ->
-                        roomRelation?.let {
-                            entityViewModel.setRelationToLayout(relationName, roomRelation)
+            entity?.let {
+                val relationKeysMap = entityViewModel.getManyToOneRelationKeysFromEntity(entity)
+                for ((relationName, liveDateListRoomRelation) in relationKeysMap) {
+                    liveDateListRoomRelation.observe(
+                        viewLifecycleOwner,
+                        Observer { roomRelation ->
+                            roomRelation?.let {
+                                entityViewModel.setRelationToLayout(relationName, roomRelation)
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     )
