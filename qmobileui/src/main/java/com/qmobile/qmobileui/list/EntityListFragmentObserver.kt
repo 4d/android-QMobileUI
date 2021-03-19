@@ -43,6 +43,7 @@ fun EntityListFragment.setupObservers() {
     observeDataSynchronized()
     observeAuthenticationState()
     observeNetworkStatus()
+    observeDataLoading()
 }
 
 // Get EntityListViewModel
@@ -91,10 +92,24 @@ fun EntityListFragment.observeEntityListDynamicSearch(sqLiteQuery: SupportSQLite
         {
             it.let {
                 adapter.setEntities(it)
-                if (it.isNullOrEmpty())
-                    fragment_list_no_data_tv.visibility = View.VISIBLE
-                else
-                    fragment_list_no_data_tv.visibility = View.GONE
+//                if (it.isNullOrEmpty())
+//                    fragment_list_no_data_tv.visibility = View.VISIBLE
+//                else
+//                    fragment_list_no_data_tv.visibility = View.GONE
+            }
+        }
+    )
+}
+
+// Observe dataLoading
+fun EntityListFragment.observeDataLoading() {
+    entityListViewModel.dataLoading.observe(
+        viewLifecycleOwner,
+        { dataLoading ->
+            if (dataLoading != true && adapter.itemCount == 0) {
+                fragment_list_no_data_tv.visibility = View.VISIBLE
+            } else {
+                fragment_list_no_data_tv.visibility = View.GONE
             }
         }
     )
