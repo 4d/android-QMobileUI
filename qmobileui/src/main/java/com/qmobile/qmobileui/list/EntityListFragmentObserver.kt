@@ -92,6 +92,9 @@ fun EntityListFragment.observeEntityListDynamicSearch(sqLiteQuery: SupportSQLite
         {
             it.let {
                 adapter.setEntities(it)
+                if (!it.isNullOrEmpty()) {
+                    fragment_list_no_data_tv.visibility = View.GONE
+                }
 //                if (it.isNullOrEmpty())
 //                    fragment_list_no_data_tv.visibility = View.VISIBLE
 //                else
