@@ -8,10 +8,8 @@ package com.qmobile.qmobileui.list
 
 import android.annotation.SuppressLint
 import android.view.View
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
@@ -22,7 +20,6 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.LoginViewModelFactory
-import com.qmobile.qmobileui.utils.fetchResourceString
 import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 
@@ -39,7 +36,6 @@ fun EntityListFragment.getViewModel() {
  * Setup observers
  */
 fun EntityListFragment.setupObservers() {
-    observeToastMessage()
     observeDataSynchronized()
     observeAuthenticationState()
     observeNetworkStatus()
@@ -89,16 +85,12 @@ fun EntityListFragment.getLoginViewModel() {
 fun EntityListFragment.observeEntityListDynamicSearch(sqLiteQuery: SupportSQLiteQuery) {
     entityListViewModel.getAllDynamicQuery(sqLiteQuery).observe(
         viewLifecycleOwner,
-        {
+        Observer {
             it.let {
                 adapter.setEntities(it)
                 if (!it.isNullOrEmpty()) {
                     fragment_list_no_data_tv.visibility = View.GONE
                 }
-//                if (it.isNullOrEmpty())
-//                    fragment_list_no_data_tv.visibility = View.VISIBLE
-//                else
-//                    fragment_list_no_data_tv.visibility = View.GONE
             }
         }
     )
@@ -108,26 +100,11 @@ fun EntityListFragment.observeEntityListDynamicSearch(sqLiteQuery: SupportSQLite
 fun EntityListFragment.observeDataLoading() {
     entityListViewModel.dataLoading.observe(
         viewLifecycleOwner,
-        { dataLoading ->
+        Observer { dataLoading ->
             if (dataLoading != true && adapter.itemCount == 0) {
                 fragment_list_no_data_tv.visibility = View.VISIBLE
             } else {
                 fragment_list_no_data_tv.visibility = View.GONE
-            }
-        }
-    )
-}
-
-// Observe any toast message
-fun EntityListFragment.observeToastMessage() {
-    entityListViewModel.toastMessage.message.observe(
-        viewLifecycleOwner,
-        Observer { event ->
-            event.getContentIfNotHandled()?.let { message ->
-                val toastMessage = context?.fetchResourceString(message)
-                activity?.let {
-                    Toast.makeText(it, toastMessage, Toast.LENGTH_LONG).show()
-                }
             }
         }
     )

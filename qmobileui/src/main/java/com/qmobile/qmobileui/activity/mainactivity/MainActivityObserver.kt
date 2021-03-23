@@ -155,6 +155,7 @@ fun MainActivity.observeEntityListViewModelList() {
         observeDataSynchronized(entityListViewModel)
         observeNewRelatedEntity(entityListViewModel)
         observeNewRelatedEntities(entityListViewModel)
+        observeEntityToastMessage(entityListViewModel)
     }
 }
 
@@ -189,6 +190,21 @@ fun MainActivity.observeNewRelatedEntities(entityListViewModel: EntityListViewMo
         this,
         Observer { oneToManyRelation ->
             dispatchNewRelatedEntities(oneToManyRelation)
+        }
+    )
+}
+
+// Observe any toast message from EntityList
+fun MainActivity.observeEntityToastMessage(entityListViewModel: EntityListViewModel<EntityModel>) {
+    entityListViewModel.toastMessage.message.observe(
+        this,
+        Observer { event ->
+            event.getContentIfNotHandled()?.let { message ->
+                val toastMessage = this.baseContext.fetchResourceString(message)
+                if (toastMessage.isNotEmpty()) {
+                    Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
+                }
+            }
         }
     )
 }
