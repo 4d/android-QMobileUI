@@ -1,0 +1,74 @@
+def currentGitBranch() {
+  def branch = ""
+  branch = System.getenv('CI_COMMIT_REF_NAME')
+  if (branch == null) {
+    def proc = "git rev-parse --abbrev-ref HEAD".execute()
+    proc.in.eachLine { line -> branch = line }
+    proc.err.eachLine { line -> println line }
+    proc.waitFor()
+  }
+  println("currentGitBranch = $branch")
+  branch.replace("/", "_")
+}
+
+def currentGitHash() {
+  def hash = ""
+  def proc = "git rev-parse --short HEAD".execute()
+  proc.in.eachLine { line -> hash = line }
+  proc.err.eachLine { line -> println line }
+  proc.waitFor()
+  println("currentGitHash = $hash")
+  return hash
+}
+
+def writeGitHashFile(String fileName) {
+  def file = new File(projectDir, fileName)
+  file.text = currentGitHash()
+  return file
+}
+
+def getGitHashUploadUrl(String repoName, String fileName) {
+
+  def repo = repoName.toLowerCase()
+  def ARTIFACT_VERSION = ""
+  switch (repo) {
+    case "qmobileapi":
+      ARTIFACT_VERSION = Versions.qmobileapi
+      break
+    case "qmobiledatastore":
+      ARTIFACT_VERSION = Versions.qmobiledatastore
+      break
+    case "qmobiledatasync":
+      ARTIFACT_VERSION = Versions.qmobiledatasync
+      break
+    case "qmobileui":
+      ARTIFACT_VERSION = Versions.qmobileui
+      break
+    default:
+      break
+  }
+
+  def machineIP = System.getenv('ARTIFACTORY_MACHINE_IP')
+  def contextUrl = "http://${machineIP}:8081/artifactory"
+  def repoKey = "libs-release-local"
+  def ARTIFACT_GROUP = "com.qmobile.${repo}"
+  def ARTIFACT_ID = "${repo}"
+  return "${contextUrl}/${repoKey}/${ARTIFACT_GROUP.replace(".", "/")}/${ARTIFACT_ID}/${ARTIFACT_VERSION}-${currentGitBranch()}/${fileName}"
+}
+
+def uploadGitHash(String repoName) {
+  def fileName = "gitHash.txt"
+  def gitHashFile = writeGitHashFile(fileName)
+  def auth = "-u" + System.getenv('ARTIFACTORY_USERNAME') + ':' + System.getenv('ARTIFACTORY_PASSWORD')
+  def link = getGitHashUploadUrl(repoName, fileName)
+  println("link = $link")
+  def proc = ['curl', '-X', 'PUT', auth, '-H', 'Content-type: application/json', '-T', gitHashFile.getAbsolutePath(), link].execute()
+  proc.in.eachLine { line -> println line }
+  proc.err.eachLine { line -> println line }
+  proc.waitFor()
+}
+
+// Export methods by turning them into closures
+ext {
+  uploadGitHash = this.&uploadGitHash
+}
