@@ -7,9 +7,13 @@
 package com.qmobile.qmobileui.list.viewholder
 
 import androidx.databinding.ViewDataBinding
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
+import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.BR
+import timber.log.Timber
 
 class BaseViewHolder(
     private val dataBinding: ViewDataBinding,
@@ -26,6 +30,22 @@ class BaseViewHolder(
                 dataBinding.root,
                 position,
                 tableName
+            )
+        }
+    }
+
+    // Map<relationName, LiveData<RoomRelation>>
+    fun observeRelations(relations: MutableMap<String, LiveData<RoomRelation>>, position: Int) {
+        for ((relationName, liveDataRelatedEntity) in relations) {
+            liveDataRelatedEntity.observe(
+                requireNotNull(dataBinding.lifecycleOwner),
+                Observer { roomRelation ->
+                    roomRelation?.first?.let {
+                        Timber.d("[$tableName] Relation named\"$relationName\" retrieved for position $position")
+                        BaseApp.fragmentUtil.setRelationBinding(dataBinding, relationName, it)
+                        dataBinding.executePendingBindings()
+                    }
+                }
             )
         }
     }

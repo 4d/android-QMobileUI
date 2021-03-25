@@ -87,7 +87,11 @@ fun EntityListFragment.observeEntityListDynamicSearch(sqLiteQuery: SupportSQLite
         viewLifecycleOwner,
         Observer {
             it.let {
-                adapter.setEntities(it)
+
+                // Map<entityKey, Map<relationName, LiveData<RoomRelation>>>
+                val relationMap = entityListViewModel.getManyToOneRelationKeysFromEntityList(it)
+
+                adapter.setEntities(it, relationMap)
                 if (!it.isNullOrEmpty()) {
                     fragment_list_no_data_tv.visibility = View.GONE
                 }
