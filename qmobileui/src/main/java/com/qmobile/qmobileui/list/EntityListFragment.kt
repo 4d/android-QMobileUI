@@ -121,7 +121,7 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
      * Initialize recyclerView
      */
     private fun initRecyclerView() {
-        adapter = EntityListAdapter(tableName)
+        adapter = EntityListAdapter(tableName, viewLifecycleOwner)
 
         fragment_list_recycler_view.layoutManager =
             when (BaseApp.fragmentUtil.layoutType(tableName)) {
