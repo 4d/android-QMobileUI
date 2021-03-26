@@ -8,19 +8,27 @@ package com.qmobile.qmobileui.utils
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
 import com.qmobile.qmobileui.model.AppUtilities
 import com.qmobile.qmobileui.model.DeviceUtility
 import com.qmobile.qmobileui.model.HardwareUtil
 import com.qmobile.qmobileui.model.QMobileUiConstants
 import org.json.JSONObject
+import java.io.IOException
 import java.util.Locale
 import kotlin.collections.ArrayList
+
 // Kotlin File To Hold Utility classes
 internal open class FileUtilsUp(var context: Context) { // scope restricted to this module
     var readContentFromFile = { fileName: String ->
-        context.assets.open(fileName).bufferedReader().use {
-            it.readText()
+        try {
+            context.assets.open(fileName).bufferedReader().use {
+                it.readText()
+            }
+        } catch (e: IOException) {
+            Log.e("FileUtilsUp", "Missing file \"$fileName\" in assets")
+            ""
         }
     }
 
@@ -38,9 +46,13 @@ internal open class FileUtilsUp(var context: Context) { // scope restricted to t
     }
 }
 
-internal class BridgeUtility(context: Context) : FileUtilsUp(context) { // scope restricted to this module
+internal class BridgeUtility(context: Context) :
+    FileUtilsUp(context) { // scope restricted to this module
     fun getAppUtil(): AppUtilities {
         val jsonObj = JSONObject(readContentFromFile("appinfo.json"))
+
+        Log.d("SDK VERSION", readContentFromFile("sdkVersion"))
+
         return AppUtilities(
             globalStamp = (jsonObj.getString("initialGlobalStamp")).toInt(),
             guestLogin = (jsonObj.getString("guestLogin")).toBoolean(),
