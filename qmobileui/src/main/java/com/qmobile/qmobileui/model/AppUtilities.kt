@@ -15,5 +15,6 @@ data class AppUtilities(
     var remoteUrl: String,
     var teams: JSONObject,
     var queryJson: JSONObject,
-    var searchField: JSONObject
+    var searchField: JSONObject,
+    var sdkVersion: String
 )

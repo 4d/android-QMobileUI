@@ -105,8 +105,7 @@ class SettingsFragment :
             findPreference<PreferenceCategory>(accountCategoryKey)?.isVisible = true
         findPreference<Preference>(logoutPrefKey)?.onPreferenceClickListener = this
 
-        remoteUrlPref =
-            findPreference(resources.getString(R.string.pref_remote_url_key))
+        remoteUrlPref = findPreference(remoteUrlPrefKey)
         remoteUrlPref?.setDefaultValue(this.remoteUrl)
         remoteUrlPref?.onPreferenceChangeListener = this
     }

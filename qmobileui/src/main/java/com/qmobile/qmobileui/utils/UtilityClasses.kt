@@ -51,7 +51,8 @@ internal class BridgeUtility(context: Context) :
     fun getAppUtil(): AppUtilities {
         val jsonObj = JSONObject(readContentFromFile("appinfo.json"))
 
-        Log.d("SDK VERSION", readContentFromFile("sdkVersion"))
+        val sdkVersion = readContentFromFile("sdkVersion")
+        Log.d("SDK VERSION", sdkVersion)
 
         return AppUtilities(
             globalStamp = (jsonObj.getString("initialGlobalStamp")).toInt(),
@@ -64,7 +65,8 @@ internal class BridgeUtility(context: Context) :
                 this.put("name", newTeam.getString("TeamID"))
             },
             queryJson = JSONObject(readContentFromFile("queries.json")),
-            searchField = jsonObj.getJSONObject("searchableField")
+            searchField = jsonObj.getJSONObject("searchableField"),
+            sdkVersion = sdkVersion
         )
     }
 }
