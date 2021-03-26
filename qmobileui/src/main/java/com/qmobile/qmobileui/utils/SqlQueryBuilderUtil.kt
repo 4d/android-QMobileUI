@@ -33,11 +33,11 @@ class SqlQueryBuilderUtil(
         (0 until columnsToFilter.length()).forEach {
             when {
                 (columnsToFilter.length() == 1) ->
-                    stringBuffer.append("`${columnsToFilter[it]}`LIKE  \'%$dataToSort%\' ")
+                    stringBuffer.append(" `${columnsToFilter[it]}` LIKE  \'%$dataToSort%\' ")
                 (it == (columnsToFilter.length() - 1)) ->
-                    stringBuffer.append("`${columnsToFilter[it]}`LIKE  \'%$dataToSort%\' ")
+                    stringBuffer.append(" `${columnsToFilter[it]}` LIKE  \'%$dataToSort%\' ")
                 else ->
-                    stringBuffer.append("`${columnsToFilter[it]}` LIKE  \'%$dataToSort%\'  OR ")
+                    stringBuffer.append(" `${columnsToFilter[it]}` LIKE  \'%$dataToSort%\'  OR ")
             }
         }
     }
