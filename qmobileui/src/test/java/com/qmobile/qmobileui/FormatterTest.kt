@@ -6,10 +6,14 @@
 
 package com.qmobile.qmobileui
 
-import com.qmobile.qmobileui.utils.*
+import com.qmobile.qmobileui.utils.TypeChoice
+import com.qmobile.qmobileui.utils.date
+import com.qmobile.qmobileui.utils.formatBoolean
+import com.qmobile.qmobileui.utils.number
+import com.qmobile.qmobileui.utils.time
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runners.JUnit4
+
 
 class FormatterTest {
 
