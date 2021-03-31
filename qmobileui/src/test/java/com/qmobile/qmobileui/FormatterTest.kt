@@ -14,7 +14,6 @@ import com.qmobile.qmobileui.utils.time
 import org.junit.Assert
 import org.junit.Test
 
-
 class FormatterTest {
 
     @Test
@@ -95,6 +94,4 @@ class FormatterTest {
 
     private fun numberFormatTest(input: String, expectedResult: String, typeChoice: TypeChoice) =
         Assert.assertEquals(expectedResult, number(typeChoice.key, input))
-
-
 }
