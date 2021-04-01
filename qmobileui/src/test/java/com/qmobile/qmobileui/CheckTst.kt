@@ -10,7 +10,7 @@ import org.junit.Test
 
 class CheckTst {
     @Test
-    fun test(){
+    fun test() {
         println("test")
     }
 }
