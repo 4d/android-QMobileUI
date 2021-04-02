@@ -8,7 +8,7 @@ package com.qmobile.qmobileui
 
 import org.junit.Test
 
-class CheckTst {
+class CheckTest {
     @Test
     fun test() {
         println("test")

@@ -36,6 +36,9 @@ def currentGitBranch() {
     proc.err.eachLine { line -> println line }
     proc.waitFor()
   }
+  if (branch == null) {
+    branch = "master"
+  }
   branch.replace("/", "_")
 }
 
