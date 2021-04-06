@@ -210,10 +210,10 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
         if (isReady()) {
             entityListViewModel.getEntities { shouldSyncData ->
                 if (shouldSyncData) {
-                    Timber.i("GlobalStamp changed, synchronization is required")
+                    Timber.d("GlobalStamp changed, synchronization is required")
                     delegate.requestDataSync(tableName)
                 } else {
-                    Timber.i("GlobalStamp unchanged, no synchronization is required")
+                    Timber.d("GlobalStamp unchanged, no synchronization is required")
                 }
             }
         } else {

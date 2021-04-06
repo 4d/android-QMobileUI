@@ -79,7 +79,7 @@ fun MainActivity.observeAuthenticationState() {
     loginViewModel.authenticationState.observe(
         this,
         Observer { authenticationState ->
-            Timber.i("[AuthenticationState : $authenticationState]")
+            Timber.d("[AuthenticationState : $authenticationState]")
             when (authenticationState) {
                 AuthenticationStateEnum.AUTHENTICATED -> {
                     if (shouldDelayOnForegroundEvent.compareAndSet(true, false)) {
@@ -126,7 +126,7 @@ fun MainActivity.observeNetworkStatus() {
         connectivityViewModel.networkStateMonitor.observe(
             this,
             Observer { networkState ->
-                Timber.i("[NetworkState : $networkState]")
+                Timber.d("[NetworkState : $networkState]")
                 when (networkState) {
                     NetworkStateEnum.CONNECTED -> {
                         // Setting the authenticationState to its initial value
@@ -165,7 +165,7 @@ fun MainActivity.observeDataSynchronized(entityListViewModel: EntityListViewMode
     entityListViewModel.dataSynchronized.observe(
         this,
         Observer { dataSyncState ->
-            Timber.i(
+            Timber.d(
                 "[DataSyncState : $dataSyncState, " +
                     "Table : ${entityListViewModel.getAssociatedTableName()}, " +
                     "Instance : $entityListViewModel]"

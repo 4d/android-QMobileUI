@@ -52,7 +52,6 @@ internal class BridgeUtility(context: Context) :
         val jsonObj = JSONObject(readContentFromFile("appinfo.json"))
 
         val sdkVersion = readContentFromFile("sdkVersion")
-        Log.d("SDK VERSION", sdkVersion)
 
         return AppUtilities(
             globalStamp = (jsonObj.getString("initialGlobalStamp")).toInt(),
@@ -66,7 +65,8 @@ internal class BridgeUtility(context: Context) :
             },
             queryJson = JSONObject(readContentFromFile("queries.json")),
             searchField = jsonObj.getJSONObject("searchableField"),
-            sdkVersion = sdkVersion
+            sdkVersion = sdkVersion,
+            logLevel = (jsonObj.getString("logLevel")).toInt()
         )
     }
 }

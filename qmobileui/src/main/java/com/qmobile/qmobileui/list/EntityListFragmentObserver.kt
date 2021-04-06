@@ -120,7 +120,7 @@ fun EntityListFragment.observeDataSynchronized() {
     entityListViewModel.dataSynchronized.observe(
         viewLifecycleOwner,
         Observer { dataSyncState ->
-            Timber.i(
+            Timber.d(
                 "[DataSyncState : $dataSyncState, " +
                     "Table : ${entityListViewModel.getAssociatedTableName()}, " +
                     "Instance : $entityListViewModel]"

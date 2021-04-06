@@ -144,7 +144,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     @Suppress("unused")
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     fun onBackground() {
-        Timber.i("[${Lifecycle.Event.ON_STOP}]")
+        Timber.d("[${Lifecycle.Event.ON_STOP}]")
         shouldDelayOnForegroundEvent.set(false)
     }
 
@@ -155,10 +155,10 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onForeground() {
         if (loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED) {
-            Timber.i("[${Lifecycle.Event.ON_START}]")
+            Timber.d("[${Lifecycle.Event.ON_START}]")
             applyOnForegroundEvent()
         } else {
-            Timber.i("[${Lifecycle.Event.ON_START} - Delayed event, waiting for authentication]")
+            Timber.d("[${Lifecycle.Event.ON_START} - Delayed event, waiting for authentication]")
             shouldDelayOnForegroundEvent.set(true)
         }
     }

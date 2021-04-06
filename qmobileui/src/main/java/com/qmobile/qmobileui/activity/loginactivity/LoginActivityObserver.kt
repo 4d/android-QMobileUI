@@ -58,7 +58,7 @@ fun LoginActivity.observeAuthenticationState() {
     loginViewModel.authenticationState.observe(
         this,
         Observer { authenticationState ->
-            Timber.i("[AuthenticationState : $authenticationState]")
+            Timber.d("[AuthenticationState : $authenticationState]")
             when (authenticationState) {
                 AuthenticationStateEnum.AUTHENTICATED -> {
                     startMainActivity(false)

@@ -16,5 +16,6 @@ data class AppUtilities(
     var teams: JSONObject,
     var queryJson: JSONObject,
     var searchField: JSONObject,
-    var sdkVersion: String
+    var sdkVersion: String,
+    var logLevel: Int
 )
