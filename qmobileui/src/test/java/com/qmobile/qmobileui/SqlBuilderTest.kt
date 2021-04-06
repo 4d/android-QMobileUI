@@ -7,7 +7,11 @@
 package com.qmobile.qmobileui
 
 import androidx.sqlite.db.SimpleSQLiteQuery
+import com.qmobile.qmobileui.model.AppUtilities
+import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
+import io.mockk.every
+import io.mockk.mockkObject
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
@@ -40,5 +44,12 @@ class SqlBuilderTest {
         val actualQueryResult = sqlQueryBuilder.getAll().sql
         val expectedQueryResult = SimpleSQLiteQuery("SELECT * FROM Service").sql
         Assert.assertEquals(expectedQueryResult, actualQueryResult)
+    }
+
+    @Test
+    fun testSearchableField(){
+        mockkObject(QMobileUiUtil)
+        every { QMobileUiUtil.appUtilities }returns AppUtilities(0,true,true,"",tableJson,tableJson,tableJson,"12.5")
+        Assert.assertEquals(tableJson,QMobileUiUtil.appUtilities.searchField)
     }
 }
