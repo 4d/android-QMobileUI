@@ -6,7 +6,7 @@
 
 package com.qmobile.qmobileui.activity.mainactivity
 
-import com.qmobile.qmobileapi.utils.getStringList
+import com.qmobile.qmobileapi.utils.getObjectListAsString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
 import com.qmobile.qmobiledatasync.relation.OneToManyRelation
@@ -34,7 +34,7 @@ fun MainActivity.dispatchNewRelatedEntity(manyToOneRelation: ManyToOneRelation) 
 fun MainActivity.dispatchNewRelatedEntities(oneToManyRelation: OneToManyRelation) {
     val entityListViewModel =
         entityListViewModelList.find { it.getAssociatedTableName() == oneToManyRelation.className }
-    for (entityString in oneToManyRelation.entities.getStringList()) {
+    for (entityString in oneToManyRelation.entities.getObjectListAsString()) {
         val entity = BaseApp.fromTableForViewModel.parseEntityFromTable(
             oneToManyRelation.className,
             entityString,

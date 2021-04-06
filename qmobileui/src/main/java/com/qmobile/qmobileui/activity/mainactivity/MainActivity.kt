@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LiveData
@@ -33,6 +34,7 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
+import com.qmobile.qmobileui.utils.QMobileUiUtil
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -124,11 +126,15 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      */
     override fun refreshApiClients() {
         ApiClient.clearApiClients()
-        loginApiService = ApiClient.getLoginApiService(this)
+        loginApiService = ApiClient.getLoginApiService(
+            context = this,
+            logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
+        )
         apiService = ApiClient.getApiService(
             context = this,
             loginApiService = loginApiService,
-            loginRequiredCallback = loginRequiredCallbackForInterceptor
+            loginRequiredCallback = loginRequiredCallbackForInterceptor,
+            logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
         )
         if (this::loginViewModel.isInitialized) {
             loginViewModel.refreshAuthRepository(loginApiService)

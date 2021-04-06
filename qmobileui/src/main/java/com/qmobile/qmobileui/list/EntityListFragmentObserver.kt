@@ -102,14 +102,17 @@ fun EntityListFragment.observeEntityListDynamicSearch(sqLiteQuery: SupportSQLite
 
 // Observe dataLoading
 fun EntityListFragment.observeDataLoading() {
+    var wasLoading = false
     entityListViewModel.dataLoading.observe(
         viewLifecycleOwner,
         Observer { dataLoading ->
-            if (dataLoading != true && adapter.itemCount == 0) {
+            if (dataLoading != true && adapter.itemCount == 0 && wasLoading) {
                 fragment_list_no_data_tv.visibility = View.VISIBLE
             } else {
                 fragment_list_no_data_tv.visibility = View.GONE
             }
+
+            wasLoading = dataLoading == true
         }
     )
 }

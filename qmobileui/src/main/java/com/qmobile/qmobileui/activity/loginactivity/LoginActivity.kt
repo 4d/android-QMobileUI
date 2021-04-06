@@ -11,6 +11,7 @@ import android.content.Intent
 import android.graphics.Rect
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -30,6 +31,7 @@ import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.binding.bindImageFromDrawable
 import com.qmobile.qmobileui.databinding.ActivityLoginBinding
+import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.customSnackBar
 import kotlinx.android.synthetic.main.activity_login.*
 
@@ -61,7 +63,10 @@ class LoginActivity : BaseActivity() {
                 getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
             // Init Api service
-            loginApiService = ApiClient.getLoginApiService(this)
+            loginApiService = ApiClient.getLoginApiService(
+                context = this,
+                logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
+            )
 
             val binding: ActivityLoginBinding =
                 DataBindingUtil.setContentView(this, R.layout.activity_login)
