@@ -47,9 +47,9 @@ class SqlBuilderTest {
     }
 
     @Test
-    fun testSearchableField(){
+    fun testSearchableField() {
         mockkObject(QMobileUiUtil)
-        every { QMobileUiUtil.appUtilities }returns AppUtilities(0,true,true,"",tableJson,tableJson,tableJson,"12.5")
-        Assert.assertEquals(tableJson,QMobileUiUtil.appUtilities.searchField)
+        every { QMobileUiUtil.appUtilities } returns AppUtilities(0, true, true, "", tableJson, tableJson, tableJson, "12.5")
+        Assert.assertEquals(tableJson, QMobileUiUtil.appUtilities.searchField)
     }
 }
