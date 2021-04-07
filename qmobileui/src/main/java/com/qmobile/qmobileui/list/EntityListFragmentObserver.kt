@@ -11,13 +11,8 @@ import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
-import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
-import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.LoginViewModelFactory
 import kotlinx.android.synthetic.main.fragment_list.*
@@ -28,7 +23,6 @@ import timber.log.Timber
  */
 fun EntityListFragment.getViewModel() {
     getEntityListViewModel()
-    getConnectivityViewModel()
     getLoginViewModel()
 }
 
@@ -37,8 +31,6 @@ fun EntityListFragment.getViewModel() {
  */
 fun EntityListFragment.setupObservers() {
     observeDataSynchronized()
-    observeAuthenticationState()
-    observeNetworkStatus()
     observeDataLoading()
 }
 
@@ -55,7 +47,7 @@ fun EntityListFragment.getEntityListViewModel() {
 }
 
 // Get ConnectivityViewModel
-fun EntityListFragment.getConnectivityViewModel() {
+/*fun EntityListFragment.getConnectivityViewModel() {
     activity?.run {
         if (sdkNewerThanKitKat) {
             connectivityViewModel = ViewModelProvider(
@@ -67,7 +59,7 @@ fun EntityListFragment.getConnectivityViewModel() {
             )[ConnectivityViewModel::class.java]
         }
     } ?: throw IllegalStateException("Invalid Activity")
-}
+}*/
 
 // Get LoginViewModel
 fun EntityListFragment.getLoginViewModel() {
@@ -133,7 +125,7 @@ fun EntityListFragment.observeDataSynchronized() {
 }
 
 // Observe authentication state
-fun EntityListFragment.observeAuthenticationState() {
+/*fun EntityListFragment.observeAuthenticationState() {
     loginViewModel.authenticationState.observe(
         viewLifecycleOwner,
         Observer { authenticationState ->
@@ -150,10 +142,10 @@ fun EntityListFragment.observeAuthenticationState() {
             }
         }
     )
-}
+}*/
 
 // Observe network status
-fun EntityListFragment.observeNetworkStatus() {
+/*fun EntityListFragment.observeNetworkStatus() {
     if (sdkNewerThanKitKat) {
         connectivityViewModel.networkStateMonitor.observe(
             viewLifecycleOwner,
@@ -172,4 +164,4 @@ fun EntityListFragment.observeNetworkStatus() {
             }
         )
     }
-}
+}*/

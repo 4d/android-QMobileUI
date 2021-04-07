@@ -28,7 +28,6 @@ import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
-import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.delete
@@ -63,7 +62,6 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
     // ViewModels
     lateinit var loginViewModel: LoginViewModel
     lateinit var entityListViewModel: EntityListViewModel<EntityModel>
-    lateinit var connectivityViewModel: ConnectivityViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -72,13 +70,13 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
     ): View? {
         arguments?.getString("tableName")?.let { tableName = it }
         sqlQueryBuilderUtil = SqlQueryBuilderUtil(tableName)
-        // Every time we land on the fragment, we want refreshed data
-        syncDataRequested = AtomicBoolean(true)
+
+        // Every time we land on the fragment, we want refreshed data // not anymore
+        syncDataRequested = AtomicBoolean(true) // unused
 
         displaySearchBarOnNavigationBar() // set has option Menu
         getViewModel()
         observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll())
-        // observeEntityList()
 
         val dataBinding: ViewDataBinding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
