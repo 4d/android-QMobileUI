@@ -20,6 +20,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
 import timber.log.Timber
 import java.io.File
+import java.lang.RuntimeException
 
 /**
  * Sample avatar list
@@ -57,13 +58,12 @@ fun bindImageFromUrl(
     val factory =
         DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
 
+    val imageFromAssetUri: Uri? = tryImageFromAssets(tableName, key, fieldName)
+
     val glideRequest = Glide.with(view.context.applicationContext)
         .load(
-            if (imageUrl.isNullOrEmpty()) tryImageFromAssets(
-                tableName,
-                key,
-                fieldName
-            ) else imageUrl
+            imageFromAssetUri
+                ?: if (!imageUrl.isNullOrEmpty()) imageUrl else R.drawable.ic_placeholder
         )
         .transition(DrawableTransitionOptions.withCrossFade(factory))
         .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -79,13 +79,17 @@ fun bindImageFromUrl(
     glideRequest.into(view)
 }
 
-fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Any {
+fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Uri? {
     BaseApp.embeddedFiles.find { it.contains(tableName + File.separator + "$tableName($key)_${fieldName}_") }
         ?.let { path ->
             Timber.d("file = $path")
-            return Uri.parse("file:///android_asset/$path")
+            return try {
+                Uri.parse("file:///android_asset/$path")
+            } catch (e: RuntimeException) {
+                null
+            }
         }
-    return R.drawable.ic_placeholder
+    return null
 }
 
 /**

@@ -18,11 +18,11 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 
 object Transformations {
 
-    const val CROP_CIRCLE_WITH_BORDER_SIZE = 4
-    const val BLUR_RADIUS = 50
-    const val BLUR_SAMPLING = 3
-    const val ROUNDED_CORNERS_RADIUS = 128
-    const val ROUNDED_CORNERS_MARGIN = 0
+    private const val CROP_CIRCLE_WITH_BORDER_SIZE = 4
+    private const val BLUR_RADIUS = 50
+    private const val BLUR_SAMPLING = 3
+    private const val ROUNDED_CORNERS_RADIUS = 128
+    private const val ROUNDED_CORNERS_MARGIN = 0
 
     @Suppress("DEPRECATION")
     fun getTransformation(transform: String?): Transformation<Bitmap>? {
