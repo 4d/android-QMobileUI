@@ -7,7 +7,7 @@
 package com.qmobile.qmobileui.binding
 
 import android.graphics.Bitmap
-import android.graphics.Color
+import androidx.annotation.ColorInt
 import com.bumptech.glide.load.Transformation
 import jp.wasabeef.glide.transformations.BlurTransformation
 import jp.wasabeef.glide.transformations.CropCircleTransformation
@@ -25,12 +25,12 @@ object Transformations {
     private const val ROUNDED_CORNERS_MARGIN = 0
 
     @Suppress("DEPRECATION")
-    fun getTransformation(transform: String?): Transformation<Bitmap>? {
+    fun getTransformation(transform: String?, @ColorInt borderColor: Int): Transformation<Bitmap>? {
         return when (transform) {
             "CropCircle" -> CropCircleTransformation()
             "CropCircleWithBorder" -> CropCircleWithBorderTransformation(
                 CROP_CIRCLE_WITH_BORDER_SIZE,
-                Color.WHITE
+                borderColor
             )
             "Blur" -> BlurTransformation(BLUR_RADIUS, BLUR_SAMPLING)
             "RoundedCorners" -> RoundedCornersTransformation(
