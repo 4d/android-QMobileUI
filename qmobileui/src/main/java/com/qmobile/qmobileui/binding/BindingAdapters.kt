@@ -6,10 +6,14 @@
 
 package com.qmobile.qmobileui.binding
 
+import android.content.Context
 import android.net.Uri
+import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -20,7 +24,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
 import timber.log.Timber
 import java.io.File
-import java.lang.RuntimeException
+import java.lang.NullPointerException
 
 /**
  * Sample avatar list
@@ -70,9 +74,12 @@ fun bindImageFromUrl(
 //        .listener(listener)
         .listener(CustomRequestListener())
         .error(R.drawable.ic_placeholder)
-//        .placeholder(R.drawable.profile_placeholder)
+//        .placeholder(R.drawable.ic_placeholder)
 
-    Transformations.getTransformation(transform)?.let { transformation ->
+    Transformations.getTransformation(
+        transform,
+        view.context.getColorFromAttr(android.R.attr.colorPrimary)
+    )?.let { transformation ->
         glideRequest.transform(transformation)
     }
 
@@ -85,7 +92,7 @@ fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Ur
             Timber.d("file = $path")
             return try {
                 Uri.parse("file:///android_asset/$path")
-            } catch (e: RuntimeException) {
+            } catch (e: NullPointerException) {
                 null
             }
         }
@@ -120,3 +127,19 @@ fun showHide(view: View, show: Boolean) {
 fun concatStringRatio(view: TextView, str1: String? = "0", str2: String? = "0") {
     view.text = "$str1/$str2"
 }
+
+@ColorInt
+fun Context.getColorFromAttr(
+    @AttrRes attrColor: Int,
+    typedValue: TypedValue = TypedValue(),
+    resolveRefs: Boolean = true
+): Int {
+    theme.resolveAttribute(attrColor, typedValue, resolveRefs)
+    return typedValue.data
+}
+
+// @BindingAdapter("setParallax")
+// fun setParallax(view: ScrollTransformImageView, boolean: Boolean?) {
+//    if (boolean == true)
+//       view.viewTransformer = VerticalParallaxTransformer()
+// }
