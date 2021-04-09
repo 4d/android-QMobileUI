@@ -40,8 +40,8 @@ fun EntityDetailFragment.observeEntity() {
 
             entity?.let {
                 val relationKeysMap = entityViewModel.getManyToOneRelationKeysFromEntity(entity)
-                for ((relationName, liveDateListRoomRelation) in relationKeysMap) {
-                    liveDateListRoomRelation.observe(
+                for ((relationName, liveDataListRoomRelation) in relationKeysMap) {
+                    liveDataListRoomRelation.observe(
                         viewLifecycleOwner,
                         Observer { roomRelation ->
                             roomRelation?.let {
