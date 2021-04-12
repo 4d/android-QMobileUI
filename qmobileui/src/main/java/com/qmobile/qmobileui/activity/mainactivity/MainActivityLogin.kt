@@ -31,7 +31,7 @@ fun MainActivity.startLoginActivity() {
  * Tries to login while in guest mode. Might fail if no Internet connection
  */
 fun MainActivity.tryAutoLogin() {
-    if (isConnected()) {
+    if (connectivityViewModel.isConnected()) {
         loginViewModel.login { }
     } else {
         authenticationRequested = true

@@ -8,7 +8,7 @@ package com.qmobile.qmobileui.settings
 
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
@@ -23,8 +23,6 @@ fun SettingsFragment.getViewModel() {
 
 fun SettingsFragment.setupObservers() {
     observeNetworkStatus()
-    observeServerAccessible()
-    observeAuthenticationState()
 }
 
 // LoginViewModel
@@ -44,7 +42,8 @@ fun SettingsFragment.getConnectivityViewModel() {
             this,
             ConnectivityViewModelFactory(
                 BaseApp.instance,
-                delegate.connectivityManager
+                delegate.connectivityManager,
+                delegate.accessibilityApiService
             )
         )[ConnectivityViewModel::class.java]
     } ?: throw IllegalStateException("Invalid Activity")
@@ -55,48 +54,12 @@ fun SettingsFragment.observeNetworkStatus() {
     if (sdkNewerThanKitKat) {
         connectivityViewModel.networkStateMonitor.observe(
             viewLifecycleOwner,
-            Observer {
-                if (!firstTime) {
-                    // first time, checkNetwork() is called in authentication observer event
-                    checkNetwork()
-                } else {
+            Observer { networkState ->
+                if (firstTime || !firstTime && networkState == NetworkStateEnum.CONNECTED) {
                     firstTime = false
+                    checkNetwork()
                 }
             }
         )
     }
-}
-
-// Observe if server is accessible
-fun SettingsFragment.observeServerAccessible() {
-    connectivityViewModel.serverAccessible.observe(
-        viewLifecycleOwner,
-        Observer { isAccessible ->
-            if (delegate.isConnected()) {
-                if (isAccessible) {
-                    setLayoutServerAccessible()
-                } else {
-                    setLayoutServerNotAccessible()
-                }
-            } else {
-                setLayoutNoInternet()
-            }
-        }
-    )
-}
-
-// Observe authentication state
-fun SettingsFragment.observeAuthenticationState() {
-    loginViewModel.authenticationState.observe(
-        viewLifecycleOwner,
-        Observer { authenticationState ->
-            when (authenticationState) {
-                AuthenticationStateEnum.AUTHENTICATED -> {
-                    checkNetwork()
-                }
-                else -> {
-                }
-            }
-        }
-    )
 }

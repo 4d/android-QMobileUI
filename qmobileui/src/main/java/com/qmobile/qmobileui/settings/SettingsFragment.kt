@@ -9,9 +9,6 @@ package com.qmobile.qmobileui.settings
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.preference.Preference
@@ -25,7 +22,6 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.customSnackBar
 import timber.log.Timber
-import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("TooManyFunctions")
 class SettingsFragment :
@@ -42,7 +38,6 @@ class SettingsFragment :
     private lateinit var remoteUrlPrefKey: String
     private lateinit var logoutPrefKey: String
     private lateinit var remoteUrl: String
-    private lateinit var checkNetworkRequested: AtomicBoolean
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -83,16 +78,6 @@ class SettingsFragment :
         getViewModel()
         initLayout()
         setupObservers()
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Every time we land on the fragment, we want refreshed data
-        checkNetworkRequested = AtomicBoolean(true)
-        return super.onCreateView(inflater, container, savedInstanceState)
     }
 
     /**
@@ -136,7 +121,6 @@ class SettingsFragment :
                     this.remoteUrl = newRemoteUrl
                     delegate.refreshApiClients()
                     remoteUrlPref?.setDefaultValue(newRemoteUrl)
-                    checkNetworkRequested.set(true)
                     checkNetwork()
                 }
             }
@@ -167,18 +151,12 @@ class SettingsFragment :
         if (isReady()) {
             loginViewModel.disconnectUser {}
         } else {
-            if (!delegate.isConnected()) {
+            if (!connectivityViewModel.isConnected()) {
                 activity?.let {
                     customSnackBar(it, it.resources.getString(R.string.no_internet), null)
                 }
                 Timber.d("No Internet connection")
             } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
-               /* activity?.let {
-                    displaySnackBar(
-                        it,
-                        it.resources.getString(R.string.error_occurred_try_again)
-                    )
-                }*/
                 Timber.d("Not authenticated yet")
             }
         }
@@ -188,12 +166,16 @@ class SettingsFragment :
      * Checks network state, and adjust the indicator icon color
      */
     fun checkNetwork() {
-        if (checkNetworkRequested.compareAndSet(true, false)) {
-            if (delegate.isConnected()) {
-                connectivityViewModel.checkAccessibility(this.remoteUrl)
-            } else {
-                setLayoutNoInternet()
+        if (connectivityViewModel.isConnected()) {
+            connectivityViewModel.isServerConnectionOk { isAccessible ->
+                if (isAccessible) {
+                    setLayoutServerAccessible()
+                } else {
+                    setLayoutServerNotAccessible()
+                }
             }
+        } else {
+            setLayoutNoInternet()
         }
     }
 
@@ -231,6 +213,6 @@ class SettingsFragment :
             return false
         }
         return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
-            delegate.isConnected()
+            connectivityViewModel.isConnected()
     }
 }

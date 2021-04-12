@@ -8,7 +8,6 @@
 package com.qmobile.qmobileui.activity.mainactivity
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
@@ -22,7 +21,6 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.LoginViewModelFactory
-import com.qmobile.qmobileui.utils.fetchResourceString
 import timber.log.Timber
 
 fun MainActivity.getViewModel() {
@@ -33,9 +31,10 @@ fun MainActivity.getViewModel() {
 
 fun MainActivity.setupObservers() {
     observeAuthenticationState()
-    observeToastMessage()
+    observeLoginToastMessage()
     observeNetworkStatus()
     observeEntityListViewModelList()
+    observeConnectivityToastMessage()
 }
 
 // Get LoginViewModel
@@ -51,7 +50,7 @@ fun MainActivity.getConnectivityViewModel() {
     if (sdkNewerThanKitKat) {
         connectivityViewModel = ViewModelProvider(
             this,
-            ConnectivityViewModelFactory(BaseApp.instance, connectivityManager)
+            ConnectivityViewModelFactory(BaseApp.instance, connectivityManager, accessibilityApiService)
         )[ConnectivityViewModel::class.java]
     }
 }
@@ -99,23 +98,20 @@ fun MainActivity.observeAuthenticationState() {
 }
 
 // Observe any toast message
-fun MainActivity.observeToastMessage() {
+fun MainActivity.observeLoginToastMessage() {
     loginViewModel.toastMessage.message.observe(
         this,
         Observer { event ->
-            event.getContentIfNotHandled()?.let { message ->
-                val toastMessage = this.baseContext.fetchResourceString(message)
-                if (toastMessage.isNotEmpty()) {
-                    Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
-                }
-            }
+            handleEvent(event)
+        }
+    )
+}
 
-//            val toastMessage = this.baseContext.fetchResourceString(message.)
-//            if (toastMessage.isNotEmpty()) {
-//                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
-//                // To avoid the error toast to be displayed without performing a refresh again
-//                loginViewModel.toastMessage.postValue("")
-//            }
+fun MainActivity.observeConnectivityToastMessage() {
+    connectivityViewModel.toastMessage.message.observe(
+        this,
+        Observer { event ->
+            handleEvent(event)
         }
     )
 }
@@ -199,12 +195,7 @@ fun MainActivity.observeEntityToastMessage(entityListViewModel: EntityListViewMo
     entityListViewModel.toastMessage.message.observe(
         this,
         Observer { event ->
-            event.getContentIfNotHandled()?.let { message ->
-                val toastMessage = this.baseContext.fetchResourceString(message)
-                if (toastMessage.isNotEmpty()) {
-                    Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
-                }
-            }
+            handleEvent(event)
         }
     )
 }
