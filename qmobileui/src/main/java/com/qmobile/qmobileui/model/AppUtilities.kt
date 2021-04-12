@@ -9,13 +9,13 @@ package com.qmobile.qmobileui.model
 import org.json.JSONObject
 
 data class AppUtilities(
-    var globalStamp: Int,
+    var initialGlobalStamp: Int,
     var guestLogin: Boolean,
-    var embeddedData: Boolean,
     var remoteUrl: String,
     var teams: JSONObject,
     var queryJson: JSONObject,
     var searchField: JSONObject,
     var sdkVersion: String,
-    var logLevel: Int
+    var logLevel: Int,
+    var dumpedTables: String
 )

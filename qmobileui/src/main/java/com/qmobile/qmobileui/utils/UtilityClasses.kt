@@ -10,6 +10,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
+import com.qmobile.qmobileapi.utils.getStringList
 import com.qmobile.qmobileui.model.AppUtilities
 import com.qmobile.qmobileui.model.DeviceUtility
 import com.qmobile.qmobileui.model.HardwareUtil
@@ -54,9 +55,8 @@ internal class BridgeUtility(context: Context) :
         val sdkVersion = readContentFromFile("sdkVersion")
 
         return AppUtilities(
-            globalStamp = (jsonObj.getString("initialGlobalStamp")).toInt(),
-            guestLogin = (jsonObj.getString("guestLogin")).toBoolean(),
-            embeddedData = (jsonObj.getString("embeddedData")).toBoolean(),
+            initialGlobalStamp = jsonObj.getInt("initialGlobalStamp"),
+            guestLogin = jsonObj.getBoolean("guestLogin"),
             remoteUrl = jsonObj.getString("remoteUrl"),
             teams = JSONObject().apply {
                 val newTeam = jsonObj.getJSONObject("team")
@@ -66,7 +66,8 @@ internal class BridgeUtility(context: Context) :
             queryJson = JSONObject(readContentFromFile("queries.json")),
             searchField = jsonObj.getJSONObject("searchableField"),
             sdkVersion = sdkVersion,
-            logLevel = (jsonObj.getString("logLevel")).toInt()
+            logLevel = jsonObj.getInt("logLevel"),
+            dumpedTables = jsonObj.getJSONArray("dumpedTables").getStringList().joinToString()
         )
     }
 }
