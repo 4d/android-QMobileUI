@@ -22,6 +22,7 @@ import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.LoginRequiredCallback
 import com.qmobile.qmobileapi.connectivity.isConnected
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.network.LoginApiService
@@ -51,6 +52,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     // FragmentCommunication
     override lateinit var apiService: ApiService
     override lateinit var loginApiService: LoginApiService
+    override lateinit var accessibilityApiService: AccessibilityApiService
     override lateinit var connectivityManager: ConnectivityManager
 
     // ViewModels
@@ -130,6 +132,10 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             context = this,
             logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
         )
+        accessibilityApiService = ApiClient.getAccessibilityApiService(
+            context = this,
+            logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
+        )
         apiService = ApiClient.getApiService(
             context = this,
             loginApiService = loginApiService,
@@ -177,8 +183,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         setDataSyncObserver(null)
     }
 
-    override fun isConnected(): Boolean =
-        connectivityManager.isConnected(connectivityViewModel.networkStateMonitor.value)
+    override fun isConnected(): Boolean = connectivityViewModel.isConnected()
 
     override fun requestAuthentication() {
         authenticationRequested = false

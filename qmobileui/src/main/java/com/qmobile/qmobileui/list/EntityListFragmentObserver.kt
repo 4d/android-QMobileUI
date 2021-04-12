@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.list
 
 import android.annotation.SuppressLint
-import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.sqlite.db.SupportSQLiteQuery
@@ -31,7 +30,6 @@ fun EntityListFragment.getViewModel() {
  */
 fun EntityListFragment.setupObservers() {
     observeDataSynchronized()
-    observeDataLoading()
 }
 
 // Get EntityListViewModel
@@ -45,21 +43,6 @@ fun EntityListFragment.getEntityListViewModel() {
         )
     )[clazz]
 }
-
-// Get ConnectivityViewModel
-/*fun EntityListFragment.getConnectivityViewModel() {
-    activity?.run {
-        if (sdkNewerThanKitKat) {
-            connectivityViewModel = ViewModelProvider(
-                this,
-                ConnectivityViewModelFactory(
-                    BaseApp.instance,
-                    delegate.connectivityManager
-                )
-            )[ConnectivityViewModel::class.java]
-        }
-    } ?: throw IllegalStateException("Invalid Activity")
-}*/
 
 // Get LoginViewModel
 fun EntityListFragment.getLoginViewModel() {
@@ -84,27 +67,7 @@ fun EntityListFragment.observeEntityListDynamicSearch(sqLiteQuery: SupportSQLite
                 val relationMap = entityListViewModel.getManyToOneRelationKeysFromEntityList(it)
 
                 adapter.setEntities(it, relationMap)
-                if (!it.isNullOrEmpty()) {
-                    fragment_list_no_data_tv.visibility = View.GONE
-                }
             }
-        }
-    )
-}
-
-// Observe dataLoading
-fun EntityListFragment.observeDataLoading() {
-    var wasLoading = false
-    entityListViewModel.dataLoading.observe(
-        viewLifecycleOwner,
-        Observer { dataLoading ->
-            if (dataLoading != true && adapter.itemCount == 0 && wasLoading) {
-                fragment_list_no_data_tv.visibility = View.VISIBLE
-            } else {
-                fragment_list_no_data_tv.visibility = View.GONE
-            }
-
-            wasLoading = dataLoading == true
         }
     )
 }
@@ -123,45 +86,3 @@ fun EntityListFragment.observeDataSynchronized() {
         }
     )
 }
-
-// Observe authentication state
-/*fun EntityListFragment.observeAuthenticationState() {
-    loginViewModel.authenticationState.observe(
-        viewLifecycleOwner,
-        Observer { authenticationState ->
-            when (authenticationState) {
-                AuthenticationStateEnum.AUTHENTICATED -> {
-                    if (isReady()) {
-                        syncData()
-                    } else {
-                        syncDataRequested.set(true)
-                    }
-                }
-                else -> {
-                }
-            }
-        }
-    )
-}*/
-
-// Observe network status
-/*fun EntityListFragment.observeNetworkStatus() {
-    if (sdkNewerThanKitKat) {
-        connectivityViewModel.networkStateMonitor.observe(
-            viewLifecycleOwner,
-            Observer { networkState ->
-                when (networkState) {
-                    NetworkStateEnum.CONNECTED -> {
-                        if (isReady()) {
-                            syncData()
-                        } else {
-                            syncDataRequested.set(true)
-                        }
-                    }
-                    else -> {
-                    }
-                }
-            }
-        )
-    }
-}*/

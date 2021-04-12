@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.activity.loginactivity
 
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
@@ -17,9 +16,7 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.LoginViewModelFactory
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.activity.mainactivity.observeToastMessage
 import com.qmobile.qmobileui.utils.customSnackBar
-import com.qmobile.qmobileui.utils.fetchResourceString
 import kotlinx.android.synthetic.main.activity_login.*
 import timber.log.Timber
 
@@ -30,9 +27,10 @@ fun LoginActivity.getViewModel() {
 
 fun LoginActivity.setupObservers() {
     observeAuthenticationState()
-    observeToastMessage()
+    observeLoginToastMessage()
     observeEmailValid()
     observeNetworkStatus()
+    observeConnectivityToastMessage()
 }
 
 // Get LoginViewModel
@@ -48,7 +46,7 @@ fun LoginActivity.getConnectivityViewModel() {
     if (sdkNewerThanKitKat) {
         connectivityViewModel = ViewModelProvider(
             this,
-            ConnectivityViewModelFactory(BaseApp.instance, connectivityManager)
+            ConnectivityViewModelFactory(BaseApp.instance, connectivityManager, accessibilityApiService)
         )[ConnectivityViewModel::class.java]
     }
 }
@@ -77,23 +75,11 @@ fun LoginActivity.observeAuthenticationState() {
 }
 
 // Observe any toast message
-fun LoginActivity.observeToastMessage() {
+fun LoginActivity.observeLoginToastMessage() {
     loginViewModel.toastMessage.message.observe(
         this,
         Observer { event ->
-            event.getContentIfNotHandled()?.let { message ->
-                val toastMessage = this.baseContext.fetchResourceString(message)
-                if (toastMessage.isNotEmpty()) {
-                    Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
-                }
-            }
-
-//            val toastMessage = this.baseContext.fetchResourceString(message)
-//            if (toastMessage.isNotEmpty()) {
-//                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show()
-//                // To avoid the error toast to be displayed without performing a refresh again
-//                loginViewModel.toastMessage.postValue("")
-//            }
+            handleEvent(event)
         }
     )
 }
@@ -104,6 +90,15 @@ fun LoginActivity.observeEmailValid() {
         this,
         Observer { emailValid ->
             login_button_auth.isEnabled = emailValid
+        }
+    )
+}
+
+fun LoginActivity.observeConnectivityToastMessage() {
+    connectivityViewModel.toastMessage.message.observe(
+        this,
+        Observer { event ->
+            handleEvent(event)
         }
     )
 }

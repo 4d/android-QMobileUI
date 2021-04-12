@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui
 
 import android.net.ConnectivityManager
+import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.network.LoginApiService
 
@@ -18,6 +19,8 @@ interface FragmentCommunication {
     val apiService: ApiService
 
     val loginApiService: LoginApiService
+
+    val accessibilityApiService: AccessibilityApiService
 
     val connectivityManager: ConnectivityManager
 
