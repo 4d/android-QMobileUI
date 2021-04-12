@@ -15,17 +15,16 @@ import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
-import com.qmobile.qmobiledatasync.viewmodel.factory.LoginViewModelFactory
+import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import timber.log.Timber
 
 fun MainActivity.getViewModel() {
-    getLoginViewModel()
-    getConnectivityViewModel()
+    loginViewModel = getLoginViewModel(this, loginApiService)
+    connectivityViewModel =
+        getConnectivityViewModel(this, connectivityManager, accessibilityApiService)
     getEntityListViewModelList()
 }
 
@@ -35,24 +34,6 @@ fun MainActivity.setupObservers() {
     observeNetworkStatus()
     observeEntityListViewModelList()
     observeConnectivityToastMessage()
-}
-
-// Get LoginViewModel
-fun MainActivity.getLoginViewModel() {
-    loginViewModel = ViewModelProvider(
-        this,
-        LoginViewModelFactory(BaseApp.instance, loginApiService)
-    )[LoginViewModel::class.java]
-}
-
-// Get ConnectivityViewModel
-fun MainActivity.getConnectivityViewModel() {
-    if (sdkNewerThanKitKat) {
-        connectivityViewModel = ViewModelProvider(
-            this,
-            ConnectivityViewModelFactory(BaseApp.instance, connectivityManager, accessibilityApiService)
-        )[ConnectivityViewModel::class.java]
-    }
 }
 
 // Get EntityListViewModel list

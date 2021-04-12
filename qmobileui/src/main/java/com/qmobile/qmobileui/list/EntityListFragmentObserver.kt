@@ -8,12 +8,9 @@ package com.qmobile.qmobileui.list
 
 import android.annotation.SuppressLint
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
-import com.qmobile.qmobiledatasync.viewmodel.factory.LoginViewModelFactory
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 
@@ -21,8 +18,10 @@ import timber.log.Timber
  * Retrieve viewModels from MainActivity lifecycle
  */
 fun EntityListFragment.getViewModel() {
-    getEntityListViewModel()
-    getLoginViewModel()
+    entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
+    // We need this ViewModel to know when MainActivity has performed its $authenticate so that
+    // we don't trigger the initial sync if we are not authenticated yet
+    loginViewModel = getLoginViewModel(activity, delegate.loginApiService)
 }
 
 /**
@@ -30,30 +29,6 @@ fun EntityListFragment.getViewModel() {
  */
 fun EntityListFragment.setupObservers() {
     observeDataSynchronized()
-}
-
-// Get EntityListViewModel
-fun EntityListFragment.getEntityListViewModel() {
-    val clazz = BaseApp.fromTableForViewModel.entityListViewModelClassFromTable(tableName)
-    entityListViewModel = ViewModelProvider(
-        this,
-        EntityListViewModelFactory(
-            tableName,
-            delegate.apiService
-        )
-    )[clazz]
-}
-
-// Get LoginViewModel
-fun EntityListFragment.getLoginViewModel() {
-    // We need this ViewModel to know when MainActivity has performed its $authenticate so that
-    // we don't trigger the initial sync if we are not authenticated yet
-    activity?.run {
-        loginViewModel = ViewModelProvider(
-            this,
-            LoginViewModelFactory(BaseApp.instance, delegate.loginApiService)
-        )[LoginViewModel::class.java]
-    } ?: throw IllegalStateException("Invalid Activity")
 }
 
 // Sql Dynamic Query Support

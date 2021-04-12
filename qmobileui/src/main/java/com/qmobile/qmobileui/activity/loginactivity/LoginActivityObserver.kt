@@ -7,22 +7,19 @@
 package com.qmobile.qmobileui.activity.loginactivity
 
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
-import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
-import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.ConnectivityViewModelFactory
-import com.qmobile.qmobiledatasync.viewmodel.factory.LoginViewModelFactory
+import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.customSnackBar
 import kotlinx.android.synthetic.main.activity_login.*
 import timber.log.Timber
 
 fun LoginActivity.getViewModel() {
-    getLoginViewModel()
-    getConnectivityViewModel()
+    loginViewModel = getLoginViewModel(this, loginApiService)
+    connectivityViewModel =
+        getConnectivityViewModel(this, connectivityManager, accessibilityApiService)
 }
 
 fun LoginActivity.setupObservers() {
@@ -31,24 +28,6 @@ fun LoginActivity.setupObservers() {
     observeEmailValid()
     observeNetworkStatus()
     observeConnectivityToastMessage()
-}
-
-// Get LoginViewModel
-fun LoginActivity.getLoginViewModel() {
-    loginViewModel = ViewModelProvider(
-        this,
-        LoginViewModelFactory(BaseApp.instance, loginApiService)
-    )[LoginViewModel::class.java]
-}
-
-// Get ConnectivityViewModel
-fun LoginActivity.getConnectivityViewModel() {
-    if (sdkNewerThanKitKat) {
-        connectivityViewModel = ViewModelProvider(
-            this,
-            ConnectivityViewModelFactory(BaseApp.instance, connectivityManager, accessibilityApiService)
-        )[ConnectivityViewModel::class.java]
-    }
 }
 
 // Observe authentication state

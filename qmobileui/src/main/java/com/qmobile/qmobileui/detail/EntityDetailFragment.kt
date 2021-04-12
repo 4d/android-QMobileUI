@@ -75,4 +75,9 @@ class EntityDetailFragment : Fragment(), BaseFragment {
         }
         // Access resources elements
     }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        setupObservers()
+    }
 }

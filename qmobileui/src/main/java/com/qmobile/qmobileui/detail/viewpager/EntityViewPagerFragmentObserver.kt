@@ -7,32 +7,16 @@
 package com.qmobile.qmobileui.detail.viewpager
 
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 
 fun EntityViewPagerFragment.getViewModel() {
-    getEntityListViewModel()
+    entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
 }
 
 // fun EntityViewPagerFragment.setupObservers() {
 //    observeEntityList()
 // }
-
-// Get EntityListViewModel
-fun EntityViewPagerFragment.getEntityListViewModel() {
-    val clazz = BaseApp.fromTableForViewModel.entityListViewModelClassFromTable(tableName)
-    entityListViewModel = activity?.run {
-        ViewModelProvider(
-            this,
-            EntityListViewModelFactory(
-                tableName,
-                delegate.apiService
-            )
-        )[clazz]
-    } ?: throw IllegalStateException("Invalid Activity")
-}
 
 // Observe entity list
 fun EntityViewPagerFragment.observeEntityList(sqLiteQuery: SupportSQLiteQuery) {

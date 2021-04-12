@@ -7,28 +7,22 @@
 package com.qmobile.qmobileui.detail
 
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
-import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.viewmodel.factory.EntityViewModelFactory
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
 import timber.log.Timber
 
+/**
+ * Retrieve viewModels from MainActivity lifecycle
+ */
 fun EntityDetailFragment.getViewModel() {
-    getEntityViewModel()
-    observeEntity()
+    entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
 }
 
-// Get EntityViewModel
-fun EntityDetailFragment.getEntityViewModel() {
-    val clazz = BaseApp.fromTableForViewModel.entityViewModelClassFromTable(tableName)
-    entityViewModel = ViewModelProvider(
-        this,
-        EntityViewModelFactory(
-            tableName,
-            itemId,
-            delegate.apiService
-        )
-    )[clazz]
+/**
+ * Setup observers
+ */
+fun EntityDetailFragment.setupObservers() {
+    observeEntity()
 }
 
 // Observe entity list
