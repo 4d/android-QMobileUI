@@ -24,6 +24,7 @@ class CustomRequestListener : RequestListener<Drawable> {
         target: Target<Drawable>?,
         isFirstResource: Boolean
     ): Boolean {
+        Timber.d(e?.localizedMessage)
         return false
     }
 
