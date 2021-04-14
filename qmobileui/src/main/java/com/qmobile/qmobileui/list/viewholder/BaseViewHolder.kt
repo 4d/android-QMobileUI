@@ -22,27 +22,40 @@ class BaseViewHolder(
     RecyclerView.ViewHolder(dataBinding.root) {
 
     // Applies DataBinding
-    fun bind(entity: Any, position: Int) {
-        dataBinding.setVariable(BR.entityData, entity)
-        dataBinding.executePendingBindings()
-        itemView.setOnClickListener {
-            BaseApp.navigationInterface.navigateFromListToViewPager(
-                dataBinding.root,
-                position,
-                tableName
-            )
+    fun bind(entity: Any?, position: Int) {
+        entity?.let {
+            dataBinding.setVariable(BR.entityData, entity)
+            dataBinding.executePendingBindings()
+            itemView.setOnClickListener {
+                BaseApp.navigationInterface.navigateFromListToViewPager(
+                    dataBinding.root,
+                    position,
+                    tableName
+                )
+            }
         }
     }
 
+    fun unbindRelations() {
+        BaseApp.fragmentUtil.unsetRelationBinding(dataBinding)
+    }
+
     // Map<relationName, LiveData<RoomRelation>>
-    fun observeRelations(relations: MutableMap<String, LiveData<RoomRelation>>, position: Int) {
+    fun observeRelations(
+        relations: Map<String, LiveData<RoomRelation>>, /* only for logs */
+        position: Int
+    ) {
         for ((relationName, liveDataRelatedEntity) in relations) {
             liveDataRelatedEntity.observe(
                 requireNotNull(dataBinding.lifecycleOwner),
                 Observer { roomRelation ->
-                    roomRelation?.first?.let {
+                    roomRelation?.first?.let { relatedEntity ->
                         Timber.d("[$tableName] Relation named\"$relationName\" retrieved for position $position")
-                        BaseApp.fragmentUtil.setRelationBinding(dataBinding, relationName, it)
+                        BaseApp.fragmentUtil.setRelationBinding(
+                            dataBinding,
+                            relationName,
+                            relatedEntity
+                        )
                         dataBinding.executePendingBindings()
                     }
                 }

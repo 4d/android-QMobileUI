@@ -7,11 +7,12 @@
 package com.qmobile.qmobileui.list
 
 import android.annotation.SuppressLint
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
-import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 
 /**
@@ -33,16 +34,11 @@ fun EntityListFragment.setupObservers() {
 
 // Sql Dynamic Query Support
 fun EntityListFragment.observeEntityListDynamicSearch(sqLiteQuery: SupportSQLiteQuery) {
+    val relationMap: MutableMap<String, Map<String, LiveData<RoomRelation>>> = mutableMapOf()
     entityListViewModel.getAllDynamicQuery(sqLiteQuery).observe(
         viewLifecycleOwner,
-        Observer {
-            it.let {
-
-                // Map<entityKey, Map<relationName, LiveData<RoomRelation>>>
-                val relationMap = entityListViewModel.getManyToOneRelationKeysFromEntityList(it)
-
-                adapter.setEntities(it, relationMap)
-            }
+        Observer { pagedList ->
+            adapter.submitList(pagedList)
         }
     )
 }
