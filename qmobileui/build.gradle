@@ -23,12 +23,6 @@ dependencies {
         implementation project(':qmobiledatasync')
     }
 
-    // Room
-    implementation Libs.androidx_room
-    implementation Libs.androidx_room_runtime
-    kapt Libs.androidx_room_compiler
-
-
     // Common
     implementation Libs.androidx_constraintlayout
     implementation Libs.androidx_preference_ktx
@@ -39,6 +33,14 @@ dependencies {
     implementation Libs.lifecycle_extensions
     implementation Libs.lifecycle_runtime
     kapt Libs.lifecycle_compiler
+
+    // Room
+    implementation Libs.androidx_room
+    implementation Libs.androidx_room_runtime
+    kapt Libs.androidx_room_compiler
+
+    // Paging
+    implementation Libs.androidx_paging
 
     // Glide
     implementation Libs.glide

@@ -19,19 +19,18 @@ import android.widget.SearchView
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
-import com.qmobile.qmobiledatasync.viewmodel.delete
-import com.qmobile.qmobiledatasync.viewmodel.insert
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -119,7 +118,13 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
      * Initialize recyclerView
      */
     private fun initRecyclerView() {
-        adapter = EntityListAdapter(tableName, viewLifecycleOwner)
+        adapter = EntityListAdapter(
+            tableName, viewLifecycleOwner,
+            object : RelationCallback {
+                override fun getRelations(entity: EntityModel): Map<String, LiveData<RoomRelation>> =
+                    entityListViewModel.getRelationsInfo(entity)
+            }
+        )
 
         fragment_list_recycler_view.layoutManager =
             when (BaseApp.fragmentUtil.layoutType(tableName)) {
@@ -162,7 +167,7 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
     /**
      * Initialize Swipe to delete
      */
-    private fun initSwipeToDeleteAndUndo() {
+    /*private fun initSwipeToDeleteAndUndo() {
         val swipeToDeleteCallback: SwipeToDeleteCallback =
             object : SwipeToDeleteCallback(requireContext(), delegate.darkModeEnabled()) {
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -185,7 +190,7 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
 
         val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
         itemTouchHelper.attachToRecyclerView(fragment_list_recycler_view)
-    }
+    }*/
 
     /**
      * Requests data sync to MainActivity if requested
