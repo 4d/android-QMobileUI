@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui
 
+import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.qmobile.qmobileui.model.AppUtilities
 import com.qmobile.qmobileui.utils.QMobileUiUtil
@@ -49,7 +50,17 @@ class SqlBuilderTest {
     @Test
     fun testSearchableField() {
         mockkObject(QMobileUiUtil)
-        every { QMobileUiUtil.appUtilities } returns AppUtilities(0, true, true, "", tableJson, tableJson, tableJson, "12.5")
+        every { QMobileUiUtil.appUtilities } returns AppUtilities(
+            0,
+            true,
+            "",
+            tableJson,
+            tableJson,
+            tableJson,
+            "12.5",
+            Log.DEBUG,
+            ""
+        )
         Assert.assertEquals(tableJson, QMobileUiUtil.appUtilities.searchField)
     }
 }
