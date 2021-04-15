@@ -19,7 +19,7 @@ internal object NumberToWordFormatter {
             // val foramtedStringNumber = decimalFormat.format(number.toDouble())
             val regex = decimalFormat.format(number.toDouble()).split(".")
             string =
-                " ${NumberToWordHelperFunction.convertFromDoubleToWord(regex[0].toDouble())} dot   ${
+                "${NumberToWordHelperFunction.convertFromDoubleToWord(regex[0].toDouble())} dot ${
                 NumberToWordHelperFunction.convertFromDoubleToWord(
                     regex[1].toDouble()
                 )

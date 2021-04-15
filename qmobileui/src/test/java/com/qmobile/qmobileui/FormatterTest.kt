@@ -72,7 +72,7 @@ class FormatterTest {
         numberFormatTest(number.toString(), "24.468", TypeChoice.Decimal)
         numberFormatTest(number.toString(), "24", TypeChoice.Number)
         numberFormatTest(number.toString(), "24.46812", TypeChoice.Real)
-        numberFormatTest(number.toString(), " twenty four dot   forty seven", TypeChoice.SpellOut)
+        numberFormatTest(number.toString(), "twenty four dot forty seven", TypeChoice.SpellOut)
         numberFormatTest(number.toString(), "24.47th", TypeChoice.Ordinal)
         numberFormatTest(number.toString(), "2447.0%", TypeChoice.Percentage)
         numberFormatTest(number.toString(), "24.47€", TypeChoice.EuroCurrency)
