@@ -17,5 +17,6 @@ data class AppUtilities(
     var searchField: JSONObject,
     var sdkVersion: String,
     var logLevel: Int,
-    var dumpedTables: String
+    var dumpedTables: String,
+    var relationAvailable: Boolean = true
 )

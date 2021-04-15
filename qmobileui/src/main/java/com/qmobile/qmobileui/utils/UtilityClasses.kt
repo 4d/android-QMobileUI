@@ -10,6 +10,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
+import com.qmobile.qmobileapi.utils.getSafeBoolean
 import com.qmobile.qmobileapi.utils.getStringList
 import com.qmobile.qmobileui.model.AppUtilities
 import com.qmobile.qmobileui.model.DeviceUtility
@@ -67,7 +68,8 @@ internal class BridgeUtility(context: Context) :
             searchField = jsonObj.getJSONObject("searchableField"),
             sdkVersion = sdkVersion,
             logLevel = jsonObj.getInt("logLevel"),
-            dumpedTables = jsonObj.getJSONArray("dumpedTables").getStringList().joinToString()
+            dumpedTables = jsonObj.getJSONArray("dumpedTables").getStringList().joinToString(),
+            relationAvailable = jsonObj.getSafeBoolean("relations") ?: true
         )
     }
 }
