@@ -92,10 +92,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        // For test purposes only
-//        appDatabaseInterface.populateDatabase()
-//        authInfoHelper.globalStamp = 240
-
         if (savedInstanceState == null) {
             // Retrieve bundled parameter to know if there was a successful login with statusText
             loginStatusText = intent.getStringExtra(LOGIN_STATUS_TEXT) ?: ""

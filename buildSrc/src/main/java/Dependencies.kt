@@ -19,6 +19,7 @@ object Versions {
     val atsl_junit = "1.1.2"
     val constraint_layout = "2.0.4"
     val design = "1.3.0"
+    val dsl_json = "1.9.8"
     val dynamic_toasts = "3.3.1"
     val espresso = "3.2.0"
     val espresso_contrib = "3.0.2"
@@ -122,6 +123,9 @@ object Libs {
 
     //    val retrofit_adapter_rxjava2 = "com.squareup.retrofit2:adapter-rxjava3:${Versions.retrofit}"
     val retrofit_converter_gson = "com.squareup.retrofit2:converter-gson:${Versions.retrofit}"
+
+    // DSL-JSON
+    val dsl_json = "com.dslplatform:dsl-json-java8:${Versions.dsl_json}"
 
     // Rx
     val rxandroid = "io.reactivex.rxjava2:rxandroid:${Versions.rx_android}"
