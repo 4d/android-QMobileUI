@@ -29,6 +29,7 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
+import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.BaseFragment
@@ -40,7 +41,7 @@ import com.qmobile.qmobileui.ui.SearchListener
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.SearchQueryStateHelper
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
-import com.qmobile.qmobileui.utils.customSnackBar
+import com.qmobile.qmobileui.utils.ToastHelper
 import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
@@ -222,7 +223,7 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
         } else {
             if (!delegate.isConnected()) {
                 activity?.let {
-                    customSnackBar(it, it.resources.getString(R.string.no_internet), null)
+                    ToastHelper.show(it, it.resources.getString(R.string.no_internet), MessageType.WARNING)
                 }
                 Timber.d("No Internet connection, syncDataRequested")
             } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {

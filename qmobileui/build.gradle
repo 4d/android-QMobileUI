@@ -55,6 +55,7 @@ dependencies {
     implementation Libs.rxjava
 
     // Utils
+    implementation Libs.dynamic_toasts
     implementation Libs.material
     implementation Libs.retrofit_converter_gson
     implementation Libs.timber

@@ -6,10 +6,7 @@
 
 package com.qmobile.qmobileui.utils
 
-import android.app.Activity
 import android.content.Context
-import android.view.View
-import com.google.android.material.snackbar.Snackbar
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.model.QMobileUiConstants
 
@@ -31,19 +28,19 @@ fun layoutFromTable(
 }
 
 // custom snackbar
-fun customSnackBar(
+/*fun customSnackBar(
     activity: Activity,
     message: String,
-    clickListener: View.OnClickListener?,
+    clickListener: View.OnClickListener? = null,
     actionName: String = "UNDO"
-) {
-    Snackbar.make(activity.findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
-        .apply {
-            clickListener ?: this.show() // If listener is null
-            setAction(actionName, clickListener)
-            show()
-        }
-}
+): Snackbar {
+    val newSnackbar =
+        Snackbar.make(activity.findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
+    clickListener?.let {
+        newSnackbar.setAction(actionName, clickListener)
+    }
+    return newSnackbar
+}*/
 
 /**
  * Gets a resource string to display to the user. As it's called in a ViewModel, there is no

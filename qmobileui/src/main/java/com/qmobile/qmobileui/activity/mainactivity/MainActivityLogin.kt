@@ -7,10 +7,11 @@
 package com.qmobile.qmobileui.activity.mainactivity
 
 import android.content.Intent
+import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
-import com.qmobile.qmobileui.utils.customSnackBar
+import com.qmobile.qmobileui.utils.ToastHelper
 import timber.log.Timber
 
 /**
@@ -36,6 +37,6 @@ fun MainActivity.tryAutoLogin() {
     } else {
         authenticationRequested = true
         Timber.d("No Internet connection, authenticationRequested")
-        customSnackBar(this, resources.getString(R.string.no_internet_auto_login), null)
+        ToastHelper.show(this, resources.getString(R.string.no_internet_auto_login), MessageType.WARNING)
     }
 }

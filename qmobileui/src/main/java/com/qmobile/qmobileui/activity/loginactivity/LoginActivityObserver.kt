@@ -6,13 +6,13 @@
 
 package com.qmobile.qmobileui.activity.loginactivity
 
+import android.view.View
 import androidx.lifecycle.Observer
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
-import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.utils.customSnackBar
+import com.qmobile.qmobileui.activity.mainactivity.observeAuthenticationState
 import kotlinx.android.synthetic.main.activity_login.*
 import timber.log.Timber
 
@@ -26,6 +26,7 @@ fun LoginActivity.setupObservers() {
     observeAuthenticationState()
     observeLoginToastMessage()
     observeEmailValid()
+    observeDataLoading()
     observeNetworkStatus()
     observeConnectivityToastMessage()
 }
@@ -38,11 +39,10 @@ fun LoginActivity.observeAuthenticationState() {
             Timber.d("[AuthenticationState : $authenticationState]")
             when (authenticationState) {
                 AuthenticationStateEnum.AUTHENTICATED -> {
-                    startMainActivity(false)
+                    startMainActivity(false, loginViewModel.statusMessage)
                 }
                 AuthenticationStateEnum.INVALID_AUTHENTICATION -> {
                     login_button_auth.isEnabled = true
-                    customSnackBar(this, resources.getString(R.string.login_fail_snackbar), null)
                 }
                 else -> {
                     // Default state in LoginActivity
@@ -69,6 +69,16 @@ fun LoginActivity.observeEmailValid() {
         this,
         Observer { emailValid ->
             login_button_auth.isEnabled = emailValid
+        }
+    )
+}
+
+// Observe if login request in progress
+fun LoginActivity.observeDataLoading() {
+    loginViewModel.dataLoading.observe(
+        this,
+        Observer { dataLoading ->
+            login_progressbar.visibility = if (dataLoading == true) View.VISIBLE else View.GONE
         }
     )
 }

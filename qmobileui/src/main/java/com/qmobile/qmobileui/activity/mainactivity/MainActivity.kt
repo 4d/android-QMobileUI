@@ -42,6 +42,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 @Suppress("TooManyFunctions")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
 
+    var loginStatusText = ""
     private var onLaunch = true
     var authenticationRequested = true
     var shouldDelayOnForegroundEvent = AtomicBoolean(false)
@@ -96,6 +97,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
 //        authInfoHelper.globalStamp = 240
 
         if (savedInstanceState == null) {
+            // Retrieve bundled parameter to know if there was a successful login with statusText
+            loginStatusText = intent.getStringExtra(LOGIN_STATUS_TEXT) ?: ""
             setupBottomNavigationBar()
         } // Else, need to wait for onRestoreInstanceState
 

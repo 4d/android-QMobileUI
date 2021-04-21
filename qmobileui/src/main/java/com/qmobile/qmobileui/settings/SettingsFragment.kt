@@ -15,12 +15,13 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.utils.customSnackBar
+import com.qmobile.qmobileui.utils.ToastHelper
 import timber.log.Timber
 
 @Suppress("TooManyFunctions")
@@ -153,7 +154,7 @@ class SettingsFragment :
         } else {
             if (!connectivityViewModel.isConnected()) {
                 activity?.let {
-                    customSnackBar(it, it.resources.getString(R.string.no_internet), null)
+                    ToastHelper.show(it, it.resources.getString(R.string.no_internet), MessageType.WARNING)
                 }
                 Timber.d("No Internet connection")
             } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {

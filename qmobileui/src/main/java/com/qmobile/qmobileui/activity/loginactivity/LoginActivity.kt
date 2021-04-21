@@ -24,6 +24,7 @@ import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.R
@@ -32,7 +33,7 @@ import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.binding.bindImageFromDrawable
 import com.qmobile.qmobileui.databinding.ActivityLoginBinding
 import com.qmobile.qmobileui.utils.QMobileUiUtil
-import com.qmobile.qmobileui.utils.customSnackBar
+import com.qmobile.qmobileui.utils.ToastHelper
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : BaseActivity() {
@@ -92,7 +93,7 @@ class LoginActivity : BaseActivity() {
         bindImageFromDrawable(login_logo, BaseApp.loginLogoDrawable)
 
         if (loggedOut) {
-            customSnackBar(this, resources.getString(R.string.login_logged_out_snackbar), null)
+            ToastHelper.show(this, resources.getString(R.string.login_logged_out), MessageType.SUCCESS)
         }
 
         // Login button
@@ -101,7 +102,7 @@ class LoginActivity : BaseActivity() {
                 login_button_auth.isEnabled = false
                 loginViewModel.login(email = login_email_input.text.toString()) { }
             } else {
-                customSnackBar(this, resources.getString(R.string.no_internet), null)
+                ToastHelper.show(this, resources.getString(R.string.no_internet), MessageType.WARNING)
             }
         }
 
@@ -127,8 +128,9 @@ class LoginActivity : BaseActivity() {
     /**
      * Goes to MainActivity, and finishes LoginActivity
      */
-    fun startMainActivity(skipAnimation: Boolean) {
+    fun startMainActivity(skipAnimation: Boolean, loginStatusText: String = "") {
         val intent = Intent(this, MainActivity::class.java)
+        intent.putExtra(LOGIN_STATUS_TEXT, loginStatusText)
         if (skipAnimation)
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
         startActivity(intent)

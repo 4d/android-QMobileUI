@@ -15,10 +15,12 @@ import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
+import com.qmobile.qmobileui.utils.ToastHelper
 import timber.log.Timber
 
 fun MainActivity.getViewModel() {
@@ -62,6 +64,10 @@ fun MainActivity.observeAuthenticationState() {
             Timber.d("[AuthenticationState : $authenticationState]")
             when (authenticationState) {
                 AuthenticationStateEnum.AUTHENTICATED -> {
+                    if (loginStatusText.isNotEmpty()) {
+                        ToastHelper.show(this, loginStatusText, MessageType.SUCCESS)
+                        loginStatusText = ""
+                    }
                     if (shouldDelayOnForegroundEvent.compareAndSet(true, false)) {
                         applyOnForegroundEvent()
                     }

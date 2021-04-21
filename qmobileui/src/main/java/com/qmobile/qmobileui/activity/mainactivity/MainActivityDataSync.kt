@@ -7,8 +7,9 @@
 package com.qmobile.qmobileui.activity.mainactivity
 
 import com.qmobile.qmobiledatasync.sync.EntityViewModelIsToSync
+import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.utils.customSnackBar
+import com.qmobile.qmobileui.utils.ToastHelper
 
 fun MainActivity.getEntityListViewModelsForSync() {
     entityViewModelIsToSyncList = mutableListOf()
@@ -40,6 +41,6 @@ fun MainActivity.setDataSyncObserver(alreadyRefreshedTable: String?) {
             }
         }
     } else {
-        customSnackBar(this, resources.getString(R.string.no_internet), null)
+        ToastHelper.show(this, resources.getString(R.string.no_internet), MessageType.WARNING)
     }
 }
