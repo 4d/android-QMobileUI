@@ -7,10 +7,8 @@
 package com.qmobile.qmobileui.utils
 
 import android.content.Context
-import androidx.sqlite.db.SimpleSQLiteQuery
 import com.qmobile.qmobileui.model.AppUtilities
 import com.qmobile.qmobileui.model.DeviceUtility
-import com.qmobile.qmobileui.model.QueryHolder
 import com.qmobile.qmobileui.utils.converter.NumberToWordFormatter
 
 object QMobileUiUtil {
@@ -18,8 +16,8 @@ object QMobileUiUtil {
     private lateinit var bridgeUtility: BridgeUtility
     lateinit var deviceUtility: DeviceUtility
     private val numberToWord = NumberToWordFormatter
-    var queryHolder: QueryHolder =
-        QueryHolder(null)
+    /*var queryHolder: QueryHolder =
+        QueryHolder(null)*/
 
     fun builder(context: Context) { // builder should be initialised
         bridgeUtility = BridgeUtility(context)
@@ -33,10 +31,10 @@ object QMobileUiUtil {
     var WordFormatter =
         { number: String -> numberToWord.convertNumberToWord(number) } // convert number To literal word
 
-    fun setQuery(sqlQuery: SimpleSQLiteQuery, isSearchActive: Boolean) { // this part has tobe added
+    /*fun setQuery(sqlQuery: SimpleSQLiteQuery, isSearchActive: Boolean) { // this part has tobe added
         queryHolder = QueryHolder(
             sqlQuery,
             isSearchActive = isSearchActive
         )
-    }
+    }*/
 }

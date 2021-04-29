@@ -8,7 +8,6 @@ package com.qmobile.qmobileui.list
 
 import android.annotation.SuppressLint
 import androidx.lifecycle.Observer
-import androidx.sqlite.db.SupportSQLiteQuery
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import timber.log.Timber
@@ -28,14 +27,34 @@ fun EntityListFragment.getViewModel() {
  */
 fun EntityListFragment.setupObservers() {
     observeDataSynchronized()
+    observeCurrentQuery()
 }
 
 // Sql Dynamic Query Support
-fun EntityListFragment.observeEntityListDynamicSearch(sqLiteQuery: SupportSQLiteQuery) {
-    entityListViewModel.getAllDynamicQuery(sqLiteQuery).observe(
+fun EntityListFragment.observeEntityListDynamicSearch() {
+    entityListViewModel.entityListLiveData.observe(
         viewLifecycleOwner,
-        Observer { pagedList ->
-            adapter.submitList(pagedList)
+        Observer {
+            adapter.submitList(it)
+            adapter.notifyDataSetChanged()
+        }
+    )
+//    entityListViewModel.getAllDynamicQuery(sqLiteQuery).observe(
+//        viewLifecycleOwner,
+//        Observer { pagedList ->
+//            adapter.submitList(pagedList)
+//        }
+//    )
+}
+
+fun EntityListFragment.observeCurrentQuery() {
+    entityListViewModel.currentQuery.observe(
+        viewLifecycleOwner,
+        Observer { currentQuery ->
+            if (currentQuery.isNullOrEmpty())
+                entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.getAll())
+            else
+                entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.sortQuery(currentQuery))
         }
     )
 }

@@ -9,12 +9,14 @@
 
     <item
         android:id="@+id/action_previous"
+        android:enabled="false"
         android:icon="@drawable/baseline_chevron_left_24"
         android:title="Previous"
         app:showAsAction="collapseActionView|ifRoom" />
 
     <item
         android:id="@+id/action_next"
+        android:enabled="false"
         android:icon="@drawable/baseline_chevron_right_24"
         android:title="Previous"
         app:showAsAction="collapseActionView|ifRoom" />

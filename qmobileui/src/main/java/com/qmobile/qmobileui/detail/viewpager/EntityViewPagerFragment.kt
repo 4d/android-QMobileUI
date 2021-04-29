@@ -21,7 +21,6 @@ import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 
 class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChangeListener {
@@ -31,6 +30,9 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
     var viewPager: ViewPager? = null
     private var onFragmentCreation = true
     private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
+
+    private lateinit var actionPrevious: MenuItem
+    private lateinit var actionNext: MenuItem
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -73,11 +75,7 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
         super.onActivityCreated(savedInstanceState)
 
         getViewModel()
-//        setupObservers()
-        if (QMobileUiUtil.queryHolder.isSearchActive)
-            observeEntityList(QMobileUiUtil.queryHolder.query!!)
-        else
-            observeEntityList(QMobileUiUtil.queryHolder.query!!)
+        setupObservers()
     }
 
     override fun onDestroyView() {
@@ -99,10 +97,18 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
 
     override fun onPageSelected(position: Int) {
         this@EntityViewPagerFragment.position = position
+
+        handleActionPreviousEnability(position)
+        handleActionNextEnability(position)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_viewpager, menu)
+        actionPrevious = menu.findItem(R.id.action_previous)
+        actionNext = menu.findItem(R.id.action_next)
+
+        handleActionPreviousEnability(position)
+        handleActionNextEnability(position)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -110,11 +116,29 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
         val currPosition = viewPager?.currentItem
         currPosition?.let {
             when (item.itemId) {
-                R.id.action_previous -> viewPager?.setCurrentItem(currPosition - 1, true)
-                R.id.action_next -> viewPager?.setCurrentItem(currPosition + 1, true)
+                R.id.action_previous -> {
+                    viewPager?.setCurrentItem(currPosition - 1, true)
+                }
+                R.id.action_next -> {
+                    viewPager?.setCurrentItem(currPosition + 1, true)
+                }
                 else -> super.onOptionsItemSelected(item)
             }
         }
         return false
+    }
+
+    private fun handleActionPreviousEnability(newPos: Int) {
+        if (this::actionPrevious.isInitialized) {
+            actionPrevious.isEnabled = newPos > 0
+        }
+    }
+
+    private fun handleActionNextEnability(newPos: Int) {
+        if (this::actionNext.isInitialized) {
+            viewPager?.adapter?.count?.let { count ->
+                actionNext.isEnabled = newPos < count - 1
+            }
+        }
     }
 }

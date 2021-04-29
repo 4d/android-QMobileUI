@@ -50,7 +50,7 @@ class BaseViewHolder(
                 requireNotNull(dataBinding.lifecycleOwner),
                 Observer { roomRelation ->
                     roomRelation?.first?.let { relatedEntity ->
-                        Timber.d("[$tableName] Relation named\"$relationName\" retrieved for position $position")
+                        Timber.d("[$tableName] Relation named \"$relationName\" retrieved for position $position")
                         BaseApp.fragmentUtil.setRelationBinding(
                             dataBinding,
                             relationName,

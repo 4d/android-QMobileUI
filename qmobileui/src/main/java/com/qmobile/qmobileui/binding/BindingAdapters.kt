@@ -137,9 +137,3 @@ fun Context.getColorFromAttr(
     theme.resolveAttribute(attrColor, typedValue, resolveRefs)
     return typedValue.data
 }
-
-// @BindingAdapter("setParallax")
-// fun setParallax(view: ScrollTransformImageView, boolean: Boolean?) {
-//    if (boolean == true)
-//       view.viewTransformer = VerticalParallaxTransformer()
-// }

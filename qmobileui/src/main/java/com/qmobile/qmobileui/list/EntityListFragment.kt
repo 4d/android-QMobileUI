@@ -6,19 +6,20 @@
 
 package com.qmobile.qmobileui.list
 
-import android.app.SearchManager
 import android.content.Context
-import android.content.Context.SEARCH_SERVICE
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SearchView
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import androidx.appcompat.widget.SearchView
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
@@ -29,32 +30,29 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
-import com.qmobile.qmobiledatasync.toast.MessageType
+import com.qmobile.qmobiledatasync.utils.forceRefresh
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.ui.CustomSearchView
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
-import com.qmobile.qmobileui.ui.SearchListener
 import com.qmobile.qmobileui.utils.QMobileUiUtil
-import com.qmobile.qmobileui.utils.SearchQueryStateHelper
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
-import com.qmobile.qmobileui.utils.ToastHelper
 import kotlinx.android.synthetic.main.fragment_list.*
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("TooManyFunctions")
-class EntityListFragment : Fragment(), BaseFragment, SearchListener {
+class EntityListFragment : Fragment(), BaseFragment {
 
     var tableName: String = ""
     lateinit var syncDataRequested: AtomicBoolean
     lateinit var adapter: EntityListAdapter
     private lateinit var searchView: SearchView
+    private lateinit var searchPlate: EditText
     private var searchableFields = QMobileUiUtil.appUtilities.searchField
-    private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
+    lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -74,9 +72,8 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
         // Every time we land on the fragment, we want refreshed data // not anymore
         syncDataRequested = AtomicBoolean(true) // unused
 
-        displaySearchBarOnNavigationBar() // set has option Menu
+        if (hasSearch()) this.setHasOptionsMenu(true)
         getViewModel()
-        observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll())
 
         val dataBinding: ViewDataBinding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
@@ -87,13 +84,10 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
             BaseApp.fragmentUtil.setEntityListViewModel(this, entityListViewModel)
             lifecycleOwner = viewLifecycleOwner
         }
-        QMobileUiUtil.setQuery(sqlQueryBuilderUtil.getAll(), false)
         return dataBinding.root
     }
 
-    private fun displaySearchBarOnNavigationBar() {
-        if (searchableFields.has(tableName)) this.setHasOptionsMenu(true)
-    }
+    private fun hasSearch() = searchableFields.has(tableName)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -108,6 +102,9 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
         initRecyclerView()
         initOnRefreshListener()
         setupObservers()
+        observeEntityListDynamicSearch()
+        hideKeyboard(activity)
+        entityListViewModel.currentQuery.forceRefresh()
     }
 
     override fun onDestroyView() {
@@ -194,97 +191,88 @@ class EntityListFragment : Fragment(), BaseFragment, SearchListener {
     }*/
 
     /**
-     * Requests data sync to MainActivity if requested
-     */
-    fun syncData() {
-        if (syncDataRequested.compareAndSet(true, false)) {
-            entityListViewModel.getEntities { shouldSyncData ->
-                if (shouldSyncData) {
-                    delegate.requestDataSync(tableName)
-                }
-            }
-        }
-    }
-
-    /**
      * Forces data sync, when user pulls to refresh
      */
     private fun forceSyncData() {
         syncDataRequested.set(false)
-        if (isReady()) {
-            entityListViewModel.getEntities { shouldSyncData ->
-                if (shouldSyncData) {
-                    Timber.d("GlobalStamp changed, synchronization is required")
-                    delegate.requestDataSync(tableName)
+        delegate.isConnected { isAccessible ->
+            if (isAccessible) {
+
+                if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
+                    Timber.d("Not authenticated yet, syncDataRequested = $syncDataRequested")
+                    delegate.requestAuthentication()
                 } else {
-                    Timber.d("GlobalStamp unchanged, no synchronization is required")
+                    // AUTHENTICATED
+                    if (entityListViewModel.dataSynchronized.value == DataSyncStateEnum.UNSYNCHRONIZED) {
+                        delegate.requestDataSync(null)
+                    } else {
+                        if (entityListViewModel.dataSynchronized.value == DataSyncStateEnum.SYNCHRONIZED) {
+                            entityListViewModel.getEntities { shouldSyncData ->
+                                if (shouldSyncData) {
+                                    Timber.d("GlobalStamp changed, synchronization is required")
+                                    delegate.requestDataSync(tableName)
+                                } else {
+                                    Timber.d("GlobalStamp unchanged, no synchronization is required")
+                                }
+                            }
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    private val searchListener: SearchView.OnQueryTextListener =
+        object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                newText?.let {
+                    entityListViewModel.currentQuery.value = it
+                }
+                return true
+            }
+        }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        searchView.setOnQueryTextListener(searchListener)
+
+        val currentQuery = entityListViewModel.currentQuery.value
+        if (currentQuery.isNullOrEmpty()) {
+            searchView.onActionViewCollapsed()
         } else {
-            if (!delegate.isConnected()) {
-                activity?.let {
-                    ToastHelper.show(it, it.resources.getString(R.string.no_internet), MessageType.WARNING)
-                }
-                Timber.d("No Internet connection, syncDataRequested")
-            } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
-                /*activity?.let {
-                    displaySnackBar(
-                        it,
-                        it.resources.getString(R.string.error_occurred_try_again)
-                    )
-                }*/
-                Timber.d("Not authenticated yet, syncDataRequested = $syncDataRequested")
-            }
+            searchView.setQuery(currentQuery, true)
+            searchView.isIconified = false
+            searchPlate.clearFocus()
         }
-    }
-
-    /**
-     * Checks if environment is ready to perform an action
-     */
-    fun isReady(): Boolean {
-        if (loginViewModel.authenticationState.value == AuthenticationStateEnum.INVALID_AUTHENTICATION) {
-            // For example server was not responding when trying to auto-login
-            delegate.requestAuthentication()
-            return false
-        }
-        return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
-            entityListViewModel.dataSynchronized.value == DataSyncStateEnum.SYNCHRONIZED &&
-            delegate.isConnected()
-    }
-
-    // Custom Search bar Listener
-    override fun dataToSearch(data: String) {
-        when {
-            (data.isEmpty()) -> {
-                QMobileUiUtil.setQuery(sqlQueryBuilderUtil.getAll(), false)
-                observeEntityListDynamicSearch(sqlQueryBuilderUtil.getAll())
-                SearchQueryStateHelper.setString(data)
-            }
-            else -> {
-                observeEntityListDynamicSearch(
-                    sqlQueryBuilderUtil.sortQuery(data)
-                )
-                QMobileUiUtil.setQuery(sqlQueryBuilderUtil.sortQuery(data), true)
-                SearchQueryStateHelper.setString(data)
-            }
-        }
+        super.onPrepareOptionsMenu(menu)
     }
 
     // Searchable implementation
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_search, menu)
-        searchView = CustomSearchView(
-            context,
-            menu.findItem(R.id.search), this
-        ).addListener(
-            (activity?.getSystemService(SEARCH_SERVICE) as SearchManager).getSearchableInfo(activity?.componentName)
-        )
-        if (SearchQueryStateHelper.getString() != "empty" && SearchQueryStateHelper.getString()
-            .isNotEmpty()
-        ) {
-            searchView.isIconified = false
-            searchView.setQuery(SearchQueryStateHelper.getString(), true)
+        if (hasSearch()) {
+            inflater.inflate(R.menu.menu_search, menu)
+            searchView = menu.findItem(R.id.search).actionView as SearchView
+            searchPlate = searchView.findViewById(androidx.appcompat.R.id.search_src_text) as EditText
+            searchPlate.hint = ""
+
+            searchView.setOnCloseListener {
+                searchView.onActionViewCollapsed()
+                true
+            }
         }
         super.onCreateOptionsMenu(menu, inflater)
+    }
+}
+
+fun hideKeyboard(fragmentActivity: FragmentActivity?) {
+    fragmentActivity?.let { activity ->
+        activity.currentFocus?.let { v ->
+            val imm: InputMethodManager =
+                activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(v.windowToken, 0)
+        }
     }
 }

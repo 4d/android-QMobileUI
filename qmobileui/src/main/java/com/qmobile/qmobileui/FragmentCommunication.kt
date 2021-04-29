@@ -26,9 +26,9 @@ interface FragmentCommunication {
 
     fun refreshApiClients()
 
-    fun isConnected(): Boolean
+    fun isConnected(onResult: (isAccessible: Boolean) -> Unit)
 
-    fun requestDataSync(alreadyRefreshedTable: String)
+    fun requestDataSync(alreadyRefreshedTable: String?)
 
     fun requestAuthentication()
 

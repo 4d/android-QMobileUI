@@ -182,7 +182,17 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         setDataSyncObserver(null)
     }
 
-    override fun isConnected(): Boolean = connectivityViewModel.isConnected()
+    override fun isConnected(
+        onResult: (isAccessible: Boolean) -> Unit
+    ) {
+        if (connectivityViewModel.isConnected()) {
+            connectivityViewModel.isServerConnectionOk { isAccessible ->
+                onResult(isAccessible)
+            }
+        } else {
+            onResult(false)
+        }
+    }
 
     override fun requestAuthentication() {
         authenticationRequested = false
@@ -192,7 +202,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     /**
      * Performs data sync, requested by a table request
      */
-    override fun requestDataSync(alreadyRefreshedTable: String) {
+    override fun requestDataSync(alreadyRefreshedTable: String?) {
         setDataSyncObserver(alreadyRefreshedTable)
     }
 
