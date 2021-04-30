@@ -18,5 +18,6 @@ data class AppUtilities(
     var sdkVersion: String,
     var logLevel: Int,
     var dumpedTables: String,
-    var relationAvailable: Boolean = true
+    var relationAvailable: Boolean = true,
+    var customFormatterJson: JSONObject
 )

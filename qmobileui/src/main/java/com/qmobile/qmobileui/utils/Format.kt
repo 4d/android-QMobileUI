@@ -38,3 +38,9 @@ fun date(format: String, date: String?) = when {
         Locale.getDefault(), date
     ).toString()
 }
+
+//customFormat
+fun custom(tableName: String, filedName: String ,value: String?) = when {
+    (value == null) -> "null"
+    else -> FormatterUtil.custom(tableName,filedName ,value)
+}

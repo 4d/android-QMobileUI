@@ -70,4 +70,14 @@ internal object FormatterUtil {
         "spellOut" -> QMobileUiUtil.WordFormatter(value)
         else -> "test"
     }
+
+    /**
+     * Custom Formatter
+     */
+    fun custom(tableName: String, filedName: String, value: String): String {
+        val json = QMobileUiUtil.appUtilities.customFormatterJson.getJSONObject(tableName)
+        val mappingData =
+            json.getJSONObject(filedName).getJSONObject("formatchoice").getJSONObject("map")
+        return value + mappingData[value].toString()
+    }
 }
