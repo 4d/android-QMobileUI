@@ -15,7 +15,7 @@ class SqlQueryBuilderUtil(
     private val searchField: JSONObject = QMobileUiUtil.appUtilities.searchField // has columns to Filter
 ) {
 
-    val getAll = { SimpleSQLiteQuery("SELECT * FROM $tableName") }
+    fun getAll() = SimpleSQLiteQuery("SELECT * FROM $tableName")
 
     fun sortQuery(dataToSort: String): SimpleSQLiteQuery {
         val stringBuffer = StringBuffer("SELECT * FROM $tableName WHERE  ")

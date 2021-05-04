@@ -179,7 +179,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             onLaunch = false
             getEntityListViewModelsForSync()
         }
-        setDataSyncObserver(null)
+        prepareDataSync(null)
     }
 
     override fun isConnected(
@@ -203,7 +203,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      * Performs data sync, requested by a table request
      */
     override fun requestDataSync(alreadyRefreshedTable: String?) {
-        setDataSyncObserver(alreadyRefreshedTable)
+        prepareDataSync(alreadyRefreshedTable)
     }
 
     override fun darkModeEnabled(): Boolean {

@@ -36,7 +36,7 @@ fun EntityListFragment.observeEntityListDynamicSearch() {
         viewLifecycleOwner,
         Observer {
             adapter.submitList(it)
-            adapter.notifyDataSetChanged()
+//            adapter.notifyDataSetChanged()
         }
     )
 //    entityListViewModel.getAllDynamicQuery(sqLiteQuery).observe(

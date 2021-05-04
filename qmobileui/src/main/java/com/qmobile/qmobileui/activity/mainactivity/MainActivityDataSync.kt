@@ -24,23 +24,20 @@ fun MainActivity.getEntityListViewModelsForSync() {
     }
 }
 
-fun MainActivity.setDataSyncObserver(alreadyRefreshedTable: String?) {
-
+fun MainActivity.prepareDataSync(alreadyRefreshedTable: String?) {
     if (connectivityViewModel.isConnected()) {
-        connectivityViewModel.isServerConnectionOk { isAccessible ->
-            if (isAccessible) {
-                entityViewModelIsToSyncList.map { it.isToSync = true }
-                alreadyRefreshedTable?.let {
-                    entityViewModelIsToSyncList.find {
-                        it.vm.getAssociatedTableName() == alreadyRefreshedTable
-                    }?.isToSync = false
-                }
-                dataSync.setObserver(entityViewModelIsToSyncList, alreadyRefreshedTable)
-            } else {
-                // Nothing to do, errors already provided in isServerConnectionOk
-            }
-        }
+        this.setDataSyncObserver(alreadyRefreshedTable)
     } else {
         ToastHelper.show(this, resources.getString(R.string.no_internet), MessageType.WARNING)
     }
+}
+
+fun MainActivity.setDataSyncObserver(alreadyRefreshedTable: String?) {
+    entityViewModelIsToSyncList.map { it.isToSync = true }
+    alreadyRefreshedTable?.let {
+        entityViewModelIsToSyncList.find {
+            it.vm.getAssociatedTableName() == alreadyRefreshedTable
+        }?.isToSync = false
+    }
+    dataSync.setObserver(entityViewModelIsToSyncList, alreadyRefreshedTable)
 }
