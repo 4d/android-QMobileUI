@@ -21,6 +21,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,6 +41,8 @@ import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 import kotlinx.android.synthetic.main.fragment_list.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -53,6 +56,8 @@ class EntityListFragment : Fragment(), BaseFragment {
     private lateinit var searchPlate: EditText
     private var searchableFields = QMobileUiUtil.appUtilities.searchField
     lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
+
+    var job: Job? = null
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -207,12 +212,16 @@ class EntityListFragment : Fragment(), BaseFragment {
                         delegate.requestDataSync(null)
                     } else {
                         if (entityListViewModel.dataSynchronized.value == DataSyncStateEnum.SYNCHRONIZED) {
-                            entityListViewModel.getEntities { shouldSyncData ->
-                                if (shouldSyncData) {
-                                    Timber.d("GlobalStamp changed, synchronization is required")
-                                    delegate.requestDataSync(tableName)
-                                } else {
-                                    Timber.d("GlobalStamp unchanged, no synchronization is required")
+
+                            job?.cancel()
+                            job = activity?.lifecycleScope?.launch {
+                                entityListViewModel.getEntities { shouldSyncData ->
+                                    if (shouldSyncData) {
+                                        Timber.d("GlobalStamp changed, synchronization is required")
+                                        delegate.requestDataSync(tableName)
+                                    } else {
+                                        Timber.d("GlobalStamp unchanged, no synchronization is required")
+                                    }
                                 }
                             }
                         }
