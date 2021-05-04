@@ -7,6 +7,8 @@
 package com.qmobile.qmobileui.utils
 
 import android.annotation.SuppressLint
+import com.qmobile.qmobileapi.utils.getSafeObject
+import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.model.QMobileFormatterConstants
 import com.qmobile.qmobileui.model.QMobileUiConstants.INT_0
 import com.qmobile.qmobileui.model.QMobileUiConstants.INT_100
@@ -16,9 +18,10 @@ import com.qmobile.qmobileui.model.QMobileUiConstants.INT_60
 import com.qmobile.qmobileui.utils.converter.getDateFromString
 import com.qmobile.qmobileui.utils.converter.getTimeFromLong
 import com.qmobile.qmobileui.utils.converter.getTimeFromString
+import timber.log.Timber
 import java.text.DateFormat
 import java.text.DecimalFormat
-import java.util.Locale
+import java.util.*
 
 @SuppressLint("SimpleDateFormat")
 internal object FormatterUtil {
@@ -37,10 +40,10 @@ internal object FormatterUtil {
         "integer" -> {
             val newTimeArray = getTimeFromLong(time.toLong()).split(":")
             (
-                newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
-                    newTimeArray[1]
-                ) * INT_3600
-                )
+                    newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
+                        newTimeArray[1]
+                    ) * INT_3600
+                    )
         }
         else -> QMobileFormatterConstants.timeFormat[format]?.let {
             DateFormat.getTimeInstance(it).format(getTimeFromString(time).time)
@@ -59,11 +62,11 @@ internal object FormatterUtil {
         "integer" -> (value.toFloat()).toInt()
         "ordinal" -> DecimalFormat("0.00").format(value.toDouble()) + "th"
         "percent" -> (
-            (
-                DecimalFormat("0.00").format(value.toDouble())
-                    .toDouble()
-                ) * INT_100
-            ).toString() + "%"
+                (
+                        DecimalFormat("0.00").format(value.toDouble())
+                            .toDouble()
+                        ) * INT_100
+                ).toString() + "%"
         "currencyDollar" -> "$" + DecimalFormat("0.00").format(value.toDouble())
         "currencyEuro" -> DecimalFormat("0.00").format(value.toDouble()) + "€"
         "currencyYen" -> "¥" + DecimalFormat("0.00").format(value.toDouble())
@@ -74,10 +77,13 @@ internal object FormatterUtil {
     /**
      * Custom Formatter
      */
-    fun custom(tableName: String, filedName: String, value: String): String {
+    fun custom(tableName: String, filedName: String, value: String) {
         val json = QMobileUiUtil.appUtilities.customFormatterJson.getJSONObject(tableName)
-        val mappingData =
-            json.getJSONObject(filedName).getJSONObject("formatchoice").getJSONObject("map")
-        return value + mappingData[value].toString()
+       // val mappingData =
+            json.getSafeObject(filedName)?.getSafeObject("formatchoice")?.getSafeObject("map")
+        val bindingType = json.getJSONObject(filedName).getSafeString("binding").toString()
+        Timber.e("TEST >>>>>>>>>>>>>>>>>>>> Replace TextView With ImageDrawable $bindingType")
     }
+
+
 }

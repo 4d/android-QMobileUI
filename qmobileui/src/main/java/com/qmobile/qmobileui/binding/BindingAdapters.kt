@@ -19,12 +19,14 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
+import com.qmobile.qmobileapi.utils.getSafeObject
+import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
+import com.qmobile.qmobileui.utils.QMobileUiUtil
 import timber.log.Timber
 import java.io.File
-import java.lang.NullPointerException
 
 /**
  * Sample avatar list
@@ -98,6 +100,44 @@ fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Ur
         }
     return null
 }
+
+/**
+ * Bind an Image Inside TextView
+ */
+@BindingAdapter(
+    value = ["tableName", "fieldName", "value"],
+    requireAll = false
+)
+fun loadImageInsideTextView(
+    view: TextView,
+    tableName: String?,
+    fieldName: String?,
+    value: String?
+) {
+    value?.let { value ->
+        tableName?.let { tableName ->
+            fieldName?.let { fieldName ->
+                val json = QMobileUiUtil.appUtilities.customFormatterJson.getJSONObject(tableName)
+                val mappingData = json.getSafeObject(fieldName)?.getSafeObject("formatchoice")
+                    ?.getSafeObject("map")
+                val bindingType = json.getJSONObject(fieldName).getSafeString("binding").toString()
+                if (bindingType.equals("imageNamed")) {
+                    view.setCompoundDrawablesWithIntrinsicBounds(
+                        R.drawable.avatar_2_raster,
+                        0,
+                        0,
+                        0
+                    )
+                } else {
+                    val mapResult = mappingData?.getSafeString(value)
+                    view.text = if (mapResult.isNullOrBlank()) value else mapResult
+                }
+            }
+        }
+
+    }
+}
+
 
 /**
  * Use Glide to load image drawable in a view
