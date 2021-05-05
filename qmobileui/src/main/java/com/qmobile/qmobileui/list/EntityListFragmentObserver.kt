@@ -27,7 +27,6 @@ fun EntityListFragment.getViewModel() {
  */
 fun EntityListFragment.setupObservers() {
     observeDataSynchronized()
-    observeCurrentQuery()
 }
 
 // Sql Dynamic Query Support
@@ -45,18 +44,6 @@ fun EntityListFragment.observeEntityListDynamicSearch() {
 //            adapter.submitList(pagedList)
 //        }
 //    )
-}
-
-fun EntityListFragment.observeCurrentQuery() {
-    entityListViewModel.currentQuery.observe(
-        viewLifecycleOwner,
-        Observer { currentQuery ->
-            if (currentQuery.isNullOrEmpty())
-                entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.getAll())
-            else
-                entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.sortQuery(currentQuery))
-        }
-    )
 }
 
 // Observe when data are synchronized

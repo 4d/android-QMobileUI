@@ -7,19 +7,20 @@
 package com.qmobile.qmobileui.list
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.appcompat.widget.SearchView
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -31,7 +32,6 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
-import com.qmobile.qmobiledatasync.utils.forceRefresh
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.BaseFragment
@@ -40,6 +40,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
+import com.qmobile.qmobileui.utils.hideKeyboard
 import kotlinx.android.synthetic.main.fragment_list.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -56,6 +57,12 @@ class EntityListFragment : Fragment(), BaseFragment {
     private lateinit var searchPlate: EditText
     private var searchableFields = QMobileUiUtil.appUtilities.searchField
     lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
+
+    companion object {
+        private const val CURRENT_QUERY_KEY = "currentQuery_key"
+    }
+
+    var currentQuery = ""
 
     var job: Job? = null
 
@@ -102,6 +109,11 @@ class EntityListFragment : Fragment(), BaseFragment {
         // Access resources elements
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        savedInstanceState?.getString(CURRENT_QUERY_KEY, "")?.let { currentQuery = it }
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initRecyclerView()
@@ -109,7 +121,7 @@ class EntityListFragment : Fragment(), BaseFragment {
         setupObservers()
         observeEntityListDynamicSearch()
         hideKeyboard(activity)
-        entityListViewModel.currentQuery.forceRefresh()
+        setSearchQuery()
     }
 
     override fun onDestroyView() {
@@ -239,7 +251,8 @@ class EntityListFragment : Fragment(), BaseFragment {
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 newText?.let {
-                    entityListViewModel.currentQuery.value = it
+                    currentQuery = it
+                    setSearchQuery()
                 }
                 return true
             }
@@ -248,8 +261,7 @@ class EntityListFragment : Fragment(), BaseFragment {
     override fun onPrepareOptionsMenu(menu: Menu) {
         searchView.setOnQueryTextListener(searchListener)
 
-        val currentQuery = entityListViewModel.currentQuery.value
-        if (currentQuery.isNullOrEmpty()) {
+        if (currentQuery.isEmpty()) {
             searchView.onActionViewCollapsed()
         } else {
             searchView.setQuery(currentQuery, true)
@@ -266,6 +278,23 @@ class EntityListFragment : Fragment(), BaseFragment {
             searchView = menu.findItem(R.id.search).actionView as SearchView
             searchPlate = searchView.findViewById(androidx.appcompat.R.id.search_src_text) as EditText
             searchPlate.hint = ""
+            searchPlate.setBackgroundResource(R.drawable.searchview_rounded)
+            if (delegate.darkModeEnabled())
+                searchPlate.setTextColor(Color.WHITE)
+            else
+                searchPlate.setTextColor(Color.BLACK)
+
+            searchPlate.setOnEditorActionListener { textView, actionId, keyEvent ->
+                if ((keyEvent != null && (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER)) ||
+                    (actionId == EditorInfo.IME_ACTION_DONE)
+                ) {
+                    hideKeyboard(activity)
+                    textView.clearFocus()
+                    if (textView.text.isEmpty())
+                        searchView.onActionViewCollapsed()
+                }
+                true
+            }
 
             searchView.setOnCloseListener {
                 searchView.onActionViewCollapsed()
@@ -274,14 +303,16 @@ class EntityListFragment : Fragment(), BaseFragment {
         }
         super.onCreateOptionsMenu(menu, inflater)
     }
-}
 
-fun hideKeyboard(fragmentActivity: FragmentActivity?) {
-    fragmentActivity?.let { activity ->
-        activity.currentFocus?.let { v ->
-            val imm: InputMethodManager =
-                activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(v.windowToken, 0)
-        }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(CURRENT_QUERY_KEY, currentQuery)
+    }
+
+    private fun setSearchQuery() {
+        if (currentQuery.isEmpty())
+            entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.getAll())
+        else
+            entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.sortQuery(currentQuery))
     }
 }

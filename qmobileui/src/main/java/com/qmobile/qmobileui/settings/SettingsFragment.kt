@@ -9,8 +9,12 @@ package com.qmobile.qmobileui.settings
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.preference.EditTextPreference
+import androidx.preference.EditTextPreferenceDialogFragmentCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
@@ -22,6 +26,7 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.ToastHelper
+import com.qmobile.qmobileui.utils.hideKeyboard
 import timber.log.Timber
 
 @Suppress("TooManyFunctions")
@@ -32,7 +37,7 @@ class SettingsFragment :
     Preference.OnPreferenceChangeListener {
 
     var firstTime = true
-    private var remoteUrlPref: Preference? = null
+    private var remoteUrlPref: EditTextPreference? = null
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
     private lateinit var accountCategoryKey: String
@@ -94,6 +99,22 @@ class SettingsFragment :
         remoteUrlPref = findPreference(remoteUrlPrefKey)
         remoteUrlPref?.setDefaultValue(this.remoteUrl)
         remoteUrlPref?.onPreferenceChangeListener = this
+
+        remoteUrlPref?.setOnBindEditTextListener { editText ->
+            editText.setSingleLine()
+            editText.setSelection(editText.text.length)
+            editText.imeOptions = EditorInfo.IME_ACTION_DONE
+            editText.setOnEditorActionListener { textView, actionId, keyEvent ->
+                if ((keyEvent != null && (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER)) ||
+                    (actionId == EditorInfo.IME_ACTION_DONE)
+                ) {
+                    remoteUrlPref?.setDefaultValue(textView.text.toString())
+                    hideKeyboard(activity)
+                    dismissDialog()
+                }
+                false
+            }
+        }
     }
 
     override fun onPreferenceClick(preference: Preference?): Boolean {
@@ -154,7 +175,11 @@ class SettingsFragment :
         } else {
             if (!connectivityViewModel.isConnected()) {
                 activity?.let {
-                    ToastHelper.show(it, it.resources.getString(R.string.no_internet), MessageType.WARNING)
+                    ToastHelper.show(
+                        it,
+                        it.resources.getString(R.string.no_internet),
+                        MessageType.WARNING
+                    )
                 }
                 Timber.d("No Internet connection")
             } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
@@ -183,7 +208,7 @@ class SettingsFragment :
     /**
      * Sets the indicator icon color and text to no Internet status
      */
-    fun setLayoutNoInternet() {
+    private fun setLayoutNoInternet() {
         remoteUrlPref?.summary = "$remoteUrl - $noInternetString"
         remoteUrlPref?.icon = serverNotAccessibleDrawable
     }
@@ -191,7 +216,7 @@ class SettingsFragment :
     /**
      * Sets the indicator icon color and text to server not accessible
      */
-    fun setLayoutServerNotAccessible() {
+    private fun setLayoutServerNotAccessible() {
         remoteUrlPref?.summary = "$remoteUrl - $serverNotAccessibleString"
         remoteUrlPref?.icon = serverNotAccessibleDrawable
     }
@@ -199,7 +224,7 @@ class SettingsFragment :
     /**
      * Sets the indicator icon color and text to server accessible
      */
-    fun setLayoutServerAccessible() {
+    private fun setLayoutServerAccessible() {
         remoteUrlPref?.summary = "$remoteUrl - $serverAccessibleString"
         remoteUrlPref?.icon = serverAccessibleDrawable
     }
@@ -215,5 +240,15 @@ class SettingsFragment :
         }
         return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
             connectivityViewModel.isConnected()
+    }
+
+    private fun dismissDialog() {
+        activity?.supportFragmentManager?.fragments?.firstOrNull()?.childFragmentManager
+            ?.fragments?.forEach { fragment ->
+                if (fragment is EditTextPreferenceDialogFragmentCompat) {
+                    fragment.onDialogClosed(true)
+                    fragment.dismiss()
+                }
+            }
     }
 }

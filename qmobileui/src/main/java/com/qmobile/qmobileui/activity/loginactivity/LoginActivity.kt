@@ -12,9 +12,11 @@ import android.graphics.Rect
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.databinding.DataBindingUtil
@@ -34,6 +36,7 @@ import com.qmobile.qmobileui.binding.bindImageFromDrawable
 import com.qmobile.qmobileui.databinding.ActivityLoginBinding
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.ToastHelper
+import com.qmobile.qmobileui.utils.hideKeyboard
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : BaseActivity() {
@@ -122,6 +125,16 @@ class LoginActivity : BaseActivity() {
             } else {
                 login_email_container.error = null
             }
+        }
+
+        login_email_input.setOnEditorActionListener { textView, actionId, keyEvent ->
+            if ((keyEvent != null && (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER)) ||
+                (actionId == EditorInfo.IME_ACTION_DONE)
+            ) {
+                hideKeyboard(this)
+                textView.clearFocus()
+            }
+            true
         }
     }
 

@@ -147,6 +147,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         if (this::entityListViewModelList.isInitialized) {
             entityListViewModelList.forEach { it.refreshRestRepository(apiService) }
         }
+        if (this::connectivityViewModel.isInitialized) {
+            connectivityViewModel.refreshAccessibilityRepository(accessibilityApiService)
+        }
     }
 
     /**
