@@ -26,7 +26,13 @@ fun MainActivity.getEntityListViewModelsForSync() {
 
 fun MainActivity.prepareDataSync(alreadyRefreshedTable: String?) {
     if (connectivityViewModel.isConnected()) {
-        this.setDataSyncObserver(alreadyRefreshedTable)
+        connectivityViewModel.isServerConnectionOk { isAccessible ->
+            if (isAccessible) {
+                this.setDataSyncObserver(alreadyRefreshedTable)
+            } else {
+                // Nothing to do, errors already provided in isServerConnectionOk
+            }
+        }
     } else {
         ToastHelper.show(this, resources.getString(R.string.no_internet), MessageType.WARNING)
     }
