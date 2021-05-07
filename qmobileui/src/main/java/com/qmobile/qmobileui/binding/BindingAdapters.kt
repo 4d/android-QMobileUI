@@ -123,9 +123,8 @@ fun loadImageInsideTextView(
                 val bindingType = json.getJSONObject(fieldName).getSafeString("binding").toString()
                 if (bindingType.equals("imageNamed")) {
                     val listofcustomImages = BaseApp.drawable
-                    Timber.e(">>>>>>>>>>> $value --- ${mappingData?.getSafeString(value)} --   ${listofcustomImages[mappingData?.getSafeString(value)]}")
                     mappingData?.getSafeString(value).let {
-                        listofcustomImages[it]?.let {drawable ->
+                        listofcustomImages[it]?.let { drawable ->
                             view.setCompoundDrawablesWithIntrinsicBounds(
                                 drawable,
                                 0,
