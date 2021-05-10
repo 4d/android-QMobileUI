@@ -15,7 +15,8 @@ import timber.log.Timber
  * Retrieve viewModels from MainActivity lifecycle
  */
 fun EntityDetailFragment.getViewModel() {
-    entityViewModel = getEntityViewModel(activity, tableName, itemId, delegate.apiService)
+    // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
+    entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
 }
 
 /**
