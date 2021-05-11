@@ -17,8 +17,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="@dimen/login_layout_margin"
         android:background="?colorSurface"
+        android:padding="@dimen/login_layout_margin"
         tools:context=".ui.LoginActivity">
 
         <androidx.constraintlayout.widget.Guideline

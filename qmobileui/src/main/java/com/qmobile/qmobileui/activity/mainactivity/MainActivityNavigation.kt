@@ -10,7 +10,6 @@ import androidx.lifecycle.Observer
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.utils.MenuItemExt.setMissingIcon
 import com.qmobile.qmobileui.utils.setupWithNavController
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -21,13 +20,6 @@ fun MainActivity.setupBottomNavigationBar() {
     bottom_nav.menu.clear() // clear old inflated items.
     BaseApp.bottomNavigationMenu?.let {
         bottom_nav.inflateMenu(it)
-    }
-
-    // Add missing icons
-    for (i in 0 until bottom_nav.menu.size()) {
-        val item = bottom_nav.menu.getItem(i)
-        if (item.icon == null)
-            item.setMissingIcon(this)
     }
 
     val navGraphIds = BaseApp.navGraphIds
