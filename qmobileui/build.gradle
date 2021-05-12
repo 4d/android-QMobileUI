@@ -61,11 +61,10 @@ dependencies {
     implementation Libs.timber
 
     // Testing
+    testImplementation Libs.json
     testImplementation Libs.junit
-    testImplementation 'org.json:json:20140107'
-    testImplementation "org.mockito:mockito-core:3.+"
-    testImplementation "org.mockito:mockito-junit-jupiter:3.3.3"
-    testImplementation "io.mockk:mockk:1.10.6"
+    testImplementation Libs.mockito
+    testImplementation Libs.mockk
 }
 
 def libraryGroupId = 'com.qmobile.qmobileui'
