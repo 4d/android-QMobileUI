@@ -109,7 +109,7 @@ fun applyFormatter(view: TextView, text: String?, format: String?, tableName: St
     if (format.isNullOrEmpty()) {
         view.text = text
     } else {
-        if (format != "custom"){
+        if (format != "custom") {
             view.text = applyFormat(format, text)
         } else {
             tableName?.let {
