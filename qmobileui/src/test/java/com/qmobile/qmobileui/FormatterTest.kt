@@ -6,35 +6,52 @@
 
 package com.qmobile.qmobileui
 
-import com.qmobile.qmobileui.utils.TypeChoice
-import com.qmobile.qmobileui.utils.date
-import com.qmobile.qmobileui.utils.formatBoolean
-import com.qmobile.qmobileui.utils.number
-import com.qmobile.qmobileui.utils.time
+import com.qmobile.qmobileui.utils.applyFormat
 import org.junit.Assert
 import org.junit.Test
+import java.util.*
 
 class FormatterTest {
 
     @Test
     fun testDateFormat() {
         val dateInput = "23!11!1937"
-        dateFormatTest(dateInput, expectedResult = "11/23/37", typeChoice = TypeChoice.ShortDate)
-        dateFormatTest(
-            dateInput,
-            expectedResult = "Nov 23, 1937",
-            typeChoice = TypeChoice.MediumDate
-        )
-        dateFormatTest(
-            dateInput,
-            expectedResult = "November 23, 1937",
-            typeChoice = TypeChoice.LongDate
-        )
-        dateFormatTest(
-            dateInput,
-            expectedResult = "Tuesday, November 23, 1937",
-            typeChoice = TypeChoice.FullDate
-        )
+        if (Locale.getDefault() == Locale.US) {
+            dateFormatTest(dateInput, expectedResult = "11/23/37", typeChoice = "shortDate")
+            dateFormatTest(
+                dateInput,
+                expectedResult = "Nov 23, 1937",
+                typeChoice = "mediumDate"
+            )
+            dateFormatTest(
+                dateInput,
+                expectedResult = "November 23, 1937",
+                typeChoice = "longDate"
+            )
+            dateFormatTest(
+                dateInput,
+                expectedResult = "Tuesday, November 23, 1937",
+                typeChoice = "fullDate"
+            )
+        }
+        if (Locale.getDefault() == Locale.FRENCH) {
+            dateFormatTest(dateInput, expectedResult = "23/11/37", typeChoice = "shortDate")
+            dateFormatTest(
+                dateInput,
+                expectedResult = "23 nov. 1937",
+                typeChoice = "mediumDate"
+            )
+            dateFormatTest(
+                dateInput,
+                expectedResult = "23 novembre 1937",
+                typeChoice = "longDate"
+            )
+            dateFormatTest(
+                dateInput,
+                expectedResult = "mardi 23 novembre 1937",
+                typeChoice = "fullDate"
+            )
+        }
     }
 
     @Test
@@ -44,54 +61,54 @@ class FormatterTest {
         booleanFormatTest(
             inputIsTrue,
             expectedResult = 1.toString(),
-            typeChoice = TypeChoice.Number
+            typeChoice = "boolInteger"
         )
-        booleanFormatTest(inputIsTrue, expectedResult = "Yes", typeChoice = TypeChoice.YesNo)
-        booleanFormatTest(inputIsTrue, expectedResult = "True", typeChoice = TypeChoice.TrueFalse)
+        booleanFormatTest(inputIsTrue, expectedResult = "Yes", typeChoice = "noOrYes")
+        booleanFormatTest(inputIsTrue, expectedResult = "True", typeChoice = "falseOrTrue")
         booleanFormatTest(
             inputIsFalse,
             expectedResult = 0.toString(),
-            typeChoice = TypeChoice.Number
+            typeChoice = "boolInteger"
         )
-        booleanFormatTest(inputIsFalse, expectedResult = "No", typeChoice = TypeChoice.YesNo)
-        booleanFormatTest(inputIsFalse, expectedResult = "False", typeChoice = TypeChoice.TrueFalse)
+        booleanFormatTest(inputIsFalse, expectedResult = "No", typeChoice = "noOrYes")
+        booleanFormatTest(inputIsFalse, expectedResult = "False", typeChoice = "falseOrTrue")
     }
 
     @Test
     fun testTimeFormat() {
         val inputTime = "946693832"
-        timeFormatTest(inputTime, "113480208800", TypeChoice.Number)
-        timeFormatTest(inputTime, "11:58:13 AM", TypeChoice.Time)
-        timeFormatTest(inputTime, "11:58 AM", TypeChoice.ShortTime)
-        timeFormatTest(inputTime, "11:58:13", TypeChoice.Duration)
+        timeFormatTest(inputTime, "113480208800", "timeInteger")
+        timeFormatTest(inputTime, "11:58:13 AM", "mediumTime")
+        timeFormatTest(inputTime, "11:58 AM", "shortTime")
+        timeFormatTest(inputTime, "11:58:13", "duration")
     }
 
     @Test
     fun testNumberFormat() {
         val number = 24.46812
-        numberFormatTest(number.toString(), "24.468", TypeChoice.Decimal)
-        numberFormatTest(number.toString(), "24", TypeChoice.Number)
-        numberFormatTest(number.toString(), "24.46812", TypeChoice.Real)
-        numberFormatTest(number.toString(), "twenty four dot forty seven", TypeChoice.SpellOut)
-        numberFormatTest(number.toString(), "24.47th", TypeChoice.Ordinal)
-        numberFormatTest(number.toString(), "2447.0%", TypeChoice.Percentage)
-        numberFormatTest(number.toString(), "24.47€", TypeChoice.EuroCurrency)
-        numberFormatTest(number.toString(), "$24.47", TypeChoice.USCurrency)
-        numberFormatTest(number.toString(), "¥24.47", TypeChoice.JapanCurrency)
+        numberFormatTest(number.toString(), "24.468", "decimal")
+        numberFormatTest(number.toString(), "24", "integer")
+        numberFormatTest(number.toString(), "24.46812", "real")
+        numberFormatTest(number.toString(), "twenty four dot forty seven", "spellOut")
+        numberFormatTest(number.toString(), "24.47th", "ordinal")
+        numberFormatTest(number.toString(), "2447.0%", "percent")
+        numberFormatTest(number.toString(), "24.47€", "currencyEuro")
+        numberFormatTest(number.toString(), "$24.47", "currencyDollar")
+        numberFormatTest(number.toString(), "¥24.47", "currencyYen")
     }
 
-    private fun dateFormatTest(inputDate: String, expectedResult: String, typeChoice: TypeChoice) =
-        Assert.assertEquals(expectedResult, date(typeChoice.key, inputDate))
+    private fun dateFormatTest(inputDate: String, expectedResult: String, typeChoice: String) =
+        Assert.assertEquals(expectedResult, applyFormat(typeChoice, inputDate))
 
     private fun booleanFormatTest(
         inputDate: String,
         expectedResult: String,
-        typeChoice: TypeChoice
-    ) = Assert.assertEquals(expectedResult, formatBoolean(typeChoice.key, inputDate))
+        typeChoice: String
+    ) = Assert.assertEquals(expectedResult, applyFormat(typeChoice, inputDate))
 
-    private fun timeFormatTest(inputDate: String, expectedResult: String, typeChoice: TypeChoice) =
-        Assert.assertEquals(expectedResult, time(typeChoice.key, inputDate).trim())
+    private fun timeFormatTest(inputDate: String, expectedResult: String, typeChoice: String) =
+        Assert.assertEquals(expectedResult, applyFormat(typeChoice, inputDate).trim())
 
-    private fun numberFormatTest(input: String, expectedResult: String, typeChoice: TypeChoice) =
-        Assert.assertEquals(expectedResult, number(typeChoice.key, input))
+    private fun numberFormatTest(input: String, expectedResult: String, typeChoice: String) =
+        Assert.assertEquals(expectedResult, applyFormat(typeChoice, input))
 }

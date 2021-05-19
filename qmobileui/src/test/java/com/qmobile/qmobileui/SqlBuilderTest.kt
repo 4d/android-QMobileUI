@@ -51,15 +51,16 @@ class SqlBuilderTest {
     fun testSearchableField() {
         mockkObject(QMobileUiUtil)
         every { QMobileUiUtil.appUtilities } returns AppUtilities(
-            0,
-            true,
-            "",
-            tableJson,
-            tableJson,
-            tableJson,
-            "12.5",
-            Log.DEBUG,
-            ""
+            initialGlobalStamp = 0,
+            guestLogin = true,
+            remoteUrl = "",
+            teams = tableJson,
+            queryJson = tableJson,
+            searchField = tableJson,
+            sdkVersion = "12.5",
+            logLevel = Log.DEBUG,
+            dumpedTables = "",
+            customFormatterJson = JSONObject()
         )
         Assert.assertEquals(tableJson, QMobileUiUtil.appUtilities.searchField)
     }

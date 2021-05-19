@@ -25,6 +25,7 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
 import com.qmobile.qmobileui.utils.QMobileUiUtil
+import com.qmobile.qmobileui.utils.applyFormat
 import timber.log.Timber
 import java.io.File
 
@@ -101,48 +102,44 @@ fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Ur
     return null
 }
 
-/**
- * Bind an Image Inside TextView
- */
-@BindingAdapter(
-    value = ["tableName", "fieldName", "value"],
-    requireAll = false
-)
-fun loadImageInsideTextView(
-    view: TextView,
-    tableName: String?,
-    fieldName: String?,
-    value: String?
-) {
-    value?.let { value ->
-        tableName?.let { tableName ->
-            fieldName?.let { fieldName ->
-                val json = QMobileUiUtil.appUtilities.customFormatterJson.getJSONObject(tableName)
-                val mappingData = json.getSafeObject(fieldName)?.getSafeObject("formatchoice")
-                    ?.getSafeObject("map")
-                val bindingType = json.getJSONObject(fieldName).getSafeString("binding").toString()
-                if (bindingType.equals("imageNamed")) {
-                    val listofcustomImages = BaseApp.drawable
-                    mappingData?.getSafeString(value).let {
-                        listofcustomImages[it]?.let { drawable ->
-                            view.setCompoundDrawablesWithIntrinsicBounds(
-                                drawable,
-                                0,
-                                0,
-                                0
-                            )
-                        }
-                    } ?: value
-                } else {
-                    val mapResult = mappingData?.getSafeString(value)
-                    view.text = if (mapResult.isNullOrBlank()) value else mapResult
-                }
-            }
+@BindingAdapter(value = ["text", "format", "tableName", "fieldName"], requireAll = false)
+fun applyFormatter(view: TextView, text: String?, format: String?, tableName: String?, fieldName: String?) {
+    if (text.isNullOrEmpty())
+        return
+    if (format.isNullOrEmpty()) {
+        view.text = text
+    } else {
+        if (format != "custom"){
+            view.text = applyFormat(format, text)
+        } else {
+            tableName?.let {
+                fieldName?.let {
+                    val json = QMobileUiUtil.appUtilities.customFormatterJson.getJSONObject(tableName)
+                    val mappingData = json.getSafeObject(fieldName)?.getSafeObject("formatchoice")
+                        ?.getSafeObject("map")
+                    val bindingType = json.getJSONObject(fieldName).getSafeString("binding").toString()
+                    if (bindingType == "imageNamed") {
+                        val listofcustomImages = BaseApp.drawable
+                        mappingData?.getSafeString(text).let {
+                            listofcustomImages[it]?.let { drawable ->
+                                view.setCompoundDrawablesWithIntrinsicBounds(
+                                    drawable,
+                                    0,
+                                    0,
+                                    0
+                                )
+                                // todo : use Glide
+                            }
+                        } ?: text
+                    } else {
+                        val mapResult = mappingData?.getSafeString(text)
+                        view.text = if (mapResult.isNullOrBlank()) text else mapResult
+                    }
+                } ?: run { view.text = text }
+            } ?: run { view.text = text }
         }
-
     }
 }
-
 
 /**
  * Use Glide to load image drawable in a view
