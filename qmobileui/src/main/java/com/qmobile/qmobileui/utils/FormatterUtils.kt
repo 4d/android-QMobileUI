@@ -20,22 +20,13 @@ import java.util.Locale
 fun applyFormat(format: String, baseText: String): String {
     return when (format) {
         "noOrYes" -> {
-            if (baseText.toBoolean())
-                "Yes"
-            else
-                "No"
+            if (baseText.toBoolean()) "Yes" else "No"
         }
         "falseOrTrue" -> {
-            if (baseText.toBoolean())
-                "True"
-            else
-                "False"
+            if (baseText.toBoolean()) "True" else "False"
         }
         "boolInteger" -> {
-            if (baseText.toBoolean())
-                "1"
-            else
-                "0"
+            if (baseText.toBoolean()) "1" else "0"
         }
         "timeInteger" -> {
             val newTimeArray = getTimeFromLong(baseText.toLong()).split(":")

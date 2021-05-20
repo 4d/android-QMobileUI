@@ -71,7 +71,7 @@ internal class BridgeUtility(context: Context) :
             logLevel = jsonObj.getInt("logLevel"),
             dumpedTables = jsonObj.getJSONArray("dumpedTables").getStringList().joinToString(),
             relationAvailable = jsonObj.getSafeBoolean("relations") ?: true,
-            customFormatterJson = jsonObj.getSafeObject("customFormatter") ?: JSONObject()
+            customFormatterJson = jsonObj.getSafeObject("customFormatters") ?: JSONObject()
         )
     }
 }

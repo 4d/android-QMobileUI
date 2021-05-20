@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -106,39 +107,37 @@ fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Ur
 fun applyFormatter(view: TextView, text: String?, format: String?, tableName: String?, fieldName: String?) {
     if (text.isNullOrEmpty())
         return
-    if (format.isNullOrEmpty()) {
-        view.text = text
-    } else {
-        if (format != "custom") {
+    if (!format.isNullOrEmpty()) {
+        if (!format.startsWith("/")) {
             view.text = applyFormat(format, text)
+            return
         } else {
-            tableName?.let {
-                fieldName?.let {
-                    val json = QMobileUiUtil.appUtilities.customFormatterJson.getJSONObject(tableName)
-                    val mappingData = json.getSafeObject(fieldName)?.getSafeObject("formatchoice")
-                        ?.getSafeObject("map")
-                    val bindingType = json.getJSONObject(fieldName).getSafeString("binding").toString()
-                    if (bindingType == "imageNamed") {
-                        val listofcustomImages = BaseApp.drawable
-                        mappingData?.getSafeString(text).let {
-                            listofcustomImages[it]?.let { drawable ->
-                                view.setCompoundDrawablesWithIntrinsicBounds(
-                                    drawable,
-                                    0,
-                                    0,
-                                    0
-                                )
-                                // todo : use Glide
+            if (tableName != null && fieldName != null) {
+                QMobileUiUtil.appUtilities.customFormatterJson.getSafeObject(tableName)?.getSafeObject(fieldName)?.let { fieldFormatter ->
+                    val formatChoiceMap = fieldFormatter.getSafeObject("formatchoice")?.getSafeObject("map")
+
+                    if (fieldFormatter.getSafeString("binding") == "imageNamed") {
+                        formatChoiceMap?.getSafeString(text)?.let { drawableName ->
+
+                            fieldFormatter.getSafeString("formatType")?.let { formatName ->
+                                BaseApp.fragmentUtil.getDrawableForFormatter(formatName, drawableName)?.let { drawable ->
+                                    view.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0)
+                                    // todo : use Glide
+                                    return
+                                }
                             }
-                        } ?: text
+                        }
                     } else {
-                        val mapResult = mappingData?.getSafeString(text)
+                        val mapResult = formatChoiceMap?.getSafeString(text)
                         view.text = if (mapResult.isNullOrBlank()) text else mapResult
+                        return
                     }
-                } ?: run { view.text = text }
-            } ?: run { view.text = text }
+                }
+            }
         }
     }
+    view.text = text
+    return
 }
 
 /**
