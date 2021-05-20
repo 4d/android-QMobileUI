@@ -14,17 +14,21 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
+import com.qmobile.qmobileapi.utils.getSafeObject
+import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
+import com.qmobile.qmobileui.utils.QMobileUiUtil
+import com.qmobile.qmobileui.utils.applyFormat
 import timber.log.Timber
 import java.io.File
-import java.lang.NullPointerException
 
 /**
  * Sample avatar list
@@ -97,6 +101,43 @@ fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Ur
             }
         }
     return null
+}
+
+@BindingAdapter(value = ["text", "format", "tableName", "fieldName"], requireAll = false)
+fun applyFormatter(view: TextView, text: String?, format: String?, tableName: String?, fieldName: String?) {
+    if (text.isNullOrEmpty())
+        return
+    if (!format.isNullOrEmpty()) {
+        if (!format.startsWith("/")) {
+            view.text = applyFormat(format, text)
+            return
+        } else {
+            if (tableName != null && fieldName != null) {
+                QMobileUiUtil.appUtilities.customFormatterJson.getSafeObject(tableName)?.getSafeObject(fieldName)?.let { fieldFormatter ->
+                    val formatChoiceMap = fieldFormatter.getSafeObject("formatchoice")?.getSafeObject("map")
+
+                    if (fieldFormatter.getSafeString("binding") == "imageNamed") {
+                        formatChoiceMap?.getSafeString(text)?.let { drawableName ->
+
+                            fieldFormatter.getSafeString("formatType")?.let { formatName ->
+                                BaseApp.fragmentUtil.getDrawableForFormatter(formatName, drawableName)?.let { drawable ->
+                                    view.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0)
+                                    // todo : use Glide
+                                    return
+                                }
+                            }
+                        }
+                    } else {
+                        val mapResult = formatChoiceMap?.getSafeString(text)
+                        view.text = if (mapResult.isNullOrBlank()) text else mapResult
+                        return
+                    }
+                }
+            }
+        }
+    }
+    view.text = text
+    return
 }
 
 /**
