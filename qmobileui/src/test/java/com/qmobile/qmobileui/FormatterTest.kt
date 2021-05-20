@@ -8,10 +8,16 @@ package com.qmobile.qmobileui
 
 import com.qmobile.qmobileui.utils.applyFormat
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import java.util.Locale
 
 class FormatterTest {
+
+    @Before
+    fun setup() {
+        Locale.setDefault(Locale.US)
+    }
 
     @Test
     fun testDateFormat() {
