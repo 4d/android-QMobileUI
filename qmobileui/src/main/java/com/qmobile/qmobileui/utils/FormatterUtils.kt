@@ -30,9 +30,11 @@ fun applyFormat(format: String, baseText: String): String {
         }
         "timeInteger" -> {
             val newTimeArray = getTimeFromLong(baseText.toLong()).split(":")
-            (newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
-                newTimeArray[1]
-            ) * INT_3600)
+            (
+                newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
+                    newTimeArray[1]
+                ) * INT_3600
+                )
         }
         "shortTime" -> {
             QMobileFormatterConstants.timeFormat[format]?.let {
@@ -84,8 +86,12 @@ fun applyFormat(format: String, baseText: String): String {
             "$" + DecimalFormat("0.00").format(baseText.toDouble())
         }
         "percent" -> {
-            ((DecimalFormat("0.00").format(baseText.toDouble())
-                .toDouble()) * INT_100).toString() + "%"
+            (
+                (
+                    DecimalFormat("0.00").format(baseText.toDouble())
+                        .toDouble()
+                    ) * INT_100
+                ).toString() + "%"
         }
         "ordinal" -> {
             DecimalFormat("0.00").format(baseText.toDouble()) + "th"
