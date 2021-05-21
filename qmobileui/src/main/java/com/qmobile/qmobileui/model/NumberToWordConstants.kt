@@ -7,11 +7,11 @@
 package com.qmobile.qmobileui.model
 
 internal object NumberToWordConstants {
-    val tensNames = listOf<String>(
+    val tensNames: List<String> = listOf(
         "", " ten", " twenty", " thirty", " forty",
         " fifty", " sixty", " seventy", " eighty", " ninety"
     )
-    val numNames = listOf<String>(
+    val numNames: List<String> = listOf(
         "", " one", " two", " three", " four", " five",
         " six", " seven", " eight", " nine", " ten", " eleven", " twelve", " thirteen",
         " fourteen", " fifteen", " sixteen", " seventeen", " eighteen", " nineteen"

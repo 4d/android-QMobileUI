@@ -21,14 +21,11 @@ object QMobileUiConstants { // Compiled at stack-level
     const val INT_12: Int = 12
     const val INT_3600 = 3600
     const val INT_60: Int = 60
-    const val INT_2: Int = 2
-    const val INT_0: Int = 0
 
     object Language {
         const val LANGUAGE_ID = Device.ID
         const val LANGUAGE_CODE = "code"
         const val LANGUAGE_REGION = "region"
-        const val LAYOUT = "layout"
     }
 
     object Prefix {

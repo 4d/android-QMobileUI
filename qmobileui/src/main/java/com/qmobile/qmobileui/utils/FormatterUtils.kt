@@ -51,7 +51,6 @@ fun applyFormat(format: String, baseText: String): String {
                 val timeFromString = getTimeFromString(baseText).time
                 val df = DateFormat.getTimeInstance(it, Locale.getDefault())
                 val time = df.format(timeFromString)
-//                time.substring(INT_0, time.length - INT_2)
                 time.removeSuffix("AM").removeSuffix("PM")
             } ?: ""
         }

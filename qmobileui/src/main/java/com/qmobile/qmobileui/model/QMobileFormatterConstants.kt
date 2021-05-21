@@ -9,14 +9,14 @@ package com.qmobile.qmobileui.model
 import java.text.DateFormat
 
 object QMobileFormatterConstants {
-    val dateFormat: HashMap<String, Int> = hashMapOf(
+    val dateFormat: Map<String, Int> = mapOf(
         "shortDate" to DateFormat.SHORT,
-        Pair("mediumDate", DateFormat.MEDIUM),
+        "mediumDate" to DateFormat.MEDIUM,
         "longDate" to DateFormat.LONG,
         "fullDate" to DateFormat.FULL
     )
 
-    val timeFormat = hashMapOf<String, Int>(
+    val timeFormat: Map<String, Int> = mapOf(
         "shortTime" to DateFormat.SHORT,
         "mediumTime" to DateFormat.MEDIUM,
         "duration" to DateFormat.MEDIUM,

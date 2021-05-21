@@ -13,12 +13,19 @@ import java.util.Date
 
 @SuppressLint("SimpleDateFormat")
 fun getTimeFromString(time: String): Calendar = Calendar.getInstance().apply {
-    setTime(SimpleDateFormat("hh:mm:ss").parse(getTimeFromLong(time.toLong()))!!)
+    val longTime: String = getTimeFromLong(time.toLong())
+    val dateFormat = SimpleDateFormat("hh:mm:ss")
+    dateFormat.parse(longTime)?.let { date ->
+        setTime(date)
+    }
 }
 
 @SuppressLint("SimpleDateFormat")
 fun getDateFromString(date: String): Calendar = Calendar.getInstance().apply {
-    time = SimpleDateFormat("dd!MM!yyyy").parse(date)!!
+    val dateFormat = SimpleDateFormat("dd!MM!yyyy")
+    dateFormat.parse(date)?.let { date ->
+        time = date
+    }
 }
 
 @SuppressLint("SimpleDateFormat")
