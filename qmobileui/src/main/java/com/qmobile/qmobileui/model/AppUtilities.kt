@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.model
 
+import com.qmobile.qmobileui.utils.FieldMapping
 import org.json.JSONObject
 
 data class AppUtilities(
@@ -19,5 +20,5 @@ data class AppUtilities(
     var logLevel: Int,
     var dumpedTables: String,
     var relationAvailable: Boolean = true,
-    var customFormatterJson: JSONObject
+    var customFormatters: Map<String, Map<String, FieldMapping>> // Map<TableName, Map<FieldName, FieldMapping>>
 )

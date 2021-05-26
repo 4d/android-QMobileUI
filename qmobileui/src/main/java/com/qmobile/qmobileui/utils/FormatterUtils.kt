@@ -17,6 +17,7 @@ import java.text.DateFormat
 import java.text.DecimalFormat
 import java.util.Locale
 
+@Suppress("LongMethod", "ComplexMethod")
 fun applyFormat(format: String, baseText: String): String {
     return when (format) {
         "noOrYes" -> {

@@ -14,18 +14,18 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
+import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
-import com.qmobile.qmobileapi.utils.getSafeObject
-import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.applyFormat
+import com.qmobile.qmobileui.utils.getChoiceListString
 import timber.log.Timber
 import java.io.File
 
@@ -102,13 +102,19 @@ fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Ur
     return null
 }
 
-@BindingAdapter(value = ["text", "format", "tableName", "fieldName"], requireAll = false)
+@Suppress("ReturnCount", "NestedBlockDepth", "LongParameterList")
+@BindingAdapter(
+    value = ["text", "format", "tableName", "fieldName", "imageWidth", "imageHeight"],
+    requireAll = false
+)
 fun applyFormatter(
     view: TextView,
     text: String?,
     format: String?,
     tableName: String?,
-    fieldName: String?
+    fieldName: String?,
+    imageWidth: Int?,
+    imageHeight: Int?
 ) {
     if (text.isNullOrEmpty())
         return
@@ -118,28 +124,27 @@ fun applyFormatter(
             return
         } else {
             if (tableName != null && fieldName != null) {
-                QMobileUiUtil.appUtilities.customFormatterJson.getSafeObject(tableName)
-                    ?.getSafeObject(fieldName)?.let { fieldFormatter ->
-                        val formatChoiceMap =
-                            fieldFormatter.getSafeObject("formatchoice")?.getSafeObject("map")
 
-                        if (fieldFormatter.getSafeString("binding") == "imageNamed") {
-                            formatChoiceMap?.getSafeString(text)?.let { drawableName ->
+                QMobileUiUtil.appUtilities.customFormatters[tableName]?.get(fieldName)
+                    ?.let { fieldMapping ->
 
-                                fieldFormatter.getSafeString("formatType")?.let { formatName ->
+                        if (fieldMapping.binding == "imageNamed") {
+
+                            getChoiceListString(fieldMapping, text)?.let { drawableName ->
+
+                                fieldMapping.formatType?.let { formatName ->
                                     BaseApp.fragmentUtil.getDrawableForFormatter(
                                         formatName,
                                         drawableName
-                                    )?.let { drawable ->
-                                        view.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0)
-                                        // todo : use Glide
+                                    )?.let { drawableRes ->
+                                        view.setFormatterDrawable(drawableRes, imageWidth, imageHeight)
                                         return
                                     }
                                 }
                             }
                         } else {
-                            val mapResult = formatChoiceMap?.getSafeString(text)
-                            view.text = if (mapResult.isNullOrBlank()) text else mapResult
+                            val formattedValue: String? = getChoiceListString(fieldMapping, text)
+                            view.text = if (formattedValue.isNullOrEmpty()) text else formattedValue
                             return
                         }
                     }
@@ -148,6 +153,17 @@ fun applyFormatter(
     }
     view.text = text
     return
+}
+
+fun TextView.setFormatterDrawable(drawableRes: Int, imageWidth: Int?, imageHeight: Int?) {
+    if (imageWidth == null || imageHeight == null || imageWidth == 0 || imageHeight == 0) {
+        this.setCompoundDrawablesWithIntrinsicBounds(drawableRes, 0, 0, 0)
+    } else {
+        ContextCompat.getDrawable(this.context.applicationContext, drawableRes)?.let { drawable ->
+            drawable.setBounds(0, 0, imageWidth, imageHeight)
+            this.setCompoundDrawables(drawable, null, null, null)
+        }
+    }
 }
 
 /**
