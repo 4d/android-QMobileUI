@@ -25,7 +25,9 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.applyFormat
+import com.qmobile.qmobileui.utils.fieldAdjustment
 import com.qmobile.qmobileui.utils.getChoiceListString
+import com.qmobile.qmobileui.utils.tableNameAdjustment
 import timber.log.Timber
 import java.io.File
 
@@ -125,7 +127,9 @@ fun applyFormatter(
         } else {
             if (tableName != null && fieldName != null) {
 
-                QMobileUiUtil.appUtilities.customFormatters[tableName]?.get(fieldName)
+                QMobileUiUtil.appUtilities.customFormatters[tableName.tableNameAdjustment()]?.get(
+                    fieldName.fieldAdjustment()
+                )
                     ?.let { fieldMapping ->
 
                         when (fieldMapping.binding) {
@@ -137,14 +141,20 @@ fun applyFormatter(
                                             formatName,
                                             drawableName
                                         )?.let { drawableRes ->
-                                            view.setFormatterDrawable(drawableRes, imageWidth, imageHeight)
+                                            view.setFormatterDrawable(
+                                                drawableRes,
+                                                imageWidth,
+                                                imageHeight
+                                            )
                                         }
                                     }
                                 }
                             }
                             "localizedText" -> {
-                                val formattedValue: String? = getChoiceListString(fieldMapping, text)
-                                view.text = if (formattedValue.isNullOrEmpty()) text else formattedValue
+                                val formattedValue: String? =
+                                    getChoiceListString(fieldMapping, text)
+                                view.text =
+                                    if (formattedValue.isNullOrEmpty()) text else formattedValue
                             }
                             else -> {
                                 view.text = text

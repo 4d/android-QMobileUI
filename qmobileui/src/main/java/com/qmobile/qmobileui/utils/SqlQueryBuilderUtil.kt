@@ -18,27 +18,43 @@ class SqlQueryBuilderUtil(
     fun getAll() = SimpleSQLiteQuery("SELECT * FROM $tableName")
 
     fun sortQuery(dataToSort: String): SimpleSQLiteQuery {
-        val stringBuffer = StringBuffer("SELECT * FROM $tableName WHERE  ")
+        val stringBuffer = StringBuffer("SELECT * FROM $tableName WHERE ")
         if (searchField.has(tableName)) {
             conditionAdder(searchField.getJSONArray(tableName), stringBuffer, dataToSort)
         }
-        return SimpleSQLiteQuery(stringBuffer.toString())
+        return SimpleSQLiteQuery(stringBuffer.toString().removeSuffix("OR "))
     }
 
+    @Suppress("NestedBlockDepth")
     private fun conditionAdder(
         columnsToFilter: JSONArray,
         stringBuffer: StringBuffer,
         dataToSort: String
     ) {
         (0 until columnsToFilter.length()).forEach {
-            when {
-                (columnsToFilter.length() == 1) ->
-                    stringBuffer.append(" `${columnsToFilter[it]}` LIKE  \'%$dataToSort%\' ")
-                (it == (columnsToFilter.length() - 1)) ->
-                    stringBuffer.append(" `${columnsToFilter[it]}` LIKE  \'%$dataToSort%\' ")
-                else ->
-                    stringBuffer.append(" `${columnsToFilter[it]}` LIKE  \'%$dataToSort%\'  OR ")
-            }
+            val field = columnsToFilter[it]
+            stringBuffer.append("`$field` LIKE \'%$dataToSort%\' OR ")
+            QMobileUiUtil.appUtilities.customFormatters[tableName]?.get(field)
+                ?.let { fieldMapping ->
+                    if (fieldMapping.binding == "localizedText") {
+                        when (fieldMapping.choiceList) {
+                            is Map<*, *> -> {
+                                for ((key, value) in fieldMapping.choiceList) {
+                                    if ((value as? String?)?.containsIgnoreCase(dataToSort) == true) {
+                                        stringBuffer.append("`$field` == \'$key\' OR ")
+                                    }
+                                }
+                            }
+                            is List<*> -> {
+                                for ((i, value) in fieldMapping.choiceList.withIndex()) {
+                                    if ((value as? String?)?.containsIgnoreCase(dataToSort) == true) {
+                                        stringBuffer.append("`$field` == \'$i\' OR ")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
         }
     }
 }

@@ -24,6 +24,7 @@ data class FieldMapping(
     val imageHeight: Int?
 )
 
+@Suppress("NestedBlockDepth")
 fun buildCustomFormatterBinding(customFormatters: JSONObject?): Map<String, Map<String, FieldMapping>> {
     val tableMap: MutableMap<String, Map<String, FieldMapping>> = mutableMapOf()
 
@@ -58,13 +59,9 @@ fun getFieldMapping(fieldMappingJsonObject: JSONObject): FieldMapping = FieldMap
             .getStringList(), // choiceList can be a JSONObject or a JSONArray
     isSearchable = fieldMappingJsonObject.getSafeBoolean("isSearchable"),
     name = fieldMappingJsonObject.getSafeString("name"),
-    imageWidth = getSize(fieldMappingJsonObject, "width"),
-    imageHeight = getSize(fieldMappingJsonObject, "height")
+    imageWidth = fieldMappingJsonObject.getSafeInt("imageWidth"),
+    imageHeight = fieldMappingJsonObject.getSafeInt("imageHeight")
 )
-
-fun getSize(fieldMappingJsonObject: JSONObject, type: String): Int? =
-    fieldMappingJsonObject.getSafeObject("assets")?.getSafeObject("size")?.getSafeInt(type)
-        ?: fieldMappingJsonObject.getSafeObject("assets")?.getSafeInt("size")
 
 fun getChoiceListString(fieldMapping: FieldMapping, text: String): String? {
     return when (fieldMapping.choiceList) {
