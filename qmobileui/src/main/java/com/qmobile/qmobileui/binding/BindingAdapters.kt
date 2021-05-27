@@ -128,25 +128,29 @@ fun applyFormatter(
                 QMobileUiUtil.appUtilities.customFormatters[tableName]?.get(fieldName)
                     ?.let { fieldMapping ->
 
-                        if (fieldMapping.binding == "imageNamed") {
+                        when (fieldMapping.binding) {
+                            "imageNamed" -> {
+                                getChoiceListString(fieldMapping, text)?.let { drawableName ->
 
-                            getChoiceListString(fieldMapping, text)?.let { drawableName ->
-
-                                fieldMapping.name?.let { formatName ->
-                                    BaseApp.fragmentUtil.getDrawableForFormatter(
-                                        formatName,
-                                        drawableName
-                                    )?.let { drawableRes ->
-                                        view.setFormatterDrawable(drawableRes, imageWidth, imageHeight)
-                                        return
+                                    fieldMapping.name?.let { formatName ->
+                                        BaseApp.fragmentUtil.getDrawableForFormatter(
+                                            formatName,
+                                            drawableName
+                                        )?.let { drawableRes ->
+                                            view.setFormatterDrawable(drawableRes, imageWidth, imageHeight)
+                                        }
                                     }
                                 }
                             }
-                        } else {
-                            val formattedValue: String? = getChoiceListString(fieldMapping, text)
-                            view.text = if (formattedValue.isNullOrEmpty()) text else formattedValue
-                            return
+                            "localizedText" -> {
+                                val formattedValue: String? = getChoiceListString(fieldMapping, text)
+                                view.text = if (formattedValue.isNullOrEmpty()) text else formattedValue
+                            }
+                            else -> {
+                                view.text = text
+                            }
                         }
+                        return
                     }
             }
         }
