@@ -146,6 +146,7 @@ fun applyFormatter(
                                                 imageWidth,
                                                 imageHeight
                                             )
+                                            return
                                         }
                                     }
                                 }
@@ -155,11 +156,10 @@ fun applyFormatter(
                                     getChoiceListString(fieldMapping, text)
                                 view.text =
                                     if (formattedValue.isNullOrEmpty()) text else formattedValue
-                            }
-                            else -> {
-                                view.text = text
+                                return
                             }
                         }
+                        view.text = text
                         return
                     }
             }
