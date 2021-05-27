@@ -60,7 +60,7 @@ class SqlBuilderTest {
             sdkVersion = "12.5",
             logLevel = Log.DEBUG,
             dumpedTables = "",
-            customFormatterJson = JSONObject()
+            customFormatters = mapOf()
         )
         Assert.assertEquals(tableJson, QMobileUiUtil.appUtilities.searchField)
     }
