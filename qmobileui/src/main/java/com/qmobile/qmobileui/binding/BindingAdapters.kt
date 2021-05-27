@@ -132,7 +132,7 @@ fun applyFormatter(
 
                             getChoiceListString(fieldMapping, text)?.let { drawableName ->
 
-                                fieldMapping.formatType?.let { formatName ->
+                                fieldMapping.name?.let { formatName ->
                                     BaseApp.fragmentUtil.getDrawableForFormatter(
                                         formatName,
                                         drawableName

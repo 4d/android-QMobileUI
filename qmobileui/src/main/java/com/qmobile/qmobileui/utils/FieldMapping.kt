@@ -19,7 +19,7 @@ data class FieldMapping(
     val binding: String?,
     val choiceList: Any?, // choiceList can be a JSONObject or a JSONArray
     val isSearchable: Boolean?,
-    val formatType: String?,
+    val name: String?,
     val imageWidth: Int?,
     val imageHeight: Int?
 )
@@ -57,7 +57,7 @@ fun getFieldMapping(fieldMappingJsonObject: JSONObject): FieldMapping = FieldMap
         ?: fieldMappingJsonObject.getSafeArray("choiceList")
             .getStringList(), // choiceList can be a JSONObject or a JSONArray
     isSearchable = fieldMappingJsonObject.getSafeBoolean("isSearchable"),
-    formatType = fieldMappingJsonObject.getSafeString("formatType"),
+    name = fieldMappingJsonObject.getSafeString("name"),
     imageWidth = getSize(fieldMappingJsonObject, "width"),
     imageHeight = getSize(fieldMappingJsonObject, "height")
 )
