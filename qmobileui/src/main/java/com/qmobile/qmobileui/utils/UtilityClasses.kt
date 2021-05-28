@@ -11,7 +11,6 @@ import android.os.Build
 import android.util.Log
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
 import com.qmobile.qmobileapi.utils.getSafeBoolean
-import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getStringList
 import com.qmobile.qmobileui.model.AppUtilities
 import com.qmobile.qmobileui.model.DeviceUtility
@@ -52,26 +51,28 @@ internal open class FileUtilsUp(var context: Context) { // scope restricted to t
 internal class BridgeUtility(context: Context) :
     FileUtilsUp(context) { // scope restricted to this module
     fun getAppUtil(): AppUtilities {
-        val jsonObj = JSONObject(readContentFromFile("appinfo.json"))
+        val appInfoJsonObj = JSONObject(readContentFromFile("app_info.json"))
+        val customFormattersJsonObj = JSONObject(readContentFromFile("custom_formatters.json"))
+        val searchableFieldsJsonObj = JSONObject(readContentFromFile("searchable_fields.json"))
 
         val sdkVersion = readContentFromFile("sdkVersion")
 
         return AppUtilities(
-            initialGlobalStamp = jsonObj.getInt("initialGlobalStamp"),
-            guestLogin = jsonObj.getBoolean("guestLogin"),
-            remoteUrl = jsonObj.getString("remoteUrl"),
+            initialGlobalStamp = appInfoJsonObj.getInt("initialGlobalStamp"),
+            guestLogin = appInfoJsonObj.getBoolean("guestLogin"),
+            remoteUrl = appInfoJsonObj.getString("remoteUrl"),
             teams = JSONObject().apply {
-                val newTeam = jsonObj.getJSONObject("team")
+                val newTeam = appInfoJsonObj.getJSONObject("team")
                 this.put("id", newTeam.getString("TeamName"))
                 this.put("name", newTeam.getString("TeamID"))
             },
             queryJson = JSONObject(readContentFromFile("queries.json")),
-            searchField = jsonObj.getJSONObject("searchableField"),
+            searchField = searchableFieldsJsonObj,
             sdkVersion = sdkVersion,
-            logLevel = jsonObj.getInt("logLevel"),
-            dumpedTables = jsonObj.getJSONArray("dumpedTables").getStringList().joinToString(),
-            relationAvailable = jsonObj.getSafeBoolean("relations") ?: true,
-            customFormatters = buildCustomFormatterBinding(jsonObj.getSafeObject("customFormatters"))
+            logLevel = appInfoJsonObj.getInt("logLevel"),
+            dumpedTables = appInfoJsonObj.getJSONArray("dumpedTables").getStringList().joinToString(),
+            relationAvailable = appInfoJsonObj.getSafeBoolean("relations") ?: true,
+            customFormatters = buildCustomFormatterBinding(customFormattersJsonObj)
         )
     }
 }
