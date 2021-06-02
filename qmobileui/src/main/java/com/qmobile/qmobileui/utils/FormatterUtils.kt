@@ -111,6 +111,8 @@ fun applyFormat(format: String, baseText: String): String {
         "decimal" -> {
             DecimalFormat("0.000").format(baseText.toDouble())
         }
-        else -> ""
+        else -> {
+            baseText
+        }
     }
 }
