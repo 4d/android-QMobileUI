@@ -6,7 +6,11 @@
 
 package com.qmobile.qmobileui
 
+import com.qmobile.qmobileui.utils.FieldMapping
 import com.qmobile.qmobileui.utils.applyFormat
+import com.qmobile.qmobileui.utils.buildCustomFormatterBinding
+import com.qmobile.qmobileui.utils.getChoiceListString
+import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -101,6 +105,31 @@ class FormatterTest {
         numberFormatTest(number.toString(), "24.47€", "currencyEuro")
         numberFormatTest(number.toString(), "$24.47", "currencyDollar")
         numberFormatTest(number.toString(), "¥24.47", "currencyYen")
+    }
+
+    @Test
+    fun testCustomFormat() {
+        val customFormattersJsonObj = JSONObject(customFormattersJson)
+        val customFormatters: Map<String, Map<String, FieldMapping>> =
+            buildCustomFormatterBinding(customFormattersJsonObj)
+
+        var tableName = "Table_3"
+        var fieldName = "field_x"
+        customFormatters[tableName]?.get(fieldName)?.let { fieldMapping ->
+            Assert.assertEquals("localizedText", fieldMapping.binding)
+            Assert.assertEquals("UX designers", getChoiceListString(fieldMapping, "0"))
+            Assert.assertNull(getChoiceListString(fieldMapping, "AnyRandomText"))
+        } ?: kotlin.run { Assert.fail() }
+
+        tableName = "Table_1"
+        fieldName = "field_1"
+
+        customFormatters[tableName]?.get(fieldName)?.let { fieldMapping ->
+            Assert.assertEquals("imageNamed", fieldMapping.binding)
+            Assert.assertEquals("todo.png", getChoiceListString(fieldMapping, "abc"))
+            Assert.assertEquals("pending.png", getChoiceListString(fieldMapping, "2"))
+            Assert.assertNull(getChoiceListString(fieldMapping, "AnyRandomText"))
+        } ?: kotlin.run { Assert.fail() }
     }
 
     private fun dateFormatTest(inputDate: String, expectedResult: String, typeChoice: String) =
