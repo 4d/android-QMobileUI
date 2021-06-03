@@ -21,6 +21,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.google.android.material.chip.Chip
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
@@ -31,6 +32,7 @@ import com.qmobile.qmobileui.utils.getChoiceListString
 import com.qmobile.qmobileui.utils.tableNameAdjustment
 import timber.log.Timber
 import java.io.File
+import kotlin.math.roundToInt
 
 /**
  * Sample avatar list
@@ -185,6 +187,15 @@ fun TextView.setFormatterDrawable(drawableRes: Int, imageWidth: Int?, imageHeigh
                     this.setCompoundDrawables(drawable, null, null, null)
                 }
         }
+    }
+}
+
+@BindingAdapter("progress")
+fun bindCircularProgressIndicator(view: CircularProgressIndicator, progress: Any?) {
+    view.progress = when (progress) {
+        is Int -> progress
+        is Float -> progress.roundToInt()
+        else -> 0
     }
 }
 
