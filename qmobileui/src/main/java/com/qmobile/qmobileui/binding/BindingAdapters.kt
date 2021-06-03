@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
+import com.google.android.material.chip.Chip
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
@@ -170,12 +171,19 @@ fun applyFormatter(
 }
 
 fun TextView.setFormatterDrawable(drawableRes: Int, imageWidth: Int?, imageHeight: Int?) {
-    if (imageWidth == null || imageHeight == null || imageWidth == 0 || imageHeight == 0) {
-        this.setCompoundDrawablesWithIntrinsicBounds(drawableRes, 0, 0, 0)
-    } else {
+    if (this is Chip) {
         ContextCompat.getDrawable(this.context.applicationContext, drawableRes)?.let { drawable ->
-            drawable.setBounds(0, 0, imageWidth, imageHeight)
-            this.setCompoundDrawables(drawable, null, null, null)
+            this.chipIcon = drawable
+        }
+    } else {
+        if (imageWidth == null || imageHeight == null || imageWidth == 0 || imageHeight == 0) {
+            this.setCompoundDrawablesWithIntrinsicBounds(drawableRes, 0, 0, 0)
+        } else {
+            ContextCompat.getDrawable(this.context.applicationContext, drawableRes)
+                ?.let { drawable ->
+                    drawable.setBounds(0, 0, imageWidth, imageHeight)
+                    this.setCompoundDrawables(drawable, null, null, null)
+                }
         }
     }
 }
