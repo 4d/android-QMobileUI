@@ -12,84 +12,46 @@ import androidx.core.widget.TextViewCompat
 import com.google.android.material.chip.Chip
 import com.qmobile.qmobiledatasync.app.BaseApp
 
-@Suppress("ReturnCount", "NestedBlockDepth", "ComplexMethod", "LongMethod")
+@Suppress("ComplexMethod")
 fun TextView.setFormatterDrawable(
-    drawableResPair: Pair<Int, Int?>,
+    drawableResPair: Pair<Int, Int>,
     imageWidth: Int?,
     imageHeight: Int?,
     template: Boolean?
 ) {
     if (this is Chip) {
 
-        if (template == true) {
-            ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
-                ?.let { drawable ->
-                    this.chipIcon = drawable
-                    this.chipIconTint = this.textColors
-                    return
-                }
-        }
+        if (BaseApp.nightMode() && drawableResPair.second != 0)
+            this.chipIcon = ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.second)
+        else
+            this.chipIcon = ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
 
-        if (BaseApp.nightMode()) {
-            drawableResPair.second?.let { darkModeDrawableRes ->
-                ContextCompat.getDrawable(this.context.applicationContext, darkModeDrawableRes)
-                    ?.let { drawable ->
-                        this.chipIcon = drawable
-                        return
-                    }
-            }
-        }
-
-        ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
-            ?.let { drawable ->
-                this.chipIcon = drawable
-            }
+        if (template == true)
+            this.chipIconTint = this.textColors
     } else { // is TextView
 
         if (imageWidth == null || imageHeight == null || imageWidth == 0 || imageHeight == 0) {
 
-            if (template == true) {
+            if (BaseApp.nightMode() && drawableResPair.second != 0)
+                this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.second, 0, 0, 0)
+            else
                 this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.first, 0, 0, 0)
+
+            if (template == true)
                 TextViewCompat.setCompoundDrawableTintList(this, this.textColors)
-                return
-            }
-
-            if (BaseApp.nightMode()) {
-                drawableResPair.second?.let { darkModeDrawableRes ->
-                    this.setCompoundDrawablesWithIntrinsicBounds(darkModeDrawableRes, 0, 0, 0)
-                    return
-                }
-            }
-
-            this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.first, 0, 0, 0)
         } else {
 
-            if (template == true) {
+            val drawable = if (BaseApp.nightMode() && drawableResPair.second != 0)
+                ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.second)
+            else
                 ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
-                    ?.let { drawable ->
-                        drawable.setTint(this.currentTextColor)
-                        drawable.setBounds(0, 0, imageWidth, imageHeight)
-                        this.setCompoundDrawables(drawable, null, null, null)
-                        return
-                    }
-            }
 
-            if (BaseApp.nightMode()) {
-                drawableResPair.second?.let { darkModeDrawableRes ->
-                    ContextCompat.getDrawable(this.context.applicationContext, darkModeDrawableRes)
-                        ?.let { drawable ->
-                            drawable.setBounds(0, 0, imageWidth, imageHeight)
-                            this.setCompoundDrawables(drawable, null, null, null)
-                            return
-                        }
-                }
+            drawable?.let {
+                if (template == true)
+                    drawable.setTint(this.currentTextColor)
+                drawable.setBounds(0, 0, imageWidth, imageHeight)
+                this.setCompoundDrawables(drawable, null, null, null)
             }
-
-            ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
-                ?.let { drawable ->
-                    drawable.setBounds(0, 0, imageWidth, imageHeight)
-                    this.setCompoundDrawables(drawable, null, null, null)
-                }
         }
     }
 }
