@@ -35,7 +35,7 @@ private fun String.replaceSpecialChars(): String {
 }
 
 private fun String.lowerCustomProperties() =
-    if (this == "__KEY" || this == "__STAMP" || this == "__GlobalStamp" || this == "__TIMESTAMP")
+    if (this in arrayOf("__KEY", "__STAMP", "__GlobalStamp", "__TIMESTAMP"))
         this
     else if (this.startsWith("__") && this.endsWith("Key"))
         this.removeSuffix("Key").toLowerCase(Locale.getDefault()) + "Key"
@@ -58,17 +58,15 @@ private fun CharSequence.unaccent(): String {
     return REGEX_UNACCENT.replace(temp, "")
 }
 
-private const val prefixReservedKeywords = "qmobile"
-
 fun String.validateWord(): String {
     return this.split(".").joinToString(".") {
-        if (reservedKeywords.contains(it)) "${prefixReservedKeywords}_$it" else it
+        if (reservedKeywords.contains(it)) "qmobile_$it" else it
     }
 }
 
 fun String.validateWordDecapitalized(): String {
     return this.decapitalizeExceptID().split(".").joinToString(".") {
-        if (reservedKeywords.contains(it)) "${prefixReservedKeywords}_$it" else it
+        if (reservedKeywords.contains(it)) "qmobile_$it" else it
     }
 }
 

@@ -23,6 +23,7 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 
+@Suppress("TooManyFunctions")
 class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChangeListener {
 
     var position: Int = 0

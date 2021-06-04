@@ -279,7 +279,7 @@ class EntityListFragment : Fragment(), BaseFragment {
             searchPlate = searchView.findViewById(androidx.appcompat.R.id.search_src_text) as EditText
             searchPlate.hint = ""
             searchPlate.setBackgroundResource(R.drawable.searchview_rounded)
-            if (delegate.darkModeEnabled())
+            if (BaseApp.nightMode())
                 searchPlate.setTextColor(Color.WHITE)
             else
                 searchPlate.setTextColor(Color.BLACK)

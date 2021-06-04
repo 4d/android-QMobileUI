@@ -6,21 +6,15 @@
 
 package com.qmobile.qmobileui.binding
 
-import android.content.Context
 import android.net.Uri
-import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.AttrRes
-import androidx.annotation.ColorInt
-import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
-import com.google.android.material.chip.Chip
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
@@ -30,26 +24,7 @@ import com.qmobile.qmobileui.utils.applyFormat
 import com.qmobile.qmobileui.utils.fieldAdjustment
 import com.qmobile.qmobileui.utils.getChoiceListString
 import com.qmobile.qmobileui.utils.tableNameAdjustment
-import timber.log.Timber
-import java.io.File
 import kotlin.math.roundToInt
-
-/**
- * Sample avatar list
- */
-private val listOfAvatars = listOf(
-    R.drawable.avatar_1_raster,
-    R.drawable.avatar_2_raster,
-    R.drawable.avatar_3_raster,
-    R.drawable.avatar_4_raster,
-    R.drawable.avatar_5_raster,
-    R.drawable.avatar_6_raster
-)
-
-/**
- * Provides one random avatar from the sample avatar list
- */
-private fun randomAvatar(): Int = listOfAvatars.random()
 
 /**
  * Use Glide to load image url in a view
@@ -70,7 +45,7 @@ fun bindImageFromUrl(
     val factory =
         DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
 
-    val imageFromAssetUri: Uri? = tryImageFromAssets(tableName, key, fieldName)
+    val imageFromAssetUri: Uri? = ImageHelper.tryImageFromAssets(tableName, key, fieldName)
 
     val glideRequest = Glide.with(view.context.applicationContext)
         .load(
@@ -92,19 +67,6 @@ fun bindImageFromUrl(
     }
 
     glideRequest.into(view)
-}
-
-fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Uri? {
-    BaseApp.embeddedFiles.find { it.contains(tableName + File.separator + "$tableName($key)_${fieldName}_") }
-        ?.let { path ->
-            Timber.d("file = $path")
-            return try {
-                Uri.parse("file:///android_asset/$path")
-            } catch (e: NullPointerException) {
-                null
-            }
-        }
-    return null
 }
 
 @Suppress("ReturnCount", "NestedBlockDepth", "LongParameterList")
@@ -143,11 +105,12 @@ fun applyFormatter(
                                         BaseApp.fragmentUtil.getDrawableForFormatter(
                                             formatName,
                                             drawableName
-                                        )?.let { drawableRes ->
+                                        )?.let { drawableResPair ->
                                             view.setFormatterDrawable(
-                                                drawableRes,
+                                                drawableResPair,
                                                 imageWidth,
-                                                imageHeight
+                                                imageHeight,
+                                                fieldMapping.template
                                             )
                                             return
                                         }
@@ -170,24 +133,6 @@ fun applyFormatter(
     }
     view.text = text
     return
-}
-
-fun TextView.setFormatterDrawable(drawableRes: Int, imageWidth: Int?, imageHeight: Int?) {
-    if (this is Chip) {
-        ContextCompat.getDrawable(this.context.applicationContext, drawableRes)?.let { drawable ->
-            this.chipIcon = drawable
-        }
-    } else {
-        if (imageWidth == null || imageHeight == null || imageWidth == 0 || imageHeight == 0) {
-            this.setCompoundDrawablesWithIntrinsicBounds(drawableRes, 0, 0, 0)
-        } else {
-            ContextCompat.getDrawable(this.context.applicationContext, drawableRes)
-                ?.let { drawable ->
-                    drawable.setBounds(0, 0, imageWidth, imageHeight)
-                    this.setCompoundDrawables(drawable, null, null, null)
-                }
-        }
-    }
 }
 
 @BindingAdapter("progress")
@@ -226,14 +171,4 @@ fun showHide(view: View, show: Boolean) {
 @BindingAdapter("concatStringRatio_1", "concatStringRatio_2")
 fun concatStringRatio(view: TextView, str1: String? = "0", str2: String? = "0") {
     view.text = "$str1/$str2"
-}
-
-@ColorInt
-fun Context.getColorFromAttr(
-    @AttrRes attrColor: Int,
-    typedValue: TypedValue = TypedValue(),
-    resolveRefs: Boolean = true
-): Int {
-    theme.resolveAttribute(attrColor, typedValue, resolveRefs)
-    return typedValue.data
 }

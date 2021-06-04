@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.activity.mainactivity
 
 import android.content.Context
-import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
@@ -20,7 +19,6 @@ import androidx.navigation.NavController
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.LoginRequiredCallback
-import com.qmobile.qmobileapi.connectivity.isConnected
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiClient
@@ -207,14 +205,5 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      */
     override fun requestDataSync(alreadyRefreshedTable: String?) {
         prepareDataSync(alreadyRefreshedTable)
-    }
-
-    override fun darkModeEnabled(): Boolean {
-        return when (resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
-            Configuration.UI_MODE_NIGHT_YES -> true
-            Configuration.UI_MODE_NIGHT_NO -> false
-            Configuration.UI_MODE_NIGHT_UNDEFINED -> false
-            else -> false
-        }
     }
 }
