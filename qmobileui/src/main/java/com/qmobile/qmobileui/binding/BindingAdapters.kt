@@ -110,7 +110,7 @@ fun applyFormatter(
                                                 drawableResPair,
                                                 imageWidth,
                                                 imageHeight,
-                                                fieldMapping.template
+                                                fieldMapping.tintable
                                             )
                                             return
                                         }

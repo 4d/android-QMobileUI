@@ -22,7 +22,7 @@ data class FieldMapping(
     val name: String?,
     val imageWidth: Int?, // currently not used, reading the one from layout
     val imageHeight: Int?, // currently not used, reading the one from layout
-    val template: Boolean?
+    val tintable: Boolean?
 )
 
 @Suppress("NestedBlockDepth")
@@ -62,7 +62,7 @@ fun getFieldMapping(fieldMappingJsonObject: JSONObject): FieldMapping = FieldMap
     name = fieldMappingJsonObject.getSafeString("name"),
     imageWidth = fieldMappingJsonObject.getSafeInt("imageWidth"), // currently not used, reading the one from layout
     imageHeight = fieldMappingJsonObject.getSafeInt("imageHeight"), // currently not used, reading the one from layout
-    template = fieldMappingJsonObject.getSafeBoolean("template")
+    tintable = fieldMappingJsonObject.getSafeBoolean("tintable")
 )
 
 fun getChoiceListString(fieldMapping: FieldMapping, text: String): String? {

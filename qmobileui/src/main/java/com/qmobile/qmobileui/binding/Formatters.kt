@@ -17,7 +17,7 @@ fun TextView.setFormatterDrawable(
     drawableResPair: Pair<Int, Int>,
     imageWidth: Int?,
     imageHeight: Int?,
-    template: Boolean?
+    tintable: Boolean?
 ) {
     if (this is Chip) {
 
@@ -26,7 +26,7 @@ fun TextView.setFormatterDrawable(
         else
             this.chipIcon = ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
 
-        if (template == true)
+        if (tintable == true)
             this.chipIconTint = this.textColors
     } else { // is TextView
 
@@ -37,7 +37,7 @@ fun TextView.setFormatterDrawable(
             else
                 this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.first, 0, 0, 0)
 
-            if (template == true)
+            if (tintable == true)
                 TextViewCompat.setCompoundDrawableTintList(this, this.textColors)
         } else {
 
@@ -47,7 +47,7 @@ fun TextView.setFormatterDrawable(
                 ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
 
             drawable?.let {
-                if (template == true)
+                if (tintable == true)
                     drawable.setTint(this.currentTextColor)
                 drawable.setBounds(0, 0, imageWidth, imageHeight)
                 this.setCompoundDrawables(drawable, null, null, null)
