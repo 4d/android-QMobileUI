@@ -7,9 +7,12 @@
 package com.qmobile.qmobileui.binding
 
 import android.net.Uri
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -18,6 +21,9 @@ import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.binding.ImageHelper.drawableSpace
+import com.qmobile.qmobileui.binding.ImageHelper.drawableStartHeight
+import com.qmobile.qmobileui.binding.ImageHelper.drawableStartWidth
 import com.qmobile.qmobileui.glide.CustomRequestListener
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.applyFormat
@@ -141,6 +147,26 @@ fun bindCircularProgressIndicator(view: CircularProgressIndicator, progress: Any
         is Int -> progress
         is Float -> progress.roundToInt()
         else -> 0
+    }
+}
+
+@BindingAdapter("icon")
+fun bindFieldLabelIcon(view: TextView, icon: String?) {
+    if (view.text.isNullOrEmpty())
+        return
+    if (icon.isNullOrEmpty())
+        return
+
+    val resId = view.resources.getIdentifier(icon, "drawable", view.context.packageName)
+    if (resId > 0) {
+        ContextCompat.getDrawable(view.context.applicationContext, resId)?.let { drawable ->
+            drawable.setTint(view.currentTextColor)
+            drawable.setBounds(0, 0, drawableStartWidth.px, drawableStartHeight.px)
+            view.gravity = Gravity.CENTER_VERTICAL
+            view.compoundDrawablePadding = drawableSpace.px
+            (view.layoutParams as? ViewGroup.MarginLayoutParams)?.bottomMargin = drawableSpace.px
+            view.setCompoundDrawables(drawable, null, null, null)
+        }
     }
 }
 

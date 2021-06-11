@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.binding
 
 import android.content.Context
+import android.content.res.Resources
 import android.net.Uri
 import android.util.TypedValue
 import androidx.annotation.AttrRes
@@ -17,6 +18,10 @@ import timber.log.Timber
 import java.io.File
 
 object ImageHelper {
+
+    const val drawableStartWidth = 24
+    const val drawableStartHeight = 24
+    const val drawableSpace = 8
 
     /**
      * Sample avatar list
@@ -39,11 +44,7 @@ object ImageHelper {
         BaseApp.embeddedFiles.find { it.contains(tableName + File.separator + "$tableName($key)_${fieldName}_") }
             ?.let { path ->
                 Timber.d("file = $path")
-                return try {
-                    Uri.parse("file:///android_asset/$path")
-                } catch (e: NullPointerException) {
-                    null
-                }
+                return Uri.parse("file:///android_asset/$path")
             }
         return null
     }
@@ -58,3 +59,8 @@ fun Context.getColorFromAttr(
     theme.resolveAttribute(attrColor, typedValue, resolveRefs)
     return typedValue.data
 }
+
+val Int.dp: Int
+    get() = (this / Resources.getSystem().displayMetrics.density).toInt()
+val Int.px: Int
+    get() = (this * Resources.getSystem().displayMetrics.density).toInt()
