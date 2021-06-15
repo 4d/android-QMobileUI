@@ -118,7 +118,6 @@ fun applyFormatter(
                                                 imageHeight,
                                                 fieldMapping.tintable
                                             )
-                                            return
                                         }
                                     }
                                 }
@@ -128,12 +127,13 @@ fun applyFormatter(
                                     getChoiceListString(fieldMapping, text)
                                 view.text =
                                     if (formattedValue.isNullOrEmpty()) text else formattedValue
-                                return
                             }
+                            else -> view.text = ""
                         }
-                        view.text = text
                         return
                     }
+                view.text = ""
+                return
             }
         }
     }
