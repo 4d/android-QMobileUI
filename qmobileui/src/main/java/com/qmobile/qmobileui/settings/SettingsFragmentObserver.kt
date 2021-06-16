@@ -8,7 +8,6 @@ package com.qmobile.qmobileui.settings
 
 import androidx.lifecycle.Observer
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
-import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 
@@ -27,15 +26,13 @@ fun SettingsFragment.setupObservers() {
 
 // Observe network status
 fun SettingsFragment.observeNetworkStatus() {
-    if (sdkNewerThanKitKat) {
-        connectivityViewModel.networkStateMonitor.observe(
-            viewLifecycleOwner,
-            Observer { networkState ->
-                if (firstTime || !firstTime && networkState == NetworkStateEnum.CONNECTED) {
-                    firstTime = false
-                    checkNetwork()
-                }
+    connectivityViewModel.networkStateMonitor.observe(
+        viewLifecycleOwner,
+        Observer { networkState ->
+            if (firstTime || !firstTime && networkState == NetworkStateEnum.CONNECTED) {
+                firstTime = false
+                checkNetwork()
             }
-        )
-    }
+        }
+    )
 }

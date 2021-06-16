@@ -18,8 +18,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.appcompat.widget.SearchView
-import androidx.databinding.DataBindingUtil
-import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
@@ -37,11 +35,11 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 import com.qmobile.qmobileui.utils.hideKeyboard
-import kotlinx.android.synthetic.main.fragment_list.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -73,11 +71,15 @@ class EntityListFragment : Fragment(), BaseFragment {
     lateinit var loginViewModel: LoginViewModel
     lateinit var entityListViewModel: EntityListViewModel<EntityModel>
 
+    private var _binding: FragmentListBinding? = null
+    // This property is only valid between onCreateView and onDestroyView.
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         arguments?.getString("tableName")?.let { tableName = it }
         sqlQueryBuilderUtil = SqlQueryBuilderUtil(tableName)
 
@@ -87,16 +89,12 @@ class EntityListFragment : Fragment(), BaseFragment {
         if (hasSearch()) this.setHasOptionsMenu(true)
         getViewModel()
 
-        val dataBinding: ViewDataBinding = DataBindingUtil.inflate<ViewDataBinding>(
-            inflater,
-            R.layout.fragment_list,
-            container,
-            false
-        ).apply {
-            BaseApp.fragmentUtil.setEntityListViewModel(this, entityListViewModel)
+        _binding = FragmentListBinding.inflate(inflater, container, false).apply {
+            viewModel = entityListViewModel
             lifecycleOwner = viewLifecycleOwner
         }
-        return dataBinding.root
+
+        return binding.root
     }
 
     private fun hasSearch() = searchableFields.has(tableName)
@@ -125,7 +123,8 @@ class EntityListFragment : Fragment(), BaseFragment {
     }
 
     override fun onDestroyView() {
-        fragment_list_recycler_view.adapter = null
+        binding.fragmentListRecyclerView.adapter = null
+        _binding = null
         super.onDestroyView()
     }
 
@@ -141,10 +140,10 @@ class EntityListFragment : Fragment(), BaseFragment {
             }
         )
 
-        fragment_list_recycler_view.layoutManager =
+        binding.fragmentListRecyclerView.layoutManager =
             when (BaseApp.fragmentUtil.layoutType(tableName)) {
                 "GRID" -> {
-                    fragment_list_recycler_view.addItemDecoration(
+                    binding.fragmentListRecyclerView.addItemDecoration(
                         ItemDecorationSimpleCollection(
                             resources.getDimensionPixelSize(
                                 R.dimen.simple_collection_spacing
@@ -155,7 +154,7 @@ class EntityListFragment : Fragment(), BaseFragment {
                     GridLayoutManager(activity, 2, GridLayoutManager.VERTICAL, false)
                 }
                 else -> {
-                    fragment_list_recycler_view.addItemDecoration(
+                    binding.fragmentListRecyclerView.addItemDecoration(
                         DividerItemDecoration(
                             activity,
                             RecyclerView.VERTICAL
@@ -165,17 +164,17 @@ class EntityListFragment : Fragment(), BaseFragment {
                 }
             }
 
-        fragment_list_recycler_view.adapter = adapter
+        binding.fragmentListRecyclerView.adapter = adapter
     }
 
     /**
      * Initialize Pull to refresh
      */
     private fun initOnRefreshListener() {
-        fragment_list_swipe_to_refresh.setOnRefreshListener {
+        binding.fragmentListSwipeToRefresh.setOnRefreshListener {
             forceSyncData()
-            fragment_list_recycler_view.adapter = adapter
-            fragment_list_swipe_to_refresh.isRefreshing = false
+            binding.fragmentListRecyclerView.adapter = adapter
+            binding.fragmentListSwipeToRefresh.isRefreshing = false
         }
     }
 

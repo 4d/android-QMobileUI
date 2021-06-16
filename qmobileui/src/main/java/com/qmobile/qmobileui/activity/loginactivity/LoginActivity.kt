@@ -37,7 +37,6 @@ import com.qmobile.qmobileui.databinding.ActivityLoginBinding
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.hideKeyboard
-import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : BaseActivity() {
 
@@ -45,6 +44,8 @@ class LoginActivity : BaseActivity() {
     lateinit var connectivityManager: ConnectivityManager
     lateinit var loginApiService: LoginApiService
     lateinit var accessibilityApiService: AccessibilityApiService
+
+    lateinit var binding: ActivityLoginBinding
 
     // ViewModels
     lateinit var loginViewModel: LoginViewModel
@@ -78,7 +79,7 @@ class LoginActivity : BaseActivity() {
                 logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
             )
 
-            val binding: ActivityLoginBinding =
+            binding =
                 DataBindingUtil.setContentView(this, R.layout.activity_login)
             binding.lifecycleOwner = this
 
@@ -93,17 +94,17 @@ class LoginActivity : BaseActivity() {
      */
     private fun initLayout() {
 
-        bindImageFromDrawable(login_logo, BaseApp.loginLogoDrawable)
+        bindImageFromDrawable(binding.loginLogo, BaseApp.loginLogoDrawable)
 
         if (loggedOut) {
             ToastHelper.show(this, resources.getString(R.string.login_logged_out), MessageType.SUCCESS)
         }
 
         // Login button
-        login_button_auth.setOnClickListener {
+        binding.loginButtonAuth.setOnClickListener {
             if (connectivityViewModel.isConnected()) {
-                login_button_auth.isEnabled = false
-                loginViewModel.login(email = login_email_input.text.toString()) { }
+                binding.loginButtonAuth.isEnabled = false
+                loginViewModel.login(email = binding.loginEmailInput.text.toString()) { }
             } else {
                 ToastHelper.show(this, resources.getString(R.string.no_internet), MessageType.WARNING)
             }
@@ -112,22 +113,22 @@ class LoginActivity : BaseActivity() {
         // Define a shake animation for when mail is not valid
         val shakeAnimation = AnimationUtils.loadAnimation(this, R.anim.shake)
 
-        login_email_input.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+        binding.loginEmailInput.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                if (login_email_input.text.toString().isEmailValid()) {
+                if (binding.loginEmailInput.text.toString().isEmailValid()) {
                     loginViewModel.emailValid.postValue(true)
-                    login_email_container.error = null
+                    binding.loginEmailContainer.error = null
                 } else {
-                    login_email_input.startAnimation(shakeAnimation)
-                    login_email_container.error = resources.getString(R.string.login_invalid_email)
+                    binding.loginEmailInput.startAnimation(shakeAnimation)
+                    binding.loginEmailContainer.error = resources.getString(R.string.login_invalid_email)
                     loginViewModel.emailValid.postValue(false)
                 }
             } else {
-                login_email_container.error = null
+                binding.loginEmailContainer.error = null
             }
         }
 
-        login_email_input.setOnEditorActionListener { textView, actionId, keyEvent ->
+        binding.loginEmailInput.setOnEditorActionListener { textView, actionId, keyEvent ->
             if ((keyEvent != null && (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER)) ||
                 (actionId == EditorInfo.IME_ACTION_DONE)
             ) {

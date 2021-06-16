@@ -7,13 +7,12 @@
 package com.qmobile.qmobileui.utils
 
 import java.text.Normalizer
-import java.util.Locale
 
 fun String.containsIgnoreCase(str: String): Boolean =
-    this.toLowerCase(Locale.getDefault()).contains(str.toLowerCase(Locale.getDefault()))
+    this.lowercase().contains(str.lowercase())
 
 fun String.tableNameAdjustment() =
-    this.condense().capitalize(Locale.getDefault()).replaceSpecialChars().firstCharForTable()
+    this.condense().replaceFirstChar { it.uppercaseChar() }.replaceSpecialChars().firstCharForTable()
         .validateWord()
 
 fun String.fieldAdjustment() =
@@ -22,7 +21,7 @@ fun String.fieldAdjustment() =
 fun String.dataBindingAdjustment(): String =
     this.condense().replaceSpecialChars().firstCharForTable()
         .split("_")
-        .joinToString("") { it.toLowerCase(Locale.getDefault()).capitalize(Locale.getDefault()) }
+        .joinToString("") { it.lowercase().replaceFirstChar { firstChar -> firstChar.uppercaseChar() } }
 
 private fun String.condense() = this.replace("\\s".toRegex(), "")
 
@@ -38,12 +37,12 @@ private fun String.lowerCustomProperties() =
     if (this in arrayOf("__KEY", "__STAMP", "__GlobalStamp", "__TIMESTAMP"))
         this
     else if (this.startsWith("__") && this.endsWith("Key"))
-        this.removeSuffix("Key").toLowerCase(Locale.getDefault()) + "Key"
+        this.removeSuffix("Key").lowercase() + "Key"
     else
-        this.toLowerCase(Locale.getDefault())
+        this.lowercase()
 
 private fun String.decapitalizeExceptID() =
-    if (this == "ID") this.toLowerCase(Locale.getDefault()) else this.decapitalize(Locale.getDefault())
+    if (this == "ID") this.lowercase() else this.replaceFirstChar { it.lowercaseChar() }
 
 private fun String.firstCharForTable(): String =
     if (this.startsWith("_"))

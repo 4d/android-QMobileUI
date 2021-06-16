@@ -12,7 +12,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
-import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
@@ -105,32 +104,30 @@ fun MainActivity.observeConnectivityToastMessage() {
 
 // Observe network status
 fun MainActivity.observeNetworkStatus() {
-    if (sdkNewerThanKitKat) {
-        connectivityViewModel.networkStateMonitor.observe(
-            this,
-            Observer { networkState ->
-                Timber.d("[NetworkState : $networkState]")
-                when (networkState) {
-                    NetworkStateEnum.CONNECTED -> {
-                        // Setting the authenticationState to its initial value
-                        if (authInfoHelper.sessionToken.isNotEmpty())
-                            loginViewModel.authenticationState.postValue(AuthenticationStateEnum.AUTHENTICATED)
+    connectivityViewModel.networkStateMonitor.observe(
+        this,
+        Observer { networkState ->
+            Timber.d("[NetworkState : $networkState]")
+            when (networkState) {
+                NetworkStateEnum.CONNECTED -> {
+                    // Setting the authenticationState to its initial value
+                    if (authInfoHelper.sessionToken.isNotEmpty())
+                        loginViewModel.authenticationState.postValue(AuthenticationStateEnum.AUTHENTICATED)
 
-                        // If guest and not yet logged in, auto login
-                        if (authInfoHelper.sessionToken.isEmpty() &&
-                            authInfoHelper.guestLogin &&
-                            authenticationRequested
-                        ) {
-                            authenticationRequested = false
-                            tryAutoLogin()
-                        }
-                    }
-                    else -> {
+                    // If guest and not yet logged in, auto login
+                    if (authInfoHelper.sessionToken.isEmpty() &&
+                        authInfoHelper.guestLogin &&
+                        authenticationRequested
+                    ) {
+                        authenticationRequested = false
+                        tryAutoLogin()
                     }
                 }
+                else -> {
+                }
             }
-        )
-    }
+        }
+    )
 }
 
 fun MainActivity.observeEntityListViewModelList() {

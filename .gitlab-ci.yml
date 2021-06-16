@@ -1,8 +1,3 @@
-variables:
-  ANDROID_COMPILE_SDK: "29"
-  ANDROID_SDK_TOOLS: "4333796"
-  ANDROID_BUILD_TOOLS: "29.0.2"
-
 stages:
   - lint
   - build
@@ -17,9 +12,19 @@ before_script:
 #    - .gradle/wrapper
 #    - .gradle/caches
 
+.prepare_sdk: &prepare_sdk |
+  export ANDROID_HOME=/Users/4d/builds/khqL5qp1/0/qmobile/android/android-sdk
+  export ANDROID_SDK_HOME=$ANDROID_HOME
+  export ANDROID_SDK_ROOT=$ANDROID_HOME
+  export PATH=$PATH:$ANDROID_HOME/platform-tools/
+  export PATH=$PATH:$ANDROID_HOME/tools/
+  export PATH=$PATH:$ANDROID_HOME/tools/bin/
+  export PATH=$PATH:$ANDROID_AVD_HOME
+
 lint:
   stage: lint
   script:
+    - *prepare_sdk
     - rm -fr build
     - ./gradlew ktlintFormat --console=rich
     - ./gradlew detekt --console=rich
@@ -29,15 +34,8 @@ lint:
     expire_in: 4 days
     paths:
     - qmobileui/build/reports/
-
-.prepare_sdk: &prepare_sdk |
-  export ANDROID_HOME=/Users/4d/builds/khqL5qp1/0/qmobile/android/android-sdk
-  export ANDROID_SDK_HOME=$ANDROID_HOME
-  export ANDROID_SDK_ROOT=$ANDROID_HOME
-  export PATH=$PATH:$ANDROID_HOME/platform-tools/
-  export PATH=$PATH:$ANDROID_HOME/tools/
-  export PATH=$PATH:$ANDROID_HOME/tools/bin/
-  export PATH=$PATH:$ANDROID_AVD_HOME
+  tags:
+    - osx
 
 build:
   stage: build

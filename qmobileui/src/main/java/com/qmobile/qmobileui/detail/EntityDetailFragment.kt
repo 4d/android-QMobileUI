@@ -21,7 +21,6 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.model.QMobileUiConstants
 import com.qmobile.qmobileui.utils.layoutFromTable
-import java.util.Locale
 
 class EntityDetailFragment : Fragment(), BaseFragment {
 
@@ -57,7 +56,7 @@ class EntityDetailFragment : Fragment(), BaseFragment {
             inflater,
             layoutFromTable(
                 inflater.context,
-                "${QMobileUiConstants.Prefix.FRAGMENT_DETAIL_PREFIX}$tableName".toLowerCase(Locale.getDefault())
+                "${QMobileUiConstants.Prefix.FRAGMENT_DETAIL_PREFIX}$tableName".lowercase()
             ),
             container,
             false

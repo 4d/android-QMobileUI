@@ -225,7 +225,7 @@ object LogController {
         val currentTime = System.currentTimeMillis()
         file.parentFile?.listFiles()
             ?.filter {
-                it.extension.toLowerCase(Locale.ROOT) == "gz" &&
+                it.extension.lowercase() == "gz" &&
                     it.lastModified() + TimeUnit.DAYS.toMillis(RETENTION_DAYS_DURATION) < currentTime
             }?.map { it.delete() }
     }
