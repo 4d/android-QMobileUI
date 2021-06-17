@@ -9,11 +9,8 @@ package com.qmobile.qmobileui.activity.loginactivity
 import android.view.View
 import androidx.lifecycle.Observer
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
-import com.qmobile.qmobileapi.connectivity.sdkNewerThanKitKat
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
-import com.qmobile.qmobileui.activity.mainactivity.observeAuthenticationState
-import kotlinx.android.synthetic.main.activity_login.*
 import timber.log.Timber
 
 fun LoginActivity.getViewModel() {
@@ -42,11 +39,11 @@ fun LoginActivity.observeAuthenticationState() {
                     startMainActivity(false, loginViewModel.statusMessage)
                 }
                 AuthenticationStateEnum.INVALID_AUTHENTICATION -> {
-                    login_button_auth.isEnabled = true
+                    binding.loginButtonAuth.isEnabled = true
                 }
                 else -> {
                     // Default state in LoginActivity
-                    login_button_auth.isEnabled = true
+                    binding.loginButtonAuth.isEnabled = true
                 }
             }
         }
@@ -68,7 +65,7 @@ fun LoginActivity.observeEmailValid() {
     loginViewModel.emailValid.observe(
         this,
         Observer { emailValid ->
-            login_button_auth.isEnabled = emailValid
+            binding.loginButtonAuth.isEnabled = emailValid
         }
     )
 }
@@ -78,7 +75,7 @@ fun LoginActivity.observeDataLoading() {
     loginViewModel.dataLoading.observe(
         this,
         Observer { dataLoading ->
-            login_progressbar.visibility = if (dataLoading == true) View.VISIBLE else View.GONE
+            binding.loginProgressbar.visibility = if (dataLoading == true) View.VISIBLE else View.GONE
         }
     )
 }
@@ -94,11 +91,9 @@ fun LoginActivity.observeConnectivityToastMessage() {
 
 // Observe network status
 fun LoginActivity.observeNetworkStatus() {
-    if (sdkNewerThanKitKat) {
-        connectivityViewModel.networkStateMonitor.observe(
-            this,
-            Observer {
-            }
-        )
-    }
+    connectivityViewModel.networkStateMonitor.observe(
+        this,
+        Observer {
+        }
+    )
 }

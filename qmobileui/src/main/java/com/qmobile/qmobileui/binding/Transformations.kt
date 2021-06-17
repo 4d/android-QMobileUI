@@ -24,7 +24,6 @@ object Transformations {
     private const val ROUNDED_CORNERS_RADIUS = 128
     private const val ROUNDED_CORNERS_MARGIN = 0
 
-    @Suppress("DEPRECATION")
     fun getTransformation(transform: String?, @ColorInt borderColor: Int): Transformation<Bitmap>? {
         return when (transform) {
             "CropCircle" -> CropCircleTransformation()

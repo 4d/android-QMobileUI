@@ -8,24 +8,25 @@ package com.qmobile.qmobileui.activity.mainactivity
 
 import androidx.lifecycle.Observer
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.setupWithNavController
-import kotlinx.android.synthetic.main.activity_main.*
 
 /**
  * Called on first creation and when restoring state.
  */
 fun MainActivity.setupBottomNavigationBar() {
-    bottom_nav.menu.clear() // clear old inflated items.
+    val bottomNav = this.findViewById<BottomNavigationView>(R.id.bottom_nav)
+    bottomNav.menu.clear() // clear old inflated items.
     BaseApp.bottomNavigationMenu?.let {
-        bottom_nav.inflateMenu(it)
+        bottomNav.inflateMenu(it)
     }
 
     val navGraphIds = BaseApp.navGraphIds
 
     // Setup the bottom navigation view with a list of navigation graphs
-    val controller = bottom_nav.setupWithNavController(
+    val controller = bottomNav.setupWithNavController(
         navGraphIds = navGraphIds,
         fragmentManager = supportFragmentManager,
         containerId = R.id.nav_host_container,
