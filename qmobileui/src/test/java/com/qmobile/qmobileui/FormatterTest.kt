@@ -104,7 +104,7 @@ class FormatterTest {
         numberFormatTest(number.toString(), "2447.0%", "percent")
         numberFormatTest(number.toString(), "24.47€", "currencyEuro")
         numberFormatTest(number.toString(), "$24.47", "currencyDollar")
-        numberFormatTest(number.toString(), "¥24.47", "currencyYen")
+        numberFormatTest(number.toString(), "¥ 24", "currencyYen")
     }
 
     @Test

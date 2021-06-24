@@ -90,7 +90,7 @@ object FormatterUtils {
                 DecimalFormat("0.00").format(baseText.toDouble()) + "€"
             }
             "currencyYen" -> {
-                "¥ " + DecimalFormat("0.00").format(baseText.toDouble())
+                "¥ " + baseText.toDouble().toInt()
             }
             "currencyDollar" -> {
                 "$" + DecimalFormat("0.00").format(baseText.toDouble())

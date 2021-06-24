@@ -132,8 +132,6 @@ fun applyFormatter(
                         }
                         return
                     }
-                view.text = ""
-                return
             }
         }
     }
