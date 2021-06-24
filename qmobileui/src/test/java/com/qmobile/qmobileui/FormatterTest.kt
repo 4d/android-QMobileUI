@@ -7,7 +7,7 @@
 package com.qmobile.qmobileui
 
 import com.qmobile.qmobileui.utils.FieldMapping
-import com.qmobile.qmobileui.utils.applyFormat
+import com.qmobile.qmobileui.utils.FormatterUtils.applyFormat
 import com.qmobile.qmobileui.utils.buildCustomFormatterBinding
 import com.qmobile.qmobileui.utils.getChoiceListString
 import org.json.JSONObject

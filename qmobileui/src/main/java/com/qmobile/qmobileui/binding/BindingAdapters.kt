@@ -25,8 +25,8 @@ import com.qmobile.qmobileui.binding.ImageHelper.drawableSpace
 import com.qmobile.qmobileui.binding.ImageHelper.drawableStartHeight
 import com.qmobile.qmobileui.binding.ImageHelper.drawableStartWidth
 import com.qmobile.qmobileui.glide.CustomRequestListener
+import com.qmobile.qmobileui.utils.FormatterUtils.applyFormat
 import com.qmobile.qmobileui.utils.QMobileUiUtil
-import com.qmobile.qmobileui.utils.applyFormat
 import com.qmobile.qmobileui.utils.fieldAdjustment
 import com.qmobile.qmobileui.utils.getChoiceListString
 import com.qmobile.qmobileui.utils.tableNameAdjustment
