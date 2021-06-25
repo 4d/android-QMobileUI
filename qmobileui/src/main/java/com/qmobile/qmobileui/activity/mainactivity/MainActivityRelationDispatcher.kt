@@ -35,7 +35,7 @@ fun MainActivity.dispatchNewRelatedEntities(oneToManyRelation: OneToManyRelation
     val entityListViewModel =
         entityListViewModelList.find { it.getAssociatedTableName() == oneToManyRelation.className }
     for (entityString in oneToManyRelation.entities.getObjectListAsString()) {
-        val entity = BaseApp.genericsHelper.parseEntityFromTable(
+        val entity = BaseApp.genericTableHelper.parseEntityFromTable(
             oneToManyRelation.className,
             entityString,
             true
