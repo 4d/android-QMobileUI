@@ -8,56 +8,17 @@ package com.qmobile.qmobileui.activity.loginactivity
 
 import android.view.View
 import androidx.lifecycle.Observer
-import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
-import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
-import timber.log.Timber
+import com.qmobile.qmobileui.activity.getViewModels
+import com.qmobile.qmobileui.activity.observe
 
-fun LoginActivity.getViewModel() {
-    loginViewModel = getLoginViewModel(this, loginApiService)
-    connectivityViewModel =
-        getConnectivityViewModel(this, connectivityManager, accessibilityApiService)
+fun LoginActivity.setupViewModels() {
+    this.getViewModels()
 }
 
 fun LoginActivity.setupObservers() {
-    observeAuthenticationState()
-    observeLoginToastMessage()
+    this.observe()
     observeEmailValid()
     observeDataLoading()
-    observeNetworkStatus()
-    observeConnectivityToastMessage()
-}
-
-// Observe authentication state
-fun LoginActivity.observeAuthenticationState() {
-    loginViewModel.authenticationState.observe(
-        this,
-        Observer { authenticationState ->
-            Timber.d("[AuthenticationState : $authenticationState]")
-            when (authenticationState) {
-                AuthenticationStateEnum.AUTHENTICATED -> {
-                    startMainActivity(false, loginViewModel.statusMessage)
-                }
-                AuthenticationStateEnum.INVALID_AUTHENTICATION -> {
-                    binding.loginButtonAuth.isEnabled = true
-                }
-                else -> {
-                    // Default state in LoginActivity
-                    binding.loginButtonAuth.isEnabled = true
-                }
-            }
-        }
-    )
-}
-
-// Observe any toast message
-fun LoginActivity.observeLoginToastMessage() {
-    loginViewModel.toastMessage.message.observe(
-        this,
-        Observer { event ->
-            handleEvent(event)
-        }
-    )
 }
 
 // Observe if email is valid
@@ -76,24 +37,6 @@ fun LoginActivity.observeDataLoading() {
         this,
         Observer { dataLoading ->
             binding.loginProgressbar.visibility = if (dataLoading == true) View.VISIBLE else View.GONE
-        }
-    )
-}
-
-fun LoginActivity.observeConnectivityToastMessage() {
-    connectivityViewModel.toastMessage.message.observe(
-        this,
-        Observer { event ->
-            handleEvent(event)
-        }
-    )
-}
-
-// Observe network status
-fun LoginActivity.observeNetworkStatus() {
-    connectivityViewModel.networkStateMonitor.observe(
-        this,
-        Observer {
         }
     )
 }

@@ -19,21 +19,20 @@ import androidx.navigation.NavController
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.LoginRequiredCallback
+import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
-import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.sync.EntityViewModelIsToSync
 import com.qmobile.qmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
-import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
+import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.utils.QMobileUiUtil
+import com.qmobile.qmobileui.utils.ToastHelper
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -50,13 +49,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
-    override lateinit var loginApiService: LoginApiService
-    override lateinit var accessibilityApiService: AccessibilityApiService
-    override lateinit var connectivityManager: ConnectivityManager
 
     // ViewModels
-    lateinit var loginViewModel: LoginViewModel
-    lateinit var connectivityViewModel: ConnectivityViewModel
     lateinit var entityViewModelIsToSyncList: MutableList<EntityViewModelIsToSync>
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
@@ -99,7 +93,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         // Init ApiClients
         refreshApiClients()
 
-        getViewModel()
+        setupViewModels()
         setupObservers()
 
         // Follow activity lifecycle and check when activity enters foreground for data sync
@@ -139,13 +133,13 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             loginRequiredCallback = loginRequiredCallbackForInterceptor,
             logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
         )
-        if (this::loginViewModel.isInitialized) {
+        if (super.loginViewModelInitialized()) {
             loginViewModel.refreshAuthRepository(loginApiService)
         }
         if (this::entityListViewModelList.isInitialized) {
             entityListViewModelList.forEach { it.refreshRestRepository(apiService) }
         }
-        if (this::connectivityViewModel.isInitialized) {
+        if (super.connectivityViewModelInitialized()) {
             connectivityViewModel.refreshAccessibilityRepository(accessibilityApiService)
         }
     }
@@ -205,5 +199,47 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      */
     override fun requestDataSync(alreadyRefreshedTable: String?) {
         prepareDataSync(alreadyRefreshedTable)
+    }
+
+    override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
+        when (authenticationState) {
+            AuthenticationStateEnum.AUTHENTICATED -> {
+                if (loginStatusText.isNotEmpty()) {
+                    ToastHelper.show(this, loginStatusText, MessageType.SUCCESS)
+                    loginStatusText = ""
+                }
+                if (shouldDelayOnForegroundEvent.compareAndSet(true, false)) {
+                    applyOnForegroundEvent()
+                }
+            }
+            AuthenticationStateEnum.LOGOUT -> {
+                // Logout performed
+                if (!authInfoHelper.guestLogin)
+                    startLoginActivity()
+            }
+            else -> {
+            }
+        }
+    }
+
+    override fun handleNetworkState(networkState: NetworkStateEnum) {
+        when (networkState) {
+            NetworkStateEnum.CONNECTED -> {
+                // Setting the authenticationState to its initial value
+                if (authInfoHelper.sessionToken.isNotEmpty())
+                    loginViewModel.authenticationState.postValue(AuthenticationStateEnum.AUTHENTICATED)
+
+                // If guest and not yet logged in, auto login
+                if (authInfoHelper.sessionToken.isEmpty() &&
+                    authInfoHelper.guestLogin &&
+                    authenticationRequested
+                ) {
+                    authenticationRequested = false
+                    tryAutoLogin()
+                }
+            }
+            else -> {
+            }
+        }
     }
 }

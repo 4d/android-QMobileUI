@@ -21,14 +21,12 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.databinding.DataBindingUtil
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
+import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.isEmailValid
-import com.qmobile.qmobileapi.network.AccessibilityApiService
+import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.network.ApiClient
-import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
-import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
-import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
@@ -41,15 +39,8 @@ import com.qmobile.qmobileui.utils.hideKeyboard
 class LoginActivity : BaseActivity() {
 
     private var loggedOut = false
-    lateinit var connectivityManager: ConnectivityManager
-    lateinit var loginApiService: LoginApiService
-    lateinit var accessibilityApiService: AccessibilityApiService
 
     lateinit var binding: ActivityLoginBinding
-
-    // ViewModels
-    lateinit var loginViewModel: LoginViewModel
-    lateinit var connectivityViewModel: ConnectivityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,7 +74,7 @@ class LoginActivity : BaseActivity() {
                 DataBindingUtil.setContentView(this, R.layout.activity_login)
             binding.lifecycleOwner = this
 
-            getViewModel()
+            setupViewModels()
             initLayout()
             setupObservers()
         }
@@ -173,5 +164,25 @@ class LoginActivity : BaseActivity() {
             }
         }
         return super.dispatchTouchEvent(event)
+    }
+
+    // Observe authentication state
+    override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
+        when (authenticationState) {
+            AuthenticationStateEnum.AUTHENTICATED -> {
+                startMainActivity(false, loginViewModel.statusMessage)
+            }
+            AuthenticationStateEnum.INVALID_AUTHENTICATION -> {
+                binding.loginButtonAuth.isEnabled = true
+            }
+            else -> {
+                // Default state in LoginActivity
+                binding.loginButtonAuth.isEnabled = true
+            }
+        }
+    }
+
+    override fun handleNetworkState(networkState: NetworkStateEnum) {
+        // Nothing to do
     }
 }

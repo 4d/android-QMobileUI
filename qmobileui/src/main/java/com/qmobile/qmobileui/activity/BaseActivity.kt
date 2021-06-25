@@ -6,9 +6,16 @@
 
 package com.qmobile.qmobileui.activity
 
+import android.net.ConnectivityManager
 import androidx.appcompat.app.AppCompatActivity
+import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
+import com.qmobile.qmobileapi.network.AccessibilityApiService
+import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
+import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.fetchResourceString
 
@@ -20,6 +27,7 @@ abstract class BaseActivity : AppCompatActivity() {
     companion object {
         // Constant used when returning to LoginActivity to display a toast message about logout
         const val LOGGED_OUT = "logged_out"
+
         // Constant used when going to MainActivity after a successful login from LoginActivity
         const val LOGIN_STATUS_TEXT = "loginStatusText"
     }
@@ -30,4 +38,16 @@ abstract class BaseActivity : AppCompatActivity() {
             ToastHelper.show(this, message, toastMessageHolder.type)
         }
     }
+
+    lateinit var loginViewModel: LoginViewModel
+    lateinit var connectivityViewModel: ConnectivityViewModel
+    lateinit var connectivityManager: ConnectivityManager
+    lateinit var accessibilityApiService: AccessibilityApiService
+    lateinit var loginApiService: LoginApiService
+
+    fun loginViewModelInitialized() = this::loginViewModel.isInitialized
+    fun connectivityViewModelInitialized() = this::connectivityViewModel.isInitialized
+
+    abstract fun handleAuthenticationState(authenticationState: AuthenticationStateEnum)
+    abstract fun handleNetworkState(networkState: NetworkStateEnum)
 }
