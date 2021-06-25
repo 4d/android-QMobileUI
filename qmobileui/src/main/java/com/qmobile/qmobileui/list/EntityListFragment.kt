@@ -46,34 +46,29 @@ import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("TooManyFunctions")
-class EntityListFragment : Fragment(), BaseFragment {
-
-    var tableName: String = ""
-    lateinit var syncDataRequested: AtomicBoolean
-    lateinit var adapter: EntityListAdapter
-    private lateinit var searchView: SearchView
-    private lateinit var searchPlate: EditText
-    private var searchableFields = QMobileUiUtil.appUtilities.searchField
-    lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
+open class EntityListFragment : Fragment(), BaseFragment {
 
     companion object {
         private const val CURRENT_QUERY_KEY = "currentQuery_key"
     }
 
-    var currentQuery = ""
-
-    var job: Job? = null
+    private lateinit var syncDataRequested: AtomicBoolean
+    private lateinit var searchView: SearchView
+    private lateinit var searchPlate: EditText
+    private var searchableFields = QMobileUiUtil.appUtilities.searchField
+    private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
+    private var currentQuery = ""
+    private var job: Job? = null
+    internal lateinit var loginViewModel: LoginViewModel
+    internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
+    private var _binding: FragmentListBinding? = null
+    // This property is only valid between onCreateView and onDestroyView.
+    val binding get() = _binding!!
+    var tableName: String = ""
+    lateinit var adapter: EntityListAdapter
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
-
-    // ViewModels
-    lateinit var loginViewModel: LoginViewModel
-    lateinit var entityListViewModel: EntityListViewModel<EntityModel>
-
-    private var _binding: FragmentListBinding? = null
-    // This property is only valid between onCreateView and onDestroyView.
-    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -141,7 +136,7 @@ class EntityListFragment : Fragment(), BaseFragment {
         )
 
         binding.fragmentListRecyclerView.layoutManager =
-            when (BaseApp.fragmentUtil.layoutType(tableName)) {
+            when (BaseApp.genericTableFragmentHelper.layoutType(tableName)) {
                 "GRID" -> {
                     binding.fragmentListRecyclerView.addItemDecoration(
                         ItemDecorationSimpleCollection(

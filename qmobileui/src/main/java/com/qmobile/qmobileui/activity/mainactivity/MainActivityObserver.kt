@@ -40,8 +40,8 @@ fun MainActivity.setupObservers() {
 // Get EntityListViewModel list
 fun MainActivity.getEntityListViewModelList() {
     entityListViewModelList = mutableListOf()
-    for (tableName in BaseApp.fromTableForViewModel.tableNames()) {
-        val clazz = BaseApp.fromTableForViewModel.entityListViewModelClassFromTable(tableName)
+    for (tableName in BaseApp.genericTableHelper.tableNames()) {
+        val clazz = BaseApp.genericTableHelper.entityListViewModelClassFromTable(tableName)
 
         entityListViewModelList.add(
             ViewModelProvider(

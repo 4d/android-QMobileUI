@@ -108,7 +108,7 @@ fun applyFormatter(
                                 getChoiceListString(fieldMapping, text)?.let { drawableName ->
 
                                     fieldMapping.name?.let { formatName ->
-                                        BaseApp.fragmentUtil.getDrawableForFormatter(
+                                        BaseApp.genericTableFragmentHelper.getDrawableForFormatter(
                                             formatName,
                                             drawableName
                                         )?.let { drawableResPair ->

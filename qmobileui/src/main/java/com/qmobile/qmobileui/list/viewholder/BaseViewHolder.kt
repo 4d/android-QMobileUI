@@ -27,7 +27,7 @@ class BaseViewHolder(
             dataBinding.setVariable(BR.entityData, entity)
             dataBinding.executePendingBindings()
             itemView.setOnClickListener {
-                BaseApp.navigationInterface.navigateFromListToViewPager(
+                BaseApp.genericTableFragmentHelper.navigateFromListToViewPager(
                     dataBinding.root,
                     position,
                     tableName
@@ -37,7 +37,7 @@ class BaseViewHolder(
     }
 
     fun unbindRelations() {
-        BaseApp.fragmentUtil.unsetRelationBinding(dataBinding)
+        BaseApp.genericTableFragmentHelper.unsetRelationBinding(dataBinding)
     }
 
     // Map<relationName, LiveData<RoomRelation>>
@@ -51,7 +51,7 @@ class BaseViewHolder(
                 Observer { roomRelation ->
                     roomRelation?.first?.let { relatedEntity ->
                         Timber.d("[$tableName] Relation named \"$relationName\" retrieved for position $position")
-                        BaseApp.fragmentUtil.setRelationBinding(
+                        BaseApp.genericTableFragmentHelper.setRelationBinding(
                             dataBinding,
                             relationName,
                             relatedEntity

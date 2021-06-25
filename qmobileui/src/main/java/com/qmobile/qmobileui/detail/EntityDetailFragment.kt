@@ -22,25 +22,17 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.model.QMobileUiConstants
 import com.qmobile.qmobileui.utils.layoutFromTable
 
-class EntityDetailFragment : Fragment(), BaseFragment {
+open class EntityDetailFragment : Fragment(), BaseFragment {
 
-    var itemId: String = "0"
+    internal var itemId: String = "0"
+    internal lateinit var entityViewModel: EntityViewModel<EntityModel>
+    private var _binding: ViewDataBinding? = null
+    // This property is only valid between onCreateView and onDestroyView.
+    val binding get() = _binding!!
     var tableName: String = ""
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
-
-    // ViewModels
-    lateinit var entityViewModel: EntityViewModel<EntityModel>
-
-    companion object {
-        fun newInstance(itemId: String, tableName: String) = EntityDetailFragment().apply {
-            arguments = Bundle().apply {
-                putString("itemId", itemId)
-                putString("tableName", tableName)
-            }
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,7 +44,7 @@ class EntityDetailFragment : Fragment(), BaseFragment {
 
         getViewModel()
 
-        val dataBinding: ViewDataBinding = DataBindingUtil.inflate<ViewDataBinding>(
+        _binding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
             layoutFromTable(
                 inflater.context,
@@ -61,10 +53,10 @@ class EntityDetailFragment : Fragment(), BaseFragment {
             container,
             false
         ).apply {
-            BaseApp.fragmentUtil.setEntityViewModel(this, entityViewModel)
+            BaseApp.genericTableFragmentHelper.setEntityViewModel(this, entityViewModel)
             lifecycleOwner = viewLifecycleOwner
         }
-        return dataBinding.root
+        return binding.root
     }
 
     override fun onAttach(context: Context) {

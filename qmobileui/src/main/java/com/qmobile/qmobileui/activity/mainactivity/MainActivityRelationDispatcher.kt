@@ -18,7 +18,7 @@ import com.qmobile.qmobiledatasync.viewmodel.insert
 fun MainActivity.dispatchNewRelatedEntity(manyToOneRelation: ManyToOneRelation) {
     val entityListViewModel =
         entityListViewModelList.find { it.getAssociatedTableName() == manyToOneRelation.className }
-    val entity = BaseApp.fromTableForViewModel.parseEntityFromTable(
+    val entity = BaseApp.genericTableHelper.parseEntityFromTable(
         manyToOneRelation.className,
         manyToOneRelation.entity.toString(),
         true
@@ -35,7 +35,7 @@ fun MainActivity.dispatchNewRelatedEntities(oneToManyRelation: OneToManyRelation
     val entityListViewModel =
         entityListViewModelList.find { it.getAssociatedTableName() == oneToManyRelation.className }
     for (entityString in oneToManyRelation.entities.getObjectListAsString()) {
-        val entity = BaseApp.fromTableForViewModel.parseEntityFromTable(
+        val entity = BaseApp.genericsHelper.parseEntityFromTable(
             oneToManyRelation.className,
             entityString,
             true
