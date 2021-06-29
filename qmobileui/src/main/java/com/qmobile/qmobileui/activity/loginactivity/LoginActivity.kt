@@ -146,20 +146,17 @@ class LoginActivity : BaseActivity() {
      * Hides keyboard layout when user touches outside input text area
      */
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
-        event?.let {
-            if (it.action == MotionEvent.ACTION_DOWN) {
-                val v = currentFocus
-                v?.let {
-                    if (v is EditText) {
-                        val outRect = Rect()
-                        v.getGlobalVisibleRect(outRect)
-                        if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
-                            v.clearFocus()
-                            val imm: InputMethodManager =
-                                getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                            imm.hideSoftInputFromWindow(v.getWindowToken(), 0)
-                        }
-                    }
+        if (event != null && event.action == MotionEvent.ACTION_DOWN) {
+            val v = currentFocus
+            v?.let currentFocus@{
+                if (v !is EditText) return@currentFocus
+                val outRect = Rect()
+                v.getGlobalVisibleRect(outRect)
+                if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
+                    v.clearFocus()
+                    val imm: InputMethodManager =
+                        getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0)
                 }
             }
         }

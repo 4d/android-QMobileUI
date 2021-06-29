@@ -10,7 +10,11 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
+import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeBoolean
+import com.qmobile.qmobileapi.utils.getSafeInt
+import com.qmobile.qmobileapi.utils.getSafeObject
+import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileapi.utils.getStringList
 import com.qmobile.qmobileui.model.AppUtilities
 import com.qmobile.qmobileui.model.DeviceUtility
@@ -50,6 +54,11 @@ internal open class FileUtilsUp(var context: Context) { // scope restricted to t
 
 internal class BridgeUtility(context: Context) :
     FileUtilsUp(context) { // scope restricted to this module
+
+    companion object {
+        const val DEFAULT_LOG_LEVEL = 4
+    }
+
     fun getAppUtil(): AppUtilities {
         val appInfoJsonObj = JSONObject(readContentFromFile("app_info.json"))
         val customFormattersJsonObj = JSONObject(readContentFromFile("custom_formatters.json"))
@@ -58,19 +67,19 @@ internal class BridgeUtility(context: Context) :
         val sdkVersion = readContentFromFile("sdkVersion")
 
         return AppUtilities(
-            initialGlobalStamp = appInfoJsonObj.getInt("initialGlobalStamp"),
-            guestLogin = appInfoJsonObj.getBoolean("guestLogin"),
-            remoteUrl = appInfoJsonObj.getString("remoteUrl"),
+            initialGlobalStamp = appInfoJsonObj.getSafeInt("initialGlobalStamp") ?: 0,
+            guestLogin = appInfoJsonObj.getSafeBoolean("guestLogin") ?: true,
+            remoteUrl = appInfoJsonObj.getSafeString("remoteUrl") ?: "",
             teams = JSONObject().apply {
-                val newTeam = appInfoJsonObj.getJSONObject("team")
-                this.put("id", newTeam.getString("TeamName"))
-                this.put("name", newTeam.getString("TeamID"))
+                val newTeam = appInfoJsonObj.getSafeObject("team")
+                this.put("id", newTeam?.getSafeString("TeamName") ?: "")
+                this.put("name", newTeam?.getSafeString("TeamID") ?: "")
             },
             queryJson = JSONObject(readContentFromFile("queries.json")),
             searchField = searchableFieldsJsonObj,
             sdkVersion = sdkVersion,
-            logLevel = appInfoJsonObj.getInt("logLevel"),
-            dumpedTables = appInfoJsonObj.getJSONArray("dumpedTables").getStringList().joinToString(),
+            logLevel = appInfoJsonObj.getSafeInt("logLevel") ?: DEFAULT_LOG_LEVEL,
+            dumpedTables = appInfoJsonObj.getSafeArray("dumpedTables").getStringList().joinToString(),
             relationAvailable = appInfoJsonObj.getSafeBoolean("relations") ?: true,
             customFormatters = buildCustomFormatterBinding(customFormattersJsonObj)
         )

@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.utils.converter
 
 import android.annotation.SuppressLint
+import com.qmobile.qmobileapi.utils.safeParse
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -15,7 +16,7 @@ import java.util.Date
 fun getTimeFromString(time: String): Calendar = Calendar.getInstance().apply {
     val longTime: String = getTimeFromLong(time.toLong())
     val dateFormat = SimpleDateFormat("hh:mm:ss")
-    dateFormat.parse(longTime)?.let { date ->
+    dateFormat.safeParse(longTime)?.let { date ->
         setTime(date)
     }
 }
@@ -23,7 +24,7 @@ fun getTimeFromString(time: String): Calendar = Calendar.getInstance().apply {
 @SuppressLint("SimpleDateFormat")
 fun getDateFromString(date: String): Calendar = Calendar.getInstance().apply {
     val dateFormat = SimpleDateFormat("dd!MM!yyyy")
-    dateFormat.parse(date)?.let { date ->
+    dateFormat.safeParse(date)?.let { date ->
         time = date
     }
 }

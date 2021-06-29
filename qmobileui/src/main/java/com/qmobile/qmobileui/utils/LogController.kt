@@ -275,7 +275,6 @@ object LogController {
 
                         while (length > 0) {
                             gzos.write(buffer, 0, length)
-
                             length = fis.read(buffer)
                         }
 
@@ -288,7 +287,6 @@ object LogController {
             Timber.e("An error occurred while compressing log file into gzip format")
             return false
         }
-
         return true
     }
 }

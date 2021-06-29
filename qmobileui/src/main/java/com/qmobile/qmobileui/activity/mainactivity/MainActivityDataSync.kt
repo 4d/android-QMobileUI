@@ -14,7 +14,7 @@ import com.qmobile.qmobileui.utils.ToastHelper
 fun MainActivity.getEntityListViewModelsForSync() {
     entityViewModelIsToSyncList = mutableListOf()
 
-    for (entityListViewModel in entityListViewModelList) {
+    entityListViewModelList.forEach { entityListViewModel ->
         entityViewModelIsToSyncList.add(
             EntityViewModelIsToSync(
                 entityListViewModel,

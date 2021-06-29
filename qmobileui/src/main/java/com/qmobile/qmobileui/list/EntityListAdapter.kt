@@ -63,11 +63,15 @@ class EntityListAdapter internal constructor(
             // item at position 12 receives binding of item at position 1, etc.
             holder.unbindRelations()
             entity?.let {
-                relationCallback.getRelations(entity).let { relationMap ->
-                    if (relationMap.isNotEmpty()) {
-                        holder.observeRelations(relationMap, position)
-                    }
-                }
+                setupObserver(entity, holder, position)
+            }
+        }
+    }
+
+    private fun setupObserver(entity: EntityModel, holder: BaseViewHolder, position: Int) {
+        relationCallback.getRelations(entity).let { relationMap ->
+            if (relationMap.isNotEmpty()) {
+                holder.observeRelations(relationMap, position)
             }
         }
     }

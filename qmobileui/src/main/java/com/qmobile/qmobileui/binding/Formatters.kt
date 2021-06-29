@@ -20,38 +20,56 @@ fun TextView.setFormatterDrawable(
     tintable: Boolean?
 ) {
     if (this is Chip) {
-
-        if (BaseApp.nightMode() && drawableResPair.second != 0)
-            this.chipIcon = ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.second)
-        else
-            this.chipIcon = ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
-
-        if (tintable == true)
-            this.chipIconTint = this.textColors
+        this.setChipDrawable(drawableResPair, tintable)
     } else { // is TextView
-
         if (imageWidth == null || imageHeight == null || imageWidth == 0 || imageHeight == 0) {
-
-            if (BaseApp.nightMode() && drawableResPair.second != 0)
-                this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.second, 0, 0, 0)
-            else
-                this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.first, 0, 0, 0)
-
-            if (tintable == true)
-                TextViewCompat.setCompoundDrawableTintList(this, this.textColors)
+            this.setTextViewDrawableWithoutSize(drawableResPair, tintable)
         } else {
-
-            val drawable = if (BaseApp.nightMode() && drawableResPair.second != 0)
-                ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.second)
-            else
-                ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
-
-            drawable?.let {
-                if (tintable == true)
-                    drawable.setTint(this.currentTextColor)
-                drawable.setBounds(0, 0, imageWidth, imageHeight)
-                this.setCompoundDrawables(drawable, null, null, null)
-            }
+            this.setTextViewDrawableWithSize(drawableResPair, tintable, imageWidth, imageHeight)
         }
+    }
+}
+
+private fun Chip.setChipDrawable(drawableResPair: Pair<Int, Int>, tintable: Boolean?) {
+    if (BaseApp.nightMode() && drawableResPair.second != 0)
+        this.chipIcon =
+            ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.second)
+    else
+        this.chipIcon =
+            ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
+
+    if (tintable == true)
+        this.chipIconTint = this.textColors
+}
+
+private fun TextView.setTextViewDrawableWithoutSize(
+    drawableResPair: Pair<Int, Int>,
+    tintable: Boolean?
+) {
+    if (BaseApp.nightMode() && drawableResPair.second != 0)
+        this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.second, 0, 0, 0)
+    else
+        this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.first, 0, 0, 0)
+
+    if (tintable == true)
+        TextViewCompat.setCompoundDrawableTintList(this, this.textColors)
+}
+
+private fun TextView.setTextViewDrawableWithSize(
+    drawableResPair: Pair<Int, Int>,
+    tintable: Boolean?,
+    imageWidth: Int,
+    imageHeight: Int
+) {
+    val drawable = if (BaseApp.nightMode() && drawableResPair.second != 0)
+        ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.second)
+    else
+        ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
+
+    drawable?.let {
+        if (tintable == true)
+            drawable.setTint(this.currentTextColor)
+        drawable.setBounds(0, 0, imageWidth, imageHeight)
+        this.setCompoundDrawables(drawable, null, null, null)
     }
 }

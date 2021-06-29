@@ -31,7 +31,7 @@ fun MainActivity.setupObservers() {
 // Get EntityListViewModel list
 fun MainActivity.getEntityListViewModelList() {
     entityListViewModelList = mutableListOf()
-    for (tableName in BaseApp.genericTableHelper.tableNames()) {
+    BaseApp.genericTableHelper.tableNames().forEach { tableName ->
         val clazz = BaseApp.genericTableHelper.entityListViewModelClassFromTable(tableName)
 
         entityListViewModelList.add(
@@ -47,7 +47,7 @@ fun MainActivity.getEntityListViewModelList() {
 }
 
 fun MainActivity.observeEntityListViewModelList() {
-    for (entityListViewModel in entityListViewModelList) {
+    entityListViewModelList.forEach { entityListViewModel ->
         observeDataSynchronized(entityListViewModel)
         observeNewRelatedEntity(entityListViewModel)
         observeNewRelatedEntities(entityListViewModel)

@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.utils
 
 import androidx.sqlite.db.SimpleSQLiteQuery
+import com.qmobile.qmobileapi.utils.getSafeArray
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -20,7 +21,7 @@ class SqlQueryBuilderUtil(
     fun sortQuery(dataToSort: String): SimpleSQLiteQuery {
         val stringBuffer = StringBuffer("SELECT * FROM $tableName WHERE ")
         if (searchField.has(tableName)) {
-            conditionAdder(searchField.getJSONArray(tableName), stringBuffer, dataToSort)
+            searchField.getSafeArray(tableName)?.let { conditionAdder(it, stringBuffer, dataToSort) }
         }
         return SimpleSQLiteQuery(stringBuffer.toString().removeSuffix("OR "))
     }

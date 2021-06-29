@@ -29,26 +29,19 @@ data class FieldMapping(
 fun buildCustomFormatterBinding(customFormatters: JSONObject?): Map<String, Map<String, FieldMapping>> {
     val tableMap: MutableMap<String, Map<String, FieldMapping>> = mutableMapOf()
 
-    customFormatters?.names()?.let { tableKeysIndex ->
-        for (i in 0 until tableKeysIndex.length()) {
-            val tableKey = tableKeysIndex.getString(i)
-            customFormatters.getSafeObject(tableKey)?.let { fieldsJsonObject ->
+    customFormatters?.keys()?.forEach { tableKey ->
+        customFormatters.getSafeObject(tableKey)?.let { fieldsJsonObject ->
 
-                val fieldMap: MutableMap<String, FieldMapping> = mutableMapOf()
+            val fieldMap: MutableMap<String, FieldMapping> = mutableMapOf()
 
-                fieldsJsonObject.names()?.let { fieldKeysIndex ->
-                    for (j in 0 until fieldKeysIndex.length()) {
-                        val fieldKey = fieldKeysIndex.getString(j)
-                        fieldsJsonObject.getSafeObject(fieldKey)?.let { fieldMappingJsonObject ->
-                            fieldMap[fieldKey] = getFieldMapping(fieldMappingJsonObject)
-                        }
-                    }
+            fieldsJsonObject.keys().forEach { fieldKey ->
+                fieldsJsonObject.getSafeObject(fieldKey)?.let { fieldMappingJsonObject ->
+                    fieldMap[fieldKey] = getFieldMapping(fieldMappingJsonObject)
                 }
-                tableMap[tableKey] = fieldMap
             }
+            tableMap[tableKey] = fieldMap
         }
     }
-
     return tableMap
 }
 
