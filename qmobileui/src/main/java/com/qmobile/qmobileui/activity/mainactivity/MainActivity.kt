@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.activity.mainactivity
 
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
@@ -17,6 +18,8 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
+import androidx.navigation.ui.setupActionBarWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.LoginRequiredCallback
@@ -25,6 +28,8 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
+import com.qmobile.qmobiledatasync.relation.OneToManyRelation
 import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.sync.EntityViewModelIsToSync
 import com.qmobile.qmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
@@ -34,8 +39,10 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
+import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.ToastHelper
+import com.qmobile.qmobileui.utils.setupWithNavController
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -249,5 +256,79 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             else -> {
             }
         }
+    }
+
+    /**
+     * Goes back to login page
+     */
+    private fun startLoginActivity() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.putExtra(LOGGED_OUT, true)
+        intent.addFlags(
+            Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_NEW_TASK
+        )
+        startActivity(intent)
+        finish()
+    }
+
+    /**
+     * Tries to login while in guest mode. Might fail if no Internet connection
+     */
+    private fun tryAutoLogin() {
+        if (connectivityViewModel.isConnected()) {
+            loginViewModel.login { }
+        } else {
+            authenticationRequested = true
+            Timber.d("No Internet connection, authenticationRequested")
+            ToastHelper.show(this, resources.getString(R.string.no_internet_auto_login), MessageType.WARNING)
+        }
+    }
+
+    /**
+     * Called on first creation and when restoring state.
+     */
+    private fun setupBottomNavigationBar() {
+        val bottomNav = this.findViewById<BottomNavigationView>(R.id.bottom_nav)
+        bottomNav.menu.clear() // clear old inflated items.
+        BaseApp.bottomNavigationMenu?.let {
+            bottomNav.inflateMenu(it)
+        }
+
+        val navGraphIds = BaseApp.navGraphIds
+
+        // Setup the bottom navigation view with a list of navigation graphs
+        val controller = bottomNav.setupWithNavController(
+            navGraphIds = navGraphIds,
+            fragmentManager = supportFragmentManager,
+            containerId = R.id.nav_host_container,
+            intent = intent
+        )
+        // Whenever the selected controller changes, setup the action bar.
+        controller.observe(
+            this,
+            { navController ->
+                setupActionBarWithNavController(navController)
+            }
+        )
+        currentNavController = controller
+    }
+
+    /**
+     * Commands the appropriate EntityListViewModel to add the related entity in its dao
+     */
+    fun dispatchNewRelatedEntity(manyToOneRelation: ManyToOneRelation) {
+        val entityListViewModel =
+            entityListViewModelList.find { it.getAssociatedTableName() == manyToOneRelation.className }
+        entityListViewModel?.insertNewRelatedEntity(manyToOneRelation)
+    }
+
+    /**
+     * Commands the appropriate EntityListViewModel to add the related entities in its dao
+     */
+    fun dispatchNewRelatedEntities(oneToManyRelation: OneToManyRelation) {
+        val entityListViewModel =
+            entityListViewModelList.find { it.getAssociatedTableName() == oneToManyRelation.className }
+        entityListViewModel?.insertNewRelatedEntities(oneToManyRelation)
     }
 }
