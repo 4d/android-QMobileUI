@@ -103,9 +103,9 @@ class LoginActivity : BaseActivity() {
 
             rootViewGroup = findViewById(android.R.id.content)
 
-            setupViewModels()
+            initViewModels()
             initLayout()
-            setupObservers()
+            LoginActivityObserver(this, loginViewModel).initObservers()
         }
     }
 
@@ -187,8 +187,10 @@ class LoginActivity : BaseActivity() {
                 .setView(loginRemoteUrlDialog)
                 .setTitle(getString(R.string.pref_remote_url_title))
                 .setPositiveButton(getString(R.string.remote_url_dialog_edit)) { _, _ ->
+
                     clearViewInParent(loginRemoteUrlEditDialog)
                     remoteUrlEditText.hint = getString(R.string.https_hint)
+
                     remoteUrlEditAlertDialogBuilder
                         .setView(loginRemoteUrlEditDialog)
                         .setTitle(getString(R.string.pref_remote_url_title))
@@ -202,6 +204,7 @@ class LoginActivity : BaseActivity() {
                         .setNegativeButton(getString(R.string.remote_url_dialog_negative), null)
                         .show()
                 }
+                .setNegativeButton(getString(R.string.remote_url_dialog_negative), null)
                 .show()
             true
         }

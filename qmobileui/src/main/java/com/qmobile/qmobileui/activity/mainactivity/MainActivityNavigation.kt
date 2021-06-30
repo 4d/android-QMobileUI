@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.activity.mainactivity
 
-import androidx.lifecycle.Observer
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.qmobile.qmobiledatasync.app.BaseApp
@@ -35,7 +34,7 @@ fun MainActivity.setupBottomNavigationBar() {
     // Whenever the selected controller changes, setup the action bar.
     controller.observe(
         this,
-        Observer { navController ->
+        { navController ->
             setupActionBarWithNavController(navController)
         }
     )

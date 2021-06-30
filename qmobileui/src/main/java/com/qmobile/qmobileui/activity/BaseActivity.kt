@@ -18,6 +18,8 @@ import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.fetchResourceString
@@ -48,11 +50,18 @@ abstract class BaseActivity : AppCompatActivity() {
     lateinit var accessibilityApiService: AccessibilityApiService
     lateinit var loginApiService: LoginApiService
 
-    private fun loginViewModelInitialized() = this::loginViewModel.isInitialized
-    private fun connectivityViewModelInitialized() = this::connectivityViewModel.isInitialized
-
     abstract fun handleAuthenticationState(authenticationState: AuthenticationStateEnum)
     abstract fun handleNetworkState(networkState: NetworkStateEnum)
+
+    fun initViewModels() {
+        loginViewModel = getLoginViewModel(this, loginApiService)
+        connectivityViewModel =
+            getConnectivityViewModel(this, connectivityManager, accessibilityApiService)
+    }
+
+    fun initObservers() {
+        BaseActivityObserver(this, loginViewModel, connectivityViewModel).initObservers()
+    }
 
     fun refreshApiClients() {
         ApiClient.clearApiClients()
@@ -64,10 +73,10 @@ abstract class BaseActivity : AppCompatActivity() {
             context = this,
             logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
         )
-        if (loginViewModelInitialized()) {
+        if (::loginViewModel.isInitialized) {
             loginViewModel.refreshAuthRepository(loginApiService)
         }
-        if (connectivityViewModelInitialized()) {
+        if (::connectivityViewModel.isInitialized) {
             connectivityViewModel.refreshAccessibilityRepository(accessibilityApiService)
         }
     }

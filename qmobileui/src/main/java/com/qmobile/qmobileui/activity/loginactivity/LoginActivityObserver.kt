@@ -7,36 +7,38 @@
 package com.qmobile.qmobileui.activity.loginactivity
 
 import android.view.View
-import androidx.lifecycle.Observer
-import com.qmobile.qmobileui.activity.getViewModels
-import com.qmobile.qmobileui.activity.observe
+import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
+import com.qmobile.qmobileui.activity.BaseObserver
 
-fun LoginActivity.setupViewModels() {
-    this.getViewModels()
-}
+class LoginActivityObserver(
+    private val activity: LoginActivity,
+    private val loginViewModel: LoginViewModel
+) : BaseObserver {
 
-fun LoginActivity.setupObservers() {
-    this.observe()
-    observeEmailValid()
-    observeDataLoading()
-}
+    override fun initObservers() {
+        activity.initObservers()
+        observeEmailValid()
+        observeDataLoading()
+    }
 
-// Observe if email is valid
-fun LoginActivity.observeEmailValid() {
-    loginViewModel.emailValid.observe(
-        this,
-        Observer { emailValid ->
-            binding.loginButtonAuth.isEnabled = emailValid
-        }
-    )
-}
+    // Observe if email is valid
+    private fun observeEmailValid() {
+        loginViewModel.emailValid.observe(
+            activity,
+            { emailValid ->
+                activity.binding.loginButtonAuth.isEnabled = emailValid
+            }
+        )
+    }
 
-// Observe if login request in progress
-fun LoginActivity.observeDataLoading() {
-    loginViewModel.dataLoading.observe(
-        this,
-        Observer { dataLoading ->
-            binding.loginProgressbar.visibility = if (dataLoading == true) View.VISIBLE else View.GONE
-        }
-    )
+    // Observe if login request in progress
+    private fun observeDataLoading() {
+        loginViewModel.dataLoading.observe(
+            activity,
+            { dataLoading ->
+                activity.binding.loginProgressbar.visibility =
+                    if (dataLoading == true) View.VISIBLE else View.GONE
+            }
+        )
+    }
 }

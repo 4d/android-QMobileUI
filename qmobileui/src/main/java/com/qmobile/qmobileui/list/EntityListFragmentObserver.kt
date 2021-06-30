@@ -7,56 +7,47 @@
 package com.qmobile.qmobileui.list
 
 import android.annotation.SuppressLint
-import androidx.lifecycle.Observer
-import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
+import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobileui.activity.BaseObserver
 import timber.log.Timber
 
-/**
- * Retrieve viewModels from MainActivity lifecycle
- */
-fun EntityListFragment.getViewModel() {
-    entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-    // We need this ViewModel to know when MainActivity has performed its $authenticate so that
-    // we don't trigger the initial sync if we are not authenticated yet
-    loginViewModel = getLoginViewModel(activity, delegate.loginApiService)
-}
+class EntityListFragmentObserver(private val fragment: EntityListFragment, private val entityListViewModel: EntityListViewModel<EntityModel>) : BaseObserver {
 
-/**
- * Setup observers
- */
-fun EntityListFragment.setupObservers() {
-    observeDataSynchronized()
-}
+    override fun initObservers() {
+        observeDataSynchronized()
+        observeEntityListDynamicSearch()
+    }
 
-// Sql Dynamic Query Support
-fun EntityListFragment.observeEntityListDynamicSearch() {
-    entityListViewModel.entityListLiveData.observe(
-        viewLifecycleOwner,
-        Observer {
-            adapter.submitList(it)
+    // Observe when data are synchronized
+    @SuppressLint("BinaryOperationInTimber")
+    private fun observeDataSynchronized() {
+        entityListViewModel.dataSynchronized.observe(
+            fragment.viewLifecycleOwner,
+            { dataSyncState ->
+                Timber.d(
+                    "[DataSyncState : $dataSyncState, " +
+                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+                        "Instance : $entityListViewModel]"
+                )
+            }
+        )
+    }
+
+    // Sql Dynamic Query Support
+    private fun observeEntityListDynamicSearch() {
+        entityListViewModel.entityListLiveData.observe(
+            fragment.viewLifecycleOwner,
+            {
+                fragment.adapter.submitList(it)
 //            adapter.notifyDataSetChanged()
-        }
-    )
+            }
+        )
 //    entityListViewModel.getAllDynamicQuery(sqLiteQuery).observe(
 //        viewLifecycleOwner,
-//        Observer { pagedList ->
+//        { pagedList ->
 //            adapter.submitList(pagedList)
 //        }
 //    )
-}
-
-// Observe when data are synchronized
-@SuppressLint("BinaryOperationInTimber")
-fun EntityListFragment.observeDataSynchronized() {
-    entityListViewModel.dataSynchronized.observe(
-        viewLifecycleOwner,
-        Observer { dataSyncState ->
-            Timber.d(
-                "[DataSyncState : $dataSyncState, " +
-                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                    "Instance : $entityListViewModel]"
-            )
-        }
-    )
+    }
 }

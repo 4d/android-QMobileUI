@@ -32,6 +32,8 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -81,8 +83,13 @@ open class EntityListFragment : Fragment(), BaseFragment {
         // Every time we land on the fragment, we want refreshed data // not anymore
         syncDataRequested = AtomicBoolean(true) // unused
 
-        if (hasSearch()) this.setHasOptionsMenu(true)
-        getViewModel()
+        if (hasSearch())
+            this.setHasOptionsMenu(true)
+
+        entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
+        // We need this ViewModel to know when MainActivity has performed its $authenticate so that
+        // we don't trigger the initial sync if we are not authenticated yet
+        loginViewModel = getLoginViewModel(activity, delegate.loginApiService)
 
         _binding = FragmentListBinding.inflate(inflater, container, false).apply {
             viewModel = entityListViewModel
@@ -111,8 +118,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
         super.onActivityCreated(savedInstanceState)
         initRecyclerView()
         initOnRefreshListener()
-        setupObservers()
-        observeEntityListDynamicSearch()
+        EntityListFragmentObserver(this, entityListViewModel).initObservers()
         hideKeyboard(activity)
         setSearchQuery()
     }

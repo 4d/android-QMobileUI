@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -75,8 +76,8 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        getViewModel()
-        setupObservers()
+        entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
+        EntityViewPagerFragmentObserver(this, entityListViewModel).initObservers()
     }
 
     override fun onDestroyView() {

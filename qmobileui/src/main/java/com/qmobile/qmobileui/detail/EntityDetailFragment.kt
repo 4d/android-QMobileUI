@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.model.QMobileUiConstants
@@ -25,7 +26,7 @@ import com.qmobile.qmobileui.utils.layoutFromTable
 open class EntityDetailFragment : Fragment(), BaseFragment {
 
     internal var itemId: String = "0"
-    internal lateinit var entityViewModel: EntityViewModel<EntityModel>
+    private lateinit var entityViewModel: EntityViewModel<EntityModel>
     private var _binding: ViewDataBinding? = null
     // This property is only valid between onCreateView and onDestroyView.
     val binding get() = _binding!!
@@ -42,7 +43,8 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
         arguments?.getString("itemId")?.let { itemId = it }
         arguments?.getString("tableName")?.let { tableName = it }
 
-        getViewModel()
+        // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
+        entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
 
         _binding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
@@ -69,6 +71,6 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        setupObservers()
+        EntityDetailFragmentObserver(this, entityViewModel).initObservers()
     }
 }

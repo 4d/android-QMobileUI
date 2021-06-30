@@ -6,33 +6,26 @@
 
 package com.qmobile.qmobileui.settings
 
-import androidx.lifecycle.Observer
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
-import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
+import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
+import com.qmobile.qmobileui.activity.BaseObserver
 
-fun SettingsFragment.getViewModel() {
-    loginViewModel = getLoginViewModel(activity, delegate.loginApiService)
-    connectivityViewModel = getConnectivityViewModel(
-        activity,
-        delegate.connectivityManager,
-        delegate.accessibilityApiService
-    )
-}
+class SettingsFragmentObserver(private val fragment: SettingsFragment, private val connectivityViewModel: ConnectivityViewModel) : BaseObserver {
 
-fun SettingsFragment.setupObservers() {
-    observeNetworkStatus()
-}
+    override fun initObservers() {
+        observeNetworkStatus()
+    }
 
-// Observe network status
-fun SettingsFragment.observeNetworkStatus() {
-    connectivityViewModel.networkStateMonitor.observe(
-        viewLifecycleOwner,
-        Observer { networkState ->
-            if (firstTime || !firstTime && networkState == NetworkStateEnum.CONNECTED) {
-                firstTime = false
-                checkNetwork()
+    // Observe network status
+    private fun observeNetworkStatus() {
+        connectivityViewModel.networkStateMonitor.observe(
+            fragment.viewLifecycleOwner,
+            { networkState ->
+                if (fragment.firstTime || !fragment.firstTime && networkState == NetworkStateEnum.CONNECTED) {
+                    fragment.firstTime = false
+                    fragment.checkNetwork()
+                }
             }
-        }
-    )
+        )
+    }
 }

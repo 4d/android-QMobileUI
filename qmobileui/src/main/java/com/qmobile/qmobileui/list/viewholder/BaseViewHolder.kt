@@ -8,7 +8,6 @@ package com.qmobile.qmobileui.list.viewholder
 
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
@@ -48,7 +47,7 @@ class BaseViewHolder(
         for ((relationName, liveDataRelatedEntity) in relations) {
             liveDataRelatedEntity.observe(
                 requireNotNull(dataBinding.lifecycleOwner),
-                Observer { roomRelation ->
+                { roomRelation ->
                     roomRelation?.first?.let { relatedEntity ->
                         Timber.d("[$tableName] Relation named \"$relationName\" retrieved for position $position")
                         BaseApp.genericTableFragmentHelper.setRelationBinding(

@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
@@ -23,11 +24,13 @@ import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.sync.EntityViewModelIsToSync
 import com.qmobile.qmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
@@ -91,10 +94,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         } // Else, need to wait for onRestoreInstanceState
 
         // Init ApiClients
-        remoteUrlChange()
+        refreshAllApiClients()
 
-        setupViewModels()
-        setupObservers()
+        initViewModels()
+        getEntityListViewModelList()
+        MainActivityObserver(this, entityListViewModelList).initObservers()
 
         // Follow activity lifecycle and check when activity enters foreground for data sync
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
@@ -113,11 +117,29 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         return currentNavController?.value?.navigateUp() ?: false
     }
 
+    // Get EntityListViewModel list
+    private fun getEntityListViewModelList() {
+        entityListViewModelList = mutableListOf()
+        BaseApp.genericTableHelper.tableNames().forEach { tableName ->
+            val clazz = BaseApp.genericTableHelper.entityListViewModelClassFromTable(tableName)
+
+            entityListViewModelList.add(
+                ViewModelProvider(
+                    this,
+                    EntityListViewModelFactory(
+                        tableName,
+                        apiService
+                    )
+                )[clazz]
+            )
+        }
+    }
+
     /**
      * If remoteUrl has been changed, we refresh ApiClient with new parameters (which are stored
      * in SharedPreferences)
      */
-    override fun remoteUrlChange() {
+    override fun refreshAllApiClients() {
         super.refreshApiClients()
         apiService = ApiClient.getApiService(
             context = this,

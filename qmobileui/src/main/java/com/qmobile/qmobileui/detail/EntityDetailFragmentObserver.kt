@@ -6,47 +6,47 @@
 
 package com.qmobile.qmobileui.detail
 
-import androidx.lifecycle.Observer
+import androidx.lifecycle.LiveData
 import com.google.gson.Gson
-import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
+import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatastore.data.RoomRelation
+import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
+import com.qmobile.qmobileui.activity.BaseObserver
 import timber.log.Timber
 
-/**
- * Retrieve viewModels from MainActivity lifecycle
- */
-fun EntityDetailFragment.getViewModel() {
-    // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
-    entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
-}
+class EntityDetailFragmentObserver(
+    private val fragment: EntityDetailFragment,
+    private val entityViewModel: EntityViewModel<EntityModel>
+) : BaseObserver {
 
-/**
- * Setup observers
- */
-fun EntityDetailFragment.setupObservers() {
-    observeEntity()
-}
+    override fun initObservers() {
+        observeEntity()
+    }
 
-// Observe entity list
-fun EntityDetailFragment.observeEntity() {
-    entityViewModel.entity.observe(
-        viewLifecycleOwner,
-        Observer { entity ->
-            Timber.d("Observed entity from Room, json = ${Gson().toJson(entity)}")
-
-            entity?.let {
-
-                val relationKeysMap = entityViewModel.getRelationsInfo(entity)
-                for ((relationName, liveDataListRoomRelation) in relationKeysMap) {
-                    liveDataListRoomRelation.observe(
-                        viewLifecycleOwner,
-                        Observer { roomRelation ->
-                            roomRelation?.let {
-                                entityViewModel.setRelationToLayout(relationName, roomRelation)
-                            }
-                        }
-                    )
+    // Observe entity list
+    private fun observeEntity() {
+        entityViewModel.entity.observe(
+            fragment.viewLifecycleOwner,
+            { entity ->
+                Timber.d("Observed entity from Room, json = ${Gson().toJson(entity)}")
+                entity?.let {
+                    val relationKeysMap = entityViewModel.getRelationsInfo(entity)
+                    observeRelations(relationKeysMap)
                 }
             }
+        )
+    }
+
+    private fun observeRelations(relationKeysMap: Map<String, LiveData<RoomRelation>>) {
+        for ((relationName, liveDataListRoomRelation) in relationKeysMap) {
+            liveDataListRoomRelation.observe(
+                fragment.viewLifecycleOwner,
+                { roomRelation ->
+                    roomRelation?.let {
+                        entityViewModel.setRelationToLayout(relationName, roomRelation)
+                    }
+                }
+            )
         }
-    )
+    }
 }

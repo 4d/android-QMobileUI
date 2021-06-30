@@ -22,6 +22,8 @@ import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -81,9 +83,14 @@ class SettingsFragment :
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        getViewModel()
+        loginViewModel = getLoginViewModel(activity, delegate.loginApiService)
+        connectivityViewModel = getConnectivityViewModel(
+            activity,
+            delegate.connectivityManager,
+            delegate.accessibilityApiService
+        )
         initLayout()
-        setupObservers()
+        SettingsFragmentObserver(this, connectivityViewModel).initObservers()
     }
 
     /**
@@ -141,7 +148,7 @@ class SettingsFragment :
                     val newRemoteUrl = newValue as String
                     loginViewModel.authInfoHelper.remoteUrl = newRemoteUrl
                     this.remoteUrl = newRemoteUrl
-                    delegate.remoteUrlChange()
+                    delegate.refreshAllApiClients()
                     remoteUrlPref?.setDefaultValue(newRemoteUrl)
                     checkNetwork()
                 }

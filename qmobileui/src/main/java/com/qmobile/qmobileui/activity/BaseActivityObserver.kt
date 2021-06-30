@@ -6,60 +6,60 @@
 
 package com.qmobile.qmobileui.activity
 
-import androidx.lifecycle.Observer
-import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
+import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import timber.log.Timber
 
-fun BaseActivity.getViewModels() {
-    loginViewModel = getLoginViewModel(this, loginApiService)
-    connectivityViewModel =
-        getConnectivityViewModel(this, connectivityManager, accessibilityApiService)
-}
+class BaseActivityObserver(
+    private val activity: BaseActivity,
+    private val loginViewModel: LoginViewModel,
+    private val connectivityViewModel: ConnectivityViewModel
+) : BaseObserver {
 
-fun BaseActivity.observe() {
-    observeAuthenticationState()
-    observeNetworkState()
-    observeConnectivityToastMessage()
-    observeLoginToastMessage()
-}
+    override fun initObservers() {
+        observeAuthenticationState()
+        observeNetworkState()
+        observeConnectivityToastMessage()
+        observeLoginToastMessage()
+    }
 
-// Observe authentication state
-fun BaseActivity.observeAuthenticationState() {
-    loginViewModel.authenticationState.observe(
-        this,
-        Observer { authenticationState ->
-            Timber.i("[AuthenticationState : $authenticationState]")
-            handleAuthenticationState(authenticationState)
-        }
-    )
-}
+    // Observe authentication state
+    private fun observeAuthenticationState() {
+        loginViewModel.authenticationState.observe(
+            activity,
+            { authenticationState ->
+                Timber.i("[AuthenticationState : $authenticationState]")
+                activity.handleAuthenticationState(authenticationState)
+            }
+        )
+    }
 
-// Observe network status
-fun BaseActivity.observeNetworkState() {
-    connectivityViewModel.networkStateMonitor.observe(
-        this,
-        Observer { networkState ->
-            Timber.i("[NetworkState : $networkState]")
-            handleNetworkState(networkState)
-        }
-    )
-}
+    // Observe network status
+    private fun observeNetworkState() {
+        connectivityViewModel.networkStateMonitor.observe(
+            activity,
+            { networkState ->
+                Timber.i("[NetworkState : $networkState]")
+                activity.handleNetworkState(networkState)
+            }
+        )
+    }
 
-fun BaseActivity.observeConnectivityToastMessage() {
-    connectivityViewModel.toastMessage.message.observe(
-        this,
-        Observer { event ->
-            handleEvent(event)
-        }
-    )
-}
+    private fun observeConnectivityToastMessage() {
+        connectivityViewModel.toastMessage.message.observe(
+            activity,
+            { event ->
+                activity.handleEvent(event)
+            }
+        )
+    }
 
-fun BaseActivity.observeLoginToastMessage() {
-    loginViewModel.toastMessage.message.observe(
-        this,
-        Observer { event ->
-            handleEvent(event)
-        }
-    )
+    private fun observeLoginToastMessage() {
+        loginViewModel.toastMessage.message.observe(
+            activity,
+            { event ->
+                activity.handleEvent(event)
+            }
+        )
+    }
 }
