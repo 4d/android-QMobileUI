@@ -11,13 +11,13 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.preference.EditTextPreference
 import androidx.preference.EditTextPreferenceDialogFragmentCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
@@ -141,7 +141,7 @@ class SettingsFragment :
                     val newRemoteUrl = newValue as String
                     loginViewModel.authInfoHelper.remoteUrl = newRemoteUrl
                     this.remoteUrl = newRemoteUrl
-                    delegate.refreshApiClients()
+                    delegate.remoteUrlChange()
                     remoteUrlPref?.setDefaultValue(newRemoteUrl)
                     checkNetwork()
                 }
@@ -155,13 +155,13 @@ class SettingsFragment :
      */
     private fun showLogoutDialog() {
         activity?.let {
-            AlertDialog.Builder(it)
+            MaterialAlertDialogBuilder(it)
                 .setTitle(resources.getString(R.string.logout_dialog_title))
                 .setMessage(resources.getString(R.string.logout_dialog_message))
+                .setNegativeButton(resources.getString(R.string.logout_dialog_negative), null)
                 .setPositiveButton(resources.getString(R.string.logout_dialog_positive)) { _, _ ->
                     logout()
                 }
-                .setNegativeButton(resources.getString(R.string.logout_dialog_negative), null)
                 .show()
         }
     }
@@ -209,7 +209,7 @@ class SettingsFragment :
      * Sets the indicator icon color and text to no Internet status
      */
     private fun setLayoutNoInternet() {
-        remoteUrlPref?.summary = "$remoteUrl - $noInternetString"
+        remoteUrlPref?.summary = getString(R.string.remote_url_placeholder, remoteUrl, noInternetString)
         remoteUrlPref?.icon = serverNotAccessibleDrawable
     }
 
@@ -217,7 +217,7 @@ class SettingsFragment :
      * Sets the indicator icon color and text to server not accessible
      */
     private fun setLayoutServerNotAccessible() {
-        remoteUrlPref?.summary = "$remoteUrl - $serverNotAccessibleString"
+        remoteUrlPref?.summary = getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
         remoteUrlPref?.icon = serverNotAccessibleDrawable
     }
 
@@ -225,7 +225,7 @@ class SettingsFragment :
      * Sets the indicator icon color and text to server accessible
      */
     private fun setLayoutServerAccessible() {
-        remoteUrlPref?.summary = "$remoteUrl - $serverAccessibleString"
+        remoteUrlPref?.summary = getString(R.string.remote_url_placeholder, remoteUrl, serverAccessibleString)
         remoteUrlPref?.icon = serverAccessibleDrawable
     }
 

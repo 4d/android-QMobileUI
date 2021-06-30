@@ -91,7 +91,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         } // Else, need to wait for onRestoreInstanceState
 
         // Init ApiClients
-        refreshApiClients()
+        remoteUrlChange()
 
         setupViewModels()
         setupObservers()
@@ -117,30 +117,16 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      * If remoteUrl has been changed, we refresh ApiClient with new parameters (which are stored
      * in SharedPreferences)
      */
-    override fun refreshApiClients() {
-        ApiClient.clearApiClients()
-        loginApiService = ApiClient.getLoginApiService(
-            context = this,
-            logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
-        )
-        accessibilityApiService = ApiClient.getAccessibilityApiService(
-            context = this,
-            logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
-        )
+    override fun remoteUrlChange() {
+        super.refreshApiClients()
         apiService = ApiClient.getApiService(
             context = this,
             loginApiService = loginApiService,
             loginRequiredCallback = loginRequiredCallbackForInterceptor,
             logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
         )
-        if (super.loginViewModelInitialized()) {
-            loginViewModel.refreshAuthRepository(loginApiService)
-        }
         if (this::entityListViewModelList.isInitialized) {
             entityListViewModelList.forEach { it.refreshRestRepository(apiService) }
-        }
-        if (super.connectivityViewModelInitialized()) {
-            connectivityViewModel.refreshAccessibilityRepository(accessibilityApiService)
         }
     }
 

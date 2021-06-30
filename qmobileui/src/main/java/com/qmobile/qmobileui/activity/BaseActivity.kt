@@ -7,15 +7,18 @@
 package com.qmobile.qmobileui.activity
 
 import android.net.ConnectivityManager
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.network.AccessibilityApiService
+import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
+import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.fetchResourceString
 
@@ -45,9 +48,27 @@ abstract class BaseActivity : AppCompatActivity() {
     lateinit var accessibilityApiService: AccessibilityApiService
     lateinit var loginApiService: LoginApiService
 
-    fun loginViewModelInitialized() = this::loginViewModel.isInitialized
-    fun connectivityViewModelInitialized() = this::connectivityViewModel.isInitialized
+    private fun loginViewModelInitialized() = this::loginViewModel.isInitialized
+    private fun connectivityViewModelInitialized() = this::connectivityViewModel.isInitialized
 
     abstract fun handleAuthenticationState(authenticationState: AuthenticationStateEnum)
     abstract fun handleNetworkState(networkState: NetworkStateEnum)
+
+    fun refreshApiClients() {
+        ApiClient.clearApiClients()
+        loginApiService = ApiClient.getLoginApiService(
+            context = this,
+            logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
+        )
+        accessibilityApiService = ApiClient.getAccessibilityApiService(
+            context = this,
+            logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
+        )
+        if (loginViewModelInitialized()) {
+            loginViewModel.refreshAuthRepository(loginApiService)
+        }
+        if (connectivityViewModelInitialized()) {
+            connectivityViewModel.refreshAccessibilityRepository(accessibilityApiService)
+        }
+    }
 }

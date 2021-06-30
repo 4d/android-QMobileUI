@@ -47,6 +47,7 @@
     <string name="server_accessible">Server is accessible</string>
     <string name="server_not_accessible">Server is not accessible</string>
     <string name="error_occurred_try_again">An error occurred, please try again later</string>
+    <string name="remote_url_placeholder">%1$s - %2$s</string>
 
     <!--    Login -->
     <string name="login_button_text">Login</string>
@@ -55,4 +56,9 @@
     <string name="login_logged_out">You have been logged out</string>
     <string name="login_invalid_email">Invalid mail address</string>
     <string name="login_image_content_description">Application logo</string>
+    <string name="remote_url_dialog_negative">Cancel</string>
+    <string name="remote_url_dialog_positive">OK</string>
+    <string name="remote_url_dialog_edit">Edit</string>
+    <string name="network_status_image">Network Status Image</string>
+    <string name="https_hint">https://…</string>
 </resources>

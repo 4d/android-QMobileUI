@@ -24,7 +24,7 @@ interface FragmentCommunication {
 
     val connectivityManager: ConnectivityManager
 
-    fun refreshApiClients()
+    fun remoteUrlChange()
 
     fun isConnected(onResult: (isAccessible: Boolean) -> Unit)
 

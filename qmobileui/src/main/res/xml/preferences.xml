@@ -18,7 +18,6 @@
             android:summary="@string/pref_remote_url_summary"
             android:title="@string/pref_remote_url_title" />
 
-
     </PreferenceCategory>
 
     <PreferenceCategory

@@ -5,8 +5,28 @@
   -->
 
 <resources>
+
     <style name="ErrorTextAppearance" parent="@android:style/TextAppearance">
         <item name="android:textColor">?colorSecondary</item>
         <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="TitleThemeOverlay.MaterialComponents.MaterialAlertDialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="materialAlertDialogTitleTextStyle">
+            @style/TitleMaterialAlertDialog.MaterialComponents.Title.Text
+        </item>
+        <item name="alertDialogStyle">@style/MaterialAlertDialog.Rounded</item>
+    </style>
+
+    <style name="TitleMaterialAlertDialog.MaterialComponents.Title.Text" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="MaterialAlertDialog.Rounded" parent="MaterialAlertDialog.MaterialComponents">
+        <item name="shapeAppearance">@style/ShapeAppearance.MaterialAlertDialog.Rounded</item>
+    </style>
+
+    <style name="ShapeAppearance.MaterialAlertDialog.Rounded" parent="">
+        <item name="cornerSize">10dp</item>
     </style>
 </resources>
