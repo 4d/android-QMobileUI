@@ -126,14 +126,12 @@ fun applyFormatter(
                                 val formattedValue: String? =
                                     getChoiceListString(fieldMapping, text)
                                 view.text =
-                                    if (formattedValue.isNullOrEmpty()) text else formattedValue
+                                    if (formattedValue.isNullOrEmpty()) "" else formattedValue
                             }
                             else -> view.text = ""
                         }
                         return
                     }
-                view.text = ""
-                return
             }
         }
     }
