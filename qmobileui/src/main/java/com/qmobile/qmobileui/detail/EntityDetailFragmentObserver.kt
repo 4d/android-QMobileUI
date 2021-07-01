@@ -10,6 +10,7 @@ import androidx.lifecycle.LiveData
 import com.google.gson.Gson
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomRelation
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import timber.log.Timber
@@ -30,7 +31,9 @@ class EntityDetailFragmentObserver(
             { entity ->
                 Timber.d("Observed entity from Room, json = ${Gson().toJson(entity)}")
                 entity?.let {
-                    val relationKeysMap = entityViewModel.getRelationsInfo(entity)
+//                    val relationKeysMap = entityViewModel.getRelationsInfo(entity)
+                    val relationKeysMap =
+                        BaseApp.genericTableHelper.getRelationsInfo(fragment.tableName, entity)
                     observeRelations(relationKeysMap)
                 }
             }

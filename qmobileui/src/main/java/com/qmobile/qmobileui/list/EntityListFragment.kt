@@ -137,7 +137,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
             tableName, viewLifecycleOwner,
             object : RelationCallback {
                 override fun getRelations(entity: EntityModel): Map<String, LiveData<RoomRelation>> =
-                    entityListViewModel.getRelationsInfo(entity)
+                    BaseApp.genericTableHelper.getRelationsInfo(tableName, entity)
+//                    entityListViewModel.getRelationsInfo(entity)
             }
         )
 
