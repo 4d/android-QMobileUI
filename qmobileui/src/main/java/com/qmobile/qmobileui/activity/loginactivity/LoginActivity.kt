@@ -180,7 +180,7 @@ class LoginActivity : BaseActivity() {
             R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
 
-        /*binding.loginLogo.setOnLongClickListener {
+        binding.loginLogo.setOnLongClickListener {
             checkNetwork()
             clearViewInParent(loginRemoteUrlDialog)
             remoteUrlAlertDialogBuilder
@@ -207,7 +207,7 @@ class LoginActivity : BaseActivity() {
                 .setNegativeButton(getString(R.string.remote_url_dialog_negative), null)
                 .show()
             true
-        }*/
+        }
     }
 
     private fun initRemoteUrlDialog() {
