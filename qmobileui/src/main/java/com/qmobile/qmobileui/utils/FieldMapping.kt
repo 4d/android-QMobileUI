@@ -25,7 +25,6 @@ data class FieldMapping(
     val tintable: Boolean?
 )
 
-@Suppress("NestedBlockDepth")
 fun buildCustomFormatterBinding(customFormatters: JSONObject?): Map<String, Map<String, FieldMapping>> {
     val tableMap: MutableMap<String, Map<String, FieldMapping>> = mutableMapOf()
 

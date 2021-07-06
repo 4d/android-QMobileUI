@@ -12,7 +12,10 @@ import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import timber.log.Timber
 
-class EntityListFragmentObserver(private val fragment: EntityListFragment, private val entityListViewModel: EntityListViewModel<EntityModel>) : BaseObserver {
+class EntityListFragmentObserver(
+    private val fragment: EntityListFragment,
+    private val entityListViewModel: EntityListViewModel<EntityModel>
+) : BaseObserver {
 
     override fun initObservers() {
         observeDataSynchronized()

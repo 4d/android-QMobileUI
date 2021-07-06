@@ -10,7 +10,10 @@ import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 
-class SettingsFragmentObserver(private val fragment: SettingsFragment, private val connectivityViewModel: ConnectivityViewModel) : BaseObserver {
+class SettingsFragmentObserver(
+    private val fragment: SettingsFragment,
+    private val connectivityViewModel: ConnectivityViewModel
+) : BaseObserver {
 
     override fun initObservers() {
         observeNetworkStatus()

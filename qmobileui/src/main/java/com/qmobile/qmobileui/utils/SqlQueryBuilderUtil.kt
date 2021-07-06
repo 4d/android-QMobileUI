@@ -8,6 +8,8 @@ package com.qmobile.qmobileui.utils
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.qmobile.qmobileapi.utils.getSafeArray
+import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobiledatasync.app.BaseApp
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -19,43 +21,116 @@ class SqlQueryBuilderUtil(
     fun getAll() = SimpleSQLiteQuery("SELECT * FROM $tableName")
 
     fun sortQuery(dataToSort: String): SimpleSQLiteQuery {
-        val stringBuffer = StringBuffer("SELECT * FROM $tableName WHERE ")
-        if (searchField.has(tableName)) {
-            searchField.getSafeArray(tableName)?.let { conditionAdder(it, stringBuffer, dataToSort) }
-        }
+        val stringBuffer = StringBuffer("SELECT * FROM $tableName AS T1 WHERE ")
+        searchField.getSafeArray(tableName)?.let { conditionAdder(it, stringBuffer, dataToSort) }
+
         return SimpleSQLiteQuery(stringBuffer.toString().removeSuffix("OR "))
     }
 
-    @Suppress("NestedBlockDepth")
     private fun conditionAdder(
         columnsToFilter: JSONArray,
         stringBuffer: StringBuffer,
         dataToSort: String
     ) {
-        (0 until columnsToFilter.length()).forEach {
-            val field = columnsToFilter[it]
-            stringBuffer.append("`$field` LIKE \'%$dataToSort%\' OR ")
-            QMobileUiUtil.appUtilities.customFormatters[tableName]?.get(field)
-                ?.let { fieldMapping ->
-                    if (fieldMapping.binding == "localizedText") {
-                        when (fieldMapping.choiceList) {
-                            is Map<*, *> -> {
-                                for ((key, value) in fieldMapping.choiceList) {
-                                    if ((value as? String?)?.containsIgnoreCase(dataToSort) == true) {
-                                        stringBuffer.append("`$field` == \'$key\' OR ")
-                                    }
-                                }
-                            }
-                            is List<*> -> {
-                                for ((i, value) in fieldMapping.choiceList.withIndex()) {
-                                    if ((value as? String?)?.containsIgnoreCase(dataToSort) == true) {
-                                        stringBuffer.append("`$field` == \'$i\' OR ")
-                                    }
-                                }
-                            }
+        (0 until columnsToFilter.length()).forEach eachColumn@{
+            val field = columnsToFilter.getSafeString(it)
+            if (field !is String) return@eachColumn
+
+            if (field.contains(".")) { // manager.FirstName
+
+                val relation = field.split(".")[0] // manager
+                val relatedField = field.split(".")[1] // FirstName
+                val relatedTableName =
+                    BaseApp.genericTableHelper.getRelatedTableName(tableName, relation)
+
+                stringBuffer.append(
+                    "EXISTS ( SELECT * FROM $relatedTableName as T2 WHERE " +
+                        "T1.__${relation}Key = T2.__KEY AND "
+                )
+                val appendFromFormat = appendFromFormat(field, dataToSort, "T2.$relatedField")
+                if (appendFromFormat.isEmpty()) {
+                    stringBuffer.append("T2.$relatedField LIKE '%$dataToSort%' OR ")
+                } else {
+                    stringBuffer.append("( T2.$relatedField LIKE '%$dataToSort%' OR $appendFromFormat")
+                    stringBuffer.removeSuffix("OR ")
+                    stringBuffer.append(") ")
+                }
+                stringBuffer.removeSuffix("OR ")
+                stringBuffer.append(") OR ")
+            } else {
+                stringBuffer.append("`$field` LIKE \'%$dataToSort%\' OR ")
+                stringBuffer.append(appendFromFormat(field, dataToSort))
+            }
+        }
+    }
+
+    private fun appendFromFormat(
+        field: String,
+        dataToSort: String,
+        relatedField: String? = null
+    ): String {
+        var appendice = ""
+        QMobileUiUtil.appUtilities.customFormatters[tableName.tableNameAdjustment()]?.get(field.fieldAdjustment())
+            ?.let { fieldMapping ->
+                if (fieldMapping.binding == "localizedText") {
+
+                    val fieldForQuery: String = relatedField ?: field
+                    appendice = when (fieldMapping.choiceList) {
+                        is Map<*, *> -> {
+                            appendFromFormatMap(
+                                fieldMapping.choiceList,
+                                fieldForQuery,
+                                dataToSort
+                            )
                         }
+                        is List<*> -> {
+                            appendFromFormatList(
+                                fieldMapping.choiceList,
+                                fieldForQuery,
+                                dataToSort
+                            )
+                        }
+                        else -> ""
                     }
                 }
+            }
+        return appendice
+    }
+
+    private fun appendFromFormatMap(
+        choiceList: Map<*, *>,
+        field: String,
+        dataToSort: String
+    ): String {
+        var appendice = ""
+        for ((key, value) in choiceList) {
+            if ((value as? String?)?.containsIgnoreCase(dataToSort) == true) {
+                appendice += "$field == \'$key\' OR "
+            }
         }
+        return appendice
+    }
+
+    private fun appendFromFormatList(
+        choiceList: List<*>,
+        field: String,
+        dataToSort: String
+    ): String {
+        var appendice = ""
+        for ((i, value) in choiceList.withIndex()) {
+            if ((value as? String?)?.containsIgnoreCase(dataToSort) == true) {
+                appendice += "$field == \'$i\' OR "
+            }
+        }
+        return appendice
+    }
+
+    private fun StringBuffer.removeSuffix(suffix: String) {
+        if (this.toString().endsWith(suffix))
+            this.replace(
+                this.toString().length - (suffix.length + 1),
+                this.toString().length - 1,
+                ""
+            )
     }
 }

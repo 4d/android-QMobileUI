@@ -75,7 +75,7 @@ fun bindImageFromUrl(
     glideRequest.into(view)
 }
 
-@Suppress("ReturnCount", "NestedBlockDepth", "LongParameterList")
+@Suppress("ReturnCount", "LongParameterList")
 @BindingAdapter(
     value = ["text", "format", "tableName", "fieldName", "imageWidth", "imageHeight"],
     requireAll = false
