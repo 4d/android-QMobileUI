@@ -18,7 +18,6 @@ import org.json.JSONObject
 data class FieldMapping(
     val binding: String?,
     val choiceList: Any?, // choiceList can be a JSONObject or a JSONArray
-    val isSearchable: Boolean?,
     val name: String?,
     val imageWidth: Int?, // currently not used, reading the one from layout
     val imageHeight: Int?, // currently not used, reading the one from layout
@@ -50,7 +49,6 @@ fun getFieldMapping(fieldMappingJsonObject: JSONObject): FieldMapping = FieldMap
         ?.toStringMap()
         ?: fieldMappingJsonObject.getSafeArray("choiceList")
             .getStringList(), // choiceList can be a JSONObject or a JSONArray
-    isSearchable = fieldMappingJsonObject.getSafeBoolean("isSearchable"),
     name = fieldMappingJsonObject.getSafeString("name"),
     imageWidth = fieldMappingJsonObject.getSafeInt("imageWidth"), // currently not used, reading the one from layout
     imageHeight = fieldMappingJsonObject.getSafeInt("imageHeight"), // currently not used, reading the one from layout
