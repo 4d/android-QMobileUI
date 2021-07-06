@@ -22,10 +22,8 @@ class SqlQueryBuilderUtil(
 
     fun sortQuery(dataToSort: String): SimpleSQLiteQuery {
         val stringBuffer = StringBuffer("SELECT * FROM $tableName AS T1 WHERE ")
-        if (searchField.has(tableName)) {
-            searchField.getSafeArray(tableName)
-                ?.let { conditionAdder(it, stringBuffer, dataToSort) }
-        }
+        searchField.getSafeArray(tableName)?.let { conditionAdder(it, stringBuffer, dataToSort) }
+
         return SimpleSQLiteQuery(stringBuffer.toString().removeSuffix("OR "))
     }
 
@@ -47,68 +45,92 @@ class SqlQueryBuilderUtil(
 
                 stringBuffer.append(
                     "EXISTS ( SELECT * FROM $relatedTableName as T2 WHERE " +
-                        "T1.__${relation}Key = T2.__KEY AND T2.$relatedField " +
-                        "LIKE '%$dataToSort%' ) OR "
+                        "T1.__${relation}Key = T2.__KEY AND "
                 )
+                val appendFromFormat = appendFromFormat(field, dataToSort, "T2.$relatedField")
+                if (appendFromFormat.isEmpty()) {
+                    stringBuffer.append("T2.$relatedField LIKE '%$dataToSort%' OR ")
+                } else {
+                    stringBuffer.append("( T2.$relatedField LIKE '%$dataToSort%' OR $appendFromFormat")
+                    stringBuffer.removeSuffix("OR ")
+                    stringBuffer.append(") ")
+                }
+                stringBuffer.removeSuffix("OR ")
+                stringBuffer.append(") OR ")
             } else {
                 stringBuffer.append("`$field` LIKE \'%$dataToSort%\' OR ")
-                appendFromFormat(field, stringBuffer, dataToSort)
+                stringBuffer.append(appendFromFormat(field, dataToSort))
             }
         }
     }
 
     private fun appendFromFormat(
         field: String,
-        stringBuffer: StringBuffer,
-        dataToSort: String
-    ) {
-        QMobileUiUtil.appUtilities.customFormatters[tableName]?.get(field)?.let { fieldMapping ->
-            if (fieldMapping.binding == "localizedText") {
-                when (fieldMapping.choiceList) {
-                    is Map<*, *> -> {
-                        appendFromFormatMap(
-                            fieldMapping.choiceList,
-                            field,
-                            stringBuffer,
-                            dataToSort
-                        )
-                    }
-                    is List<*> -> {
-                        appendFromFormatList(
-                            fieldMapping.choiceList,
-                            field,
-                            stringBuffer,
-                            dataToSort
-                        )
+        dataToSort: String,
+        relatedField: String? = null
+    ): String {
+        var appendice = ""
+        QMobileUiUtil.appUtilities.customFormatters[tableName.tableNameAdjustment()]?.get(field.fieldAdjustment())
+            ?.let { fieldMapping ->
+                if (fieldMapping.binding == "localizedText") {
+
+                    val fieldForQuery: String = relatedField ?: field
+                    appendice = when (fieldMapping.choiceList) {
+                        is Map<*, *> -> {
+                            appendFromFormatMap(
+                                fieldMapping.choiceList,
+                                fieldForQuery,
+                                dataToSort
+                            )
+                        }
+                        is List<*> -> {
+                            appendFromFormatList(
+                                fieldMapping.choiceList,
+                                fieldForQuery,
+                                dataToSort
+                            )
+                        }
+                        else -> ""
                     }
                 }
             }
-        }
+        return appendice
     }
 
     private fun appendFromFormatMap(
         choiceList: Map<*, *>,
         field: String,
-        stringBuffer: StringBuffer,
         dataToSort: String
-    ) {
+    ): String {
+        var appendice = ""
         for ((key, value) in choiceList) {
             if ((value as? String?)?.containsIgnoreCase(dataToSort) == true) {
-                stringBuffer.append("`$field` == \'$key\' OR ")
+                appendice += "$field == \'$key\' OR "
             }
         }
+        return appendice
     }
 
     private fun appendFromFormatList(
         choiceList: List<*>,
         field: String,
-        stringBuffer: StringBuffer,
         dataToSort: String
-    ) {
+    ): String {
+        var appendice = ""
         for ((i, value) in choiceList.withIndex()) {
             if ((value as? String?)?.containsIgnoreCase(dataToSort) == true) {
-                stringBuffer.append("`$field` == \'$i\' OR ")
+                appendice += "$field == \'$i\' OR "
             }
         }
+        return appendice
+    }
+
+    private fun StringBuffer.removeSuffix(suffix: String) {
+        if (this.toString().endsWith(suffix))
+            this.replace(
+                this.toString().length - (suffix.length + 1),
+                this.toString().length - 1,
+                ""
+            )
     }
 }
