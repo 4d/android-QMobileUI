@@ -120,6 +120,12 @@ fun applyFormatter(
                                             )
                                         }
                                     }
+                                } ?: run {
+                                    /* There are inconsistencies with RecyclerView and imageNamed
+                                    custom formatters : if we don't remove any compoundDrawable,
+                                    some RecyclerView item receive a compound drawable while it
+                                    should not receive any */
+                                    view.setCompoundDrawables(null, null, null, null)
                                 }
                             }
                             "localizedText" -> {
