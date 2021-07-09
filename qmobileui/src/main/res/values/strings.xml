@@ -56,9 +56,11 @@
     <string name="login_logged_out">You have been logged out</string>
     <string name="login_invalid_email">Invalid mail address</string>
     <string name="login_image_content_description">Application logo</string>
-    <string name="remote_url_dialog_negative">Cancel</string>
+    <string name="remote_url_dialog_cancel">Cancel</string>
+    <string name="remote_url_dialog_done">Done</string>
     <string name="remote_url_dialog_positive">OK</string>
     <string name="remote_url_dialog_edit">Edit</string>
+    <string name="remote_url_invalid">Invalid remote url</string>
     <string name="network_status_image">Network Status Image</string>
     <string name="https_hint">https://…</string>
 </resources>

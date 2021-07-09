@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.activity.loginactivity
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
@@ -18,6 +19,8 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -27,10 +30,12 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.qmobile.qmobileapi.auth.AuthInfoHelper
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.isEmailValid
+import com.qmobile.qmobileapi.auth.isRemoteUrlValid
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobiledatasync.app.BaseApp
@@ -53,9 +58,10 @@ class LoginActivity : BaseActivity() {
     private var remoteUrl = ""
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
-    private lateinit var remoteUrlAlertDialogBuilder: MaterialAlertDialogBuilder
-    private lateinit var remoteUrlEditAlertDialogBuilder: MaterialAlertDialogBuilder
+    private lateinit var remoteUrlDisplayDialogBuilder: MaterialAlertDialogBuilder
+    private lateinit var remoteUrlEditDialogBuilder: MaterialAlertDialogBuilder
     private lateinit var authInfoHelper: AuthInfoHelper
+    private lateinit var shakeAnimation: Animation
 
     // UI strings
     private lateinit var noInternetString: String
@@ -63,11 +69,12 @@ class LoginActivity : BaseActivity() {
     private lateinit var serverNotAccessibleString: String
 
     // Views
-    private lateinit var loginRemoteUrlDialog: View
-    private lateinit var loginRemoteUrlEditDialog: View
+    private lateinit var remoteUrlDisplayDialog: View
+    private lateinit var remoteUrlEditDialog: View
     private lateinit var imageNetworkStatus: ImageView
     private lateinit var remoteUrlMessage: TextView
-    private lateinit var remoteUrlEditText: TextInputLayout
+    private lateinit var remoteUrlEditLayout: TextInputLayout
+    private lateinit var remoteUrlEditEditText: TextInputEditText
     private lateinit var rootViewGroup: ViewGroup
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -139,8 +146,8 @@ class LoginActivity : BaseActivity() {
             }
         }
 
-        // Define a shake animation for when mail is not valid
-        val shakeAnimation = AnimationUtils.loadAnimation(this, R.anim.shake)
+        // Define a shake animation for when input is not valid
+        shakeAnimation = AnimationUtils.loadAnimation(this, R.anim.shake)
 
         binding.loginEmailInput.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
@@ -169,49 +176,75 @@ class LoginActivity : BaseActivity() {
         }
 
         this.remoteUrl = authInfoHelper.remoteUrl
-        initRemoteUrlDialog()
+        initRemoteUrlDisplayDialog()
         initRemoteUrlEditDialog()
 
-        remoteUrlAlertDialogBuilder = MaterialAlertDialogBuilder(
+        remoteUrlDisplayDialogBuilder = MaterialAlertDialogBuilder(
             this,
             R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
-        remoteUrlEditAlertDialogBuilder = MaterialAlertDialogBuilder(
+        remoteUrlEditDialogBuilder = MaterialAlertDialogBuilder(
             this,
             R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
 
         binding.loginLogo.setOnVeryLongClickListener {
             checkNetwork()
-            clearViewInParent(loginRemoteUrlDialog)
-            remoteUrlAlertDialogBuilder
-                .setView(loginRemoteUrlDialog)
-                .setTitle(getString(R.string.pref_remote_url_title))
-                .setPositiveButton(getString(R.string.remote_url_dialog_edit)) { _, _ ->
-
-                    clearViewInParent(loginRemoteUrlEditDialog)
-                    remoteUrlEditText.hint = getString(R.string.https_hint)
-
-                    remoteUrlEditAlertDialogBuilder
-                        .setView(loginRemoteUrlEditDialog)
-                        .setTitle(getString(R.string.pref_remote_url_title))
-                        .setPositiveButton(getString(R.string.remote_url_dialog_positive)) { _, _ ->
-                            val newRemoteUrl = remoteUrlEditText.editText?.text.toString()
-                            authInfoHelper.remoteUrl = newRemoteUrl
-                            this.remoteUrl = newRemoteUrl
-                            super.refreshApiClients()
-                            checkNetwork()
-                        }
-                        .setNegativeButton(getString(R.string.remote_url_dialog_negative), null)
-                        .show()
-                }
-                .setNegativeButton(getString(R.string.remote_url_dialog_negative), null)
-                .show()
-            true
+            showRemoteUrlDisplayDialog()
         }
     }
 
-    private fun initRemoteUrlDialog() {
+    private fun showRemoteUrlDisplayDialog() {
+        clearViewInParent(remoteUrlDisplayDialog)
+
+        remoteUrlDisplayDialogBuilder
+            .setView(remoteUrlDisplayDialog)
+            .setTitle(getString(R.string.pref_remote_url_title))
+            .setPositiveButton(getString(R.string.remote_url_dialog_edit), null)
+            .setNegativeButton(getString(R.string.remote_url_dialog_done), null)
+            .create().apply {
+                setOnShowListener {
+                    getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                        showRemoteUrlEditDialog()
+                    }
+                }
+            }.show()
+    }
+
+    private fun showRemoteUrlEditDialog() {
+        clearViewInParent(remoteUrlEditDialog)
+        remoteUrlEditLayout.editText?.setText(remoteUrl)
+        remoteUrlEditLayout.error = null
+
+        remoteUrlEditDialogBuilder
+            .setView(remoteUrlEditDialog)
+            .setTitle(getString(R.string.pref_remote_url_title))
+            .setPositiveButton(getString(R.string.remote_url_dialog_positive), null)
+            .setNegativeButton(getString(R.string.remote_url_dialog_cancel), null)
+            .create().apply {
+                setOnShowListener {
+                    getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                        val newRemoteUrl = remoteUrlEditLayout.editText?.text.toString()
+                        if (newRemoteUrl.isRemoteUrlValid()) {
+                            authInfoHelper.remoteUrl = newRemoteUrl
+                            remoteUrl = newRemoteUrl
+                            super.refreshApiClients()
+                            checkNetwork()
+                            dismiss()
+                        } else {
+                            remoteUrlEditEditText.startAnimation(shakeAnimation)
+                            remoteUrlEditLayout.error =
+                                resources.getString(R.string.remote_url_invalid)
+                        }
+                    }
+                }
+                if (remoteUrlEditEditText.requestFocus()) {
+                    window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+                }
+            }.show()
+    }
+
+    private fun initRemoteUrlDisplayDialog() {
         serverAccessibleDrawable = ContextCompat.getDrawable(this, R.drawable.network_ok_circle)
         serverNotAccessibleDrawable =
             ContextCompat.getDrawable(this, R.drawable.network_nok_circle)
@@ -219,10 +252,10 @@ class LoginActivity : BaseActivity() {
         serverAccessibleString = resources.getString(R.string.server_accessible)
         serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
 
-        loginRemoteUrlDialog = LayoutInflater.from(this)
-            .inflate(R.layout.login_remote_url_dialog, rootViewGroup, false)
-        imageNetworkStatus = loginRemoteUrlDialog.findViewById(R.id.image_network_status)
-        remoteUrlMessage = loginRemoteUrlDialog.findViewById(R.id.remote_url_message)
+        remoteUrlDisplayDialog = LayoutInflater.from(this)
+            .inflate(R.layout.login_remote_url_display_dialog, rootViewGroup, false)
+        imageNetworkStatus = remoteUrlDisplayDialog.findViewById(R.id.image_network_status)
+        remoteUrlMessage = remoteUrlDisplayDialog.findViewById(R.id.remote_url_message)
 
         serverNotAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
         remoteUrlMessage.text =
@@ -230,10 +263,10 @@ class LoginActivity : BaseActivity() {
     }
 
     private fun initRemoteUrlEditDialog() {
-        loginRemoteUrlEditDialog = LayoutInflater.from(this)
-            .inflate(R.layout.login_remote_url_edit_dialog, rootViewGroup, false)
-        remoteUrlEditText = loginRemoteUrlEditDialog.findViewById(R.id.remote_url_edit)
-        remoteUrlEditText.editText?.setText(remoteUrl)
+        remoteUrlEditDialog = LayoutInflater.from(this)
+            .inflate(R.layout.remote_url_edit_dialog, rootViewGroup, false)
+        remoteUrlEditLayout = remoteUrlEditDialog.findViewById(R.id.remote_url_edit_layout)
+        remoteUrlEditEditText = remoteUrlEditDialog.findViewById(R.id.remote_url_edit_edittext)
     }
 
     private fun clearViewInParent(view: View) {

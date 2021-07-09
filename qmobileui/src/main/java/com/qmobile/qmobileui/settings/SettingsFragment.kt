@@ -9,16 +9,21 @@ package com.qmobile.qmobileui.settings
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.KeyEvent
-import android.view.inputmethod.EditorInfo
+import android.view.LayoutInflater
+import android.view.View
+import android.view.WindowManager
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import androidx.preference.EditTextPreference
-import androidx.preference.EditTextPreferenceDialogFragmentCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.auth.isRemoteUrlValid
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
@@ -28,24 +33,36 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.ToastHelper
-import com.qmobile.qmobileui.utils.hideKeyboard
 import timber.log.Timber
 
 @Suppress("TooManyFunctions")
 class SettingsFragment :
     PreferenceFragmentCompat(),
     BaseFragment,
-    Preference.OnPreferenceClickListener,
-    Preference.OnPreferenceChangeListener {
+    Preference.OnPreferenceClickListener {
 
     var firstTime = true
-    private var remoteUrlPref: EditTextPreference? = null
+    private var logoutDialogTitle = ""
+    private var logoutDialogMessage = ""
+    private var logoutDialogPositive = ""
+    private var logoutDialogNegative = ""
+    private var prefRemoteUrlTitle = ""
+    private var remoteUrlDialogPositive = ""
+    private var remoteUrlDialogCancel = ""
+    private var remoteUrlInvalid = ""
+    private var remoteUrlPref: Preference? = null
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
     private lateinit var accountCategoryKey: String
     private lateinit var remoteUrlPrefKey: String
     private lateinit var logoutPrefKey: String
     private lateinit var remoteUrl: String
+    private lateinit var remoteUrlEditDialogBuilder: MaterialAlertDialogBuilder
+    private lateinit var logoutDialogBuilder: MaterialAlertDialogBuilder
+    private lateinit var shakeAnimation: Animation
+    private lateinit var remoteUrlEditLayout: TextInputLayout
+    private lateinit var remoteUrlEditEditText: TextInputEditText
+    private lateinit var remoteUrlEditDialog: View
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -78,6 +95,34 @@ class SettingsFragment :
         noInternetString = resources.getString(R.string.no_internet)
         serverAccessibleString = resources.getString(R.string.server_accessible)
         serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
+
+        logoutDialogBuilder = MaterialAlertDialogBuilder(
+            context,
+            R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
+        )
+        remoteUrlEditDialogBuilder = MaterialAlertDialogBuilder(
+            context,
+            R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
+        )
+        shakeAnimation = AnimationUtils.loadAnimation(context, R.anim.shake)
+
+        remoteUrlEditDialog = LayoutInflater.from(context)
+            .inflate(
+                R.layout.remote_url_edit_dialog,
+                view?.findViewById(android.R.id.content),
+                false
+            )
+        remoteUrlEditLayout = remoteUrlEditDialog.findViewById(R.id.remote_url_edit_layout)
+        remoteUrlEditEditText = remoteUrlEditDialog.findViewById(R.id.remote_url_edit_edittext)
+        prefRemoteUrlTitle = getString(R.string.pref_remote_url_title)
+        remoteUrlDialogPositive = getString(R.string.remote_url_dialog_positive)
+        remoteUrlDialogCancel = getString(R.string.remote_url_dialog_cancel)
+        remoteUrlInvalid = resources.getString(R.string.remote_url_invalid)
+
+        logoutDialogTitle = resources.getString(R.string.logout_dialog_title)
+        logoutDialogMessage = resources.getString(R.string.logout_dialog_message)
+        logoutDialogPositive = resources.getString(R.string.logout_dialog_positive)
+        logoutDialogNegative = resources.getString(R.string.logout_dialog_negative)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -102,31 +147,18 @@ class SettingsFragment :
         if (!loginViewModel.authInfoHelper.guestLogin)
             findPreference<PreferenceCategory>(accountCategoryKey)?.isVisible = true
         findPreference<Preference>(logoutPrefKey)?.onPreferenceClickListener = this
-
         remoteUrlPref = findPreference(remoteUrlPrefKey)
-        remoteUrlPref?.setDefaultValue(this.remoteUrl)
-        remoteUrlPref?.onPreferenceChangeListener = this
-
-        remoteUrlPref?.setOnBindEditTextListener { editText ->
-            editText.setSingleLine()
-            editText.setSelection(editText.text.length)
-            editText.imeOptions = EditorInfo.IME_ACTION_DONE
-            editText.setOnEditorActionListener { textView, actionId, keyEvent ->
-                if ((keyEvent != null && (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER)) ||
-                    (actionId == EditorInfo.IME_ACTION_DONE)
-                ) {
-                    remoteUrlPref?.setDefaultValue(textView.text.toString())
-                    hideKeyboard(activity)
-                    dismissDialog()
-                }
-                false
-            }
-        }
+        remoteUrlPref?.onPreferenceClickListener = this
     }
 
     override fun onPreferenceClick(preference: Preference?): Boolean {
         preference?.let {
             return when (preference.key) {
+
+                remoteUrlPrefKey -> {
+                    showRemoteUrlEditDialog()
+                    true
+                }
                 logoutPrefKey -> {
                     // When Logout button is clicked, pop up a confirmation dialog
                     showLogoutDialog()
@@ -140,37 +172,52 @@ class SettingsFragment :
         return false
     }
 
-    override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
-        preference?.let {
-            when (preference.key) {
-                remoteUrlPrefKey -> {
-                    // When remoteUrl is changed, notify activity to refresh ApiClients
-                    val newRemoteUrl = newValue as String
-                    loginViewModel.authInfoHelper.remoteUrl = newRemoteUrl
-                    this.remoteUrl = newRemoteUrl
-                    delegate.refreshAllApiClients()
-                    remoteUrlPref?.setDefaultValue(newRemoteUrl)
-                    checkNetwork()
+    private fun showRemoteUrlEditDialog() {
+
+        remoteUrlEditLayout.editText?.setText(remoteUrl)
+        remoteUrlEditLayout.error = null
+
+        remoteUrlEditDialogBuilder
+            .setView(remoteUrlEditDialog)
+            .setTitle(prefRemoteUrlTitle)
+            .setPositiveButton(remoteUrlDialogPositive, null)
+            .setNegativeButton(remoteUrlDialogCancel, null)
+            .create()
+            .apply {
+                setOnShowListener {
+                    getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                        val newRemoteUrl = remoteUrlEditLayout.editText?.text.toString()
+                        if (newRemoteUrl.isRemoteUrlValid()) {
+                            // When remoteUrl is changed, notify activity to refresh ApiClients
+                            loginViewModel.authInfoHelper.remoteUrl = newRemoteUrl
+                            remoteUrl = newRemoteUrl
+                            this@SettingsFragment.delegate.refreshAllApiClients()
+                            checkNetwork()
+                            dismiss()
+                        } else {
+                            remoteUrlEditEditText.startAnimation(shakeAnimation)
+                            remoteUrlEditLayout.error = remoteUrlInvalid
+                        }
+                    }
                 }
-            }
-        }
-        return true
+                if (remoteUrlEditEditText.requestFocus()) {
+                    window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+                }
+            }.show()
     }
 
     /**
      * Displays a dialog to confirm logout
      */
     private fun showLogoutDialog() {
-        activity?.let {
-            MaterialAlertDialogBuilder(it)
-                .setTitle(resources.getString(R.string.logout_dialog_title))
-                .setMessage(resources.getString(R.string.logout_dialog_message))
-                .setNegativeButton(resources.getString(R.string.logout_dialog_negative), null)
-                .setPositiveButton(resources.getString(R.string.logout_dialog_positive)) { _, _ ->
-                    logout()
-                }
-                .show()
-        }
+        logoutDialogBuilder
+            .setTitle(logoutDialogTitle)
+            .setMessage(logoutDialogMessage)
+            .setNegativeButton(logoutDialogNegative, null)
+            .setPositiveButton(logoutDialogPositive) { _, _ ->
+                logout()
+            }
+            .show()
     }
 
     /**
@@ -216,7 +263,8 @@ class SettingsFragment :
      * Sets the indicator icon color and text to no Internet status
      */
     private fun setLayoutNoInternet() {
-        remoteUrlPref?.summary = getString(R.string.remote_url_placeholder, remoteUrl, noInternetString)
+        remoteUrlPref?.summary =
+            getString(R.string.remote_url_placeholder, remoteUrl, noInternetString)
         remoteUrlPref?.icon = serverNotAccessibleDrawable
     }
 
@@ -224,7 +272,8 @@ class SettingsFragment :
      * Sets the indicator icon color and text to server not accessible
      */
     private fun setLayoutServerNotAccessible() {
-        remoteUrlPref?.summary = getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
+        remoteUrlPref?.summary =
+            getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
         remoteUrlPref?.icon = serverNotAccessibleDrawable
     }
 
@@ -232,7 +281,8 @@ class SettingsFragment :
      * Sets the indicator icon color and text to server accessible
      */
     private fun setLayoutServerAccessible() {
-        remoteUrlPref?.summary = getString(R.string.remote_url_placeholder, remoteUrl, serverAccessibleString)
+        remoteUrlPref?.summary =
+            getString(R.string.remote_url_placeholder, remoteUrl, serverAccessibleString)
         remoteUrlPref?.icon = serverAccessibleDrawable
     }
 
@@ -247,15 +297,5 @@ class SettingsFragment :
         }
         return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
             connectivityViewModel.isConnected()
-    }
-
-    private fun dismissDialog() {
-        activity?.supportFragmentManager?.fragments?.firstOrNull()?.childFragmentManager
-            ?.fragments?.forEach { fragment ->
-                if (fragment is EditTextPreferenceDialogFragmentCompat) {
-                    fragment.onDialogClosed(true)
-                    fragment.dismiss()
-                }
-            }
     }
 }

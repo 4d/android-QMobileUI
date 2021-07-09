@@ -14,8 +14,8 @@ import android.view.View
 
 fun View.setOnVeryLongClickListener(listener: () -> Unit) {
     setOnTouchListener(object : View.OnTouchListener {
-        
-        private  val longClickDuration = 1500L
+
+        private val longClickDuration = 1500L
         private val handler = Handler(Looper.getMainLooper())
 
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
