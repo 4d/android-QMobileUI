@@ -39,6 +39,7 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
+import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 import com.qmobile.qmobileui.utils.hideKeyboard
@@ -213,9 +214,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
      */
     private fun forceSyncData() {
         syncDataRequested.set(false)
-        delegate.isConnected { isAccessible ->
-            if (isAccessible) {
 
+        delegate.checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
                 if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
                     Timber.d("Not authenticated yet, syncDataRequested = $syncDataRequested")
                     delegate.requestAuthentication()
@@ -241,7 +242,15 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     }
                 }
             }
-        }
+
+            override fun onServiceInaccessible() {
+                // Nothing to do
+            }
+
+            override fun onNoInternet() {
+                // Nothing to do
+            }
+        })
     }
 
     private val searchListener: SearchView.OnQueryTextListener =

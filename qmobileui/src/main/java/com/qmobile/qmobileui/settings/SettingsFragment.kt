@@ -11,10 +11,8 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
@@ -23,7 +21,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
-import com.qmobile.qmobileapi.auth.isRemoteUrlValid
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
@@ -32,6 +29,7 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.ui.RemoteUrlChange
 import com.qmobile.qmobileui.utils.ToastHelper
 import timber.log.Timber
 
@@ -39,7 +37,8 @@ import timber.log.Timber
 class SettingsFragment :
     PreferenceFragmentCompat(),
     BaseFragment,
-    Preference.OnPreferenceClickListener {
+    Preference.OnPreferenceClickListener,
+    RemoteUrlChange {
 
     var firstTime = true
     private var logoutDialogTitle = ""
@@ -74,7 +73,7 @@ class SettingsFragment :
 
     // ViewModels
     lateinit var loginViewModel: LoginViewModel
-    lateinit var connectivityViewModel: ConnectivityViewModel
+    private lateinit var connectivityViewModel: ConnectivityViewModel
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preferences)
@@ -156,7 +155,8 @@ class SettingsFragment :
             return when (preference.key) {
 
                 remoteUrlPrefKey -> {
-                    showRemoteUrlEditDialog()
+//                    showRemoteUrlEditDialog()
+                    delegate.showRemoteUrlEditDialog(remoteUrl, this)
                     true
                 }
                 logoutPrefKey -> {
@@ -170,40 +170,6 @@ class SettingsFragment :
             }
         }
         return false
-    }
-
-    private fun showRemoteUrlEditDialog() {
-
-        remoteUrlEditLayout.editText?.setText(remoteUrl)
-        remoteUrlEditLayout.error = null
-
-        remoteUrlEditDialogBuilder
-            .setView(remoteUrlEditDialog)
-            .setTitle(prefRemoteUrlTitle)
-            .setPositiveButton(remoteUrlDialogPositive, null)
-            .setNegativeButton(remoteUrlDialogCancel, null)
-            .create()
-            .apply {
-                setOnShowListener {
-                    getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                        val newRemoteUrl = remoteUrlEditLayout.editText?.text.toString()
-                        if (newRemoteUrl.isRemoteUrlValid()) {
-                            // When remoteUrl is changed, notify activity to refresh ApiClients
-                            loginViewModel.authInfoHelper.remoteUrl = newRemoteUrl
-                            remoteUrl = newRemoteUrl
-                            this@SettingsFragment.delegate.refreshAllApiClients()
-                            checkNetwork()
-                            dismiss()
-                        } else {
-                            remoteUrlEditEditText.startAnimation(shakeAnimation)
-                            remoteUrlEditLayout.error = remoteUrlInvalid
-                        }
-                    }
-                }
-                if (remoteUrlEditEditText.requestFocus()) {
-                    window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
-                }
-            }.show()
     }
 
     /**
@@ -243,50 +209,6 @@ class SettingsFragment :
     }
 
     /**
-     * Checks network state, and adjust the indicator icon color
-     */
-    fun checkNetwork() {
-        if (connectivityViewModel.isConnected()) {
-            connectivityViewModel.isServerConnectionOk { isAccessible ->
-                if (isAccessible) {
-                    setLayoutServerAccessible()
-                } else {
-                    setLayoutServerNotAccessible()
-                }
-            }
-        } else {
-            setLayoutNoInternet()
-        }
-    }
-
-    /**
-     * Sets the indicator icon color and text to no Internet status
-     */
-    private fun setLayoutNoInternet() {
-        remoteUrlPref?.summary =
-            getString(R.string.remote_url_placeholder, remoteUrl, noInternetString)
-        remoteUrlPref?.icon = serverNotAccessibleDrawable
-    }
-
-    /**
-     * Sets the indicator icon color and text to server not accessible
-     */
-    private fun setLayoutServerNotAccessible() {
-        remoteUrlPref?.summary =
-            getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
-        remoteUrlPref?.icon = serverNotAccessibleDrawable
-    }
-
-    /**
-     * Sets the indicator icon color and text to server accessible
-     */
-    private fun setLayoutServerAccessible() {
-        remoteUrlPref?.summary =
-            getString(R.string.remote_url_placeholder, remoteUrl, serverAccessibleString)
-        remoteUrlPref?.icon = serverAccessibleDrawable
-    }
-
-    /**
      * Checks if environment is ready to perform an action
      */
     private fun isReady(): Boolean {
@@ -297,5 +219,29 @@ class SettingsFragment :
         }
         return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
             connectivityViewModel.isConnected()
+    }
+
+    override fun onServerAccessible() {
+        remoteUrlPref?.summary =
+            getString(R.string.remote_url_placeholder, remoteUrl, serverAccessibleString)
+        remoteUrlPref?.icon = serverAccessibleDrawable
+    }
+
+    override fun onServiceInaccessible() {
+        remoteUrlPref?.summary =
+            getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
+        remoteUrlPref?.icon = serverNotAccessibleDrawable
+    }
+
+    override fun onNoInternet() {
+        remoteUrlPref?.summary =
+            getString(R.string.remote_url_placeholder, remoteUrl, noInternetString)
+        remoteUrlPref?.icon = serverNotAccessibleDrawable
+    }
+
+    override fun onValidRemoteUrlChange(newRemoteUrl: String) {
+        loginViewModel.authInfoHelper.remoteUrl = newRemoteUrl
+        remoteUrl = newRemoteUrl
+        this@SettingsFragment.delegate.refreshAllApiClients()
     }
 }

@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.detail.viewpager
 
+import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.qmobile.qmobileapi.model.entity.EntityModel
@@ -23,7 +24,13 @@ class EntityViewPagerAdapter(
     override fun getItem(position: Int): Fragment {
         val entity: EntityModel? = list[position] as EntityModel?
         val itemId = entity?.__KEY ?: "0"
-        return BaseApp.genericTableFragmentHelper.getDetailFragment(itemId, tableName)
+
+        return BaseApp.genericTableFragmentHelper.getDetailFragment(itemId, tableName).apply {
+            arguments = Bundle().apply {
+                putString("itemId", itemId)
+                putString("tableName", tableName)
+            }
+        }
     }
 
     override fun getCount(): Int {

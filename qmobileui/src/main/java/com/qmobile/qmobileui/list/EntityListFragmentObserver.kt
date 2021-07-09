@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.list
 
 import android.annotation.SuppressLint
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import timber.log.Timber
@@ -33,6 +34,10 @@ class EntityListFragmentObserver(
                         "Table : ${entityListViewModel.getAssociatedTableName()}, " +
                         "Instance : $entityListViewModel]"
                 )
+                // Refresh views as cached imaged would not be updated
+                if (dataSyncState == DataSyncStateEnum.SYNCHRONIZED) {
+                    fragment.adapter.notifyDataSetChanged()
+                }
             }
         )
     }
@@ -43,7 +48,6 @@ class EntityListFragmentObserver(
             fragment.viewLifecycleOwner,
             {
                 fragment.adapter.submitList(it)
-//            adapter.notifyDataSetChanged()
             }
         )
 //    entityListViewModel.getAllDynamicQuery(sqLiteQuery).observe(

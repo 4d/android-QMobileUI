@@ -10,6 +10,8 @@ import android.net.ConnectivityManager
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.network.LoginApiService
+import com.qmobile.qmobileui.ui.NetworkChecker
+import com.qmobile.qmobileui.ui.RemoteUrlChange
 
 /**
  * Interface implemented by MainActivity to provide elements that depend on generated type
@@ -26,9 +28,11 @@ interface FragmentCommunication {
 
     fun refreshAllApiClients()
 
-    fun isConnected(onResult: (isAccessible: Boolean) -> Unit)
-
     fun requestDataSync(alreadyRefreshedTable: String?)
 
     fun requestAuthentication()
+
+    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChange: RemoteUrlChange)
+
+    fun checkNetwork(networkChecker: NetworkChecker)
 }

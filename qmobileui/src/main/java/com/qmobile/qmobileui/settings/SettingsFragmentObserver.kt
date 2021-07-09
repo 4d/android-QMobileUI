@@ -26,7 +26,7 @@ class SettingsFragmentObserver(
             { networkState ->
                 if (fragment.firstTime || !fragment.firstTime && networkState == NetworkStateEnum.CONNECTED) {
                     fragment.firstTime = false
-                    fragment.checkNetwork()
+                    fragment.delegate.checkNetwork(fragment)
                 }
             }
         )

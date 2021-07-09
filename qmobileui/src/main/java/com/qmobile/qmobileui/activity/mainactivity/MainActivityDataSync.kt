@@ -6,44 +6,75 @@
 
 package com.qmobile.qmobileui.activity.mainactivity
 
+import com.qmobile.qmobileapi.auth.LoginRequiredCallback
+import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.sync.EntityViewModelIsToSync
+import com.qmobile.qmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
 import com.qmobile.qmobiledatasync.toast.MessageType
+import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.ToastHelper
 
-fun MainActivity.getEntityListViewModelsForSync() {
-    entityViewModelIsToSyncList = mutableListOf()
+class MainActivityDataSync(private val activity: MainActivity) {
 
-    entityListViewModelList.forEach { entityListViewModel ->
-        entityViewModelIsToSyncList.add(
-            EntityViewModelIsToSync(
-                entityListViewModel,
-                true
-            )
-        )
-    }
-}
+    lateinit var entityViewModelIsToSyncList: MutableList<EntityViewModelIsToSync>
 
-fun MainActivity.prepareDataSync(alreadyRefreshedTable: String?) {
-    if (connectivityViewModel.isConnected()) {
-        connectivityViewModel.isServerConnectionOk { isAccessible ->
-            if (isAccessible) {
-                this.setDataSyncObserver(alreadyRefreshedTable)
-            } else {
-                // Nothing to do, errors already provided in isServerConnectionOk
+    // DataSync notifies MainActivity to go to login page
+    private val loginRequiredCallbackForDataSync: LoginRequiredCallback =
+        object : LoginRequiredCallback {
+            override fun loginRequired() {
+                if (!activity.authInfoHelper.guestLogin) {
+                    dataSync.unsuccessfulSynchronizationNeedsLogin(entityViewModelIsToSyncList)
+                    activity.startLoginActivity()
+                }
             }
         }
-    } else {
-        ToastHelper.show(this, resources.getString(R.string.no_internet), MessageType.WARNING)
-    }
-}
 
-fun MainActivity.setDataSyncObserver(alreadyRefreshedTable: String?) {
-    entityViewModelIsToSyncList.map { it.isToSync = true }
-    alreadyRefreshedTable?.let {
-        entityViewModelIsToSyncList.find {
-            it.vm.getAssociatedTableName() == alreadyRefreshedTable
-        }?.isToSync = false
+    val dataSync = DataSync(activity, activity.authInfoHelper, loginRequiredCallbackForDataSync)
+
+    fun getEntityListViewModelsForSync(entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>) {
+        entityViewModelIsToSyncList = mutableListOf()
+
+        entityListViewModelList.forEach { entityListViewModel ->
+            entityViewModelIsToSyncList.add(
+                EntityViewModelIsToSync(
+                    entityListViewModel,
+                    true
+                )
+            )
+        }
     }
-    dataSync.setObserver(entityViewModelIsToSyncList, alreadyRefreshedTable)
+
+    fun prepareDataSync(
+        connectivityViewModel: ConnectivityViewModel,
+        alreadyRefreshedTable: String?
+    ) {
+        if (connectivityViewModel.isConnected()) {
+            connectivityViewModel.isServerConnectionOk { isAccessible ->
+                if (isAccessible) {
+                    setDataSyncObserver(alreadyRefreshedTable)
+                } else {
+                    // Nothing to do, errors already provided in isServerConnectionOk
+                }
+            }
+        } else {
+            ToastHelper.show(
+                activity,
+                activity.resources.getString(R.string.no_internet),
+                MessageType.WARNING
+            )
+        }
+    }
+
+    fun setDataSyncObserver(alreadyRefreshedTable: String?) {
+        entityViewModelIsToSyncList.map { it.isToSync = true }
+        alreadyRefreshedTable?.let {
+            entityViewModelIsToSyncList.find {
+                it.vm.getAssociatedTableName() == alreadyRefreshedTable
+            }?.isToSync = false
+        }
+        dataSync.setObserver(entityViewModelIsToSyncList, alreadyRefreshedTable)
+    }
 }

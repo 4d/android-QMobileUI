@@ -6,10 +6,17 @@
 
 package com.qmobile.qmobileui.activity
 
+import android.app.AlertDialog
 import android.net.ConnectivityManager
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.auth.isRemoteUrlValid
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiClient
@@ -20,6 +27,11 @@ import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
+import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.ui.NetworkChecker
+import com.qmobile.qmobileui.ui.RemoteUrlChange
+import com.qmobile.qmobileui.ui.ViewUtils
+import com.qmobile.qmobileui.ui.clearViewInParent
 import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.fetchResourceString
@@ -50,6 +62,8 @@ abstract class BaseActivity : AppCompatActivity() {
     lateinit var accessibilityApiService: AccessibilityApiService
     lateinit var loginApiService: LoginApiService
 
+    lateinit var remoteUrlEditDialogBuilder: MaterialAlertDialogBuilder
+
     abstract fun handleAuthenticationState(authenticationState: AuthenticationStateEnum)
     abstract fun handleNetworkState(networkState: NetworkStateEnum)
 
@@ -78,6 +92,61 @@ abstract class BaseActivity : AppCompatActivity() {
         }
         if (::connectivityViewModel.isInitialized) {
             connectivityViewModel.refreshAccessibilityRepository(accessibilityApiService)
+        }
+    }
+
+    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChange: RemoteUrlChange) {
+        val remoteUrlEditDialog = LayoutInflater.from(this)
+            .inflate(R.layout.remote_url_edit_dialog, findViewById(android.R.id.content), false)
+        val remoteUrlEditLayout = remoteUrlEditDialog.findViewById<TextInputLayout>(R.id.remote_url_edit_layout)
+        val remoteUrlEditEditText = remoteUrlEditDialog.findViewById<TextInputEditText>(R.id.remote_url_edit_edittext)
+        remoteUrlEditDialogBuilder = MaterialAlertDialogBuilder(
+            this,
+            R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
+        )
+        val shakeAnimation = ViewUtils.getShakeAnimation(this)
+
+        remoteUrlEditDialog.clearViewInParent()
+        remoteUrlEditLayout.editText?.setText(remoteUrl)
+        remoteUrlEditLayout.error = null
+
+        remoteUrlEditDialogBuilder
+            .setView(remoteUrlEditDialog)
+            .setTitle(getString(R.string.pref_remote_url_title))
+            .setPositiveButton(getString(R.string.remote_url_dialog_positive), null)
+            .setNegativeButton(getString(R.string.remote_url_dialog_cancel), null)
+            .create().apply {
+                setOnShowListener {
+                    getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                        val newRemoteUrl = remoteUrlEditLayout.editText?.text.toString()
+                        if (newRemoteUrl.isRemoteUrlValid()) {
+                            remoteUrlChange.onValidRemoteUrlChange(newRemoteUrl)
+                            checkNetwork(remoteUrlChange)
+                            dismiss()
+                        } else {
+                            remoteUrlEditEditText.startAnimation(shakeAnimation)
+                            remoteUrlEditLayout.error =
+                                resources.getString(R.string.remote_url_invalid)
+                        }
+                    }
+                }
+                if (remoteUrlEditEditText.requestFocus()) {
+                    window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+                }
+            }.show()
+    }
+
+    fun checkNetwork(networkChecker: NetworkChecker) {
+        if (connectivityViewModel.isConnected()) {
+            connectivityViewModel.isServerConnectionOk(toastError = false) { isAccessible ->
+                if (isAccessible) {
+                    networkChecker.onServerAccessible()
+                } else {
+                    networkChecker.onServiceInaccessible()
+                }
+            }
+        } else {
+            networkChecker.onNoInternet()
         }
     }
 }

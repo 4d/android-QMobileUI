@@ -30,9 +30,6 @@ import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
 import com.qmobile.qmobiledatasync.relation.OneToManyRelation
-import com.qmobile.qmobiledatasync.sync.DataSync
-import com.qmobile.qmobiledatasync.sync.EntityViewModelIsToSync
-import com.qmobile.qmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
@@ -55,13 +52,12 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     var shouldDelayOnForegroundEvent = AtomicBoolean(false)
     val authInfoHelper = AuthInfoHelper.getInstance(this)
     var currentNavController: LiveData<NavController>? = null
-    lateinit var dataSync: DataSync
+    lateinit var mainActivityDataSync: MainActivityDataSync
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
 
     // ViewModels
-    lateinit var entityViewModelIsToSyncList: MutableList<EntityViewModelIsToSync>
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
     // Interceptor notifies the MainActivity that we need to go to login page. First, stop syncing
@@ -69,18 +65,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         object : LoginRequiredCallback {
             override fun loginRequired() {
                 if (!authInfoHelper.guestLogin)
-                    dataSync.loginRequired.set(true)
-            }
-        }
-
-    // DataSync notifies MainActivity to go to login page
-    private val loginRequiredCallbackForDataSync: LoginRequiredCallback =
-        object : LoginRequiredCallback {
-            override fun loginRequired() {
-                if (!authInfoHelper.guestLogin) {
-                    dataSync.unsuccessfulSynchronizationNeedsLogin(entityViewModelIsToSyncList)
-                    startLoginActivity()
-                }
+                    mainActivityDataSync.dataSync.loginRequired.set(true)
             }
         }
 
@@ -89,7 +74,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         setContentView(R.layout.activity_main)
 
         // Init data sync class
-        dataSync = DataSync(this, authInfoHelper, loginRequiredCallbackForDataSync)
+        mainActivityDataSync = MainActivityDataSync(this)
 
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -187,21 +172,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     fun applyOnForegroundEvent() {
         if (onLaunch) {
             onLaunch = false
-            getEntityListViewModelsForSync()
+            mainActivityDataSync.getEntityListViewModelsForSync(entityListViewModelList)
         }
-        prepareDataSync(null)
-    }
-
-    override fun isConnected(
-        onResult: (isAccessible: Boolean) -> Unit
-    ) {
-        if (connectivityViewModel.isConnected()) {
-            connectivityViewModel.isServerConnectionOk { isAccessible ->
-                onResult(isAccessible)
-            }
-        } else {
-            onResult(false)
-        }
+        mainActivityDataSync.prepareDataSync(connectivityViewModel, null)
     }
 
     override fun requestAuthentication() {
@@ -213,7 +186,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      * Performs data sync, requested by a table request
      */
     override fun requestDataSync(alreadyRefreshedTable: String?) {
-        prepareDataSync(alreadyRefreshedTable)
+        mainActivityDataSync.prepareDataSync(connectivityViewModel, alreadyRefreshedTable)
     }
 
     override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
@@ -261,7 +234,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     /**
      * Goes back to login page
      */
-    private fun startLoginActivity() {
+    fun startLoginActivity() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.putExtra(LOGGED_OUT, true)
         intent.addFlags(
