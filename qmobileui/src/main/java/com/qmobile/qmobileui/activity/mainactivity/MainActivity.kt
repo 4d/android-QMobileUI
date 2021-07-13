@@ -170,8 +170,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     }
 
     fun applyOnForegroundEvent() {
+        Timber.d("applyOnForegroundEvent")
         if (onLaunch) {
+            Timber.d("applyOnForegroundEvent on Launch")
             onLaunch = false
+            refreshAllApiClients()
             mainActivityDataSync.getEntityListViewModelsForSync(entityListViewModelList)
         }
         mainActivityDataSync.prepareDataSync(connectivityViewModel, null)
