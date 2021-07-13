@@ -174,6 +174,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         if (onLaunch) {
             Timber.d("applyOnForegroundEvent on Launch")
             onLaunch = false
+            // Refreshing it again, as a remoteUrl change would bring issues with post requests going on previous remoteUrl
             refreshAllApiClients()
             mainActivityDataSync.getEntityListViewModelsForSync(entityListViewModelList)
         }
