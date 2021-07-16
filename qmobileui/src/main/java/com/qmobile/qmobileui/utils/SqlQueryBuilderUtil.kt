@@ -15,7 +15,7 @@ import org.json.JSONObject
 
 class SqlQueryBuilderUtil(
     var tableName: String,
-    private val searchField: JSONObject = QMobileUiUtil.appUtilities.searchField // has columns to Filter
+    private val searchField: JSONObject = BaseApp.runtimeDataHolder.searchField // has columns to Filter
 ) {
 
     fun getAll() = SimpleSQLiteQuery("SELECT * FROM $tableName")
@@ -70,22 +70,23 @@ class SqlQueryBuilderUtil(
         relatedField: String? = null
     ): String {
         var appendice = ""
-        QMobileUiUtil.appUtilities.customFormatters[tableName.tableNameAdjustment()]?.get(field.fieldAdjustment())
+        BaseApp.runtimeDataHolder.customFormatters[tableName.tableNameAdjustment()]?.get(field.fieldAdjustment())
             ?.let { fieldMapping ->
                 if (fieldMapping.binding == "localizedText") {
 
                     val fieldForQuery: String = relatedField ?: field
-                    appendice = when (fieldMapping.choiceList) {
+                    val choiceList = fieldMapping.choiceList
+                    appendice = when (choiceList) {
                         is Map<*, *> -> {
                             appendFromFormatMap(
-                                fieldMapping.choiceList,
+                                choiceList,
                                 fieldForQuery,
                                 dataToSort
                             )
                         }
                         is List<*> -> {
                             appendFromFormatList(
-                                fieldMapping.choiceList,
+                                choiceList,
                                 fieldForQuery,
                                 dataToSort
                             )

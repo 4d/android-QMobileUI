@@ -20,8 +20,7 @@ import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
-import com.qmobile.qmobileui.model.QMobileUiConstants
-import com.qmobile.qmobileui.utils.layoutFromTable
+import com.qmobile.qmobileui.utils.ResourcesHelper
 
 open class EntityDetailFragment : Fragment(), BaseFragment {
 
@@ -48,9 +47,9 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
         _binding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
-            layoutFromTable(
+            ResourcesHelper.layoutFromTable(
                 inflater.context,
-                "${QMobileUiConstants.Prefix.FRAGMENT_DETAIL_PREFIX}$tableName".lowercase()
+                "${ResourcesHelper.FRAGMENT_DETAIL_PREFIX}_$tableName".lowercase()
             ),
             container,
             false

@@ -7,30 +7,16 @@
 package com.qmobile.qmobileui.binding
 
 import android.net.Uri
-import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
-import com.google.android.material.progressindicator.CircularProgressIndicator
-import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.binding.ImageHelper.drawableSpace
-import com.qmobile.qmobileui.binding.ImageHelper.drawableStartHeight
-import com.qmobile.qmobileui.binding.ImageHelper.drawableStartWidth
 import com.qmobile.qmobileui.glide.CustomRequestListener
-import com.qmobile.qmobileui.utils.FormatterUtils.applyFormat
-import com.qmobile.qmobileui.utils.QMobileUiUtil
-import com.qmobile.qmobileui.utils.fieldAdjustment
-import com.qmobile.qmobileui.utils.getChoiceListString
-import com.qmobile.qmobileui.utils.tableNameAdjustment
-import kotlin.math.roundToInt
 
 /**
  * Use Glide to load image url in a view
@@ -73,105 +59,6 @@ fun bindImageFromUrl(
     }
 
     glideRequest.into(view)
-}
-
-@Suppress("ReturnCount", "LongParameterList")
-@BindingAdapter(
-    value = ["text", "format", "tableName", "fieldName", "imageWidth", "imageHeight"],
-    requireAll = false
-)
-fun applyFormatter(
-    view: TextView,
-    text: String?,
-    format: String?,
-    tableName: String?,
-    fieldName: String?,
-    imageWidth: Int?,
-    imageHeight: Int?
-) {
-    if (text.isNullOrEmpty())
-        return
-    if (!format.isNullOrEmpty()) {
-        if (!format.startsWith("/")) {
-            view.text = applyFormat(format, text)
-            return
-        } else {
-            if (tableName != null && fieldName != null) {
-
-                QMobileUiUtil.appUtilities.customFormatters[tableName.tableNameAdjustment()]?.get(
-                    fieldName.fieldAdjustment()
-                )
-                    ?.let { fieldMapping ->
-
-                        when (fieldMapping.binding) {
-                            "imageNamed" -> {
-                                getChoiceListString(fieldMapping, text)?.let { drawableName ->
-
-                                    fieldMapping.name?.let { formatName ->
-                                        BaseApp.genericTableFragmentHelper.getDrawableForFormatter(
-                                            formatName,
-                                            drawableName
-                                        )?.let { drawableResPair ->
-                                            view.setFormatterDrawable(
-                                                drawableResPair,
-                                                imageWidth,
-                                                imageHeight,
-                                                fieldMapping.tintable
-                                            )
-                                        }
-                                    }
-                                } ?: run {
-                                    /* There are inconsistencies with RecyclerView and imageNamed
-                                    custom formatters : if we don't remove any compoundDrawable,
-                                    some RecyclerView item receive a compound drawable while it
-                                    should not receive any */
-                                    view.setCompoundDrawables(null, null, null, null)
-                                }
-                            }
-                            "localizedText" -> {
-                                val formattedValue: String? =
-                                    getChoiceListString(fieldMapping, text)
-                                view.text =
-                                    if (formattedValue.isNullOrEmpty()) "" else formattedValue
-                            }
-                            else -> view.text = ""
-                        }
-                        return
-                    }
-            }
-        }
-    }
-    view.text = text
-    return
-}
-
-@BindingAdapter("progress")
-fun bindCircularProgressIndicator(view: CircularProgressIndicator, progress: Any?) {
-    view.progress = when (progress) {
-        is Int -> progress
-        is Float -> progress.roundToInt()
-        else -> 0
-    }
-}
-
-@BindingAdapter("icon")
-fun bindFieldLabelIcon(view: TextView, icon: String?) {
-    if (view.text.isNullOrEmpty())
-        return
-    if (icon.isNullOrEmpty())
-        return
-
-    val resId = view.resources.getIdentifier(icon, "drawable", view.context.packageName)
-    if (resId > 0) {
-        ContextCompat.getDrawable(view.context.applicationContext, resId)?.let { drawable ->
-            drawable.setTint(view.currentTextColor)
-            drawable.setBounds(0, 0, drawableStartWidth.px, drawableStartHeight.px)
-            view.gravity = Gravity.CENTER_VERTICAL
-            view.compoundDrawablePadding = drawableSpace.px
-            (view.layoutParams as? ViewGroup.MarginLayoutParams)?.bottomMargin = drawableSpace.px
-            view.setCompoundDrawables(drawable, null, null, null)
-        }
-    }
 }
 
 /**

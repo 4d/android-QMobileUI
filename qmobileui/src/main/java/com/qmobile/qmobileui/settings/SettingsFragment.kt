@@ -21,6 +21,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
@@ -33,7 +34,7 @@ import com.qmobile.qmobileui.ui.RemoteUrlChange
 import com.qmobile.qmobileui.utils.ToastHelper
 import timber.log.Timber
 
-@Suppress("TooManyFunctions")
+// @Suppress("TooManyFunctions")
 class SettingsFragment :
     PreferenceFragmentCompat(),
     BaseFragment,
@@ -141,9 +142,9 @@ class SettingsFragment :
      * Initializes layout components
      */
     private fun initLayout() {
-        this.remoteUrl = loginViewModel.authInfoHelper.remoteUrl
+        this.remoteUrl = BaseApp.sharedPreferencesHolder.remoteUrl
 
-        if (!loginViewModel.authInfoHelper.guestLogin)
+        if (!BaseApp.runtimeDataHolder.guestLogin)
             findPreference<PreferenceCategory>(accountCategoryKey)?.isVisible = true
         findPreference<Preference>(logoutPrefKey)?.onPreferenceClickListener = this
         remoteUrlPref = findPreference(remoteUrlPrefKey)
@@ -240,7 +241,7 @@ class SettingsFragment :
     }
 
     override fun onValidRemoteUrlChange(newRemoteUrl: String) {
-        loginViewModel.authInfoHelper.remoteUrl = newRemoteUrl
+        BaseApp.sharedPreferencesHolder.remoteUrl = newRemoteUrl
         remoteUrl = newRemoteUrl
         this@SettingsFragment.delegate.refreshAllApiClients()
     }

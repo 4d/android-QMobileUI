@@ -8,8 +8,8 @@ package com.qmobile.qmobileui
 
 import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.qmobile.qmobileui.model.AppUtilities
-import com.qmobile.qmobileui.utils.QMobileUiUtil
+import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.utils.RuntimeDataHolder
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 import io.mockk.every
 import io.mockk.mockkObject
@@ -49,19 +49,20 @@ class SqlBuilderTest {
 
     @Test
     fun testSearchableField() {
-        mockkObject(QMobileUiUtil)
-        every { QMobileUiUtil.appUtilities } returns AppUtilities(
+        mockkObject(BaseApp)
+        every { BaseApp.runtimeDataHolder } returns RuntimeDataHolder(
             initialGlobalStamp = 0,
             guestLogin = true,
             remoteUrl = "",
-            teams = tableJson,
-            queryJson = tableJson,
             searchField = tableJson,
             sdkVersion = "12.5",
             logLevel = Log.DEBUG,
             dumpedTables = "",
-            customFormatters = mapOf()
+            queries = mutableMapOf(),
+            tableProperties = mutableMapOf(),
+            customFormatters = mapOf(),
+            embeddedFiles = mutableListOf()
         )
-        Assert.assertEquals(tableJson, QMobileUiUtil.appUtilities.searchField)
+        Assert.assertEquals(tableJson, BaseApp.runtimeDataHolder.searchField)
     }
 }

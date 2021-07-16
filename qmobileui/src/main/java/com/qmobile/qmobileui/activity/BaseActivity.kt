@@ -21,6 +21,7 @@ import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.LoginApiService
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
@@ -32,9 +33,8 @@ import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.ui.RemoteUrlChange
 import com.qmobile.qmobileui.ui.ViewUtils
 import com.qmobile.qmobileui.ui.clearViewInParent
-import com.qmobile.qmobileui.utils.QMobileUiUtil
+import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.utils.ToastHelper
-import com.qmobile.qmobileui.utils.fetchResourceString
 
 /**
  * Base AppCompatActivity for activities
@@ -51,7 +51,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     fun handleEvent(event: Event<ToastMessageHolder>) {
         event.getContentIfNotHandled()?.let { toastMessageHolder: ToastMessageHolder ->
-            val message = this.baseContext.fetchResourceString(toastMessageHolder.message)
+            val message = ResourcesHelper.fetchResourceString(this.baseContext, toastMessageHolder.message)
             ToastHelper.show(this, message, toastMessageHolder.type)
         }
     }
@@ -81,11 +81,11 @@ abstract class BaseActivity : AppCompatActivity() {
         ApiClient.clearApiClients()
         loginApiService = ApiClient.getLoginApiService(
             context = this,
-            logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
+            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
         )
         accessibilityApiService = ApiClient.getAccessibilityApiService(
             context = this,
-            logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
+            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
         )
         if (::loginViewModel.isInitialized) {
             loginViewModel.refreshAuthRepository(loginApiService)

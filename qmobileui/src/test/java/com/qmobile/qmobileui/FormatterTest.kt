@@ -6,10 +6,8 @@
 
 package com.qmobile.qmobileui
 
-import com.qmobile.qmobileui.utils.FieldMapping
-import com.qmobile.qmobileui.utils.FormatterUtils.applyFormat
-import com.qmobile.qmobileui.utils.buildCustomFormatterBinding
-import com.qmobile.qmobileui.utils.getChoiceListString
+import com.qmobile.qmobiledatasync.utils.FieldMapping
+import com.qmobile.qmobileui.formatters.FormatterUtils
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
@@ -111,14 +109,14 @@ class FormatterTest {
     fun testCustomFormat() {
         val customFormattersJsonObj = JSONObject(customFormattersJson)
         val customFormatters: Map<String, Map<String, FieldMapping>> =
-            buildCustomFormatterBinding(customFormattersJsonObj)
+            FieldMapping.buildCustomFormatterBinding(customFormattersJsonObj)
 
         var tableName = "Table_3"
         var fieldName = "field_x"
         customFormatters[tableName]?.get(fieldName)?.let { fieldMapping ->
             Assert.assertEquals("localizedText", fieldMapping.binding)
-            Assert.assertEquals("UX designers", getChoiceListString(fieldMapping, "0"))
-            Assert.assertNull(getChoiceListString(fieldMapping, "AnyRandomText"))
+            Assert.assertEquals("UX designers", fieldMapping.getChoiceListString("0"))
+            Assert.assertNull(fieldMapping.getChoiceListString("AnyRandomText"))
         } ?: kotlin.run { Assert.fail() }
 
         tableName = "Table_1"
@@ -126,24 +124,24 @@ class FormatterTest {
 
         customFormatters[tableName]?.get(fieldName)?.let { fieldMapping ->
             Assert.assertEquals("imageNamed", fieldMapping.binding)
-            Assert.assertEquals("todo.png", getChoiceListString(fieldMapping, "abc"))
-            Assert.assertEquals("pending.png", getChoiceListString(fieldMapping, "2"))
-            Assert.assertNull(getChoiceListString(fieldMapping, "AnyRandomText"))
+            Assert.assertEquals("todo.png", fieldMapping.getChoiceListString("abc"))
+            Assert.assertEquals("pending.png", fieldMapping.getChoiceListString("2"))
+            Assert.assertNull(fieldMapping.getChoiceListString("AnyRandomText"))
         } ?: kotlin.run { Assert.fail() }
     }
 
     private fun dateFormatTest(inputDate: String, expectedResult: String, typeChoice: String) =
-        Assert.assertEquals(expectedResult, applyFormat(typeChoice, inputDate))
+        Assert.assertEquals(expectedResult, FormatterUtils.applyFormat(typeChoice, inputDate))
 
     private fun booleanFormatTest(
         inputDate: String,
         expectedResult: String,
         typeChoice: String
-    ) = Assert.assertEquals(expectedResult, applyFormat(typeChoice, inputDate))
+    ) = Assert.assertEquals(expectedResult, FormatterUtils.applyFormat(typeChoice, inputDate))
 
     private fun timeFormatTest(inputDate: String, expectedResult: String, typeChoice: String) =
-        Assert.assertEquals(expectedResult, applyFormat(typeChoice, inputDate).trim())
+        Assert.assertEquals(expectedResult, FormatterUtils.applyFormat(typeChoice, inputDate).trim())
 
     private fun numberFormatTest(input: String, expectedResult: String, typeChoice: String) =
-        Assert.assertEquals(expectedResult, applyFormat(typeChoice, input))
+        Assert.assertEquals(expectedResult, FormatterUtils.applyFormat(typeChoice, input))
 }

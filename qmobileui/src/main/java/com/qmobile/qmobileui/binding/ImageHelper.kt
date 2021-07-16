@@ -41,11 +41,12 @@ object ImageHelper {
     private fun randomAvatar(): Int = listOfAvatars.random()
 
     fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Uri? {
-        BaseApp.embeddedFiles.find { it.contains(tableName + File.separator + "$tableName($key)_${fieldName}_") }
-            ?.let { path ->
-                Timber.d("file = $path")
-                return Uri.parse("file:///android_asset/$path")
-            }
+        BaseApp.runtimeDataHolder.embeddedFiles.find {
+            it.contains(tableName + File.separator + "$tableName($key)_${fieldName}_")
+        }?.let { path ->
+            Timber.d("file = $path")
+            return Uri.parse("file:///android_asset/$path")
+        }
         return null
     }
 }

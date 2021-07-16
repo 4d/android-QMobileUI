@@ -40,7 +40,6 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.ui.NetworkChecker
-import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 import com.qmobile.qmobileui.utils.hideKeyboard
 import kotlinx.coroutines.Job
@@ -58,7 +57,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private lateinit var syncDataRequested: AtomicBoolean
     private lateinit var searchView: SearchView
     private lateinit var searchPlate: EditText
-    private var searchableFields = QMobileUiUtil.appUtilities.searchField
+    private var searchableFields = BaseApp.runtimeDataHolder.searchField
     private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
     private var currentQuery = ""
     private var job: Job? = null
@@ -222,11 +221,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     delegate.requestAuthentication()
                 } else {
                     // AUTHENTICATED
-                    if (entityListViewModel.dataSynchronized.value == DataSyncStateEnum.UNSYNCHRONIZED) {
-                        delegate.requestDataSync(null)
-                    } else {
-                        if (entityListViewModel.dataSynchronized.value == DataSyncStateEnum.SYNCHRONIZED) {
-
+                    when (entityListViewModel.dataSynchronized.value) {
+                        DataSyncStateEnum.UNSYNCHRONIZED -> delegate.requestDataSync(null)
+                        DataSyncStateEnum.SYNCHRONIZED -> {
                             job?.cancel()
                             job = activity?.lifecycleScope?.launch {
                                 entityListViewModel.getEntities { shouldSyncData ->
@@ -239,6 +236,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                                 }
                             }
                         }
+                        DataSyncStateEnum.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
                     }
                 }
             }

@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.activity.mainactivity
 
 import com.qmobile.qmobileapi.auth.LoginRequiredCallback
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.sync.EntityViewModelIsToSync
 import com.qmobile.qmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
@@ -25,14 +26,14 @@ class MainActivityDataSync(private val activity: MainActivity) {
     private val loginRequiredCallbackForDataSync: LoginRequiredCallback =
         object : LoginRequiredCallback {
             override fun loginRequired() {
-                if (!activity.authInfoHelper.guestLogin) {
+                if (!BaseApp.runtimeDataHolder.guestLogin) {
                     dataSync.unsuccessfulSynchronizationNeedsLogin(entityViewModelIsToSyncList)
                     activity.startLoginActivity()
                 }
             }
         }
 
-    val dataSync = DataSync(activity, activity.authInfoHelper, loginRequiredCallbackForDataSync)
+    val dataSync = DataSync(activity, BaseApp.sharedPreferencesHolder, loginRequiredCallbackForDataSync)
 
     fun getEntityListViewModelsForSync(entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>) {
         entityViewModelIsToSyncList = mutableListOf()

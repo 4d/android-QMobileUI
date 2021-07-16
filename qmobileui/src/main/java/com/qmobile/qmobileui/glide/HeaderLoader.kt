@@ -6,27 +6,24 @@
 
 package com.qmobile.qmobileui.glide
 
-import android.content.Context
 import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.Headers
 import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.load.model.ModelLoader
 import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader
-import com.qmobile.qmobileapi.auth.AuthInfoHelper
 import com.qmobile.qmobileapi.network.ApiClient
+import com.qmobile.qmobiledatasync.app.BaseApp
 import java.io.InputStream
 
-class HeaderLoader(context: Context, concreteLoader: ModelLoader<GlideUrl, InputStream>) :
+class HeaderLoader(concreteLoader: ModelLoader<GlideUrl, InputStream>) :
     BaseGlideUrlLoader<String>(concreteLoader) {
-
-    private val authInfoHelper = AuthInfoHelper.getInstance(context)
 
     /**
      * Adjusts image url depending on what is given in remoteUrl
      */
     private fun buildImageUrl(imageUrl: String): String =
-        authInfoHelper.remoteUrl.removeSuffix("/") + imageUrl
+        BaseApp.sharedPreferencesHolder.remoteUrl.removeSuffix("/") + imageUrl
 
     override fun getUrl(model: String?, width: Int, height: Int, options: Options?): String {
         if (model.isNullOrEmpty()) {
@@ -40,11 +37,11 @@ class HeaderLoader(context: Context, concreteLoader: ModelLoader<GlideUrl, Input
         val lazyHeadersBuilder = LazyHeaders.Builder()
 
         // If a token is stored in sharedPreferences, we add it in header
-        if (authInfoHelper.sessionToken.isNotEmpty()) {
+        if (BaseApp.sharedPreferencesHolder.sessionToken.isNotEmpty()) {
             lazyHeadersBuilder
                 .setHeader(
                     ApiClient.AUTHORIZATION_HEADER_KEY,
-                    "${ApiClient.AUTHORIZATION_HEADER_VALUE_PREFIX} ${authInfoHelper.sessionToken}"
+                    "${ApiClient.AUTHORIZATION_HEADER_VALUE_PREFIX} ${BaseApp.sharedPreferencesHolder.sessionToken}"
                 )
         }
 

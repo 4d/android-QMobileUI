@@ -1,10 +1,10 @@
 /*
- * Created by Quentin Marciset on 4/6/2021.
+ * Created by qmarciset on 9/7/2021.
  * 4D SAS
- * Copyright (c) 2021 Quentin Marciset. All rights reserved.
+ * Copyright (c) 2021 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.binding
+package com.qmobile.qmobileui.formatters
 
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -12,7 +12,7 @@ import androidx.core.widget.TextViewCompat
 import com.google.android.material.chip.Chip
 import com.qmobile.qmobiledatasync.app.BaseApp
 
-@Suppress("ComplexMethod")
+// @Suppress("ComplexMethod")
 fun TextView.setFormatterDrawable(
     drawableResPair: Pair<Int, Int>,
     imageWidth: Int?,

@@ -6,18 +6,17 @@
 
 package com.qmobile.qmobileui.glide
 
-import android.content.Context
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.ModelLoader
 import com.bumptech.glide.load.model.ModelLoaderFactory
 import com.bumptech.glide.load.model.MultiModelLoaderFactory
 import java.io.InputStream
 
-class HeaderLoaderFactory(private val context: Context) : ModelLoaderFactory<String, InputStream> {
+class HeaderLoaderFactory : ModelLoaderFactory<String, InputStream> {
 
     override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<String, InputStream> {
         val loader = multiFactory.build(GlideUrl::class.java, InputStream::class.java)
-        return HeaderLoader(context, loader)
+        return HeaderLoader(loader)
     }
 
     override fun teardown() {

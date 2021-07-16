@@ -15,8 +15,7 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileui.list.viewholder.BaseViewHolder
-import com.qmobile.qmobileui.model.QMobileUiConstants
-import com.qmobile.qmobileui.utils.layoutFromTable
+import com.qmobile.qmobileui.utils.ResourcesHelper
 
 class EntityListAdapter internal constructor(
     private val tableName: String,
@@ -45,9 +44,10 @@ class EntityListAdapter internal constructor(
         val dataBinding: ViewDataBinding =
             DataBindingUtil.inflate(
                 inflater,
-                layoutFromTable(
+
+                ResourcesHelper.layoutFromTable(
                     parent.context,
-                    "${QMobileUiConstants.Prefix.RECYCLER_PREFIX}$tableName".lowercase()
+                    "${ResourcesHelper.RV_ITEM_PREFIX}_$tableName".lowercase()
                 ),
                 parent,
                 false

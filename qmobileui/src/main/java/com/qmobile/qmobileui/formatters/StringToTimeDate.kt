@@ -4,7 +4,7 @@
  * Copyright (c) 2021 Quentin Marciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.utils.converter
+package com.qmobile.qmobileui.formatters
 
 import android.annotation.SuppressLint
 import com.qmobile.qmobileapi.utils.safeParse

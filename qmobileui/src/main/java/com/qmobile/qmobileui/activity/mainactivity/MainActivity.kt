@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.qmobile.qmobileapi.auth.AuthInfoHelper
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.LoginRequiredCallback
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
@@ -37,7 +36,6 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
-import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.setupWithNavController
 import timber.log.Timber
@@ -50,7 +48,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     private var onLaunch = true
     var authenticationRequested = true
     var shouldDelayOnForegroundEvent = AtomicBoolean(false)
-    val authInfoHelper = AuthInfoHelper.getInstance(this)
     var currentNavController: LiveData<NavController>? = null
     lateinit var mainActivityDataSync: MainActivityDataSync
 
@@ -64,7 +61,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     private val loginRequiredCallbackForInterceptor: LoginRequiredCallback =
         object : LoginRequiredCallback {
             override fun loginRequired() {
-                if (!authInfoHelper.guestLogin)
+                if (!BaseApp.runtimeDataHolder.guestLogin)
                     mainActivityDataSync.dataSync.loginRequired.set(true)
             }
         }
@@ -137,7 +134,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             context = this,
             loginApiService = loginApiService,
             loginRequiredCallback = loginRequiredCallbackForInterceptor,
-            logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
+            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
         )
         if (this::entityListViewModelList.isInitialized) {
             entityListViewModelList.forEach { it.refreshRestRepository(apiService) }
@@ -147,7 +144,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     /**
      * Listens to event ON_STOP - app going in background
      */
-    @Suppress("unused")
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     fun onBackground() {
         Timber.d("[${Lifecycle.Event.ON_STOP}]")
@@ -157,7 +153,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     /**
      * Listens to event ON_START - app going in foreground
      */
-    @Suppress("unused")
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onForeground() {
         if (loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED) {
@@ -174,7 +169,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         if (onLaunch) {
             Timber.d("applyOnForegroundEvent on Launch")
             onLaunch = false
-            // Refreshing it again, as a remoteUrl change would bring issues with post requests going on previous remoteUrl
+            // Refreshing it again, as a remoteUrl change would bring issues with post requests
+            // going on previous remoteUrl
             refreshAllApiClients()
             mainActivityDataSync.getEntityListViewModelsForSync(entityListViewModelList)
         }
@@ -206,7 +202,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             }
             AuthenticationStateEnum.LOGOUT -> {
                 // Logout performed
-                if (!authInfoHelper.guestLogin)
+                if (!BaseApp.runtimeDataHolder.guestLogin)
                     startLoginActivity()
             }
             else -> {
@@ -218,12 +214,12 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         when (networkState) {
             NetworkStateEnum.CONNECTED -> {
                 // Setting the authenticationState to its initial value
-                if (authInfoHelper.sessionToken.isNotEmpty())
+                if (BaseApp.sharedPreferencesHolder.sessionToken.isNotEmpty())
                     loginViewModel.authenticationState.postValue(AuthenticationStateEnum.AUTHENTICATED)
 
                 // If guest and not yet logged in, auto login
-                if (authInfoHelper.sessionToken.isEmpty() &&
-                    authInfoHelper.guestLogin &&
+                if (BaseApp.sharedPreferencesHolder.sessionToken.isEmpty() &&
+                    BaseApp.runtimeDataHolder.guestLogin &&
                     authenticationRequested
                 ) {
                     authenticationRequested = false

@@ -1,18 +1,11 @@
 /*
- * Created by Quentin Marciset on 23/2/2021.
+ * Created by qmarciset on 9/7/2021.
  * 4D SAS
- * Copyright (c) 2021 Quentin Marciset. All rights reserved.
+ * Copyright (c) 2021 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.utils
+package com.qmobile.qmobileui.formatters
 
-import com.qmobile.qmobileui.model.QMobileFormatterConstants
-import com.qmobile.qmobileui.model.QMobileUiConstants.INT_100
-import com.qmobile.qmobileui.model.QMobileUiConstants.INT_3600
-import com.qmobile.qmobileui.model.QMobileUiConstants.INT_60
-import com.qmobile.qmobileui.utils.converter.getDateFromString
-import com.qmobile.qmobileui.utils.converter.getTimeFromLong
-import com.qmobile.qmobileui.utils.converter.getTimeFromString
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.util.Locale
@@ -22,8 +15,29 @@ object FormatterUtils {
 
     private const val DECIMAL_DIGITS = 3
     const val ROUND_MULTIPLIER = 10
+    const val INT_100: Int = 100
+    const val INT_20: Int = 20
+    const val INT_10: Int = 10
+    const val INT_3: Int = 3
+    const val INT_6: Int = 6
+    const val INT_9: Int = 9
+    const val INT_12: Int = 12
+    const val INT_3600 = 3600
+    const val INT_60: Int = 60
 
-    @Suppress("LongMethod", "ComplexMethod")
+    private val dateFormat: Map<String, Int> = mapOf(
+        "shortDate" to DateFormat.SHORT,
+        "mediumDate" to DateFormat.MEDIUM,
+        "longDate" to DateFormat.LONG,
+        "fullDate" to DateFormat.FULL
+    )
+
+    private val timeFormat: Map<String, Int> = mapOf(
+        "shortTime" to DateFormat.SHORT,
+        "mediumTime" to DateFormat.MEDIUM,
+        "duration" to DateFormat.MEDIUM,
+    )
+
     fun applyFormat(format: String, baseText: String): String {
 
         return when (format) {
@@ -45,17 +59,17 @@ object FormatterUtils {
                     )
             }
             "shortTime" -> {
-                QMobileFormatterConstants.timeFormat[format]?.let {
+                timeFormat[format]?.let {
                     DateFormat.getTimeInstance(it).format(getTimeFromString(baseText).time)
                 } ?: ""
             }
             "mediumTime" -> {
-                QMobileFormatterConstants.timeFormat[format]?.let {
+                timeFormat[format]?.let {
                     DateFormat.getTimeInstance(it).format(getTimeFromString(baseText).time)
                 } ?: ""
             }
             "duration" -> {
-                QMobileFormatterConstants.timeFormat[format]?.let {
+                timeFormat[format]?.let {
                     val timeFromString = getTimeFromString(baseText).time
                     val df = DateFormat.getTimeInstance(it, Locale.getDefault())
                     val time = df.format(timeFromString)
@@ -63,25 +77,25 @@ object FormatterUtils {
                 } ?: ""
             }
             "fullDate" -> {
-                QMobileFormatterConstants.dateFormat[format]?.let {
+                dateFormat[format]?.let {
                     DateFormat.getDateInstance(it, Locale.getDefault())
                         .format(getDateFromString(baseText).time)
                 } ?: ""
             }
             "longDate" -> {
-                QMobileFormatterConstants.dateFormat[format]?.let {
+                dateFormat[format]?.let {
                     DateFormat.getDateInstance(it, Locale.getDefault())
                         .format(getDateFromString(baseText).time)
                 } ?: ""
             }
             "mediumDate" -> {
-                QMobileFormatterConstants.dateFormat[format]?.let {
+                dateFormat[format]?.let {
                     DateFormat.getDateInstance(it, Locale.getDefault())
                         .format(getDateFromString(baseText).time)
                 } ?: ""
             }
             "shortDate" -> {
-                QMobileFormatterConstants.dateFormat[format]?.let {
+                dateFormat[format]?.let {
                     DateFormat.getDateInstance(it, Locale.getDefault())
                         .format(getDateFromString(baseText).time)
                 } ?: ""
@@ -107,7 +121,7 @@ object FormatterUtils {
                 DecimalFormat("0.00").format(baseText.toDouble()) + "th"
             }
             "spellOut" -> {
-                QMobileUiUtil.WordFormatter(baseText)
+                NumberToWord.convertNumberToWord(baseText)
             }
             "integer" -> {
                 (baseText.toFloat()).toInt().toString()

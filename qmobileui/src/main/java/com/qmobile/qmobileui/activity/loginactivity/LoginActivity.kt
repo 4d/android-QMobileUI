@@ -29,7 +29,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmobile.qmobileapi.auth.AuthInfoHelper
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.isEmailValid
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
@@ -44,7 +43,6 @@ import com.qmobile.qmobileui.databinding.ActivityLoginBinding
 import com.qmobile.qmobileui.ui.RemoteUrlChange
 import com.qmobile.qmobileui.ui.clearViewInParent
 import com.qmobile.qmobileui.ui.setOnVeryLongClickListener
-import com.qmobile.qmobileui.utils.QMobileUiUtil
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.hideKeyboard
 
@@ -57,7 +55,6 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
     private lateinit var remoteUrlDisplayDialogBuilder: MaterialAlertDialogBuilder
-    private lateinit var authInfoHelper: AuthInfoHelper
     private lateinit var shakeAnimation: Animation
 
     // UI strings
@@ -77,10 +74,8 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
         // Retrieve bundled parameter to know if we are coming from a logout action
         loggedOut = intent.getBooleanExtra(LOGGED_OUT, false)
 
-        authInfoHelper = AuthInfoHelper.getInstance(BaseApp.instance)
-
         // If guest or already logged in, skip LoginActivity
-        if (authInfoHelper.sessionToken.isNotEmpty() || authInfoHelper.guestLogin) {
+        if (BaseApp.sharedPreferencesHolder.sessionToken.isNotEmpty() || BaseApp.runtimeDataHolder.guestLogin) {
             startMainActivity(true)
         } else {
 
@@ -91,12 +86,12 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
             // Init Api service
             loginApiService = ApiClient.getLoginApiService(
                 context = this,
-                logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
+                logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
             )
 
             accessibilityApiService = ApiClient.getAccessibilityApiService(
                 context = this,
-                logBody = QMobileUiUtil.appUtilities.logLevel <= Log.VERBOSE
+                logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
             )
 
             binding =
@@ -169,7 +164,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
             true
         }
 
-        this.remoteUrl = authInfoHelper.remoteUrl
+        this.remoteUrl = BaseApp.sharedPreferencesHolder.remoteUrl
         initRemoteUrlDisplayDialog()
 
         remoteUrlDisplayDialogBuilder = MaterialAlertDialogBuilder(
@@ -291,7 +286,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
     }
 
     override fun onValidRemoteUrlChange(newRemoteUrl: String) {
-        authInfoHelper.remoteUrl = newRemoteUrl
+        BaseApp.sharedPreferencesHolder.remoteUrl = newRemoteUrl
         remoteUrl = newRemoteUrl
         refreshApiClients()
     }
