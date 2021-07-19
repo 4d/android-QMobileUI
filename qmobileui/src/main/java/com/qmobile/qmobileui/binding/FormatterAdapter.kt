@@ -36,21 +36,26 @@ fun applyFormatter(
             view.text = FormatterUtils.applyFormat(format, text)
             return
         } else {
-            applyCustomFormat(view, fieldName, tableName, text, imageWidth, imageHeight)
+            val fieldMappingFound =
+                applyCustomFormat(view, fieldName, tableName, text, imageWidth, imageHeight)
+            if (fieldMappingFound) return
         }
     }
     view.text = text
     return
 }
 
-fun applyCustomFormat(
+/**
+ * Returns true if a fieldMapping was found, false otherwise
+ */
+private fun applyCustomFormat(
     view: TextView,
     fieldName: String?,
     tableName: String?,
     text: String,
     imageWidth: Int?,
     imageHeight: Int?
-) {
+): Boolean {
     if (tableName != null && fieldName != null) {
 
         BaseApp.runtimeDataHolder.customFormatters[tableName.tableNameAdjustment()]?.get(
@@ -67,12 +72,13 @@ fun applyCustomFormat(
                     }
                     else -> view.text = ""
                 }
-                return
+                return true
             }
     }
+    return false
 }
 
-fun applyImageNamedFormat(
+private fun applyImageNamedFormat(
     view: TextView,
     text: String,
     fieldMapping: FieldMapping,
@@ -103,7 +109,7 @@ fun applyImageNamedFormat(
     }
 }
 
-fun applyLocalizedTextFormat(view: TextView, text: String, fieldMapping: FieldMapping) {
+private fun applyLocalizedTextFormat(view: TextView, text: String, fieldMapping: FieldMapping) {
     val formattedValue: String? =
         fieldMapping.getChoiceListString(text)
     view.text =
