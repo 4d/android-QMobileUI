@@ -215,7 +215,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             NetworkStateEnum.CONNECTED -> {
                 // Setting the authenticationState to its initial value
                 if (BaseApp.sharedPreferencesHolder.sessionToken.isNotEmpty())
-                    loginViewModel.authenticationState.postValue(AuthenticationStateEnum.AUTHENTICATED)
+                    loginViewModel.setAuthenticationState(AuthenticationStateEnum.AUTHENTICATED)
 
                 // If guest and not yet logged in, auto login
                 if (BaseApp.sharedPreferencesHolder.sessionToken.isEmpty() &&

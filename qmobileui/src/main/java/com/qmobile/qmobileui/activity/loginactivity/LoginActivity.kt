@@ -141,13 +141,13 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
         binding.loginEmailInput.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 if (binding.loginEmailInput.text.toString().isEmailValid()) {
-                    loginViewModel.emailValid.postValue(true)
+                    loginViewModel.setEmailValidState(true)
                     binding.loginEmailContainer.error = null
                 } else {
                     binding.loginEmailInput.startAnimation(shakeAnimation)
                     binding.loginEmailContainer.error =
                         resources.getString(R.string.login_invalid_email)
-                    loginViewModel.emailValid.postValue(false)
+                    loginViewModel.setEmailValidState(false)
                 }
             } else {
                 binding.loginEmailContainer.error = null
