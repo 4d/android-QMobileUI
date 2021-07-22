@@ -22,7 +22,9 @@ class SqlQueryBuilderUtil(
 
     fun sortQuery(dataToSort: String): SimpleSQLiteQuery {
         val stringBuffer = StringBuffer("SELECT * FROM $tableName AS T1 WHERE ")
-        searchField.getSafeArray(tableName)?.let { conditionAdder(it, stringBuffer, dataToSort) }
+        searchField.getSafeArray(tableName)?.let {
+            conditionAdder(it, stringBuffer, dataToSort)
+        }
 
         return SimpleSQLiteQuery(stringBuffer.toString().removeSuffix("OR "))
     }

@@ -10,4 +10,4 @@ const val customFormattersJson =
     "{\"Table_1\":{\"field_1\":{\"binding\":\"imageNamed\",\"choiceList\":{\"abc\":\"todo.png\",\"def\":\"inprogress.png\",\"2\":\"pending.png\",\"3\":\"done.png\"},\"name\":\"\\/formatter-IntegerToImage\",\"imageWidth\":50,\"imageHeight\":50}}," +
         "\"Table_2\":{}," +
         "\"Table_3\":{\"field_x\":{\"binding\":\"localizedText\",\"choiceList\":{\"0\":\"UX designers\",\"1\":\"Developer\",\"2\":\"QA\",\"3\":\"Product Owner\"},\"name\":\"\\/formatter-IntToString\"}}," +
-        "\"Table_4\":{\"relationField.field_1\":{\"binding\":\"localizedText\",\"choiceList\":{\"0\":\"UX designers\",\"1\":\"Developer\",\"2\":\"QA\",\"3\":\"Product Owner\"},\"name\":\"\\/formatter-IntToString\"}}}"
+        "\"Table_4\":{\"relationfield.field_1\":{\"binding\":\"localizedText\",\"choiceList\":{\"0\":\"UX designers\",\"1\":\"Developer\",\"2\":\"QA\",\"3\":\"Product Owner\"},\"name\":\"\\/formatter-IntToString\"}}}"
