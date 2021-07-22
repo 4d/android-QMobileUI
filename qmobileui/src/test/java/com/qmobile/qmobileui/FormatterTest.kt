@@ -129,7 +129,7 @@ class FormatterTest {
         } ?: kotlin.run { Assert.fail() }
 
         tableName = "Table_4"
-        fieldName = "relationField.field_1"
+        fieldName = "relationfield.field_1"
         customFormatters[tableName]?.get(fieldName)?.let { fieldMapping ->
             Assert.assertEquals("localizedText", fieldMapping.binding)
             Assert.assertEquals("UX designers", fieldMapping.getChoiceListString("0"))
