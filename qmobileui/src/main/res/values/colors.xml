@@ -7,4 +7,10 @@
 <resources>
     <color name="error_dark">#FFCF6679</color>
     <color name="error_light">#FFB00020</color>
+    <color name="background_light">#E9E9EB</color>
+    <color name="background_dark">#262629</color>
+    <color name="card_cell_footer_background_light">#F2F2F7</color>
+    <color name="card_cell_footer_background_dark">#1C1C1E</color>
+    <color name="card_cell_background_light">#FFFFFF</color>
+    <color name="card_cell_background_dark">#000000</color>
 </resources>
