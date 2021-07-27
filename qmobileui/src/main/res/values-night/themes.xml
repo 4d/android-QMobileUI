@@ -1,0 +1,42 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.QMobileApp.Card.Background" parent="Theme.QMobileApp">
+        <item name="cardBackgroundColor">@android:color/black</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Card.Background.Alt1" parent="Theme.QMobileApp">
+        <item name="cardBackgroundColor">@color/grey_dark_2</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Card.Background.Alt2" parent="Theme.QMobileApp">
+        <item name="cardBackgroundColor">@color/grey_dark_3</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Card.Background.Alt3" parent="Theme.QMobileApp">
+        <item name="cardBackgroundColor">@color/grey_dark_2</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Custom.Background" parent="Theme.QMobileApp">
+        <item name="background">@android:color/black</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Custom.Background.Alt1" parent="Theme.QMobileApp">
+        <item name="background">@color/grey_dark_1</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Custom.Background.Alt2" parent="Theme.QMobileApp">
+        <item name="background">@color/grey_dark_2</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Custom.Background.Alt3" parent="Theme.QMobileApp">
+        <item name="background">@android:color/white</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Custom.Background.Alt4" parent="Theme.QMobileApp">
+        <item name="background">@color/grey_dark_4</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Text.Color" parent="Theme.QMobileApp">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+</resources>

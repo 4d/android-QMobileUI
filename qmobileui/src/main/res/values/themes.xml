@@ -1,0 +1,59 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.QMobileApp" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="actionBarTheme">@style/ThemeOverlay.Actionbar</item>
+    </style>
+
+    <style name="Theme.QMobileApp.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.QMobileApp.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.QMobileApp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="ThemeOverlay.Actionbar" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        <item name="android:textColorPrimary">?attr/colorOnPrimary</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Card.Background" parent="Theme.QMobileApp">
+        <item name="cardBackgroundColor">@android:color/white</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Card.Background.Alt1" parent="Theme.QMobileApp">
+        <item name="cardBackgroundColor">@color/grey_light_2</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Card.Background.Alt2" parent="Theme.QMobileApp">
+        <item name="cardBackgroundColor">@color/grey_light_3</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Card.Background.Alt3" parent="Theme.QMobileApp">
+        <item name="cardBackgroundColor">@android:color/white</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Custom.Background" parent="Theme.QMobileApp">
+        <item name="background">@android:color/white</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Custom.Background.Alt1" parent="Theme.QMobileApp">
+        <item name="background">@color/grey_light_1</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Custom.Background.Alt2" parent="Theme.QMobileApp">
+        <item name="background">@android:color/white</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Custom.Background.Alt3" parent="Theme.QMobileApp">
+        <item name="background">@android:color/black</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Custom.Background.Alt4" parent="Theme.QMobileApp">
+        <item name="background">@color/grey_light_2</item>
+    </style>
+
+    <style name="Theme.QMobileApp.Text.Color" parent="Theme.QMobileApp">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+</resources>
