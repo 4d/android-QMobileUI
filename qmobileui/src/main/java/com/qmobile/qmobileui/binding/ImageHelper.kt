@@ -12,6 +12,7 @@ import android.net.Uri
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
+import androidx.core.graphics.ColorUtils
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import timber.log.Timber
@@ -60,6 +61,8 @@ fun Context.getColorFromAttr(
     theme.resolveAttribute(attrColor, typedValue, resolveRefs)
     return typedValue.data
 }
+
+fun isDarkColor(@ColorInt color: Int): Boolean = ColorUtils.calculateLuminance(color) < 0.5
 
 val Int.dp: Int
     get() = (this / Resources.getSystem().displayMetrics.density).toInt()

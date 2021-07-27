@@ -37,6 +37,8 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.binding.getColorFromAttr
+import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.ui.NetworkChecker
@@ -287,10 +289,13 @@ open class EntityListFragment : Fragment(), BaseFragment {
             searchPlate = searchView.findViewById(androidx.appcompat.R.id.search_src_text) as EditText
             searchPlate.hint = ""
             searchPlate.setBackgroundResource(R.drawable.searchview_rounded)
-            if (BaseApp.nightMode())
-                searchPlate.setTextColor(Color.WHITE)
-            else
-                searchPlate.setTextColor(Color.BLACK)
+            context?.getColorFromAttr(android.R.attr.colorPrimary)?.let {
+                if (isDarkColor(it)) {
+                    searchPlate.setTextColor(Color.BLACK)
+                } else {
+                    searchPlate.setTextColor(Color.WHITE)
+                }
+            }
 
             searchPlate.setOnEditorActionListener { textView, actionId, keyEvent ->
                 if ((keyEvent != null && (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER)) ||
