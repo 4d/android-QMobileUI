@@ -5,11 +5,6 @@
         <item name="actionBarStyle">@style/Widget.AppTheme.ActionBar</item>
     </style>
 
-    <style name="Theme.QMobileApp.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
     <style name="Theme.QMobileApp.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.QMobileApp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
@@ -19,7 +14,6 @@
     </style>
 
     <style name="Widget.AppTheme.ActionBar" parent="Widget.AppCompat.ActionBar.Solid">
-        <!-- action bar background - without android prefix -->
         <item name="background">?attr/colorPrimary</item>
     </style>
 
