@@ -320,7 +320,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                             setIcon(resId)
                     }
                     setOnMenuItemClickListener {
-                        entityListViewModel.sendAction(action.getPreferredName())
+                        entityListViewModel.sendAction(action.name)
                         entityListViewModel.toastMessage.showMessage(
                             action.getPreferredName(),
                             "",
