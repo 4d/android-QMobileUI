@@ -13,6 +13,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -48,6 +49,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
+import androidx.appcompat.view.menu.MenuBuilder
+import android.annotation.SuppressLint
+import com.google.gson.Gson
+import com.qmobile.qmobiledatasync.toast.MessageType
+import com.qmobile.qmobileui.Action
+
 
 @Suppress("TooManyFunctions")
 open class EntityListFragment : Fragment(), BaseFragment {
@@ -60,6 +67,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private lateinit var searchView: SearchView
     private lateinit var searchPlate: EditText
     private var searchableFields = BaseApp.runtimeDataHolder.searchField
+    private var actions = BaseApp.runtimeDataHolder.actions
     private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
     private var currentQuery = ""
     private var job: Job? = null
@@ -102,6 +110,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun hasSearch() = searchableFields.has(tableName)
+    private fun hasActions() = actions.has(tableName)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -281,12 +290,53 @@ open class EntityListFragment : Fragment(), BaseFragment {
         super.onPrepareOptionsMenu(menu)
     }
 
-    // Searchable implementation
+    data class TestModel(
+        val id: Int,
+        val description: String
+    )
+
+
+    @SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        if (hasActions()) {
+            val length = actions.getJSONArray(tableName).length()
+            val context = requireParentFragment().requireContext()
+            for (i in 0 until length) {
+                val jsonObject = actions.getJSONArray(tableName).getJSONObject(i)
+                var action = Gson().fromJson(jsonObject.toString(), Action::class.java)
+                val menuBuilder = menu as MenuBuilder
+                menuBuilder.setOptionalIconsVisible(true)
+                menu.add(
+                    action.getPreferredName()
+                ).apply {
+                    setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+                    action.icon?.let {
+                        val resId = context.resources.getIdentifier(
+                            it,
+                            "drawable",
+                            context.packageName
+                        )
+                        if (resId != 0)
+                            setIcon(resId)
+                    }
+                    setOnMenuItemClickListener {
+                        entityListViewModel.sendAction(action.getPreferredName())
+                        entityListViewModel.toastMessage.showMessage(
+                            action.getPreferredName(),
+                            "",
+                            MessageType.NEUTRAL
+                        )
+                        true
+                    }
+                }
+            }
+        }
+
         if (hasSearch()) {
             inflater.inflate(R.menu.menu_search, menu)
             searchView = menu.findItem(R.id.search).actionView as SearchView
-            searchPlate = searchView.findViewById(androidx.appcompat.R.id.search_src_text) as EditText
+            searchPlate =
+                searchView.findViewById(androidx.appcompat.R.id.search_src_text) as EditText
             searchPlate.hint = ""
             searchPlate.setBackgroundResource(R.drawable.searchview_rounded)
             context?.getColorFromAttr(android.R.attr.colorPrimary)?.let {
