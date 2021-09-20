@@ -25,7 +25,7 @@ class EntityViewPagerAdapter(
         val entity: EntityModel? = list[position] as EntityModel?
         val itemId = entity?.__KEY ?: "0"
 
-        return BaseApp.genericTableFragmentHelper.getDetailFragment(itemId, tableName).apply {
+        return BaseApp.genericTableFragmentHelper.getDetailFragment(tableName).apply {
             arguments = Bundle().apply {
                 putString("itemId", itemId)
                 putString("tableName", tableName)

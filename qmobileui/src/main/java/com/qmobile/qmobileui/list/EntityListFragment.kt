@@ -71,6 +71,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
     var tableName: String = ""
     lateinit var adapter: EntityListAdapter
 
+    private var fromRelation = false
+
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
 
@@ -80,6 +82,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
         savedInstanceState: Bundle?
     ): View {
         arguments?.getString("tableName")?.let { tableName = it }
+        arguments?.getString("currentQuery")?.let { currentQuery = it }
+        arguments?.getBoolean("fromRelation")?.let { fromRelation = it }
+
         sqlQueryBuilderUtil = SqlQueryBuilderUtil(tableName)
 
         // Every time we land on the fragment, we want refreshed data // not anymore
