@@ -41,6 +41,7 @@ object Versions {
     const val retrofit = "2.9.0"
     const val robolectric = "4.5.1"
     const val room = "2.4.0-alpha04"
+    const val room_compiler = "2.3.0"
     const val rules = "1.3.0"
     const val runner = "1.3.0"
     const val rx_android = "2.1.1"
@@ -101,7 +102,7 @@ object Libs {
     // Room
     const val androidx_room = "androidx.room:room-ktx:${Versions.room}"
     const val androidx_room_runtime = "androidx.room:room-runtime:${Versions.room}"
-    const val androidx_room_compiler = "androidx.room:room-compiler:${Versions.room}"
+    const val androidx_room_compiler = "androidx.room:room-compiler:${Versions.room_compiler}"
     const val sqlite = "androidx.sqlite:sqlite-ktx:${Versions.sqlite}"
 
     // Glide
