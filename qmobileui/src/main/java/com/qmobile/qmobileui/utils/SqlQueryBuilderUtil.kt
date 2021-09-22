@@ -20,6 +20,14 @@ class SqlQueryBuilderUtil(
 
     fun getAll() = SimpleSQLiteQuery("SELECT * FROM $tableName")
 
+    fun setRelationQuery(parentTableName: String? = null, parentItemId: String? = null, relatedEntities: Array<String>): SimpleSQLiteQuery {
+//        val stringBuffer = StringBuffer("SELECT * FROM $tableName AS T1 WHERE EXISTS (SELECT * FROM $parentTableName AS T2 WHERE T2.__KEY = $parentItemId AND  )")
+        val stringBuffer = StringBuffer("SELECT * FROM $tableName AS T1 WHERE T1.__KEY in (${
+            relatedEntities.joinToString(",") { "'$it'" }
+        })")
+        return SimpleSQLiteQuery(stringBuffer.toString())
+    }
+
     fun sortQuery(dataToSort: String): SimpleSQLiteQuery {
         val stringBuffer = StringBuffer("SELECT * FROM $tableName AS T1 WHERE ")
         searchField.getSafeArray(tableName)?.let {

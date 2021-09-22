@@ -74,9 +74,4 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
         super.onActivityCreated(savedInstanceState)
         EntityDetailFragmentObserver(this, entityViewModel).initObservers()
     }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-//        binding.root.findViewById<Button>
-    }
 }

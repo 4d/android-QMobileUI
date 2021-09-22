@@ -36,6 +36,9 @@ class EntityDetailFragmentObserver(
                     val relationKeysMap =
                         BaseApp.genericTableHelper.getRelationsInfo(fragment.tableName, entity)
                     observeRelations(relationKeysMap)
+
+                    val oneToManyRelationMap = BaseApp.genericTableHelper.getOneToManyRelationsInfo(fragment.tableName, entity)
+                    BaseApp.genericTableFragmentHelper.setButtonClick(fragment.binding, oneToManyRelationMap, fragment.childFragmentManager, fragment.tableName, "Employee", fragment.binding.root)
                 }
             }
         )
