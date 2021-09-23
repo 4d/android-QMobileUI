@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui
 
-
 class Action(
     val name: String,
     val icon: String?,
@@ -16,11 +15,14 @@ class Action(
 ) {
 
     fun getPreferredName(): String {
+        val preferredNAme: String
         if (!label.isNullOrEmpty())
-            return label
+            preferredNAme = label
         else if (!shortLabel.isNullOrEmpty())
-            return shortLabel
-        return name
-
+            preferredNAme = shortLabel
+        else
+            preferredNAme = name
+        return preferredNAme
     }
+
 }

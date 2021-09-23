@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.list
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
@@ -18,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
@@ -26,15 +28,18 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
+import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
+import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -49,12 +54,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
-import androidx.appcompat.view.menu.MenuBuilder
-import android.annotation.SuppressLint
-import com.google.gson.Gson
-import com.qmobile.qmobiledatasync.toast.MessageType
-import com.qmobile.qmobileui.Action
-
 
 @Suppress("TooManyFunctions")
 open class EntityListFragment : Fragment(), BaseFragment {
@@ -295,9 +294,26 @@ open class EntityListFragment : Fragment(), BaseFragment {
         val description: String
     )
 
-
     @SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        setupActionsMenuIfNeeded(menu)
+        setupSearchMenuIfNeeded(menu, inflater)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(CURRENT_QUERY_KEY, currentQuery)
+    }
+
+    private fun setSearchQuery() {
+        if (currentQuery.isEmpty())
+            entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.getAll())
+        else
+            entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.sortQuery(currentQuery))
+    }
+
+    private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasActions()) {
             val length = actions.getJSONArray(tableName).length()
             val context = requireParentFragment().requireContext()
@@ -306,19 +322,21 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 var action = Gson().fromJson(jsonObject.toString(), Action::class.java)
                 val menuBuilder = menu as MenuBuilder
                 menuBuilder.setOptionalIconsVisible(true)
-                menu.add(
+                var menuItem = menu.add(
                     action.getPreferredName()
-                ).apply {
+                )
+                val resId = if (action.icon != null) {
+                    context.resources.getIdentifier(
+                        action.icon,
+                        "drawable",
+                        context.packageName
+                    )
+                } else {
+                    0
+                }
+                menuItem.run {
                     setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-                    action.icon?.let {
-                        val resId = context.resources.getIdentifier(
-                            it,
-                            "drawable",
-                            context.packageName
-                        )
-                        if (resId != 0)
-                            setIcon(resId)
-                    }
+                    setIcon(resId)
                     setOnMenuItemClickListener {
                         entityListViewModel.sendAction(action.name)
                         entityListViewModel.toastMessage.showMessage(
@@ -331,7 +349,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 }
             }
         }
+    }
 
+    private fun setupSearchMenuIfNeeded(menu: Menu, inflater: MenuInflater) {
         if (hasSearch()) {
             inflater.inflate(R.menu.menu_search, menu)
             searchView = menu.findItem(R.id.search).actionView as SearchView
@@ -364,18 +384,5 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 true
             }
         }
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString(CURRENT_QUERY_KEY, currentQuery)
-    }
-
-    private fun setSearchQuery() {
-        if (currentQuery.isEmpty())
-            entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.getAll())
-        else
-            entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.sortQuery(currentQuery))
     }
 }
