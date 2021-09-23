@@ -15,14 +15,11 @@ class Action(
 ) {
 
     fun getPreferredName(): String {
-        val preferredNAme: String
-        if (!label.isNullOrEmpty())
-            preferredNAme = label
+        return if (!label.isNullOrEmpty())
+            label
         else if (!shortLabel.isNullOrEmpty())
-            preferredNAme = shortLabel
+            shortLabel
         else
-            preferredNAme = name
-        return preferredNAme
+            name
     }
-
 }
