@@ -26,6 +26,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
@@ -127,6 +128,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initRecyclerView()
+        initCellSwipe()
         initOnRefreshListener()
         EntityListFragmentObserver(this, entityListViewModel).initObservers()
         hideKeyboard(activity)
@@ -193,30 +195,18 @@ open class EntityListFragment : Fragment(), BaseFragment {
     /**
      * Initialize Swipe to delete
      */
-    /*private fun initSwipeToDeleteAndUndo() {
-        val swipeToDeleteCallback: SwipeToDeleteCallback =
-            object : SwipeToDeleteCallback(requireContext(), delegate.darkModeEnabled()) {
+    private fun initCellSwipe() {
+        val swipeCallback: SwipeCallback =
+            object : SwipeCallback(requireContext(), BaseApp.nightMode()) {
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     val position = viewHolder.adapterPosition
-                    val item = adapter.getEntities()[position]
-                    entityListViewModel.delete(item)
-
-                    activity?.let {
-                        customSnackBar(
-                            it,
-                            it.resources.getString(R.string.snackbar_remove),
-                            View.OnClickListener {
-                                entityListViewModel.insert(item)
-                                // rv_main.scrollToPosition(position)
-                            }
-                        )
-                    }
+                    // TODO
                 }
             }
 
-        val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
-        itemTouchHelper.attachToRecyclerView(fragment_list_recycler_view)
-    }*/
+        val itemTouchHelper = ItemTouchHelper(swipeCallback)
+        itemTouchHelper.attachToRecyclerView(binding.fragmentListRecyclerView)
+    }
 
     /**
      * Forces data sync, when user pulls to refresh

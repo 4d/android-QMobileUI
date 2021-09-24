@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.R
 
-abstract class SwipeToDeleteCallback(context: Context, darkMode: Boolean) : ItemTouchHelper.Callback() {
+abstract class SwipeCallback(context: Context, darkMode: Boolean) : ItemTouchHelper.Callback() {
 
     private val mClearPaint: Paint = Paint()
     private val mBackground: ColorDrawable = ColorDrawable()
