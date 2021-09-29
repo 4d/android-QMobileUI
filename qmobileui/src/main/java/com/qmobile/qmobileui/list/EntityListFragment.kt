@@ -7,7 +7,9 @@
 package com.qmobile.qmobileui.list
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.view.KeyEvent
@@ -31,6 +33,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
@@ -47,6 +50,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
+import com.qmobile.qmobileui.list.viewholder.SwipeHelper
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
@@ -61,13 +65,15 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     companion object {
         private const val CURRENT_QUERY_KEY = "currentQuery_key"
+        private const val MAX_ACTIONS_VISIBLE = 3
     }
 
     private lateinit var syncDataRequested: AtomicBoolean
     private lateinit var searchView: SearchView
     private lateinit var searchPlate: EditText
     private var searchableFields = BaseApp.runtimeDataHolder.searchField
-    private var actions = BaseApp.runtimeDataHolder.actions
+    private var tableActionsJsonObject = BaseApp.runtimeDataHolder.listActions
+    private var currentRecorodActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
     private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
     private var currentQuery = ""
     private var job: Job? = null
@@ -78,6 +84,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
     val binding get() = _binding!!
     var tableName: String = ""
     lateinit var adapter: EntityListAdapter
+
+    private var tableActions = mutableListOf<Action>()
+    private var currentRecordActions = mutableListOf<Action>()
+    private var showMoreActions = mutableListOf<Action>()
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -109,8 +119,36 @@ open class EntityListFragment : Fragment(), BaseFragment {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initActions()
+        initCellSwipe()
+    }
+
+    private fun initActions() {
+        tableActions.clear()
+        currentRecordActions.clear()
+        if (hasTableActions()) {
+            val length = tableActionsJsonObject.getJSONArray(tableName).length()
+            for (i in 0 until length) {
+                val jsonObject = tableActionsJsonObject.getJSONArray(tableName).getJSONObject(i)
+                tableActions.add(Gson().fromJson(jsonObject.toString(), Action::class.java))
+            }
+        }
+        if (hasCurrentRecordActions()) {
+            val length = currentRecorodActionsJsonObject.getJSONArray(tableName).length()
+            for (i in 0 until (length)) {
+                val jsonObject =
+                    currentRecorodActionsJsonObject.getJSONArray(tableName).getJSONObject(i)
+                var action = Gson().fromJson(jsonObject.toString(), Action::class.java)
+                currentRecordActions.add(action)
+            }
+        }
+    }
+
     private fun hasSearch() = searchableFields.has(tableName)
-    private fun hasActions() = actions.has(tableName)
+    private fun hasTableActions() = tableActionsJsonObject.has(tableName)
+    private fun hasCurrentRecordActions() = currentRecorodActionsJsonObject.has(tableName)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -128,7 +166,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initRecyclerView()
-        initCellSwipe()
         initOnRefreshListener()
         EntityListFragmentObserver(this, entityListViewModel).initObservers()
         hideKeyboard(activity)
@@ -151,6 +188,11 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 override fun getRelations(entity: EntityModel): Map<String, LiveData<RoomRelation>> =
                     BaseApp.genericTableHelper.getRelationsInfo(tableName, entity)
 //                    entityListViewModel.getRelationsInfo(entity)
+            },
+            { selectedActionId ->
+                if (hasCurrentRecordActions()) {
+                    showDialog(selectedActionId, currentRecordActions)
+                }
             }
         )
 
@@ -196,16 +238,80 @@ open class EntityListFragment : Fragment(), BaseFragment {
      * Initialize Swipe to delete
      */
     private fun initCellSwipe() {
-        val swipeCallback: SwipeCallback =
-            object : SwipeCallback(requireContext(), BaseApp.nightMode()) {
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    val position = viewHolder.adapterPosition
-                    // TODO
+        if (hasCurrentRecordActions()) {
+            val itemTouchHelper =
+                ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
+                    override fun instantiateUnderlayButton(position: Int): MutableList<ItemActionButton> {
+                        var buttons = mutableListOf<ItemActionButton>()
+                        for (i in 0 until (currentRecordActions.size)) {
+                            if ((i + 1) > MAX_ACTIONS_VISIBLE) {
+                                buttons.add(createButton(position, null, i))
+                                showMoreActions.clear()
+                                showMoreActions.addAll(
+                                    currentRecordActions.subList(
+                                        i,
+                                        currentRecordActions.size
+                                    )
+                                )
+                                break
+                            }
+                            var action = currentRecordActions.get(i)
+                            buttons.add(createButton(position, action, i))
+                        }
+                        return buttons
+                    }
+                })
+            itemTouchHelper.attachToRecyclerView(binding.fragmentListRecyclerView)
+        }
+    }
+
+    private fun showDialog(selectedActionId: String?, actions: MutableList<Action>) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+        val items = actions.map { it.getPreferredShortName() }
+        builder.setItems(
+            items.toTypedArray(),
+            DialogInterface.OnClickListener { dialog, position ->
+                sendAction(actions.get(position).name, selectedActionId)
+            }
+        )
+        builder.show()
+    }
+
+    private fun sendAction(actionName: String, selectedActionId: String?) {
+        entityListViewModel.sendAction(
+            actionName,
+            ActionContent(
+                mapOf(
+                    Pair("dataClass", tableName),
+                    Pair("entity", mapOf(Pair("primaryKey", selectedActionId)))
+                )
+            )
+        )
+    }
+
+    private fun createButton(
+        position: Int,
+        action: Action?,
+        verticalIndex: Int
+    ): SwipeHelper.ItemActionButton {
+        val color =
+            if (verticalIndex % 2 == 0) android.R.color.holo_blue_dark else android.R.color.holo_blue_light
+        return SwipeHelper.ItemActionButton(
+            requireContext(),
+            action,
+            14.0f,
+            color,
+            object : SwipeHelper.UnderlayButtonClickListener {
+                override fun onClick() {
+                    // the case of "..." button
+                    if (action == null) {
+                        showDialog(adapter.getSelectedItem(position)?.__KEY, showMoreActions)
+                    } else {
+                        sendAction(action.name, adapter.getSelectedItem(position)?.__KEY)
+                    }
                 }
             }
-
-        val itemTouchHelper = ItemTouchHelper(swipeCallback)
-        itemTouchHelper.attachToRecyclerView(binding.fragmentListRecyclerView)
+        )
     }
 
     /**
@@ -304,38 +410,36 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
-        if (hasActions()) {
-            val length = actions.getJSONArray(tableName).length()
-            val context = requireParentFragment().requireContext()
-            for (i in 0 until length) {
-                val jsonObject = actions.getJSONArray(tableName).getJSONObject(i)
-                var action = Gson().fromJson(jsonObject.toString(), Action::class.java)
-                val menuBuilder = menu as MenuBuilder
-                menuBuilder.setOptionalIconsVisible(true)
-                var menuItem = menu.add(
-                    action.getPreferredName()
+        val context = requireParentFragment().requireContext()
+        tableActions.forEach { action ->
+            val menuBuilder = menu as MenuBuilder
+            menuBuilder.setOptionalIconsVisible(true)
+            var menuItem = menu.add(
+                action.getPreferredName()
+            )
+            val resId = if (action.icon != null) {
+                context.resources.getIdentifier(
+                    action.icon,
+                    "drawable",
+                    context.packageName
                 )
-                val resId = if (action.icon != null) {
-                    context.resources.getIdentifier(
-                        action.icon,
-                        "drawable",
-                        context.packageName
+            } else {
+                0
+            }
+            menuItem.run {
+                setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+                setIcon(resId)
+                setOnMenuItemClickListener {
+                    entityListViewModel.sendAction(
+                        action.name,
+                        ActionContent(mapOf(Pair("dataClass", tableName)))
                     )
-                } else {
-                    0
-                }
-                menuItem.run {
-                    setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-                    setIcon(resId)
-                    setOnMenuItemClickListener {
-                        entityListViewModel.sendAction(action.name)
-                        entityListViewModel.toastMessage.showMessage(
-                            action.getPreferredName(),
-                            "",
-                            MessageType.NEUTRAL
-                        )
-                        true
-                    }
+                    entityListViewModel.toastMessage.showMessage(
+                        action.getPreferredName(),
+                        "",
+                        MessageType.NEUTRAL
+                    )
+                    true
                 }
             }
         }

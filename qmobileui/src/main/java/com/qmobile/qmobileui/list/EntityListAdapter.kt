@@ -20,7 +20,8 @@ import com.qmobile.qmobileui.utils.ResourcesHelper
 class EntityListAdapter internal constructor(
     private val tableName: String,
     private val lifecycleOwner: LifecycleOwner,
-    private val relationCallback: RelationCallback
+    private val relationCallback: RelationCallback,
+    private val actionDialogCLickedCallBack: (String?) -> Unit,
 ) :
     PagedListAdapter<EntityModel, BaseViewHolder>(DIFF_CALLBACK) {
 
@@ -44,7 +45,6 @@ class EntityListAdapter internal constructor(
         val dataBinding: ViewDataBinding =
             DataBindingUtil.inflate(
                 inflater,
-
                 ResourcesHelper.layoutFromTable(
                     parent.context,
                     "${ResourcesHelper.RV_ITEM_PREFIX}_$tableName".lowercase()
@@ -59,6 +59,10 @@ class EntityListAdapter internal constructor(
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         getItem(position).let { entity ->
             holder.bind(entity, position)
+            holder.itemView.setOnLongClickListener {
+                actionDialogCLickedCallBack(getItem(position)?.__KEY)
+                true
+            }
             // unbind because of issue : item at position 11 receives binding of at item 0,
             // item at position 12 receives binding of item at position 1, etc.
             holder.unbindRelations()
@@ -74,5 +78,9 @@ class EntityListAdapter internal constructor(
                 holder.observeRelations(relationMap, position)
             }
         }
+    }
+
+    fun getSelectedItem(position: Int): EntityModel? {
+        return getItem(position)
     }
 }

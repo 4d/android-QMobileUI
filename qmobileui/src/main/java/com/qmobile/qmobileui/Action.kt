@@ -22,4 +22,13 @@ class Action(
         else
             name
     }
+
+    fun getPreferredShortName(): String {
+        return if (!shortLabel.isNullOrEmpty())
+            shortLabel
+        else if (!label.isNullOrEmpty())
+            label
+        else
+            name
+    }
 }
