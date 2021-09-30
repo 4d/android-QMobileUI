@@ -38,7 +38,6 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
-import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
@@ -272,13 +271,13 @@ open class EntityListFragment : Fragment(), BaseFragment {
         builder.setItems(
             items.toTypedArray(),
             DialogInterface.OnClickListener { dialog, position ->
-                sendAction(actions.get(position).name, selectedActionId)
+                sendCurrentRecordAction(actions.get(position).name, selectedActionId)
             }
         )
         builder.show()
     }
 
-    private fun sendAction(actionName: String, selectedActionId: String?) {
+    private fun sendCurrentRecordAction(actionName: String, selectedActionId: String?) {
         entityListViewModel.sendAction(
             actionName,
             ActionContent(
@@ -287,7 +286,17 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     Pair("entity", mapOf(Pair("primaryKey", selectedActionId)))
                 )
             )
-        )
+        ) {
+            if (it != null) {
+                syncDataIfNeeded(it)
+            }
+        }
+    }
+
+    private fun syncDataIfNeeded(shouldSyncData: Boolean) {
+        if (shouldSyncData){
+            forceSyncData()
+        }
     }
 
     private fun createButton(
@@ -308,7 +317,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     if (action == null) {
                         showDialog(adapter.getSelectedItem(position)?.__KEY, showMoreActions)
                     } else {
-                        sendAction(action.name, adapter.getSelectedItem(position)?.__KEY)
+                        sendCurrentRecordAction(action.name, adapter.getSelectedItem(position)?.__KEY)
                     }
                 }
             }
@@ -434,12 +443,11 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     entityListViewModel.sendAction(
                         action.name,
                         ActionContent(mapOf(Pair("dataClass", tableName)))
-                    )
-                    entityListViewModel.toastMessage.showMessage(
-                        action.getPreferredName(),
-                        "",
-                        MessageType.NEUTRAL
-                    )
+                    ) {
+                        if (it != null) {
+                            syncDataIfNeeded(it)
+                        }
+                    }
                     true
                 }
             }
