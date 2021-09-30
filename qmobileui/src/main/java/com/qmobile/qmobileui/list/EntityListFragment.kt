@@ -58,6 +58,7 @@ import com.qmobile.qmobileui.utils.hideKeyboard
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("TooManyFunctions")
@@ -241,7 +242,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
         if (hasCurrentRecordActions()) {
             val itemTouchHelper =
                 ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
-                    override fun instantiateUnderlayButton(position: Int): MutableList<ItemActionButton> {
+                    override fun instantiateUnderlayButton(position: Int): List<ItemActionButton> {
                         var buttons = mutableListOf<ItemActionButton>()
                         for (i in 0 until (currentRecordActions.size)) {
                             if ((i + 1) > MAX_ACTIONS_VISIBLE) {

@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.R
 import java.util.LinkedList
-import java.util.List
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 
