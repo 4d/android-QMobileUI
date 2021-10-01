@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.binding.getColorFromAttr
 import java.util.LinkedList
 import java.util.*
 import kotlin.math.abs
@@ -140,8 +141,8 @@ abstract class SwipeHelper(
     class ItemActionButton(
         private val context: Context,
         private val action: Action?,
+        horizontalIndex: Int,
         textSize: Float,
-        @ColorRes private val colorRes: Int,
         private val clickListener: UnderlayButtonClickListener
     ) {
         private var title: String
@@ -149,9 +150,11 @@ abstract class SwipeHelper(
         private val textSizeInPixel: Float =
             textSize * context.resources.displayMetrics.density // dp to px
         val intrinsicWidth: Float
+        private var horizontalIndex: Int;
 
         init {
             title = action?.getPreferredShortName() ?: "..."
+            this.horizontalIndex = horizontalIndex
             val paint = Paint()
             paint.textSize = textSizeInPixel
             paint.typeface = Typeface.DEFAULT_BOLD
@@ -165,10 +168,12 @@ abstract class SwipeHelper(
         fun draw(canvas: Canvas, rect: RectF) {
             val paint = Paint()
             // Draw background
-            paint.color = ContextCompat.getColor(context, colorRes)
+            val color =
+                if (horizontalIndex % 2 == 0) android.R.attr.colorPrimary else R.attr.colorPrimaryVariant
+            paint.color = context.getColorFromAttr(color)
             canvas.drawRect(rect, paint)
             // Draw icon
-            if (action?.icon != null) {
+            if (action?.icon != null && action.icon.isNotEmpty()) {
                 var deleteDrawable = AppCompatResources.getDrawable(
                     context,
                     R.drawable.ic_delete_white_24dp

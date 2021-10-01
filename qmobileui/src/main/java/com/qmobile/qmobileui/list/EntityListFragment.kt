@@ -23,6 +23,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
@@ -103,7 +104,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
         // Every time we land on the fragment, we want refreshed data // not anymore
         syncDataRequested = AtomicBoolean(true) // unused
 
-        if (hasSearch())
+        if (hasSearch()|| hasTableActions())
             this.setHasOptionsMenu(true)
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
@@ -302,15 +303,14 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private fun createButton(
         position: Int,
         action: Action?,
-        verticalIndex: Int
+        horizontalIndex: Int
     ): SwipeHelper.ItemActionButton {
-        val color =
-            if (verticalIndex % 2 == 0) android.R.color.holo_blue_dark else android.R.color.holo_blue_light
+
         return SwipeHelper.ItemActionButton(
             requireContext(),
             action,
+            horizontalIndex,
             14.0f,
-            color,
             object : SwipeHelper.UnderlayButtonClickListener {
                 override fun onClick() {
                     // the case of "..." button
@@ -383,14 +383,16 @@ open class EntityListFragment : Fragment(), BaseFragment {
         }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
-        searchView.setOnQueryTextListener(searchListener)
+        if (hasSearch()) {
+            searchView.setOnQueryTextListener(searchListener)
 
-        if (currentQuery.isEmpty()) {
-            searchView.onActionViewCollapsed()
-        } else {
-            searchView.setQuery(currentQuery, true)
-            searchView.isIconified = false
-            searchPlate.clearFocus()
+            if (currentQuery.isEmpty()) {
+                searchView.onActionViewCollapsed()
+            } else {
+                searchView.setQuery(currentQuery, true)
+                searchView.isIconified = false
+                searchPlate.clearFocus()
+            }
         }
         super.onPrepareOptionsMenu(menu)
     }
