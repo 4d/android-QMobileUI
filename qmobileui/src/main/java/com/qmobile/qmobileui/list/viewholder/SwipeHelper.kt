@@ -3,7 +3,6 @@ package com.qmobile.qmobileui.list.viewholder
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
@@ -131,8 +130,6 @@ abstract class SwipeHelper(
     }
 
     abstract fun instantiateUnderlayButton(position: Int): List<ItemActionButton>
-
-    //region UnderlayButton
     interface UnderlayButtonClickListener {
         fun onClick()
     }
@@ -174,17 +171,16 @@ abstract class SwipeHelper(
             // Draw icon
 
             var iconResId = 0
-            if (action?.icon != null && action.icon.isNotEmpty() ){
-                     iconResId =
-                        context.resources.getIdentifier(
-                            action?.icon,
-                            "drawable",
-                            context.packageName
-                        )
+            if (action?.icon != null && action.icon.isNotEmpty()) {
+                iconResId =
+                    context.resources.getIdentifier(
+                        action?.icon,
+                        "drawable",
+                        context.packageName
+                    )
+            }
 
-                }
-
-            if (iconResId != 0 ){
+            if (iconResId != 0) {
 
                 var iconDrawable = AppCompatResources.getDrawable(
                     context,
@@ -225,7 +221,7 @@ abstract class SwipeHelper(
                 paint.getTextBounds(title, 0, title.length, titleBounds)
                 val x = rect.width() / 2 + titleBounds.width() / 2 - titleBounds.right
                 val y = rect.height() / 2 + titleBounds.height() / 2 - titleBounds.bottom
-                canvas.drawText(title, rect.left+ x, rect.top + y, paint)
+                canvas.drawText(title, rect.left + x, rect.top + y, paint)
             }
             clickableRegion = rect
         }
@@ -238,7 +234,6 @@ abstract class SwipeHelper(
             }
         }
     }
-    //endregion
 }
 
 private fun List<SwipeHelper.ItemActionButton>.intrinsicWidth(): Float {
