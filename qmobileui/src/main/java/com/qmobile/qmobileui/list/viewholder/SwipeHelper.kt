@@ -22,6 +22,9 @@ import kotlin.math.abs
 import kotlin.math.max
 
 const val HORIZONTAL_PADDING = 50.0f
+const val BUTTON_TEXT_SIZE = 14.0f
+const val ICON_RATIO = 0.25F
+const val TITLE_MARGIN_TOP_RATIO = 0.75F
 
 abstract class SwipeHelper(
     private val recyclerView: RecyclerView
@@ -138,13 +141,12 @@ abstract class SwipeHelper(
         private val context: Context,
         private val action: Action?,
         horizontalIndex: Int,
-        textSize: Float,
         private val clickListener: UnderlayButtonClickListener
     ) {
         private var title: String
         private var clickableRegion: RectF? = null
         private val textSizeInPixel: Float =
-            textSize * context.resources.displayMetrics.density // dp to px
+            BUTTON_TEXT_SIZE * context.resources.displayMetrics.density // dp to px
         val intrinsicWidth: Float
         private var horizontalIndex: Int;
 
@@ -169,7 +171,6 @@ abstract class SwipeHelper(
             paint.color = context.getColorFromAttr(color)
             canvas.drawRect(rect, paint)
             // Draw icon
-
             var iconResId = 0
             if (action?.icon != null && action.icon.isNotEmpty()) {
                 iconResId =
@@ -181,35 +182,40 @@ abstract class SwipeHelper(
             }
 
             if (iconResId != 0) {
-
-                var iconDrawable = AppCompatResources.getDrawable(
+                val iconDrawable = AppCompatResources.getDrawable(
                     context,
                     iconResId
                 )
-                iconDrawable?.setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
+                val iconWith = rect.width() * ICON_RATIO
+                val iconHeight = rect.height() * ICON_RATIO
 
-                var intrinsicWidth = iconDrawable?.intrinsicWidth
-                var intrinsicHeight = iconDrawable?.intrinsicHeight
-                val left = (rect.left + rect.width() / 2 - (intrinsicWidth?.div(2) ?: 0)).toInt()
-                val top = (rect.top + rect.height() / 2 - (intrinsicHeight?.div(2) ?: 0)).toInt()
-                iconDrawable?.setBounds(
-                    left,
-                    top,
-                    left + intrinsicWidth!!,
-                    (top + intrinsicHeight!!)
-                )
-                iconDrawable?.draw(canvas)
+                iconDrawable?.apply {
+                    setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
+                    val iconLeft =
+                        (rect.left + rect.width() / 2 - iconWith.div(2))
+                    val iconTop =
+                        (rect.top + rect.height()* ICON_RATIO)
+                    val iconBottom = iconTop + iconHeight
+                    val iconRight = iconLeft + iconWith
+                    setBounds(
+                        iconLeft.toInt(),
+                        iconTop.toInt(),
+                        iconRight.toInt(),
+                        iconBottom.toInt()
+                    )
+                    draw(canvas)
 
-                // Draw title
-                paint.color = ContextCompat.getColor(context, android.R.color.white)
-                paint.textSize = textSizeInPixel
-                paint.typeface = Typeface.DEFAULT_BOLD
-                paint.textAlign = Paint.Align.LEFT
-                val titleBounds = Rect()
-                paint.getTextBounds(title, 0, title.length, titleBounds)
-                val x = rect.width() / 2 + titleBounds.width() / 2 - titleBounds.right
-                val bottomMargin = 35
-                canvas.drawText(title, rect.left + x, rect.bottom - bottomMargin, paint)
+                    // Draw title
+                    paint.color = ContextCompat.getColor(context, android.R.color.white)
+                    paint.textSize = textSizeInPixel
+                    paint.typeface = Typeface.DEFAULT
+                    paint.textAlign = Paint.Align.LEFT
+                    val titleBounds = Rect()
+                    paint.getTextBounds(title, 0, title.length, titleBounds)
+                    val x = rect.width() / 2 + titleBounds.width().div(2) - titleBounds.right
+                    val y = rect.top + rect.height() * TITLE_MARGIN_TOP_RATIO
+                    canvas.drawText(title, rect.left + x, y, paint)
+                }
 
             } else {
                 // Draw title

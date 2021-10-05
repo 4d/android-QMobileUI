@@ -81,6 +81,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     internal lateinit var loginViewModel: LoginViewModel
     internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
     private var _binding: FragmentListBinding? = null
+
     // This property is only valid between onCreateView and onDestroyView.
     val binding get() = _binding!!
     var tableName: String = ""
@@ -104,7 +105,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
         // Every time we land on the fragment, we want refreshed data // not anymore
         syncDataRequested = AtomicBoolean(true) // unused
 
-        if (hasSearch()|| hasTableActions())
+        if (hasSearch() || hasTableActions())
             this.setHasOptionsMenu(true)
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
@@ -295,7 +296,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun syncDataIfNeeded(shouldSyncData: Boolean) {
-        if (shouldSyncData){
+        if (shouldSyncData) {
             forceSyncData()
         }
     }
@@ -310,14 +311,16 @@ open class EntityListFragment : Fragment(), BaseFragment {
             requireContext(),
             action,
             horizontalIndex,
-            14.0f,
             object : SwipeHelper.UnderlayButtonClickListener {
                 override fun onClick() {
                     // the case of "..." button
                     if (action == null) {
                         showDialog(adapter.getSelectedItem(position)?.__KEY, showMoreActions)
                     } else {
-                        sendCurrentRecordAction(action.name, adapter.getSelectedItem(position)?.__KEY)
+                        sendCurrentRecordAction(
+                            action.name,
+                            adapter.getSelectedItem(position)?.__KEY
+                        )
                     }
                 }
             }
