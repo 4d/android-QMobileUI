@@ -10,7 +10,6 @@ import android.graphics.RectF
 import android.graphics.Typeface
 import android.view.MotionEvent
 import android.view.View
-import androidx.annotation.ColorRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -173,23 +172,49 @@ abstract class SwipeHelper(
             paint.color = context.getColorFromAttr(color)
             canvas.drawRect(rect, paint)
             // Draw icon
-            if (action?.icon != null && action.icon.isNotEmpty()) {
-                var deleteDrawable = AppCompatResources.getDrawable(
+
+            var iconResId = 0
+            if (action?.icon != null && action.icon.isNotEmpty() ){
+                     iconResId =
+                        context.resources.getIdentifier(
+                            action?.icon,
+                            "drawable",
+                            context.packageName
+                        )
+
+                }
+
+            if (iconResId != 0 ){
+
+                var iconDrawable = AppCompatResources.getDrawable(
                     context,
-                    R.drawable.ic_delete_white_24dp
+                    iconResId
                 )
-                deleteDrawable?.setTint(Color.RED)
-                var intrinsicWidth = deleteDrawable?.intrinsicWidth
-                var intrinsicHeight = deleteDrawable?.intrinsicHeight
+                iconDrawable?.setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
+
+                var intrinsicWidth = iconDrawable?.intrinsicWidth
+                var intrinsicHeight = iconDrawable?.intrinsicHeight
                 val left = (rect.left + rect.width() / 2 - (intrinsicWidth?.div(2) ?: 0)).toInt()
                 val top = (rect.top + rect.height() / 2 - (intrinsicHeight?.div(2) ?: 0)).toInt()
-                deleteDrawable?.setBounds(
+                iconDrawable?.setBounds(
                     left,
                     top,
                     left + intrinsicWidth!!,
                     (top + intrinsicHeight!!)
                 )
-                deleteDrawable?.draw(canvas)
+                iconDrawable?.draw(canvas)
+
+                // Draw title
+                paint.color = ContextCompat.getColor(context, android.R.color.white)
+                paint.textSize = textSizeInPixel
+                paint.typeface = Typeface.DEFAULT_BOLD
+                paint.textAlign = Paint.Align.LEFT
+                val titleBounds = Rect()
+                paint.getTextBounds(title, 0, title.length, titleBounds)
+                val x = rect.width() / 2 + titleBounds.width() / 2 - titleBounds.right
+                val bottomMargin = 35
+                canvas.drawText(title, rect.left + x, rect.bottom - bottomMargin, paint)
+
             } else {
                 // Draw title
                 paint.color = ContextCompat.getColor(context, android.R.color.white)
@@ -198,8 +223,9 @@ abstract class SwipeHelper(
                 paint.textAlign = Paint.Align.LEFT
                 val titleBounds = Rect()
                 paint.getTextBounds(title, 0, title.length, titleBounds)
+                val x = rect.width() / 2 + titleBounds.width() / 2 - titleBounds.right
                 val y = rect.height() / 2 + titleBounds.height() / 2 - titleBounds.bottom
-                canvas.drawText(title, rect.left + HORIZONTAL_PADDING, rect.top + y, paint)
+                canvas.drawText(title, rect.left+ x, rect.top + y, paint)
             }
             clickableRegion = rect
         }

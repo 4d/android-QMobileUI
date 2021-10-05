@@ -397,10 +397,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
         super.onPrepareOptionsMenu(menu)
     }
 
-    data class TestModel(
-        val id: Int,
-        val description: String
-    )
 
     @SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
