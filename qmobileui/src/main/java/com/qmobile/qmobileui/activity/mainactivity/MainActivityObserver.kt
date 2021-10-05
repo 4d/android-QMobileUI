@@ -8,7 +8,10 @@
 package com.qmobile.qmobileui.activity.mainactivity
 
 import android.annotation.SuppressLint
+import androidx.lifecycle.LiveData
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatasync.toast.Event
+import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import timber.log.Timber
@@ -24,8 +27,18 @@ class MainActivityObserver(
             observeDataSynchronized(entityListViewModel)
             observeNewRelatedEntity(entityListViewModel)
             observeNewRelatedEntities(entityListViewModel)
-            observeEntityToastMessage(entityListViewModel)
+            observeEntityListToastMessage(entityListViewModel)
         }
+    }
+
+    // Observe any toast message from Entity Detail
+    fun observeEntityToastMessage(message: LiveData<Event<ToastMessageHolder>>) {
+        message.observe(
+            activity,
+            { event ->
+                activity.handleEvent(event)
+            }
+        )
     }
 
     // Observe when data are synchronized
@@ -64,7 +77,7 @@ class MainActivityObserver(
     }
 
     // Observe any toast message from EntityList
-    private fun observeEntityToastMessage(entityListViewModel: EntityListViewModel<EntityModel>) {
+    private fun observeEntityListToastMessage(entityListViewModel: EntityListViewModel<EntityModel>) {
         entityListViewModel.toastMessage.message.observe(
             activity,
             { event ->
