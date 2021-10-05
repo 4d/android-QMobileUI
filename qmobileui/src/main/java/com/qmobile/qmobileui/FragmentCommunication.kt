@@ -7,9 +7,12 @@
 package com.qmobile.qmobileui
 
 import android.net.ConnectivityManager
+import androidx.lifecycle.LiveData
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.network.LoginApiService
+import com.qmobile.qmobiledatasync.toast.Event
+import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.ui.RemoteUrlChange
 
@@ -35,4 +38,6 @@ interface FragmentCommunication {
     fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChange: RemoteUrlChange)
 
     fun checkNetwork(networkChecker: NetworkChecker)
+
+    fun observeEntityToastMessage(message: LiveData<Event<ToastMessageHolder>>)
 }

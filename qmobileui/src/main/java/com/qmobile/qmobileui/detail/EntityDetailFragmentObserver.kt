@@ -22,6 +22,7 @@ class EntityDetailFragmentObserver(
 
     override fun initObservers() {
         observeEntity()
+        fragment.delegate.observeEntityToastMessage(entityViewModel.toastMessage.message)
     }
 
     // Observe entity list

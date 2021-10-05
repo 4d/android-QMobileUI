@@ -29,7 +29,9 @@ import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
 import com.qmobile.qmobiledatasync.relation.OneToManyRelation
+import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.MessageType
+import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobileui.FragmentCommunication
@@ -50,6 +52,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     var shouldDelayOnForegroundEvent = AtomicBoolean(false)
     var currentNavController: LiveData<NavController>? = null
     lateinit var mainActivityDataSync: MainActivityDataSync
+    private lateinit var mainActivityObserver: MainActivityObserver
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
@@ -87,7 +90,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
 
         initViewModels()
         getEntityListViewModelList()
-        MainActivityObserver(this, entityListViewModelList).initObservers()
+        mainActivityObserver = MainActivityObserver(this, entityListViewModelList).apply {
+            initObservers()
+        }
 
         // Follow activity lifecycle and check when activity enters foreground for data sync
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
@@ -231,6 +236,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         }
     }
 
+    // Observe any toast message from Entity Detail
+    override fun observeEntityToastMessage(message: LiveData<Event<ToastMessageHolder>>) {
+        mainActivityObserver.observeEntityToastMessage(message)
+    }
+
     /**
      * Goes back to login page
      */
@@ -254,7 +264,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         } else {
             authenticationRequested = true
             Timber.d("No Internet connection, authenticationRequested")
-            ToastHelper.show(this, resources.getString(R.string.no_internet_auto_login), MessageType.WARNING)
+            ToastHelper.show(
+                this,
+                resources.getString(R.string.no_internet_auto_login),
+                MessageType.WARNING
+            )
         }
     }
 
