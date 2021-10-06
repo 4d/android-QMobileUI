@@ -428,9 +428,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
             var menuItem = menu.add(
                 action.getPreferredName()
             )
-            val resId = if (action.icon != null) {
+            val iconDrawablePath = action.getIconDrawablePath()
+            val resId = if (iconDrawablePath != null) {
                 context.resources.getIdentifier(
-                    action.icon,
+                    iconDrawablePath,
                     "drawable",
                     context.packageName
                 )

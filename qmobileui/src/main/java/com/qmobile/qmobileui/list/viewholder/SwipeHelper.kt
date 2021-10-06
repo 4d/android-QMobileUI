@@ -172,10 +172,11 @@ abstract class SwipeHelper(
             canvas.drawRect(rect, paint)
             // Draw icon
             var iconResId = 0
-            if (action?.icon != null && action.icon.isNotEmpty()) {
+            val iconDrawablePath = action?.getIconDrawablePath()
+            if (iconDrawablePath != null && iconDrawablePath.isNotEmpty()) {
                 iconResId =
                     context.resources.getIdentifier(
-                        action?.icon,
+                        iconDrawablePath,
                         "drawable",
                         context.packageName
                     )

@@ -6,13 +6,20 @@
 
 package com.qmobile.qmobileui
 
+import com.qmobile.qmobileui.utils.ResourcesHelper
+
 class Action(
     val name: String,
-    val icon: String?,
+    private val icon: String?,
     private val label: String?,
     private val shortLabel: String?,
     val parameters: Array<Pair<String, Any>>
 ) {
+    fun getIconDrawablePath(): String? {
+        return icon?.let {
+            ResourcesHelper.correctIconPath(it)
+        }
+    }
 
     fun getPreferredName(): String {
         return if (!label.isNullOrEmpty())
