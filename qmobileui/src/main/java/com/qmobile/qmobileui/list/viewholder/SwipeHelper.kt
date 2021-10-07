@@ -17,7 +17,6 @@ import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import java.util.LinkedList
-import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 

@@ -58,7 +58,6 @@ import com.qmobile.qmobileui.utils.hideKeyboard
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("TooManyFunctions")
