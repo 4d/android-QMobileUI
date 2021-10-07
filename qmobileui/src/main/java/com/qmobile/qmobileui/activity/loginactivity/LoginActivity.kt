@@ -85,12 +85,12 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
 
             // Init Api service
             loginApiService = ApiClient.getLoginApiService(
-                context = this,
+                sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
                 logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
             )
 
             accessibilityApiService = ApiClient.getAccessibilityApiService(
-                context = this,
+                sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
                 logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
             )
 

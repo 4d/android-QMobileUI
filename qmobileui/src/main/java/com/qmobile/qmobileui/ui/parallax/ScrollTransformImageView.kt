@@ -10,9 +10,9 @@ import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.ViewTreeObserver
-import android.widget.ImageView
+import androidx.appcompat.widget.AppCompatImageView
 
-open class ScrollTransformImageView : ImageView, ViewTreeObserver.OnScrollChangedListener {
+open class ScrollTransformImageView : AppCompatImageView, ViewTreeObserver.OnScrollChangedListener {
 
     private val viewLocation: IntArray = IntArray(2)
 
@@ -22,7 +22,7 @@ open class ScrollTransformImageView : ImageView, ViewTreeObserver.OnScrollChange
             field = value
             field?.onAttached(this)
         }
-    var enableTransformer: Boolean = true
+    private var enableTransformer: Boolean = true
 
     constructor(ctx: Context) : super(ctx)
     constructor(ctx: Context, attributeSet: AttributeSet) : super(ctx, attributeSet)

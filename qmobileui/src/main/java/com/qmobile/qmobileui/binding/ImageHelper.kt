@@ -14,7 +14,6 @@ import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobileui.R
 import timber.log.Timber
 import java.io.File
 
@@ -23,23 +22,7 @@ object ImageHelper {
     const val drawableStartWidth = 24
     const val drawableStartHeight = 24
     const val drawableSpace = 8
-
-    /**
-     * Sample avatar list
-     */
-    private val listOfAvatars = listOf(
-        R.drawable.avatar_1_raster,
-        R.drawable.avatar_2_raster,
-        R.drawable.avatar_3_raster,
-        R.drawable.avatar_4_raster,
-        R.drawable.avatar_5_raster,
-        R.drawable.avatar_6_raster
-    )
-
-    /**
-     * Provides one random avatar from the sample avatar list
-     */
-    private fun randomAvatar(): Int = listOfAvatars.random()
+    const val luminanceThreshold = 0.5
 
     fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Uri? {
         BaseApp.runtimeDataHolder.embeddedFiles.find {
@@ -62,7 +45,8 @@ fun Context.getColorFromAttr(
     return typedValue.data
 }
 
-fun isDarkColor(@ColorInt color: Int): Boolean = ColorUtils.calculateLuminance(color) < 0.5
+fun isDarkColor(@ColorInt color: Int): Boolean =
+    ColorUtils.calculateLuminance(color) < ImageHelper.luminanceThreshold
 
 val Int.dp: Int
     get() = (this / Resources.getSystem().displayMetrics.density).toInt()
