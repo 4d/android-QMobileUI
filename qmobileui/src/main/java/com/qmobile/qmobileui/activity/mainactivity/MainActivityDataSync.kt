@@ -56,9 +56,7 @@ class MainActivityDataSync(private val activity: MainActivity) {
             connectivityViewModel.isServerConnectionOk { isAccessible ->
                 if (isAccessible) {
                     setDataSyncObserver(alreadyRefreshedTable)
-                } else {
-                    // Nothing to do, errors already provided in isServerConnectionOk
-                }
+                } // else : Nothing to do, errors already provided in isServerConnectionOk
             }
         } else {
             ToastHelper.show(
@@ -69,7 +67,7 @@ class MainActivityDataSync(private val activity: MainActivity) {
         }
     }
 
-    fun setDataSyncObserver(alreadyRefreshedTable: String?) {
+    private fun setDataSyncObserver(alreadyRefreshedTable: String?) {
         entityViewModelIsToSyncList.map { it.isToSync = true }
         alreadyRefreshedTable?.let {
             entityViewModelIsToSyncList.find {

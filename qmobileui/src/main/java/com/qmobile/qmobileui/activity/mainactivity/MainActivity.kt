@@ -46,11 +46,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 @Suppress("TooManyFunctions")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
 
-    var loginStatusText = ""
+    private var loginStatusText = ""
     private var onLaunch = true
-    var authenticationRequested = true
-    var shouldDelayOnForegroundEvent = AtomicBoolean(false)
-    var currentNavController: LiveData<NavController>? = null
+    private var authenticationRequested = true
+    private var shouldDelayOnForegroundEvent = AtomicBoolean(false)
+    private var currentNavController: LiveData<NavController>? = null
     lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
 
@@ -58,7 +58,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     override lateinit var apiService: ApiService
 
     // ViewModels
-    lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
+    private lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
     // Interceptor notifies the MainActivity that we need to go to login page. First, stop syncing
     private val loginRequiredCallbackForInterceptor: LoginRequiredCallback =
@@ -136,9 +136,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     override fun refreshAllApiClients() {
         super.refreshApiClients()
         apiService = ApiClient.getApiService(
-            context = this,
             loginApiService = loginApiService,
             loginRequiredCallback = loginRequiredCallbackForInterceptor,
+            sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
             logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
         )
         if (this::entityListViewModelList.isInitialized) {
@@ -169,7 +169,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         }
     }
 
-    fun applyOnForegroundEvent() {
+    private fun applyOnForegroundEvent() {
         Timber.d("applyOnForegroundEvent")
         if (onLaunch) {
             Timber.d("applyOnForegroundEvent on Launch")

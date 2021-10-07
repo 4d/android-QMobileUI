@@ -87,13 +87,6 @@ subprojects {
                 packagingOptions {
                     exclude 'META-INF/atomicfu.kotlin_module'
                 }
-                compileOptions {
-                    sourceCompatibility Config.javaVersion
-                    targetCompatibility Config.javaVersion
-                }
-                kotlinOptions {
-                    jvmTarget = "1.8"
-                }
                 buildFeatures {
                     dataBinding true
                     viewBinding true

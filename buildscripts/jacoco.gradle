@@ -2,7 +2,7 @@ apply plugin: 'jacoco'
 
 jacoco {
     toolVersion = "0.8.7"
-    // Custom reports directory can be specfied like this:
+    // Custom reports directory can be specified like this:
     // reportsDir = file("$buildDir/customJacocoReportDir")
 }
 
@@ -11,14 +11,14 @@ tasks.withType(Test) {
     jacoco.excludes = ['jdk.internal.*']
 }
 
-task jacocoTestReport(type:JacocoReport, dependsOn: "testDebugUnitTest") {
+task jacocoTestReport(type:JacocoReport, dependsOn: "check") {
     group = "Reporting"
     description = "Generate Jacoco coverage reports for Debug build"
 
     reports {
-        html.enabled = true
-        xml.enabled = true
-        csv.enabled = true
+        html.required.set(true)
+        xml.required.set(true)
+        csv.required.set(true)
     }
 
     def excludes = [
@@ -31,7 +31,8 @@ task jacocoTestReport(type:JacocoReport, dependsOn: "testDebugUnitTest") {
             'android/**/*.*',
             '**/*Fragment.*',
             '**/*Activity.*',
-            '**/*Enum.*'
+            '**/*Enum.*',
+            '**/com/qmobile/qmobileapi/model/*'
     ]
 
     // generated classes
