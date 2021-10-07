@@ -89,7 +89,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     private var tableActions = mutableListOf<Action>()
     private var currentRecordActions = mutableListOf<Action>()
-    private var showMoreActions = mutableListOf<Action>()
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -248,13 +247,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
                         for (i in 0 until (currentRecordActions.size)) {
                             if ((i + 1) > MAX_ACTIONS_VISIBLE) {
                                 buttons.add(createButton(position, null, i))
-                                showMoreActions.clear()
-                                showMoreActions.addAll(
-                                    currentRecordActions.subList(
-                                        i,
-                                        currentRecordActions.size
-                                    )
-                                )
                                 break
                             }
                             var action = currentRecordActions.get(i)
@@ -315,7 +307,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 override fun onClick() {
                     // the case of "..." button
                     if (action == null) {
-                        showDialog(adapter.getSelectedItem(position)?.__KEY, showMoreActions)
+                        showDialog(adapter.getSelectedItem(position)?.__KEY, currentRecordActions)
                     } else {
                         sendCurrentRecordAction(
                             action.name,
