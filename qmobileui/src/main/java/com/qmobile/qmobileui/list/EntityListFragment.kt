@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.list
 
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
@@ -21,9 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
-import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.SearchView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
@@ -392,7 +389,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
 
-    @SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         setupActionsMenuIfNeeded(menu)
         setupSearchMenuIfNeeded(menu, inflater)
@@ -414,8 +410,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         val context = requireParentFragment().requireContext()
         tableActions.forEach { action ->
-            val menuBuilder = menu as MenuBuilder
-            menuBuilder.setOptionalIconsVisible(true)
             var menuItem = menu.add(
                 action.getPreferredName()
             )
