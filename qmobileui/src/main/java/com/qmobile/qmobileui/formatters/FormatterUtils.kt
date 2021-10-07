@@ -14,6 +14,8 @@ import kotlin.math.roundToInt
 object FormatterUtils {
 
     private const val DECIMAL_DIGITS = 3
+    private const val INT_3600 = 3600
+    private const val INT_60: Int = 60
     const val ROUND_MULTIPLIER = 10
     const val INT_100: Int = 100
     const val INT_20: Int = 20
@@ -22,8 +24,6 @@ object FormatterUtils {
     const val INT_6: Int = 6
     const val INT_9: Int = 9
     const val INT_12: Int = 12
-    const val INT_3600 = 3600
-    const val INT_60: Int = 60
 
     private val dateFormat: Map<String, Int> = mapOf(
         "shortDate" to DateFormat.SHORT,

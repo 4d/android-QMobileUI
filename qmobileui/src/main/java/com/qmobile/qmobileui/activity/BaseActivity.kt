@@ -62,7 +62,7 @@ abstract class BaseActivity : AppCompatActivity() {
     lateinit var accessibilityApiService: AccessibilityApiService
     lateinit var loginApiService: LoginApiService
 
-    lateinit var remoteUrlEditDialogBuilder: MaterialAlertDialogBuilder
+    private lateinit var remoteUrlEditDialogBuilder: MaterialAlertDialogBuilder
 
     abstract fun handleAuthenticationState(authenticationState: AuthenticationStateEnum)
     abstract fun handleNetworkState(networkState: NetworkStateEnum)
@@ -80,11 +80,11 @@ abstract class BaseActivity : AppCompatActivity() {
     fun refreshApiClients() {
         ApiClient.clearApiClients()
         loginApiService = ApiClient.getLoginApiService(
-            context = this,
+            sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
             logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
         )
         accessibilityApiService = ApiClient.getAccessibilityApiService(
-            context = this,
+            sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
             logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
         )
         if (::loginViewModel.isInitialized) {

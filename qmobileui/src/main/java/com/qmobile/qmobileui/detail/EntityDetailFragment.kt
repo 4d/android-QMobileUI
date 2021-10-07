@@ -24,7 +24,7 @@ import com.qmobile.qmobileui.utils.ResourcesHelper
 
 open class EntityDetailFragment : Fragment(), BaseFragment {
 
-    internal var itemId: String = "0"
+    private var itemId: String = "0"
     private lateinit var entityViewModel: EntityViewModel<EntityModel>
     private var _binding: ViewDataBinding? = null
     // This property is only valid between onCreateView and onDestroyView.
