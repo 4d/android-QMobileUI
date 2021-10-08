@@ -6,6 +6,12 @@
 
 package com.qmobile.qmobileui.formatters
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.google.gson.GsonBuilder
+import org.json.JSONObject
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.util.Locale
@@ -24,6 +30,11 @@ object FormatterUtils {
     const val INT_6: Int = 6
     const val INT_9: Int = 9
     const val INT_12: Int = 12
+
+    private val gson = GsonBuilder().setPrettyPrinting().create()
+    private val mapper: ObjectMapper = ObjectMapper()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .registerKotlinModule()
 
     private val dateFormat: Map<String, Int> = mapOf(
         "shortDate" to DateFormat.SHORT,
@@ -131,6 +142,17 @@ object FormatterUtils {
             }
             "decimal" -> {
                 baseText.toDouble().round(DECIMAL_DIGITS).toString()
+            }
+            "jsonPrettyPrinted" -> {
+                gson.toJson(JSONObject(baseText))
+            }
+            "json" -> {
+                JSONObject(baseText).toString()
+            }
+            "jsonValues" -> {
+                mapper.readValue<HashMap<String, Any>>(JSONObject(baseText).toString()).values.joinToString(
+                    System.lineSeparator()
+                )
             }
             else -> {
                 baseText

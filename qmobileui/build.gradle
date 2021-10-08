@@ -34,10 +34,12 @@ dependencies {
     kapt Libs.lifecycle_compiler
 
     // Room
-//    kapt Libs.sqlite_jdbc
     implementation Libs.androidx_room
     implementation Libs.androidx_room_runtime
     kapt Libs.androidx_room_compiler
+
+    // Jackson
+    implementation Libs.jackson
 
     // Paging
     implementation Libs.androidx_paging
