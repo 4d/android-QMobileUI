@@ -4,8 +4,6 @@
  * Copyright (c) 2020 Quentin Marciset. All rights reserved.
  */
 
-import org.gradle.api.JavaVersion
-
 object Versions {
     // QMobile libraries
     const val qmobileapi = "0.0.1"
