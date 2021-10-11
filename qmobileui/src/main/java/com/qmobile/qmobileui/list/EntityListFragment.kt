@@ -57,6 +57,9 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
+import androidx.appcompat.view.menu.MenuBuilder
+
+
 @Suppress("TooManyFunctions")
 open class EntityListFragment : Fragment(), BaseFragment {
 
@@ -278,7 +281,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             )
         ) {
             if (it != null) {
-                syncDataIfNeeded(it)
+                it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
             }
         }
     }
@@ -388,7 +391,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
         super.onPrepareOptionsMenu(menu)
     }
 
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         setupActionsMenuIfNeeded(menu)
         setupSearchMenuIfNeeded(menu, inflater)
@@ -410,6 +412,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         val context = requireParentFragment().requireContext()
         tableActions.forEach { action ->
+
+            val menuBuilder = menu as MenuBuilder
+            menuBuilder.setOptionalIconsVisible(true)
             var menuItem = menu.add(
                 action.getPreferredName()
             )
@@ -424,6 +429,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 0
             }
             menuItem.run {
+                if (menu is MenuBuilder) {
+                    menu.setOptionalIconsVisible(true)
+                }
                 setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
                 setIcon(resId)
                 setOnMenuItemClickListener {
@@ -432,7 +440,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                         ActionContent(mapOf(Pair("dataClass", tableName)))
                     ) {
                         if (it != null) {
-                            syncDataIfNeeded(it)
+                            it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
                         }
                     }
                     true

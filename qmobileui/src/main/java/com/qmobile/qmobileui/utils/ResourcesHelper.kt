@@ -46,8 +46,10 @@ object ResourcesHelper {
     }
 
     fun correctIconPath(iconPath: String): String? {
-        try {
-            return iconPath
+        if (iconPath.isNullOrEmpty())
+            return null
+        return try {
+            iconPath
                 .substring(0, iconPath.lastIndexOf('.')) // removes extension
                 .replace(".+/".toRegex(), "")
                 .removePrefix(File.separator)
@@ -55,7 +57,7 @@ object ResourcesHelper {
                 .replace("[^a-z0-9]+".toRegex(), "_")
         } catch (e: Exception) {
             e.message?.let { Log.e("correctIconPath: ", it) }
-            return null
+            null
         }
     }
 }

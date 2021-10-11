@@ -91,7 +91,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
         EntityDetailFragmentObserver(this, entityViewModel).initObservers()
     }
 
-    @SuppressLint("RestrictedApi")
+
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasActions()) {
             val length = actions.getJSONArray(tableName).length()

@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.getColorFromAttr
+import com.qmobile.qmobileui.utils.ColorHelper
 import java.util.LinkedList
 import kotlin.math.abs
 import kotlin.math.max
@@ -165,9 +166,7 @@ abstract class SwipeHelper(
         fun draw(canvas: Canvas, rect: RectF) {
             val paint = Paint()
             // Draw background
-            val color =
-                if (horizontalIndex % 2 == 0) android.R.attr.colorPrimary else R.attr.colorPrimaryVariant
-            paint.color = context.getColorFromAttr(color)
+            paint.color = ColorHelper.getActionButtonColor(horizontalIndex, context)
             canvas.drawRect(rect, paint)
             // Draw icon
             var iconResId = 0
@@ -206,7 +205,7 @@ abstract class SwipeHelper(
                     draw(canvas)
 
                     // Draw title
-                    paint.color = ContextCompat.getColor(context, android.R.color.white)
+                    paint.color = context.getColorFromAttr(R.attr.colorOnPrimary)
                     paint.textSize = textSizeInPixel
                     paint.typeface = Typeface.DEFAULT
                     paint.textAlign = Paint.Align.LEFT
@@ -219,7 +218,7 @@ abstract class SwipeHelper(
 
             } else {
                 // Draw title
-                paint.color = ContextCompat.getColor(context, android.R.color.white)
+                paint.color = context.getColorFromAttr(R.attr.colorOnPrimary)
                 paint.textSize = textSizeInPixel
                 paint.typeface = Typeface.DEFAULT_BOLD
                 paint.textAlign = Paint.Align.LEFT
