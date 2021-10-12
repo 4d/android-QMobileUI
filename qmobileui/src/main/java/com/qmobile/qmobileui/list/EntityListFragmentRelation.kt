@@ -59,9 +59,9 @@ open class EntityListFragmentRelation : Fragment(), BaseFragment {
     }
 
     private var parentTableName: String = ""
-    private lateinit var relatedEntities: Array<String>
+    private var inverseName: String = ""
     private var parentItemId: String = "0"
-    private lateinit var parentEntityViewModel: EntityViewModel<EntityModel>
+//    private lateinit var parentEntityViewModel: EntityViewModel<EntityModel>
 
     private lateinit var syncDataRequested: AtomicBoolean
     private lateinit var searchView: SearchView
@@ -78,7 +78,7 @@ open class EntityListFragmentRelation : Fragment(), BaseFragment {
     var tableName: String = ""
     lateinit var adapter: EntityListAdapter
 
-    private var fromRelation = false
+//    private var fromRelation = false
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -88,10 +88,10 @@ open class EntityListFragmentRelation : Fragment(), BaseFragment {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        arguments?.getString("tableName")?.let { tableName = it }
-        arguments?.getString("parentTableName")?.let { parentTableName = it }
-        arguments?.getString("parentItemId")?.let { parentItemId = it }
-        arguments?.getStringArray("relatedEntities")?.let { relatedEntities = it }
+        arguments?.getString("destinationTable")?.let { tableName = it }
+        arguments?.getString("currentTable")?.let { parentTableName = it }
+        arguments?.getString("currentItemId")?.let { parentItemId = it }
+        arguments?.getString("inverseName")?.let { inverseName = it }
 
         sqlQueryBuilderUtil = SqlQueryBuilderUtil(tableName)
 
@@ -102,7 +102,7 @@ open class EntityListFragmentRelation : Fragment(), BaseFragment {
             this.setHasOptionsMenu(true)
 
         // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
-        parentEntityViewModel = getEntityViewModel(this, parentTableName, parentItemId, delegate.apiService)
+//        parentEntityViewModel = getEntityViewModel(this, parentTableName, parentItemId, delegate.apiService)
 
 
         entityListViewModel = getEntityListViewModel(this, tableName, delegate.apiService)
@@ -341,7 +341,7 @@ open class EntityListFragmentRelation : Fragment(), BaseFragment {
 
     private fun setSearchQuery() {
 //        if (currentQuery.isEmpty())
-            entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.setRelationQuery(relatedEntities = relatedEntities))
+            entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.setRelationQuery(parentItemId = parentItemId, inverseName = inverseName))
 //        else
 //            if (currentQuery.startsWith("relation:"))
 //                entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.setRelationQuery(relatedEntities = relatedEntities))

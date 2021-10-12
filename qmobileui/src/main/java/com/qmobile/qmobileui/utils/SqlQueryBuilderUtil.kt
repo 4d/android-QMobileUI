@@ -20,10 +20,8 @@ class SqlQueryBuilderUtil(
 
     fun getAll() = SimpleSQLiteQuery("SELECT * FROM $tableName")
 
-    fun setRelationQuery(relatedEntities: Array<String>): SimpleSQLiteQuery {
-        val stringBuffer = StringBuffer("SELECT * FROM $tableName AS T1 WHERE T1.__KEY in (${
-            relatedEntities.joinToString(",") { "'$it'" }
-        })")
+    fun setRelationQuery(parentItemId: String, inverseName: String): SimpleSQLiteQuery {
+        val stringBuffer = StringBuffer("SELECT * FROM $tableName AS T1 WHERE T1.__${inverseName}Key = $parentItemId")
         return SimpleSQLiteQuery(stringBuffer.toString())
     }
 

@@ -32,13 +32,19 @@ class EntityDetailFragmentObserver(
             { entity ->
                 Timber.d("Observed entity from Room, json = ${BaseApp.mapper.parseToString(entity)}")
                 entity?.let {
-//                    val relationKeysMap = entityViewModel.getRelationsInfo(entity)
                     val relationKeysMap =
                         BaseApp.genericTableHelper.getRelationsInfo(fragment.tableName, entity)
                     observeRelations(relationKeysMap)
 
-                    val oneToManyRelationMap = BaseApp.genericTableHelper.getOneToManyRelationsInfo(fragment.tableName, entity)
-                    BaseApp.genericTableFragmentHelper.setButtonClick(fragment.binding, oneToManyRelationMap, fragment.childFragmentManager, fragment.tableName, "Employee", fragment.binding.root)
+                    entity.__KEY?.let { parentItemId ->
+                        BaseApp.genericTableHelper.getOneToManyRelationNames(fragment.tableName).forEach { relationName ->
+                            BaseApp.genericTableFragmentHelper.setupRelationButtonOnClickAction(
+                                viewDataBinding = fragment.binding,
+                                relationName = relationName,
+                                parentItemId = parentItemId
+                            )
+                        }
+                    }
                 }
             }
         )
