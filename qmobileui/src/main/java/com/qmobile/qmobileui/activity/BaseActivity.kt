@@ -81,11 +81,13 @@ abstract class BaseActivity : AppCompatActivity() {
         ApiClient.clearApiClients()
         loginApiService = ApiClient.getLoginApiService(
             sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
-            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
+            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE,
+            mapper = BaseApp.mapper
         )
         accessibilityApiService = ApiClient.getAccessibilityApiService(
             sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
-            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
+            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE,
+            mapper = BaseApp.mapper
         )
         if (::loginViewModel.isInitialized) {
             loginViewModel.refreshAuthRepository(loginApiService)
