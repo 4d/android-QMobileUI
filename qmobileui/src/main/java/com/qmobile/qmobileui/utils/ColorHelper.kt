@@ -13,6 +13,7 @@ private const val LUMINANCE_BRIGHT_THRESHOLD = 0.8F
 private const val DARK_COLOR_FACTOR = 1.1F
 private const val BRIGHT_COLOR_FACTOR = 0.96F
 private const val MEDIUM_COLOR_FACTOR = 1.04F
+private const val ARGB_MAX_VALUE = 255
 
 object ColorHelper {
     fun getActionButtonColor(horizontalIndex: Int, context: Context): Int {
@@ -47,9 +48,9 @@ object ColorHelper {
             val b = (Color.blue(colorTmp) * factor).roundToInt()
             colorTmp = Color.argb(
                 a,
-                min(r, 255),
-                min(g, 255),
-                min(b, 255)
+                min(r, ARGB_MAX_VALUE),
+                min(g, ARGB_MAX_VALUE),
+                min(b, ARGB_MAX_VALUE)
             )
         }
         return colorTmp
