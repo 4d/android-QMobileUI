@@ -10,6 +10,9 @@ import kotlin.math.roundToInt
 
 private const val LUMINANCE_DARK_THRESHOLD = 0.5F
 private const val LUMINANCE_BRIGHT_THRESHOLD = 0.8F
+private const val DARK_COLOR_FACTOR = 1.1F
+private const val BRIGHT_COLOR_FACTOR = 0.96F
+private const val MEDIUM_COLOR_FACTOR = 1.04F
 
 object ColorHelper {
     fun getActionButtonColor(horizontalIndex: Int, context: Context): Int {
@@ -22,15 +25,15 @@ object ColorHelper {
         return when {
             // dark
             themeColorLuminance < LUMINANCE_DARK_THRESHOLD -> {
-                manipulateColor(themeColor, 1.1F, horizontalIndex)
+                manipulateColor(themeColor, DARK_COLOR_FACTOR, horizontalIndex)
             }
             // bright
             themeColorLuminance > LUMINANCE_BRIGHT_THRESHOLD -> {
-                manipulateColor(themeColor, 0.96F, horizontalIndex)
+                manipulateColor(themeColor, BRIGHT_COLOR_FACTOR, horizontalIndex)
             }
             // medium
             else -> {
-                manipulateColor(themeColor, 1.04F, horizontalIndex)
+                manipulateColor(themeColor, MEDIUM_COLOR_FACTOR, horizontalIndex)
             }
         }
     }
