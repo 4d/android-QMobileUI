@@ -12,6 +12,7 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.OnLifecycleEvent
@@ -29,17 +30,23 @@ import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
 import com.qmobile.qmobiledatasync.relation.OneToManyRelation
+import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
+import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.setupWithNavController
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -53,6 +60,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     private var currentNavController: LiveData<NavController>? = null
     lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
+    private var job: Job? = null
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
@@ -187,12 +195,53 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         tryAutoLogin()
     }
 
+    fun prepareDataSync(alreadyRefreshedTable: String?) {
+        mainActivityDataSync.prepareDataSync(connectivityViewModel, alreadyRefreshedTable)
+    }
+
     /**
      * Performs data sync, requested by a table request
      */
     override fun requestDataSync(alreadyRefreshedTable: String?) {
-        mainActivityDataSync.prepareDataSync(connectivityViewModel, alreadyRefreshedTable)
+        val entityListViewModel =
+            alreadyRefreshedTable?.let { getEntityListViewModel(this, it, apiService) }!!
+
+        checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
+                    requestAuthentication()
+                } else {
+                    // AUTHENTICATED
+                    when (entityListViewModel.dataSynchronized.value) {
+                        DataSyncStateEnum.UNSYNCHRONIZED -> prepareDataSync(null)
+                        DataSyncStateEnum.SYNCHRONIZED -> {
+                            job?.cancel()
+                            job = lifecycleScope?.launch {
+                                entityListViewModel.getEntities { shouldSyncData ->
+                                    if (shouldSyncData) {
+                                        Timber.d("GlobalStamp changed, synchronization is required")
+                                        prepareDataSync(alreadyRefreshedTable)
+                                    } else {
+                                        Timber.d("GlobalStamp unchanged, no synchronization is required")
+                                    }
+                                }
+                            }
+                        }
+                        DataSyncStateEnum.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
+                    }
+                }
+            }
+
+            override fun onServiceInaccessible() {
+                // Nothing to do
+            }
+
+            override fun onNoInternet() {
+                // Nothing to do
+            }
+        })
     }
+
 
     override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
         when (authenticationState) {

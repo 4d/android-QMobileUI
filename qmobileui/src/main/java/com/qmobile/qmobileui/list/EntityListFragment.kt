@@ -20,26 +20,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
@@ -49,15 +45,9 @@ import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.list.viewholder.SwipeHelper
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
-import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 import com.qmobile.qmobileui.utils.hideKeyboard
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
-
-import androidx.appcompat.view.menu.MenuBuilder
 
 
 @Suppress("TooManyFunctions")
@@ -76,8 +66,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private var currentRecorodActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
     private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
     private var currentQuery = ""
-    private var job: Job? = null
-    internal lateinit var loginViewModel: LoginViewModel
     internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
     private var _binding: FragmentListBinding? = null
 
@@ -107,10 +95,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             this.setHasOptionsMenu(true)
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-        // We need this ViewModel to know when MainActivity has performed its $authenticate so that
-        // we don't trigger the initial sync if we are not authenticated yet
-        loginViewModel = getLoginViewModel(activity, delegate.loginApiService)
-
+        
         _binding = FragmentListBinding.inflate(inflater, container, false).apply {
             viewModel = entityListViewModel
             lifecycleOwner = viewLifecycleOwner
@@ -322,43 +307,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
      * Forces data sync, when user pulls to refresh
      */
     private fun forceSyncData() {
-        syncDataRequested.set(false)
-
-        delegate.checkNetwork(object : NetworkChecker {
-            override fun onServerAccessible() {
-                if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
-                    Timber.d("Not authenticated yet, syncDataRequested = $syncDataRequested")
-                    delegate.requestAuthentication()
-                } else {
-                    // AUTHENTICATED
-                    when (entityListViewModel.dataSynchronized.value) {
-                        DataSyncStateEnum.UNSYNCHRONIZED -> delegate.requestDataSync(null)
-                        DataSyncStateEnum.SYNCHRONIZED -> {
-                            job?.cancel()
-                            job = activity?.lifecycleScope?.launch {
-                                entityListViewModel.getEntities { shouldSyncData ->
-                                    if (shouldSyncData) {
-                                        Timber.d("GlobalStamp changed, synchronization is required")
-                                        delegate.requestDataSync(tableName)
-                                    } else {
-                                        Timber.d("GlobalStamp unchanged, no synchronization is required")
-                                    }
-                                }
-                            }
-                        }
-                        DataSyncStateEnum.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
-                    }
-                }
-            }
-
-            override fun onServiceInaccessible() {
-                // Nothing to do
-            }
-
-            override fun onNoInternet() {
-                // Nothing to do
-            }
-        })
+        delegate.requestDataSync(tableName)
     }
 
     private val searchListener: SearchView.OnQueryTextListener =

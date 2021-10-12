@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.detail
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -134,12 +133,22 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                                     )
                                 )
                             )
-                        )
-
+                        ) {
+                            it?.dataSynchro?.let { shouldSyncData ->
+                                if (shouldSyncData) {
+                                    forceSyncData()
+                                }
+                            }
+                        }
                         true
                     }
                 }
             }
         }
     }
+
+    private fun forceSyncData() {
+        delegate.requestDataSync(tableName)
+    }
+
 }
