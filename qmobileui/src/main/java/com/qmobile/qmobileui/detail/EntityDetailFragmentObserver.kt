@@ -37,13 +37,22 @@ class EntityDetailFragmentObserver(
                     observeRelations(relationKeysMap)
 
                     entity.__KEY?.let { parentItemId ->
-                        BaseApp.genericTableHelper.getOneToManyRelationNames(fragment.tableName).forEach { relationName ->
-                            BaseApp.genericTableFragmentHelper.setupRelationButtonOnClickAction(
-                                viewDataBinding = fragment.binding,
-                                relationName = relationName,
-                                parentItemId = parentItemId
-                            )
-                        }
+                        BaseApp.genericTableHelper.getOneToManyRelationNames(fragment.tableName)
+                            .forEach { relationName ->
+                                BaseApp.genericTableFragmentHelper.setupOneToManyRelationButtonOnClickAction(
+                                    viewDataBinding = fragment.binding,
+                                    relationName = relationName,
+                                    parentItemId = parentItemId
+                                )
+                            }
+                        BaseApp.genericTableHelper.getManyToOneRelationNames(fragment.tableName)
+                            .forEach { relationName ->
+                                BaseApp.genericTableFragmentHelper.setupManyToOneRelationButtonOnClickAction(
+                                    viewDataBinding = fragment.binding,
+                                    relationName = relationName,
+                                    entity = entity
+                                )
+                            }
                     }
                 }
             }

@@ -14,13 +14,13 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.list.viewholder.BaseViewHolder
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
 class EntityListAdapter internal constructor(
     private val tableName: String,
-    private val lifecycleOwner: LifecycleOwner,
-    private val relationCallback: RelationCallback
+    private val lifecycleOwner: LifecycleOwner
 ) :
     PagedListAdapter<EntityModel, BaseViewHolder>(DIFF_CALLBACK) {
 
@@ -69,7 +69,7 @@ class EntityListAdapter internal constructor(
     }
 
     private fun setupObserver(entity: EntityModel, holder: BaseViewHolder, position: Int) {
-        relationCallback.getRelations(entity).let { relationMap ->
+        BaseApp.genericTableHelper.getRelationsInfo(tableName, entity).let { relationMap ->
             if (relationMap.isNotEmpty()) {
                 holder.observeRelations(relationMap, position)
             }

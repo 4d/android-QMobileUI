@@ -19,7 +19,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
@@ -27,7 +26,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -63,14 +61,17 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
     private var currentQuery = ""
     private var job: Job? = null
-    internal lateinit var loginViewModel: LoginViewModel
-    internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
+    private lateinit var loginViewModel: LoginViewModel
+    private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
+    lateinit var adapter: EntityListAdapter
     private var _binding: FragmentListBinding? = null
+
     // This property is only valid between onCreateView and onDestroyView.
     val binding get() = _binding!!
-    var tableName: String = ""
-    lateinit var adapter: EntityListAdapter
-
+    private var tableName: String = ""
+    private var parentTableName: String = ""
+    private var inverseName: String = ""
+    private var parentItemId: String = "0"
     private var fromRelation = false
 
     // BaseFragment
@@ -81,9 +82,16 @@ open class EntityListFragment : Fragment(), BaseFragment {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Base entity list fragment
         arguments?.getString("tableName")?.let { tableName = it }
-        arguments?.getString("currentQuery")?.let { currentQuery = it }
-        arguments?.getBoolean("fromRelation")?.let { fromRelation = it }
+        // Entity list fragment from relation
+        arguments?.getString("destinationTable")?.let {
+            tableName = it
+            fromRelation = true
+        }
+        arguments?.getString("currentTable")?.let { parentTableName = it }
+        arguments?.getString("currentItemId")?.let { parentItemId = it }
+        arguments?.getString("inverseName")?.let { inverseName = it }
 
         sqlQueryBuilderUtil = SqlQueryBuilderUtil(tableName)
 
@@ -93,7 +101,11 @@ open class EntityListFragment : Fragment(), BaseFragment {
         if (hasSearch())
             this.setHasOptionsMenu(true)
 
-        entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
+        entityListViewModel = if (fromRelation)
+            getEntityListViewModel(this, tableName, delegate.apiService)
+        else
+            getEntityListViewModel(activity, tableName, delegate.apiService)
+
         // We need this ViewModel to know when MainActivity has performed its $authenticate so that
         // we don't trigger the initial sync if we are not authenticated yet
         loginViewModel = getLoginViewModel(activity, delegate.loginApiService)
@@ -128,6 +140,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
         EntityListFragmentObserver(this, entityListViewModel).initObservers()
         hideKeyboard(activity)
         setSearchQuery()
+        BaseApp.genericTableFragmentHelper.getCustomEntityListFragment(tableName, binding)
+            .onActivityCreated(savedInstanceState)
     }
 
     override fun onDestroyView() {
@@ -140,14 +154,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
      * Initialize recyclerView
      */
     private fun initRecyclerView() {
-        adapter = EntityListAdapter(
-            tableName, viewLifecycleOwner,
-            object : RelationCallback {
-                override fun getRelations(entity: EntityModel): Map<String, LiveData<RoomRelation>> =
-                    BaseApp.genericTableHelper.getRelationsInfo(tableName, entity)
-//                    entityListViewModel.getRelationsInfo(entity)
-            }
-        )
+        adapter = EntityListAdapter(tableName, viewLifecycleOwner)
 
         binding.fragmentListRecyclerView.layoutManager =
             when (BaseApp.genericTableFragmentHelper.layoutType(tableName)) {
@@ -291,7 +298,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
         if (hasSearch()) {
             inflater.inflate(R.menu.menu_search, menu)
             searchView = menu.findItem(R.id.search).actionView as SearchView
-            searchPlate = searchView.findViewById(androidx.appcompat.R.id.search_src_text) as EditText
+            searchPlate =
+                searchView.findViewById(androidx.appcompat.R.id.search_src_text) as EditText
             searchPlate.hint = ""
             searchPlate.setBackgroundResource(R.drawable.searchview_rounded)
             context?.getColorFromAttr(android.R.attr.colorPrimary)?.let {
@@ -328,9 +336,18 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun setSearchQuery() {
-        if (currentQuery.isEmpty())
-            entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.getAll())
-        else
-            entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.sortQuery(currentQuery))
+        if (fromRelation) {
+            entityListViewModel.setSearchQuery(
+                sqlQueryBuilderUtil.setRelationQuery(
+                    parentItemId = parentItemId,
+                    inverseName = inverseName
+                )
+            )
+        } else {
+            if (currentQuery.isEmpty())
+                entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.getAll())
+            else
+                entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.sortQuery(currentQuery))
+        }
     }
 }
