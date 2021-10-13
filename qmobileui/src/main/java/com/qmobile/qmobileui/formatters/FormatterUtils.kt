@@ -137,13 +137,13 @@ object FormatterUtils {
             }
             "jsonPrettyPrinted" -> {
                 BaseApp.mapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(getJsonMap(baseText))
+                    .writeValueAsString(baseText.toJsonMap())
             }
             "json" -> {
                 JSONObject(baseText).toString()
             }
             "jsonValues" -> {
-                getJsonMap(baseText).values.joinToString(
+                baseText.toJsonMap().values.joinToString(
                     System.lineSeparator()
                 )
             }
@@ -154,8 +154,8 @@ object FormatterUtils {
     }
 }
 
-private fun getJsonMap(baseText: String): Map<String, Any> =
-    BaseApp.mapper.parseToType(JSONObject(baseText).toString()) ?: mapOf()
+private fun String.toJsonMap(): Map<String, Any> =
+    BaseApp.mapper.parseToType(JSONObject(this).toString()) ?: mapOf()
 
 fun Double.round(decimals: Int): Double {
     var multiplier = 1.0
