@@ -9,6 +9,7 @@ package com.qmobile.qmobileui.list.viewholder
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
+import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.BR
@@ -22,14 +23,27 @@ class BaseViewHolder(
 
     // Applies DataBinding
     fun bind(entity: Any?, position: Int) {
-        entity?.let {
+        (entity as? EntityModel)?.__KEY?.let { parentItemId ->
             dataBinding.setVariable(BR.entityData, entity)
             dataBinding.executePendingBindings()
             itemView.setOnClickListener {
-                BaseApp.genericTableFragmentHelper.navigateFromListToViewPager(
-                    dataBinding.root,
-                    position,
-                    tableName
+                BaseApp.genericNavigationResolver.navigateFromListToViewPager(
+                    dataBinding,
+                    position
+                )
+            }
+            BaseApp.runtimeDataHolder.oneToManyRelations[tableName]?.forEach { relationName ->
+                BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForCell(
+                    viewDataBinding = dataBinding,
+                    relationName = relationName,
+                    parentItemId = parentItemId
+                )
+            }
+            BaseApp.runtimeDataHolder.manyToOneRelations[tableName]?.forEach { relationName ->
+                BaseApp.genericNavigationResolver.setupManyToOneRelationButtonOnClickActionForCell(
+                    viewDataBinding = dataBinding,
+                    relationName = relationName,
+                    entity = entity
                 )
             }
         }

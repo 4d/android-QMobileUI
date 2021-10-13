@@ -33,26 +33,24 @@ class EntityDetailFragmentObserver(
                 Timber.d("Observed entity from Room, json = ${BaseApp.mapper.parseToString(entity)}")
                 entity?.let {
                     val relationKeysMap =
-                        BaseApp.genericTableHelper.getRelationsInfo(fragment.tableName, entity)
+                        BaseApp.genericTableHelper.getManyToOneRelationsInfo(fragment.tableName, entity)
                     observeRelations(relationKeysMap)
 
                     entity.__KEY?.let { parentItemId ->
-                        BaseApp.genericTableHelper.getOneToManyRelationNames(fragment.tableName)
-                            .forEach { relationName ->
-                                BaseApp.genericTableFragmentHelper.setupOneToManyRelationButtonOnClickAction(
-                                    viewDataBinding = fragment.binding,
-                                    relationName = relationName,
-                                    parentItemId = parentItemId
-                                )
-                            }
-                        BaseApp.genericTableHelper.getManyToOneRelationNames(fragment.tableName)
-                            .forEach { relationName ->
-                                BaseApp.genericTableFragmentHelper.setupManyToOneRelationButtonOnClickAction(
-                                    viewDataBinding = fragment.binding,
-                                    relationName = relationName,
-                                    entity = entity
-                                )
-                            }
+                        BaseApp.runtimeDataHolder.oneToManyRelations[fragment.tableName]?.forEach { relationName ->
+                            BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForDetail(
+                                viewDataBinding = fragment.binding,
+                                relationName = relationName,
+                                parentItemId = parentItemId
+                            )
+                        }
+                        BaseApp.runtimeDataHolder.manyToOneRelations[fragment.tableName]?.forEach { relationName ->
+                            BaseApp.genericNavigationResolver.setupManyToOneRelationButtonOnClickActionForDetail(
+                                viewDataBinding = fragment.binding,
+                                relationName = relationName,
+                                entity = entity
+                            )
+                        }
                     }
                 }
             }

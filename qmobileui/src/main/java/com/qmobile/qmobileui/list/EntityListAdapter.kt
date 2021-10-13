@@ -69,7 +69,7 @@ class EntityListAdapter internal constructor(
     }
 
     private fun setupObserver(entity: EntityModel, holder: BaseViewHolder, position: Int) {
-        BaseApp.genericTableHelper.getRelationsInfo(tableName, entity).let { relationMap ->
+        BaseApp.genericTableHelper.getManyToOneRelationsInfo(tableName, entity).let { relationMap ->
             if (relationMap.isNotEmpty()) {
                 holder.observeRelations(relationMap, position)
             }
