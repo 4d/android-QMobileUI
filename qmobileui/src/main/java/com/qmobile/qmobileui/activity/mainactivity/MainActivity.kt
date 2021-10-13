@@ -147,7 +147,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             loginApiService = loginApiService,
             loginRequiredCallback = loginRequiredCallbackForInterceptor,
             sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
-            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE
+            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE,
+            mapper = BaseApp.mapper
         )
         if (this::entityListViewModelList.isInitialized) {
             entityListViewModelList.forEach { it.refreshRestRepository(apiService) }

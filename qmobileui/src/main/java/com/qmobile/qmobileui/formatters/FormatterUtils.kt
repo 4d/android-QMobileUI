@@ -6,6 +6,9 @@
 
 package com.qmobile.qmobileui.formatters
 
+import com.qmobile.qmobileapi.utils.parseToType
+import com.qmobile.qmobiledatasync.app.BaseApp
+import org.json.JSONObject
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.util.Locale
@@ -132,12 +135,27 @@ object FormatterUtils {
             "decimal" -> {
                 baseText.toDouble().round(DECIMAL_DIGITS).toString()
             }
+            "jsonPrettyPrinted" -> {
+                BaseApp.mapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(baseText.toJsonMap())
+            }
+            "json" -> {
+                JSONObject(baseText).toString()
+            }
+            "jsonValues" -> {
+                baseText.toJsonMap().values.joinToString(
+                    System.lineSeparator()
+                )
+            }
             else -> {
                 baseText
             }
         }
     }
 }
+
+private fun String.toJsonMap(): Map<String, Any> =
+    BaseApp.mapper.parseToType(JSONObject(this).toString()) ?: mapOf()
 
 fun Double.round(decimals: Int): Double {
     var multiplier = 1.0
