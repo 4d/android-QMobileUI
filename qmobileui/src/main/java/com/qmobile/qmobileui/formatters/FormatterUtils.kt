@@ -6,9 +6,15 @@
 
 package com.qmobile.qmobileui.formatters
 
+import com.fasterxml.jackson.core.util.DefaultIndenter
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.qmobile.qmobileapi.utils.getStringList
 import com.qmobile.qmobileapi.utils.parseToType
 import com.qmobile.qmobiledatasync.app.BaseApp
+import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
+import timber.log.Timber
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.util.Locale
@@ -40,6 +46,9 @@ object FormatterUtils {
         "mediumTime" to DateFormat.MEDIUM,
         "duration" to DateFormat.MEDIUM,
     )
+
+    private val prettyPrinter =
+        DefaultPrettyPrinter().apply { indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE) }
 
     fun applyFormat(format: String, baseText: String): String {
 
@@ -136,16 +145,21 @@ object FormatterUtils {
                 baseText.toDouble().round(DECIMAL_DIGITS).toString()
             }
             "jsonPrettyPrinted" -> {
-                BaseApp.mapper.writerWithDefaultPrettyPrinter()
+                BaseApp.mapper.setDefaultPrettyPrinter(prettyPrinter)
                     .writeValueAsString(baseText.toJsonMap())
             }
             "json" -> {
                 JSONObject(baseText).toString()
             }
             "jsonValues" -> {
-                baseText.toJsonMap().values.joinToString(
-                    System.lineSeparator()
-                )
+                try {
+                    JSONArray(baseText.toJsonMap().values).getStringList().joinToString(
+                        System.lineSeparator()
+                    )
+                } catch (e: JSONException) {
+                    Timber.d("Could not provide jsonValues for baseText: $baseText")
+                    baseText
+                }
             }
             else -> {
                 baseText
