@@ -62,10 +62,10 @@ object FormatterUtils {
             "timeInteger" -> {
                 val newTimeArray = getTimeFromLong(baseText.toString().toLong()).split(":")
                 (
-                        newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
-                            newTimeArray[1]
-                        ) * INT_3600
-                        )
+                    newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
+                        newTimeArray[1]
+                    ) * INT_3600
+                    )
             }
             "shortTime" -> {
                 timeFormat[format]?.let {
@@ -122,11 +122,11 @@ object FormatterUtils {
             }
             "percent" -> {
                 (
-                        (
-                                DecimalFormat("0.00").format(baseText.toString().toDouble())
-                                    .toDouble()
-                                ) * INT_100
-                        ).toString() + "%"
+                    (
+                        DecimalFormat("0.00").format(baseText.toString().toDouble())
+                            .toDouble()
+                        ) * INT_100
+                    ).toString() + "%"
             }
             "ordinal" -> {
                 DecimalFormat("0.00").format(baseText.toString().toDouble()) + "th"
