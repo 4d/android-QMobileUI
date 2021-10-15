@@ -95,7 +95,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             this.setHasOptionsMenu(true)
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-        
+
         _binding = FragmentListBinding.inflate(inflater, container, false).apply {
             viewModel = entityListViewModel
             lifecycleOwner = viewLifecycleOwner
@@ -259,16 +259,27 @@ open class EntityListFragment : Fragment(), BaseFragment {
         entityListViewModel.sendAction(
             actionName,
             ActionContent(
-                mapOf(
-                    Pair("dataClass", tableName),
-                    Pair("entity", mapOf(Pair("primaryKey", selectedActionId)))
-                )
+                getActionContext(selectedActionId)
             )
         ) {
             if (it != null) {
                 it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
             }
         }
+    }
+
+
+    private fun getActionContext(selectedActionId: String?): Map<String, Any> {
+        val actionContext = mutableMapOf<String, Any>(
+            Pair(
+                "dataClass",
+                BaseApp.genericTableHelper.originalTableName(tableName)
+            )
+        )
+        if (selectedActionId != null) {
+            actionContext["entity"] = mapOf(Pair("primaryKey", selectedActionId))
+        }
+        return actionContext
     }
 
     private fun syncDataIfNeeded(shouldSyncData: Boolean) {
@@ -386,7 +397,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 setOnMenuItemClickListener {
                     entityListViewModel.sendAction(
                         action.name,
-                        ActionContent(mapOf(Pair("dataClass", tableName)))
+                        ActionContent(getActionContext(null))
                     ) {
                         if (it != null) {
                             it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }

@@ -119,19 +119,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                     setOnMenuItemClickListener {
                         entityViewModel.sendAction(
                             action.name,
-                            ActionContent(
-                                mapOf(
-                                    Pair("dataClass", tableName),
-                                    Pair(
-                                        "entity",
-                                        mapOf(
-                                            Pair(
-                                                "primaryKey",
-                                                entityViewModel.entity.value?.__KEY
-                                            )
-                                        )
-                                    )
-                                )
+                            ActionContent(getActionContext()
                             )
                         ) {
                             it?.dataSynchro?.let { shouldSyncData ->
@@ -145,6 +133,21 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                 }
             }
         }
+    }
+
+    private fun getActionContext(): Map<String, Any> {
+        return mapOf(
+            Pair("dataClass", BaseApp.genericTableHelper.originalTableName(tableName)),
+            Pair(
+                "entity",
+                mapOf(
+                    Pair(
+                        "primaryKey",
+                        entityViewModel.entity.value?.__KEY
+                    )
+                )
+            )
+        )
     }
 
     private fun forceSyncData() {
