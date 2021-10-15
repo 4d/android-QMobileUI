@@ -22,14 +22,14 @@ import com.qmobile.qmobileui.utils.tableNameAdjustment
 )
 fun applyFormatter(
     view: TextView,
-    text: String?,
+    text: Any?,
     format: String?,
     tableName: String?,
     fieldName: String?,
     imageWidth: Int?,
     imageHeight: Int?
 ) {
-    if (text.isNullOrEmpty())
+    if (text == null || text.toString().isEmpty())
         return
     if (!format.isNullOrEmpty()) {
         if (!format.startsWith("/")) {
@@ -37,11 +37,11 @@ fun applyFormatter(
             return
         } else {
             val fieldMappingFound =
-                applyCustomFormat(view, fieldName, tableName, text, imageWidth, imageHeight)
+                applyCustomFormat(view, fieldName, tableName, text.toString(), imageWidth, imageHeight)
             if (fieldMappingFound) return
         }
     }
-    view.text = text
+    view.text = text.toString()
     return
 }
 
