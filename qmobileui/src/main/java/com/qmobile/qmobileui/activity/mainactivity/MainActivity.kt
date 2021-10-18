@@ -203,9 +203,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     /**
      * Performs data sync, requested by a table request
      */
-    override fun requestDataSync(alreadyRefreshedTable: String?) {
+    override fun requestDataSync(currentTableName: String) {
         val entityListViewModel =
-            alreadyRefreshedTable?.let { getEntityListViewModel(this, it, apiService) }!!
+            entityListViewModelList.find { it.getAssociatedTableName() == currentTableName }
 
         checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
@@ -213,7 +213,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
                     requestAuthentication()
                 } else {
                     // AUTHENTICATED
-                    when (entityListViewModel.dataSynchronized.value) {
+                    when (entityListViewModel?.dataSynchronized?.value) {
                         DataSyncStateEnum.UNSYNCHRONIZED -> prepareDataSync(null)
                         DataSyncStateEnum.SYNCHRONIZED -> {
                             job?.cancel()
@@ -221,7 +221,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
                                 entityListViewModel.getEntities { shouldSyncData ->
                                     if (shouldSyncData) {
                                         Timber.d("GlobalStamp changed, synchronization is required")
-                                        prepareDataSync(alreadyRefreshedTable)
+                                        prepareDataSync(currentTableName)
                                     } else {
                                         Timber.d("GlobalStamp unchanged, no synchronization is required")
                                     }

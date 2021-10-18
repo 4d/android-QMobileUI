@@ -31,7 +31,7 @@ interface FragmentCommunication {
 
     fun refreshAllApiClients()
 
-    fun requestDataSync(alreadyRefreshedTable: String?)
+    fun requestDataSync(currentTableName: String)
 
     fun requestAuthentication()
 
