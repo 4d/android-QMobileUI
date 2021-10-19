@@ -366,13 +366,15 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
-        delegate.setupActionsMenu(menu, tableActions) { name ->
-            entityListViewModel.sendAction(
-                name,
-                ActionContent(getActionContext(null))
-            ) {
-                if (it != null) {
-                    it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
+        if(hasTableActions()) {
+            delegate.setupActionsMenu(menu, tableActions) { name ->
+                entityListViewModel.sendAction(
+                    name,
+                    ActionContent(getActionContext(null))
+                ) {
+                    if (it != null) {
+                        it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
+                    }
                 }
             }
         }
