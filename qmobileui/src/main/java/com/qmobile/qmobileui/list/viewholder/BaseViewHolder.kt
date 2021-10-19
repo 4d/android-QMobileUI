@@ -36,7 +36,8 @@ class BaseViewHolder(
                 BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForCell(
                     viewDataBinding = dataBinding,
                     relationName = relationName,
-                    parentItemId = parentItemId
+                    parentItemId = parentItemId,
+                    entity = entity
                 )
             }
             BaseApp.runtimeDataHolder.manyToOneRelations[tableName]?.forEach { relationName ->

@@ -41,7 +41,8 @@ class EntityDetailFragmentObserver(
                             BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForDetail(
                                 viewDataBinding = fragment.binding,
                                 relationName = relationName,
-                                parentItemId = parentItemId
+                                parentItemId = parentItemId,
+                                entity = entity
                             )
                         }
                         BaseApp.runtimeDataHolder.manyToOneRelations[fragment.tableName]?.forEach { relationName ->

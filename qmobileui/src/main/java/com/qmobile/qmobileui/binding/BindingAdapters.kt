@@ -17,7 +17,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.glide.CustomRequestListener
 
 /**
@@ -87,9 +86,7 @@ fun showHide(view: View, show: Boolean) {
     view.visibility = if (show) View.VISIBLE else View.GONE
 }
 
-@BindingAdapter(
-    value = ["linkColor"]
-)
+@BindingAdapter("linkColor")
 fun bindRelationLinkColor(view: TextView, textColor: Boolean?) {
     if (textColor == true) {
         view.setTextColor(ContextCompat.getColor(view.context, R.color.relation_link))

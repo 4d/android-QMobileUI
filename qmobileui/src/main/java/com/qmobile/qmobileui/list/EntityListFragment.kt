@@ -69,7 +69,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
     // This property is only valid between onCreateView and onDestroyView.
     val binding get() = _binding!!
     private var tableName: String = ""
-    private var parentTableName: String = ""
     private var inverseName: String = ""
     private var parentItemId: String = "0"
     private var fromRelation = false
@@ -89,7 +88,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
             tableName = it
             fromRelation = true
         }
-        arguments?.getString("currentTable")?.let { parentTableName = it }
         arguments?.getString("currentItemId")?.let { parentItemId = it }
         arguments?.getString("inverseName")?.let { inverseName = it }
 
