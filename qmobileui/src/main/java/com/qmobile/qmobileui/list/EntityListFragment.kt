@@ -15,12 +15,10 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
-import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
@@ -74,7 +72,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     var tableName: String = ""
     lateinit var adapter: EntityListAdapter
 
-    private var tableActions = mutableListOf<Action>()
+    private val tableActions = mutableListOf<Action>()
     private var currentRecordActions = mutableListOf<Action>()
 
     // BaseFragment
@@ -271,13 +269,11 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     private fun getActionContext(selectedActionId: String?): Map<String, Any> {
         val actionContext = mutableMapOf<String, Any>(
-            Pair(
-                "dataClass",
+                "dataClass" to
                 BaseApp.genericTableHelper.originalTableName(tableName)
-            )
         )
         if (selectedActionId != null) {
-            actionContext["entity"] = mapOf(Pair("primaryKey", selectedActionId))
+            actionContext["entity"] = mapOf("primaryKey" to selectedActionId)
         }
         return actionContext
     }
@@ -370,40 +366,13 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
-        val context = requireParentFragment().requireContext()
-        tableActions.forEach { action ->
-
-            val menuBuilder = menu as MenuBuilder
-            menuBuilder.setOptionalIconsVisible(true)
-            var menuItem = menu.add(
-                action.getPreferredName()
-            )
-            val iconDrawablePath = action.getIconDrawablePath()
-            val resId = if (iconDrawablePath != null) {
-                context.resources.getIdentifier(
-                    iconDrawablePath,
-                    "drawable",
-                    context.packageName
-                )
-            } else {
-                0
-            }
-            menuItem.run {
-                if (menu is MenuBuilder) {
-                    menu.setOptionalIconsVisible(true)
-                }
-                setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-                setIcon(resId)
-                setOnMenuItemClickListener {
-                    entityListViewModel.sendAction(
-                        action.name,
-                        ActionContent(getActionContext(null))
-                    ) {
-                        if (it != null) {
-                            it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
-                        }
-                    }
-                    true
+        delegate.setupActionsMenu(menu, tableActions) { name ->
+            entityListViewModel.sendAction(
+                name,
+                ActionContent(getActionContext(null))
+            ) {
+                if (it != null) {
+                    it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
                 }
             }
         }

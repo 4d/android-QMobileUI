@@ -11,6 +11,9 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.LifecycleObserver
@@ -24,6 +27,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.LoginRequiredCallback
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
+import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
@@ -38,6 +42,7 @@ import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
@@ -261,6 +266,39 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
                     startLoginActivity()
             }
             else -> {
+            }
+        }
+    }
+
+
+   override  fun setupActionsMenu(menu: Menu, actions: List<Action>, onMenuItemClick: (String) -> Unit) {
+        actions.forEach { action ->
+            val menuBuilder = menu as MenuBuilder
+            menuBuilder.setOptionalIconsVisible(true)
+            var menuItem = menu.add(
+                action.getPreferredName()
+            )
+            val iconDrawablePath = action.getIconDrawablePath()
+            val resId = if (iconDrawablePath != null) {
+                resources.getIdentifier(
+                    iconDrawablePath,
+                    "drawable",
+                    packageName
+                )
+            } else {
+                0
+            }
+            menuItem.run {
+                if (menu is MenuBuilder) {
+                    menu.setOptionalIconsVisible(true)
+                }
+                setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+                setIcon(resId)
+                setOnMenuItemClickListener {
+
+                    onMenuItemClick(action.name)
+                    true
+                }
             }
         }
     }

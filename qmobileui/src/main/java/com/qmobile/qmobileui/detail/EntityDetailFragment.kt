@@ -11,10 +11,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.view.menu.MenuBuilder
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -38,7 +36,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
     // This property is only valid between onCreateView and onDestroyView.
     val binding get() = _binding!!
     var tableName: String = ""
-    private var actions = BaseApp.runtimeDataHolder.currentRecordActions
+    private var actionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -75,7 +73,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    private fun hasActions() = actions.has(tableName)
+    private fun hasActions() = actionsJsonObject.has(tableName)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -93,42 +91,24 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasActions()) {
-            val length = actions.getJSONArray(tableName).length()
-            val context = requireParentFragment().requireContext()
+            val actions = mutableListOf<Action>()
+            val length = actionsJsonObject.getJSONArray(tableName).length()
             for (i in 0 until length) {
-                val jsonObject = actions.getJSONArray(tableName).getJSONObject(i)
-                var action = Gson().fromJson(jsonObject.toString(), Action::class.java)
-                val menuBuilder = menu as MenuBuilder
-                menuBuilder.setOptionalIconsVisible(true)
-                var menuItem = menu.add(
-                    action.getPreferredName()
-                )
-                val iconDrawablePath = action.getIconDrawablePath()
-                val resId = if (iconDrawablePath != null) {
-                    context.resources.getIdentifier(
-                        iconDrawablePath,
-                        "drawable",
-                        context.packageName
+                val jsonObject = actionsJsonObject.getJSONArray(tableName).getJSONObject(i)
+                actions.add(Gson().fromJson(jsonObject.toString(), Action::class.java))
+            }
+
+            delegate.setupActionsMenu(menu, actions) { name ->
+                entityViewModel.sendAction(
+                    name,
+                    ActionContent(
+                        getActionContext()
                     )
-                } else {
-                    0
-                }
-                menuItem.run {
-                    setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-                    setIcon(resId)
-                    setOnMenuItemClickListener {
-                        entityViewModel.sendAction(
-                            action.name,
-                            ActionContent(getActionContext()
-                            )
-                        ) {
-                            it?.dataSynchro?.let { shouldSyncData ->
-                                if (shouldSyncData) {
-                                    forceSyncData()
-                                }
-                            }
+                ) {
+                    it?.dataSynchro?.let { shouldSyncData ->
+                        if (shouldSyncData) {
+                            forceSyncData()
                         }
-                        true
                     }
                 }
             }
@@ -137,16 +117,12 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
     private fun getActionContext(): Map<String, Any> {
         return mapOf(
-            Pair("dataClass", BaseApp.genericTableHelper.originalTableName(tableName)),
-            Pair(
-                "entity",
-                mapOf(
-                    Pair(
-                        "primaryKey",
-                        entityViewModel.entity.value?.__KEY
+            "dataClass" to BaseApp.genericTableHelper.originalTableName(tableName),
+            "entity" to
+                    mapOf(
+                        "primaryKey" to
+                                entityViewModel.entity.value?.__KEY
                     )
-                )
-            )
         )
     }
 
