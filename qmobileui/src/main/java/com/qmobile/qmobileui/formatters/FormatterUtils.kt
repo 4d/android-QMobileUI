@@ -8,7 +8,10 @@ package com.qmobile.qmobileui.formatters
 
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator
 import com.qmobile.qmobileapi.utils.parseToString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import org.json.JSONArray
@@ -46,6 +49,12 @@ object FormatterUtils {
 
     private val prettyPrinter =
         DefaultPrettyPrinter().apply { indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE) }
+
+    private val yamlMapper = ObjectMapper(
+        YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+            .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+            .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR)
+    )
 
     fun applyFormat(format: String, baseText: Any): String {
 
@@ -142,6 +151,10 @@ object FormatterUtils {
             }
             "decimal" -> {
                 baseText.toString().toDouble().round(DECIMAL_DIGITS).toString()
+            }
+            "yaml" -> {
+                if (baseText.toString().isEmpty()) ""
+                else yamlMapper.writeValueAsString(baseText)
             }
             "jsonPrettyPrinted" -> {
                 BaseApp.mapper.enable(SerializationFeature.INDENT_OUTPUT)
