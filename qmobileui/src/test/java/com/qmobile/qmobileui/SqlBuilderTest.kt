@@ -158,7 +158,9 @@ class SqlBuilderTest {
             queries = mutableMapOf(),
             tableProperties = mutableMapOf(),
             customFormatters = mapOf(),
-            embeddedFiles = mutableListOf()
+            embeddedFiles = mutableListOf(),
+            listActions = JSONObject(),
+            currentRecordActions = JSONObject()
         )
         Assert.assertEquals(searchFieldsJson, BaseApp.runtimeDataHolder.searchField)
     }
