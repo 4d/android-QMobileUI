@@ -21,7 +21,7 @@ class EntityListAdapter internal constructor(
     private val tableName: String,
     private val lifecycleOwner: LifecycleOwner,
     private val relationCallback: RelationCallback,
-    private val actionDialogCLickedCallBack: (String?) -> Unit,
+    private val actionDialogClickedCallBack: (String?) -> Unit,
 ) :
     PagedListAdapter<EntityModel, BaseViewHolder>(DIFF_CALLBACK) {
 
@@ -60,7 +60,7 @@ class EntityListAdapter internal constructor(
         getItem(position).let { entity ->
             holder.bind(entity, position)
             holder.itemView.setOnLongClickListener {
-                actionDialogCLickedCallBack(getItem(position)?.__KEY)
+                actionDialogClickedCallBack(getItem(position)?.__KEY)
                 true
             }
             // unbind because of issue : item at position 11 receives binding of at item 0,
