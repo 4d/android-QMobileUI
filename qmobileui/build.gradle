@@ -40,6 +40,7 @@ dependencies {
 
     // Jackson
     implementation Libs.jackson
+    implementation Libs.jackson_yaml
 
     // Paging
     implementation Libs.androidx_paging
