@@ -31,6 +31,7 @@ import com.google.gson.Gson
 import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
+import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -124,9 +125,11 @@ open class EntityListFragment : Fragment(), BaseFragment {
             if (length != null) {
                 for (i in 0 until (length)) {
                     val jsonObject =
-                        currentRecorodActionsJsonObject.getSafeArray(tableName)?.getJSONObject(i)
-                    var action = Gson().fromJson(jsonObject.toString(), Action::class.java)
-                    currentRecordActions.add(action)
+                        currentRecorodActionsJsonObject.getSafeArray(tableName)?.getSafeObject(i)
+                    jsonObject?.let {
+                        var action = Gson().fromJson(it.toString(), Action::class.java)
+                        currentRecordActions.add(action)
+                    }
                 }
             }
         }

@@ -6,9 +6,15 @@
 
 package com.qmobile.qmobileui.formatters
 
-import com.qmobile.qmobileapi.utils.parseToType
+import com.fasterxml.jackson.core.util.DefaultIndenter
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator
+import com.qmobile.qmobileapi.utils.parseToString
 import com.qmobile.qmobiledatasync.app.BaseApp
-import org.json.JSONObject
+import org.json.JSONArray
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.util.Locale
@@ -41,20 +47,29 @@ object FormatterUtils {
         "duration" to DateFormat.MEDIUM,
     )
 
-    fun applyFormat(format: String, baseText: String): String {
+    private val prettyPrinter =
+        DefaultPrettyPrinter().apply { indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE) }
+
+    private val yamlMapper = ObjectMapper(
+        YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+            .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+            .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR)
+    )
+
+    fun applyFormat(format: String, baseText: Any): String {
 
         return when (format) {
             "noOrYes" -> {
-                if (baseText.toBoolean()) "Yes" else "No"
+                if (baseText.toString().toBoolean()) "Yes" else "No"
             }
             "falseOrTrue" -> {
-                if (baseText.toBoolean()) "True" else "False"
+                if (baseText.toString().toBoolean()) "True" else "False"
             }
             "boolInteger" -> {
-                if (baseText.toBoolean()) "1" else "0"
+                if (baseText.toString().toBoolean()) "1" else "0"
             }
             "timeInteger" -> {
-                val newTimeArray = getTimeFromLong(baseText.toLong()).split(":")
+                val newTimeArray = getTimeFromLong(baseText.toString().toLong()).split(":")
                 (
                     newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
                         newTimeArray[1]
@@ -63,17 +78,19 @@ object FormatterUtils {
             }
             "shortTime" -> {
                 timeFormat[format]?.let {
-                    DateFormat.getTimeInstance(it).format(getTimeFromString(baseText).time)
+                    DateFormat.getTimeInstance(it)
+                        .format(getTimeFromString(baseText.toString()).time)
                 } ?: ""
             }
             "mediumTime" -> {
                 timeFormat[format]?.let {
-                    DateFormat.getTimeInstance(it).format(getTimeFromString(baseText).time)
+                    DateFormat.getTimeInstance(it)
+                        .format(getTimeFromString(baseText.toString()).time)
                 } ?: ""
             }
             "duration" -> {
                 timeFormat[format]?.let {
-                    val timeFromString = getTimeFromString(baseText).time
+                    val timeFromString = getTimeFromString(baseText.toString()).time
                     val df = DateFormat.getTimeInstance(it, Locale.getDefault())
                     val time = df.format(timeFromString)
                     time.removeSuffix("AM").removeSuffix("PM")
@@ -82,80 +99,82 @@ object FormatterUtils {
             "fullDate" -> {
                 dateFormat[format]?.let {
                     DateFormat.getDateInstance(it, Locale.getDefault())
-                        .format(getDateFromString(baseText).time)
+                        .format(getDateFromString(baseText.toString()).time)
                 } ?: ""
             }
             "longDate" -> {
                 dateFormat[format]?.let {
                     DateFormat.getDateInstance(it, Locale.getDefault())
-                        .format(getDateFromString(baseText).time)
+                        .format(getDateFromString(baseText.toString()).time)
                 } ?: ""
             }
             "mediumDate" -> {
                 dateFormat[format]?.let {
                     DateFormat.getDateInstance(it, Locale.getDefault())
-                        .format(getDateFromString(baseText).time)
+                        .format(getDateFromString(baseText.toString()).time)
                 } ?: ""
             }
             "shortDate" -> {
                 dateFormat[format]?.let {
                     DateFormat.getDateInstance(it, Locale.getDefault())
-                        .format(getDateFromString(baseText).time)
+                        .format(getDateFromString(baseText.toString()).time)
                 } ?: ""
             }
             "currencyEuro" -> {
-                DecimalFormat("0.00").format(baseText.toDouble()) + "€"
+                DecimalFormat("0.00").format(baseText.toString().toDouble()) + "€"
             }
             "currencyYen" -> {
-                "¥ " + baseText.toDouble().toInt()
+                "¥ " + baseText.toString().toDouble().toInt()
             }
             "currencyDollar" -> {
-                "$" + DecimalFormat("0.00").format(baseText.toDouble())
+                "$" + DecimalFormat("0.00").format(baseText.toString().toDouble())
             }
             "percent" -> {
                 (
                     (
-                        DecimalFormat("0.00").format(baseText.toDouble())
+                        DecimalFormat("0.00").format(baseText.toString().toDouble())
                             .toDouble()
                         ) * INT_100
                     ).toString() + "%"
             }
             "ordinal" -> {
-                DecimalFormat("0.00").format(baseText.toDouble()) + "th"
+                DecimalFormat("0.00").format(baseText.toString().toDouble()) + "th"
             }
             "spellOut" -> {
-                NumberToWord.convertNumberToWord(baseText)
+                NumberToWord.convertNumberToWord(baseText.toString())
             }
             "integer" -> {
-                (baseText.toFloat()).toInt().toString()
+                (baseText.toString().toFloat()).toInt().toString()
             }
             "real" -> {
-                baseText
+                baseText.toString()
             }
             "decimal" -> {
-                baseText.toDouble().round(DECIMAL_DIGITS).toString()
+                baseText.toString().toDouble().round(DECIMAL_DIGITS).toString()
+            }
+            "yaml" -> {
+                if (baseText.toString().isEmpty()) ""
+                else yamlMapper.writeValueAsString(baseText)
             }
             "jsonPrettyPrinted" -> {
-                BaseApp.mapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(baseText.toJsonMap())
+                BaseApp.mapper.enable(SerializationFeature.INDENT_OUTPUT)
+                    .setDefaultPrettyPrinter(prettyPrinter)
+                    .parseToString(baseText)
             }
             "json" -> {
-                JSONObject(baseText).toString()
+                BaseApp.mapper.disable(SerializationFeature.INDENT_OUTPUT).parseToString(baseText)
             }
             "jsonValues" -> {
-                baseText.toJsonMap().values.joinToString(
-                    System.lineSeparator()
-                )
+                (baseText as? Map<*, *>)?.values?.let {
+                    JSONArray(it).toString()
+                } ?: ""
             }
             else -> {
-                baseText
+                baseText.toString()
             }
         }
     }
 }
-
-private fun String.toJsonMap(): Map<String, Any> =
-    BaseApp.mapper.parseToType(JSONObject(this).toString()) ?: mapOf()
 
 fun Double.round(decimals: Int): Double {
     var multiplier = 1.0
