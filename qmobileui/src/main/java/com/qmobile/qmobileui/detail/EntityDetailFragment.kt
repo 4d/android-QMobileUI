@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment
 import com.google.gson.Gson
 import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
@@ -94,7 +95,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
             val actions = mutableListOf<Action>()
             val length = actionsJsonObject.getJSONArray(tableName).length()
             for (i in 0 until length) {
-                val jsonObject = actionsJsonObject.getJSONArray(tableName).getJSONObject(i)
+                val jsonObject = actionsJsonObject.getSafeArray(tableName)?.getJSONObject(i)
                 actions.add(Gson().fromJson(jsonObject.toString(), Action::class.java))
             }
 
