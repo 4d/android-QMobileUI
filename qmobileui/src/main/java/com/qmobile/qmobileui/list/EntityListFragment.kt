@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -114,17 +115,19 @@ open class EntityListFragment : Fragment(), BaseFragment {
         if (hasTableActions()) {
             val length = tableActionsJsonObject.getJSONArray(tableName).length()
             for (i in 0 until length) {
-                val jsonObject = tableActionsJsonObject.getJSONArray(tableName).getJSONObject(i)
+                val jsonObject = tableActionsJsonObject.getSafeArray(tableName)?.getJSONObject(i)
                 tableActions.add(Gson().fromJson(jsonObject.toString(), Action::class.java))
             }
         }
         if (hasCurrentRecordActions()) {
-            val length = currentRecorodActionsJsonObject.getJSONArray(tableName).length()
-            for (i in 0 until (length)) {
-                val jsonObject =
-                    currentRecorodActionsJsonObject.getJSONArray(tableName).getJSONObject(i)
-                var action = Gson().fromJson(jsonObject.toString(), Action::class.java)
-                currentRecordActions.add(action)
+            val length = currentRecorodActionsJsonObject.getSafeArray(tableName)?.length()
+            if (length != null) {
+                for (i in 0 until (length)) {
+                    val jsonObject =
+                        currentRecorodActionsJsonObject.getSafeArray(tableName)?.getJSONObject(i)
+                    var action = Gson().fromJson(jsonObject.toString(), Action::class.java)
+                    currentRecordActions.add(action)
+                }
             }
         }
     }
