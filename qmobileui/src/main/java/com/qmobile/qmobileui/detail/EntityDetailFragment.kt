@@ -20,10 +20,7 @@ import com.google.gson.Gson
 import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
-<<<<<<< HEAD
-=======
 import com.qmobile.qmobileapi.utils.getSafeObject
->>>>>>> master
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
