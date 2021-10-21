@@ -270,7 +270,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private fun getActionContext(selectedActionId: String?): Map<String, Any> {
         val actionContext = mutableMapOf<String, Any>(
             "dataClass" to
-                    BaseApp.genericTableHelper.originalTableName(tableName)
+                BaseApp.genericTableHelper.originalTableName(tableName)
         )
         if (selectedActionId != null) {
             actionContext["entity"] = mapOf("primaryKey" to selectedActionId)
@@ -355,7 +355,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
-        if(hasTableActions()) {
+        if (hasTableActions()) {
             delegate.setupActionsMenu(menu, tableActions) { name ->
                 entityListViewModel.sendAction(
                     name,

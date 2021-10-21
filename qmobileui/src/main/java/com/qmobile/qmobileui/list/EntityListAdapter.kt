@@ -21,7 +21,6 @@ import com.qmobile.qmobileui.utils.ResourcesHelper
 class EntityListAdapter internal constructor(
     private val tableName: String,
     private val lifecycleOwner: LifecycleOwner,
-    private val relationCallback: RelationCallback,
     private val actionDialogClickedCallBack: (String?) -> Unit
 ) :
     PagedListAdapter<EntityModel, BaseViewHolder>(DIFF_CALLBACK) {
