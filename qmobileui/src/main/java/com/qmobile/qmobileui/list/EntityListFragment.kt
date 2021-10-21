@@ -41,7 +41,7 @@ import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.list.viewholder.SwipeHelper
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
-import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
+import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
 
 @Suppress("TooManyFunctions")
@@ -57,7 +57,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private var searchableFields = BaseApp.runtimeDataHolder.searchField
     private var tableActionsJsonObject = BaseApp.runtimeDataHolder.listActions
     private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
-    private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
+    private lateinit var formQueryBuilder: FormQueryBuilder
     private var currentQuery = ""
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
     lateinit var adapter: EntityListAdapter
@@ -91,7 +91,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
         arguments?.getString("currentItemId")?.let { parentItemId = it }
         arguments?.getString("inverseName")?.let { inverseName = it }
 
-        sqlQueryBuilderUtil = SqlQueryBuilderUtil(tableName)
+        formQueryBuilder = FormQueryBuilder(tableName)
 
         if (hasSearch() || hasTableActions())
             this.setHasOptionsMenu(true)
@@ -410,18 +410,15 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun setSearchQuery() {
-        if (fromRelation) {
-            entityListViewModel.setSearchQuery(
-                sqlQueryBuilderUtil.setRelationQuery(
-                    parentItemId = parentItemId,
-                    inverseName = inverseName
-                )
+        val formQuery = if (fromRelation) {
+            formQueryBuilder.getRelationQuery(
+                parentItemId = parentItemId,
+                inverseName = inverseName,
+                pattern = currentQuery
             )
         } else {
-            if (currentQuery.isEmpty())
-                entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.getAll())
-            else
-                entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.sortQuery(currentQuery))
+            formQueryBuilder.getQuery(currentQuery)
         }
+        entityListViewModel.setSearchQuery(formQuery)
     }
 }

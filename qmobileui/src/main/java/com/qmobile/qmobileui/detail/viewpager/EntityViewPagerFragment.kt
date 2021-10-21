@@ -22,7 +22,6 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 
 @Suppress("TooManyFunctions")
 class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChangeListener {
@@ -31,7 +30,6 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
     var tableName: String = ""
     var viewPager: ViewPager? = null
     private var onFragmentCreation = true
-    private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
 
     private lateinit var actionPrevious: MenuItem
     private lateinit var actionNext: MenuItem
@@ -56,8 +54,6 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
         if (onFragmentCreation)
             arguments?.getInt("position")?.let { position = it }
         arguments?.getString("tableName")?.let { tableName = it }
-
-        sqlQueryBuilderUtil = SqlQueryBuilderUtil(tableName)
 
         this.setHasOptionsMenu(true)
 
