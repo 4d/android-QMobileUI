@@ -159,6 +159,8 @@ class SqlBuilderTest {
             tableProperties = mutableMapOf(),
             customFormatters = mapOf(),
             embeddedFiles = mutableListOf(),
+            listActions = JSONObject(),
+            currentRecordActions = JSONObject(),
             manyToOneRelations = mapOf(),
             oneToManyRelations = mapOf()
         )

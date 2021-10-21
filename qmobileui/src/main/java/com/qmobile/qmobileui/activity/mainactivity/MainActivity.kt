@@ -11,7 +11,11 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.OnLifecycleEvent
@@ -23,23 +27,31 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.LoginRequiredCallback
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
+import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
 import com.qmobile.qmobiledatasync.relation.OneToManyRelation
+import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
+import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.setupWithNavController
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -53,6 +65,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     private var currentNavController: LiveData<NavController>? = null
     lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
+    private var job: Job? = null
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
@@ -188,12 +201,53 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         tryAutoLogin()
     }
 
+    fun prepareDataSync(alreadyRefreshedTable: String?) {
+        mainActivityDataSync.prepareDataSync(connectivityViewModel, alreadyRefreshedTable)
+    }
+
     /**
      * Performs data sync, requested by a table request
      */
-    override fun requestDataSync(alreadyRefreshedTable: String?) {
-        mainActivityDataSync.prepareDataSync(connectivityViewModel, alreadyRefreshedTable)
+    override fun requestDataSync(currentTableName: String) {
+        val entityListViewModel =
+            entityListViewModelList.find { it.getAssociatedTableName() == currentTableName }
+
+        checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
+                    requestAuthentication()
+                } else {
+                    // AUTHENTICATED
+                    when (entityListViewModel?.dataSynchronized?.value) {
+                        DataSyncStateEnum.UNSYNCHRONIZED -> prepareDataSync(null)
+                        DataSyncStateEnum.SYNCHRONIZED -> {
+                            job?.cancel()
+                            job = lifecycleScope?.launch {
+                                entityListViewModel.getEntities { shouldSyncData ->
+                                    if (shouldSyncData) {
+                                        Timber.d("GlobalStamp changed, synchronization is required")
+                                        prepareDataSync(currentTableName)
+                                    } else {
+                                        Timber.d("GlobalStamp unchanged, no synchronization is required")
+                                    }
+                                }
+                            }
+                        }
+                        DataSyncStateEnum.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
+                    }
+                }
+            }
+
+            override fun onServiceInaccessible() {
+                // Nothing to do
+            }
+
+            override fun onNoInternet() {
+                // Nothing to do
+            }
+        })
     }
+
 
     override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
         when (authenticationState) {
@@ -212,6 +266,39 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
                     startLoginActivity()
             }
             else -> {
+            }
+        }
+    }
+
+
+   override  fun setupActionsMenu(menu: Menu, actions: List<Action>, onMenuItemClick: (String) -> Unit) {
+        actions.forEach { action ->
+            val menuBuilder = menu as MenuBuilder
+            menuBuilder.setOptionalIconsVisible(true)
+            var menuItem = menu.add(
+                action.getPreferredName()
+            )
+            val iconDrawablePath = action.getIconDrawablePath()
+            val resId = if (iconDrawablePath != null) {
+                resources.getIdentifier(
+                    iconDrawablePath,
+                    "drawable",
+                    packageName
+                )
+            } else {
+                0
+            }
+            menuItem.run {
+                if (menu is MenuBuilder) {
+                    menu.setOptionalIconsVisible(true)
+                }
+                setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+                setIcon(resId)
+                setOnMenuItemClickListener {
+
+                    onMenuItemClick(action.name)
+                    true
+                }
             }
         }
     }

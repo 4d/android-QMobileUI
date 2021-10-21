@@ -6,7 +6,9 @@
 
 package com.qmobile.qmobileui.list
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.view.KeyEvent
@@ -19,49 +21,44 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.google.gson.Gson
+import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
+import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
+import com.qmobile.qmobileui.list.viewholder.SwipeHelper
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
-import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 import com.qmobile.qmobileui.utils.hideKeyboard
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import timber.log.Timber
-import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("TooManyFunctions")
 open class EntityListFragment : Fragment(), BaseFragment {
 
     companion object {
         private const val CURRENT_QUERY_KEY = "currentQuery_key"
+        private const val MAX_ACTIONS_VISIBLE = 3
     }
 
-    private lateinit var syncDataRequested: AtomicBoolean
     private lateinit var searchView: SearchView
     private lateinit var searchPlate: EditText
     private var searchableFields = BaseApp.runtimeDataHolder.searchField
+    private var tableActionsJsonObject = BaseApp.runtimeDataHolder.listActions
+    private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
     private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
     private var currentQuery = ""
-    private var job: Job? = null
-    private lateinit var loginViewModel: LoginViewModel
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
     lateinit var adapter: EntityListAdapter
     private var _binding: FragmentListBinding? = null
@@ -72,6 +69,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private var inverseName: String = ""
     private var parentItemId: String = "0"
     private var fromRelation = false
+
+    private val tableActions = mutableListOf<Action>()
+    private var currentRecordActions = mutableListOf<Action>()
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -93,20 +93,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
         sqlQueryBuilderUtil = SqlQueryBuilderUtil(tableName)
 
-        // Every time we land on the fragment, we want refreshed data // not anymore
-        syncDataRequested = AtomicBoolean(true) // unused
-
-        if (hasSearch())
+        if (hasSearch() || hasTableActions())
             this.setHasOptionsMenu(true)
 
-        entityListViewModel = if (fromRelation)
-            getEntityListViewModel(this, tableName, delegate.apiService)
-        else
-            getEntityListViewModel(activity, tableName, delegate.apiService)
-
-        // We need this ViewModel to know when MainActivity has performed its $authenticate so that
-        // we don't trigger the initial sync if we are not authenticated yet
-        loginViewModel = getLoginViewModel(activity, delegate.loginApiService)
+        entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
 
         _binding = FragmentListBinding.inflate(inflater, container, false).apply {
             viewModel = entityListViewModel
@@ -117,6 +107,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun hasSearch() = searchableFields.has(tableName)
+    private fun hasTableActions() = tableActionsJsonObject.has(tableName)
+    private fun hasCurrentRecordActions() = currentRecordActionsJsonObject.has(tableName)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -124,6 +116,12 @@ open class EntityListFragment : Fragment(), BaseFragment {
             delegate = context
         }
         // Access resources elements
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initActions()
+        initCellSwipe()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -152,7 +150,14 @@ open class EntityListFragment : Fragment(), BaseFragment {
      * Initialize recyclerView
      */
     private fun initRecyclerView() {
-        adapter = EntityListAdapter(tableName, viewLifecycleOwner)
+        adapter = EntityListAdapter(
+            tableName, viewLifecycleOwner,
+            { selectedActionId ->
+                if (hasCurrentRecordActions()) {
+                    showDialog(selectedActionId, currentRecordActions)
+                }
+            }
+        )
 
         binding.fragmentListRecyclerView.layoutManager =
             when (BaseApp.genericTableFragmentHelper.layoutType(tableName)) {
@@ -192,75 +197,124 @@ open class EntityListFragment : Fragment(), BaseFragment {
         }
     }
 
+    private fun initActions() {
+        tableActions.clear()
+        currentRecordActions.clear()
+        if (hasTableActions()) {
+            val length = tableActionsJsonObject.getJSONArray(tableName).length()
+            for (i in 0 until length) {
+                val jsonObject = tableActionsJsonObject.getJSONArray(tableName).getJSONObject(i)
+                tableActions.add(Gson().fromJson(jsonObject.toString(), Action::class.java))
+            }
+        }
+        if (hasCurrentRecordActions()) {
+            val length = currentRecordActionsJsonObject.getJSONArray(tableName).length()
+            for (i in 0 until (length)) {
+                val jsonObject =
+                    currentRecordActionsJsonObject.getJSONArray(tableName).getJSONObject(i)
+                var action = Gson().fromJson(jsonObject.toString(), Action::class.java)
+                currentRecordActions.add(action)
+            }
+        }
+    }
+
     /**
      * Initialize Swipe to delete
      */
-    /*private fun initSwipeToDeleteAndUndo() {
-        val swipeToDeleteCallback: SwipeToDeleteCallback =
-            object : SwipeToDeleteCallback(requireContext(), delegate.darkModeEnabled()) {
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    val position = viewHolder.adapterPosition
-                    val item = adapter.getEntities()[position]
-                    entityListViewModel.delete(item)
-
-                    activity?.let {
-                        customSnackBar(
-                            it,
-                            it.resources.getString(R.string.snackbar_remove),
-                            View.OnClickListener {
-                                entityListViewModel.insert(item)
-                                // rv_main.scrollToPosition(position)
+    private fun initCellSwipe() {
+        if (hasCurrentRecordActions()) {
+            val itemTouchHelper =
+                ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
+                    override fun instantiateUnderlayButton(position: Int): List<ItemActionButton> {
+                        var buttons = mutableListOf<ItemActionButton>()
+                        for (i in 0 until (currentRecordActions.size)) {
+                            if ((i + 1) > MAX_ACTIONS_VISIBLE) {
+                                buttons.add(createButton(position, null, i))
+                                break
                             }
+                            var action = currentRecordActions.get(i)
+                            buttons.add(createButton(position, action, i))
+                        }
+                        return buttons
+                    }
+                })
+            itemTouchHelper.attachToRecyclerView(binding.fragmentListRecyclerView)
+        }
+    }
+
+    private fun showDialog(selectedActionId: String?, actions: MutableList<Action>) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+        val items = actions.map { it.getPreferredShortName() }
+        builder.setItems(
+            items.toTypedArray(),
+            DialogInterface.OnClickListener { dialog, position ->
+                sendCurrentRecordAction(actions.get(position).name, selectedActionId)
+            }
+        )
+        builder.show()
+    }
+
+    private fun sendCurrentRecordAction(actionName: String, selectedActionId: String?) {
+        entityListViewModel.sendAction(
+            actionName,
+            ActionContent(
+                getActionContext(selectedActionId)
+            )
+        ) {
+            if (it != null) {
+                it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
+            }
+        }
+    }
+
+    private fun getActionContext(selectedActionId: String?): Map<String, Any> {
+        val actionContext = mutableMapOf<String, Any>(
+            "dataClass" to
+                    BaseApp.genericTableHelper.originalTableName(tableName)
+        )
+        if (selectedActionId != null) {
+            actionContext["entity"] = mapOf("primaryKey" to selectedActionId)
+        }
+        return actionContext
+    }
+
+    private fun syncDataIfNeeded(shouldSyncData: Boolean) {
+        if (shouldSyncData) {
+            forceSyncData()
+        }
+    }
+
+    private fun createButton(
+        position: Int,
+        action: Action?,
+        horizontalIndex: Int
+    ): SwipeHelper.ItemActionButton {
+
+        return SwipeHelper.ItemActionButton(
+            requireContext(),
+            action,
+            horizontalIndex,
+            object : SwipeHelper.UnderlayButtonClickListener {
+                override fun onClick() {
+                    // the case of "..." button
+                    if (action == null) {
+                        showDialog(adapter.getSelectedItem(position)?.__KEY, currentRecordActions)
+                    } else {
+                        sendCurrentRecordAction(
+                            action.name,
+                            adapter.getSelectedItem(position)?.__KEY
                         )
                     }
                 }
             }
-
-        val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
-        itemTouchHelper.attachToRecyclerView(fragment_list_recycler_view)
-    }*/
+        )
+    }
 
     /**
      * Forces data sync, when user pulls to refresh
      */
     private fun forceSyncData() {
-        syncDataRequested.set(false)
-
-        delegate.checkNetwork(object : NetworkChecker {
-            override fun onServerAccessible() {
-                if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
-                    Timber.d("Not authenticated yet, syncDataRequested = $syncDataRequested")
-                    delegate.requestAuthentication()
-                } else {
-                    // AUTHENTICATED
-                    when (entityListViewModel.dataSynchronized.value) {
-                        DataSyncStateEnum.UNSYNCHRONIZED -> delegate.requestDataSync(null)
-                        DataSyncStateEnum.SYNCHRONIZED -> {
-                            job?.cancel()
-                            job = activity?.lifecycleScope?.launch {
-                                entityListViewModel.getEntities { shouldSyncData ->
-                                    if (shouldSyncData) {
-                                        Timber.d("GlobalStamp changed, synchronization is required")
-                                        delegate.requestDataSync(tableName)
-                                    } else {
-                                        Timber.d("GlobalStamp unchanged, no synchronization is required")
-                                    }
-                                }
-                            }
-                        }
-                        DataSyncStateEnum.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
-                    }
-                }
-            }
-
-            override fun onServiceInaccessible() {
-                // Nothing to do
-            }
-
-            override fun onNoInternet() {
-                // Nothing to do
-            }
-        })
+        delegate.requestDataSync(tableName)
     }
 
     private val searchListener: SearchView.OnQueryTextListener =
@@ -279,20 +333,43 @@ open class EntityListFragment : Fragment(), BaseFragment {
         }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
-        searchView.setOnQueryTextListener(searchListener)
+        if (hasSearch()) {
+            searchView.setOnQueryTextListener(searchListener)
 
-        if (currentQuery.isEmpty()) {
-            searchView.onActionViewCollapsed()
-        } else {
-            searchView.setQuery(currentQuery, true)
-            searchView.isIconified = false
-            searchPlate.clearFocus()
+            if (currentQuery.isEmpty()) {
+                searchView.onActionViewCollapsed()
+            } else {
+                searchView.setQuery(currentQuery, true)
+                searchView.isIconified = false
+                searchPlate.clearFocus()
+            }
         }
         super.onPrepareOptionsMenu(menu)
     }
 
     // Searchable implementation
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        setupActionsMenuIfNeeded(menu)
+        setupSearchMenuIfNeeded(menu, inflater)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    private fun setupActionsMenuIfNeeded(menu: Menu) {
+        if(hasTableActions()) {
+            delegate.setupActionsMenu(menu, tableActions) { name ->
+                entityListViewModel.sendAction(
+                    name,
+                    ActionContent(getActionContext(null))
+                ) {
+                    if (it != null) {
+                        it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setupSearchMenuIfNeeded(menu: Menu, inflater: MenuInflater) {
         if (hasSearch()) {
             inflater.inflate(R.menu.menu_search, menu)
             searchView = menu.findItem(R.id.search).actionView as SearchView
@@ -325,7 +402,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 true
             }
         }
-        super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

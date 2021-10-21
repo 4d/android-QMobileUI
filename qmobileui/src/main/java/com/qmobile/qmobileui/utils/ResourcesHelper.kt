@@ -7,7 +7,9 @@
 package com.qmobile.qmobileui.utils
 
 import android.content.Context
+import android.util.Log
 import com.qmobile.qmobileui.R
+import java.io.File
 
 object ResourcesHelper {
 
@@ -40,6 +42,22 @@ object ResourcesHelper {
         return when (string) {
             "try_refresh_data" -> context.getString(R.string.try_refresh_data)
             else -> string
+        }
+    }
+
+    fun correctIconPath(iconPath: String): String? {
+        if (iconPath.isNullOrEmpty())
+            return null
+        return try {
+            iconPath
+                .substring(0, iconPath.lastIndexOf('.')) // removes extension
+                .replace(".+/".toRegex(), "")
+                .removePrefix(File.separator)
+                .toLowerCase()
+                .replace("[^a-z0-9]+".toRegex(), "_")
+        } catch (e: Exception) {
+            e.message?.let { Log.e("correctIconPath: ", it) }
+            null
         }
     }
 }

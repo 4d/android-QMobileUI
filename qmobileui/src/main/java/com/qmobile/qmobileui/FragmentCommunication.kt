@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui
 
 import android.net.ConnectivityManager
+import android.view.Menu
 import androidx.lifecycle.LiveData
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiService
@@ -31,7 +32,7 @@ interface FragmentCommunication {
 
     fun refreshAllApiClients()
 
-    fun requestDataSync(alreadyRefreshedTable: String?)
+    fun requestDataSync(currentTableName: String)
 
     fun requestAuthentication()
 
@@ -40,4 +41,6 @@ interface FragmentCommunication {
     fun checkNetwork(networkChecker: NetworkChecker)
 
     fun observeEntityToastMessage(message: LiveData<Event<ToastMessageHolder>>)
+
+    fun setupActionsMenu(menu: Menu, actions: List<Action>, onMenuItemClick: (String) -> Unit)
 }
