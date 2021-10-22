@@ -60,7 +60,7 @@ class EntityListAdapter internal constructor(
         getItem(position).let { entity ->
             holder.bind(entity, position)
             holder.itemView.setOnLongClickListener {
-                actionDialogClickedCallBack(getItem(position)?.__KEY)
+                actionDialogClickedCallBack(entity?.__KEY)
                 true
             }
             // unbind because of issue : item at position 11 receives binding of at item 0,
