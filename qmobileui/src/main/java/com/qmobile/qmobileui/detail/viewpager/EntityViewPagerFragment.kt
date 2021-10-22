@@ -55,6 +55,7 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
             arguments?.getInt("position")?.let { position = it }
         arguments?.getString("tableName")?.let { tableName = it }
 
+        entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
         this.setHasOptionsMenu(true)
 
         onFragmentCreation = false
@@ -72,7 +73,6 @@ class EntityViewPagerFragment : Fragment(), BaseFragment, ViewPager.OnPageChange
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
         EntityViewPagerFragmentObserver(this, entityListViewModel).initObservers()
     }
 

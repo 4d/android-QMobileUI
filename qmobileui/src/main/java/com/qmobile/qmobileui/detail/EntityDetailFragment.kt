@@ -88,7 +88,6 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
         EntityDetailFragmentObserver(this, entityViewModel).initObservers()
     }
 
-
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasActions()) {
             val actions = mutableListOf<Action>()
