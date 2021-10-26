@@ -34,6 +34,7 @@ import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.Action
@@ -45,6 +46,7 @@ import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.list.viewholder.SwipeHelper
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
+import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 import com.qmobile.qmobileui.utils.hideKeyboard
 import java.util.concurrent.atomic.AtomicBoolean
@@ -259,24 +261,45 @@ open class EntityListFragment : Fragment(), BaseFragment {
         builder.show()
     }
 
+
     private fun sendCurrentRecordAction(actionName: String, selectedActionId: String?) {
-        entityListViewModel.sendAction(
-            actionName,
-            ActionContent(
-                getActionContext(selectedActionId)
-            )
-        ) {
-            if (it != null) {
-                it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
+        delegate.checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                entityListViewModel.sendAction(
+                    actionName,
+                    ActionContent(
+                        getActionContext(selectedActionId)
+                    )
+                ) {
+                    if (it != null) {
+                        it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
+                    }
+                }
             }
-        }
+
+            override fun onServiceInaccessible() {
+                entityListViewModel.toastMessage.showMessage(
+                    context?.getString(R.string.action_send_server_not_accessible),
+                    tableName,
+                    MessageType.ERROR
+                )
+            }
+
+            override fun onNoInternet() {
+                entityListViewModel.toastMessage.showMessage(
+                    context?.getString(R.string.action_send_no_internet),
+                    tableName,
+                    MessageType.ERROR
+                )
+            }
+        })
     }
 
 
     private fun getActionContext(selectedActionId: String?): Map<String, Any> {
         val actionContext = mutableMapOf<String, Any>(
-                "dataClass" to
-                BaseApp.genericTableHelper.originalTableName(tableName)
+            "dataClass" to
+                    BaseApp.genericTableHelper.originalTableName(tableName)
         )
         if (selectedActionId != null) {
             actionContext["entity"] = mapOf("primaryKey" to selectedActionId)
@@ -372,16 +395,36 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
-        if(hasTableActions()) {
+        if (hasTableActions()) {
             delegate.setupActionsMenu(menu, tableActions) { name ->
-                entityListViewModel.sendAction(
-                    name,
-                    ActionContent(getActionContext(null))
-                ) {
-                    if (it != null) {
-                        it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
+                delegate.checkNetwork(object : NetworkChecker {
+                    override fun onServerAccessible() {
+                        entityListViewModel.sendAction(
+                            name,
+                            ActionContent(getActionContext(null))
+                        ) {
+                            if (it != null) {
+                                it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
+                            }
+                        }
                     }
-                }
+
+                    override fun onServiceInaccessible() {
+                        entityListViewModel.toastMessage.showMessage(
+                            context?.getString(R.string.action_send_server_not_accessible),
+                            tableName,
+                            MessageType.ERROR
+                        )
+                    }
+
+                    override fun onNoInternet() {
+                        entityListViewModel.toastMessage.showMessage(
+                            context?.getString(R.string.action_send_no_internet),
+                            tableName,
+                            MessageType.ERROR
+                        )
+                    }
+                })
             }
         }
     }
