@@ -54,10 +54,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
         _binding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
-            ResourcesHelper.layoutFromTable(
-                inflater.context,
-                "${ResourcesHelper.FRAGMENT_DETAIL_PREFIX}_$tableName".lowercase()
-            ),
+            ResourcesHelper.detailLayoutFromTable(inflater.context, tableName),
             container,
             false
         ).apply {
@@ -118,15 +115,14 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
         return mapOf(
             "dataClass" to BaseApp.genericTableHelper.originalTableName(tableName),
             "entity" to
-                    mapOf(
-                        "primaryKey" to
-                                entityViewModel.entity.value?.__KEY
-                    )
+                mapOf(
+                    "primaryKey" to
+                        entityViewModel.entity.value?.__KEY
+                )
         )
     }
 
     private fun forceSyncData() {
         delegate.requestDataSync(tableName)
     }
-
 }

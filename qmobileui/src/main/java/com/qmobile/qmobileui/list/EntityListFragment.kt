@@ -85,8 +85,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
         arguments?.getString("tableName")?.let { tableName = it }
         // Entity list fragment from relation
         arguments?.getString("destinationTable")?.let {
-            tableName = it
-            fromRelation = true
+            if (it.isNotEmpty()) {
+                tableName = it
+                fromRelation = true
+            }
         }
         arguments?.getString("currentItemId")?.let { parentItemId = it }
         arguments?.getString("inverseName")?.let { inverseName = it }
@@ -118,12 +120,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
         // Access resources elements
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initActions()
-        initCellSwipe()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         savedInstanceState?.getString(CURRENT_QUERY_KEY, "")?.let { currentQuery = it }
@@ -131,6 +127,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        initActions()
+        initCellSwipe()
         initRecyclerView()
         initOnRefreshListener()
         EntityListFragmentObserver(this, entityListViewModel).initObservers()
@@ -152,6 +150,16 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private fun initRecyclerView() {
         adapter = EntityListAdapter(
             tableName, viewLifecycleOwner,
+            { dataBinding, key ->
+                BaseApp.genericNavigationResolver.navigateFromListToViewPager(
+                    viewDataBinding = dataBinding,
+                    key = key,
+                    query = currentQuery,
+                    destinationTable = if (fromRelation) tableName else "",
+                    currentItemId = parentItemId,
+                    inverseName = inverseName
+                )
+            },
             { selectedActionId ->
                 if (hasCurrentRecordActions()) {
                     showDialog(selectedActionId, currentRecordActions)

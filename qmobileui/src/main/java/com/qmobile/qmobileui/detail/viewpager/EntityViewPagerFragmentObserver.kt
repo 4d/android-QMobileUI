@@ -6,13 +6,18 @@
 
 package com.qmobile.qmobileui.detail.viewpager
 
+import androidx.lifecycle.lifecycleScope
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 
 class EntityViewPagerFragmentObserver(
     private val fragment: EntityViewPagerFragment,
-    private val entityListViewModel: EntityListViewModel<EntityModel>
+    private val entityListViewModel: EntityListViewModel<EntityModel>,
+    private val key: String
 ) : BaseObserver {
 
     override fun initObservers() {
@@ -20,51 +25,26 @@ class EntityViewPagerFragmentObserver(
     }
 
     // Observe entity list
-    // fun EntityViewPagerFragment.observeEntityList(sqLiteQuery: SupportSQLiteQuery) {
     private fun observeEntityList() {
         entityListViewModel.entityListLiveData.observe(
             fragment.viewLifecycleOwner,
             {
-                fragment.viewPager?.adapter =
-                    EntityViewPagerAdapter(
-                        fragment,
-                        fragment.tableName,
-                        it
-                    )
-                fragment.viewPager?.addOnPageChangeListener(fragment)
-                fragment.viewPager?.currentItem = fragment.position
+                fragment.adapter.submitList(it)
+                val index = it.indexOfFirst { entityModel -> entityModel.__KEY == key }
+                if (index > -1) {
+                    fragment.viewPager?.setCurrentItem(index, false)
+                }
             }
         )
-        //    job?.cancel()
-//    job = lifecycleScope.launch {
-//        entityListViewModel.getAllDynamicQueryFlow(sqLiteQuery).collectLatest {
-//            // When entity list data changed, refresh the displayed list
-//            viewPager?.adapter =
-//                EntityViewPagerAdapter(
-//                    this@observeEntityList,
-//                    tableName,
-//                    it
-//                )
-//            viewPager?.addOnPageChangeListener(this@observeEntityList)
-//            viewPager?.currentItem = position
-//        }
-//    }
 
-//    entityListViewModel.getAllDynamicQuery(sqLiteQuery).observe(
-//        viewLifecycleOwner,
-//        { entities ->
-//            entities?.let {
-//                // When entity list data changed, refresh the displayed list
-//                viewPager?.adapter =
-//                    EntityViewPagerAdapter(
-//                        this,
-//                        tableName,
-//                        it
-//                    )
-//                viewPager?.addOnPageChangeListener(this)
-//                viewPager?.currentItem = position
+//        fragment.lifecycleScope.launch {
+//            entityListViewModel.entityListFlow.distinctUntilChanged().collectLatest {
+//                fragment.adapter.submitData(it)
+////                val index = it.indexOfFirst { entityModel -> entityModel.__KEY == key }
+////                if (index > -1) {
+////                    fragment.viewPager?.setCurrentItem(index, false)
+////                }
 //            }
 //        }
-//    )
     }
 }

@@ -10,7 +10,6 @@ import android.graphics.Typeface
 import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.Action
@@ -148,7 +147,7 @@ abstract class SwipeHelper(
         private val textSizeInPixel: Float =
             BUTTON_TEXT_SIZE * context.resources.displayMetrics.density // dp to px
         val intrinsicWidth: Float
-        private var horizontalIndex: Int;
+        private var horizontalIndex: Int
 
         init {
             title = action?.getPreferredShortName() ?: "..."
@@ -193,7 +192,7 @@ abstract class SwipeHelper(
                     val iconLeft =
                         (rect.left + rect.width() / 2 - iconWith.div(2))
                     val iconTop =
-                        (rect.top + rect.height()* ICON_RATIO)
+                        (rect.top + rect.height() * ICON_RATIO)
                     val iconBottom = iconTop + iconHeight
                     val iconRight = iconLeft + iconWith
                     setBounds(
@@ -215,7 +214,6 @@ abstract class SwipeHelper(
                     val y = rect.top + rect.height() * TITLE_MARGIN_TOP_RATIO
                     canvas.drawText(title, rect.left + x, y, paint)
                 }
-
             } else {
                 // Draw title
                 paint.color = context.getColorFromAttr(R.attr.colorOnPrimary)
