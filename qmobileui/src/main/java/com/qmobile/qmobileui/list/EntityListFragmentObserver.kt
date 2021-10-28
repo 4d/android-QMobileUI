@@ -7,10 +7,15 @@
 package com.qmobile.qmobileui.list
 
 import android.annotation.SuppressLint
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
+import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class EntityListFragmentObserver(
@@ -20,7 +25,8 @@ class EntityListFragmentObserver(
 
     override fun initObservers() {
         observeDataSynchronized()
-        observeEntityListDynamicSearch()
+        observeScheduleRefresh()
+        observeEntityList()
     }
 
     // Observe when data are synchronized
@@ -34,27 +40,29 @@ class EntityListFragmentObserver(
                         "Table : ${entityListViewModel.getAssociatedTableName()}, " +
                         "Instance : $entityListViewModel]"
                 )
-                // Refresh views as cached imaged would not be updated
-                if (dataSyncState == DataSyncStateEnum.SYNCHRONIZED) {
-                    fragment.adapter.notifyDataSetChanged()
+            }
+        )
+    }
+
+    private fun observeScheduleRefresh() {
+        entityListViewModel.scheduleRefresh.observe(
+            fragment.viewLifecycleOwner,
+            { scheduleRefresh ->
+                if (scheduleRefresh == ScheduleRefreshEnum.PERFORM) {
+                    entityListViewModel.setScheduleRefreshState(ScheduleRefreshEnum.NO)
+                    val firstVisible = (fragment.binding.fragmentListRecyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    val childCount = fragment.binding.fragmentListRecyclerView.childCount
+                    fragment.adapter.notifyItemRangeChanged(firstVisible, childCount)
                 }
             }
         )
     }
 
-    // Sql Dynamic Query Support
-    private fun observeEntityListDynamicSearch() {
-        entityListViewModel.entityListLiveData.observe(
-            fragment.viewLifecycleOwner,
-            {
-                fragment.adapter.submitList(it)
+    private fun observeEntityList() {
+        fragment.lifecycleScope.launch {
+            entityListViewModel.entityListFlow.distinctUntilChanged().collectLatest {
+                fragment.adapter.submitData(it)
             }
-        )
-//    entityListViewModel.getAllDynamicQuery(sqLiteQuery).observe(
-//        viewLifecycleOwner,
-//        { pagedList ->
-//            adapter.submitList(pagedList)
-//        }
-//    )
+        }
     }
 }
