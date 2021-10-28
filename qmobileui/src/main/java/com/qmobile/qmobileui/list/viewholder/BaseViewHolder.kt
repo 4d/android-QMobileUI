@@ -74,7 +74,13 @@ class BaseViewHolder(
     private fun setupObserver(entity: EntityModel) {
         BaseApp.genericTableHelper.getManyToOneRelationsInfo(tableName, entity).let { relationMap ->
             if (relationMap.isNotEmpty()) {
-                observeRelations(relationMap, entity.__KEY)
+                observeManyToOneRelations(relationMap, entity.__KEY)
+            }
+        }
+
+        BaseApp.genericTableHelper.getOneToManyRelationsInfo(tableName, entity).let { relationMap ->
+            if (relationMap.isNotEmpty()) {
+                observeOneToManyRelations(relationMap, entity.__KEY)
             }
         }
     }
@@ -83,9 +89,8 @@ class BaseViewHolder(
         BaseApp.genericTableFragmentHelper.unsetRelationBinding(dataBinding)
     }
 
-    // Map<relationName, LiveData<RoomRelation>>
-    private fun observeRelations(
-        relations: Map<String, LiveData<RoomRelation>>, /* only for logs */
+    private fun observeManyToOneRelations(
+        relations: Map<String, LiveData<RoomRelation>>,
         key: String?
     ) {
         for ((relationName, liveDataRelatedEntity) in relations) {
@@ -93,11 +98,33 @@ class BaseViewHolder(
                 requireNotNull(dataBinding.lifecycleOwner),
                 { roomRelation ->
                     roomRelation?.toOne?.let { relatedEntity ->
-                        Timber.d("[$tableName] Relation named \"$relationName\" retrieved for entity key $key")
+                        Timber.d("[$tableName] Many to One Relation named \"$relationName\" retrieved for entity key $key")
                         BaseApp.genericTableFragmentHelper.setRelationBinding(
                             dataBinding,
                             relationName,
                             relatedEntity
+                        )
+                        dataBinding.executePendingBindings()
+                    }
+                }
+            )
+        }
+    }
+
+    private fun observeOneToManyRelations(
+        relations: Map<String, LiveData<RoomRelation>>,
+        key: String?
+    ) {
+        for ((relationName, liveDataRelatedEntities) in relations) {
+            liveDataRelatedEntities.observe(
+                requireNotNull(dataBinding.lifecycleOwner),
+                { roomRelation ->
+                    roomRelation?.toMany?.let { toMany ->
+                        Timber.d("[$tableName] One to Many Relation named \"$relationName\" retrieved for entity key $key")
+                        BaseApp.genericTableFragmentHelper.setRelationBinding(
+                            dataBinding,
+                            relationName,
+                            toMany
                         )
                         dataBinding.executePendingBindings()
                     }

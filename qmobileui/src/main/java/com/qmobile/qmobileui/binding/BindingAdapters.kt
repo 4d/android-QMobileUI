@@ -16,7 +16,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
+import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.glide.CustomRequestListener
 
 /**
