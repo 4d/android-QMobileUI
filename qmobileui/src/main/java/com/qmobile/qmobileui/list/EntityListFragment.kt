@@ -261,20 +261,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
         builder.show()
     }
 
-
-    private fun sendCurrentRecordAction(actionName: String, selectedActionId: String?) {
+    private fun sendAction(onResult: () -> Unit) {
         delegate.checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
-                entityListViewModel.sendAction(
-                    actionName,
-                    ActionContent(
-                        getActionContext(selectedActionId)
-                    )
-                ) {
-                    if (it != null) {
-                        it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
-                    }
-                }
+                onResult()
             }
 
             override fun onServiceInaccessible() {
@@ -293,6 +283,20 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 )
             }
         })
+    }
+    private fun sendCurrentRecordAction(actionName: String, selectedActionId: String?) {
+        sendAction {
+            entityListViewModel.sendAction(
+                actionName,
+                ActionContent(
+                    getActionContext(selectedActionId)
+                )
+            ) {
+                if (it != null) {
+                    it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
+                }
+            }
+        }
     }
 
 
@@ -397,34 +401,16 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasTableActions()) {
             delegate.setupActionsMenu(menu, tableActions) { name ->
-                delegate.checkNetwork(object : NetworkChecker {
-                    override fun onServerAccessible() {
-                        entityListViewModel.sendAction(
-                            name,
-                            ActionContent(getActionContext(null))
-                        ) {
-                            if (it != null) {
-                                it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
-                            }
+                sendAction {
+                    entityListViewModel.sendAction(
+                        name,
+                        ActionContent(getActionContext(null))
+                    ) {
+                        if (it != null) {
+                            it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
                         }
                     }
-
-                    override fun onServiceInaccessible() {
-                        entityListViewModel.toastMessage.showMessage(
-                            context?.getString(R.string.action_send_server_not_accessible),
-                            tableName,
-                            MessageType.ERROR
-                        )
-                    }
-
-                    override fun onNoInternet() {
-                        entityListViewModel.toastMessage.showMessage(
-                            context?.getString(R.string.action_send_no_internet),
-                            tableName,
-                            MessageType.ERROR
-                        )
-                    }
-                })
+                }
             }
         }
     }
