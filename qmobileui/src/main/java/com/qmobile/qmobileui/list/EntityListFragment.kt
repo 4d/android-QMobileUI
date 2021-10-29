@@ -8,7 +8,6 @@ package com.qmobile.qmobileui.list
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.view.KeyEvent
@@ -18,7 +17,9 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.ListAdapter
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
@@ -50,6 +51,7 @@ import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 import com.qmobile.qmobileui.utils.hideKeyboard
 import java.util.concurrent.atomic.AtomicBoolean
+import android.widget.TextView
 
 
 @Suppress("TooManyFunctions")
@@ -250,15 +252,45 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun showDialog(selectedActionId: String?, actions: MutableList<Action>) {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-        val items = actions.map { it.getPreferredShortName() }
-        builder.setItems(
-            items.toTypedArray(),
-            DialogInterface.OnClickListener { dialog, position ->
-                sendCurrentRecordAction(actions.get(position).name, selectedActionId)
+        val items = actions.map {
+            DialogItem(
+                it.getPreferredShortName(),
+                it.getIconDrawablePath()
+            )
+        }.toTypedArray()
+
+        val adapter: ListAdapter = object : ArrayAdapter<DialogItem?>(
+            requireContext(),
+            android.R.layout.select_dialog_item,
+            android.R.id.text1,
+            items
+        ) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val itemView = super.getView(position, convertView, parent)
+                val textView = itemView.findViewById<View>(android.R.id.text1) as TextView
+                val item = items[position]
+                //Put the image on the TextView
+                val resId = if (item.icon != null) {
+                    resources.getIdentifier(
+                        item.icon,
+                        "drawable",
+                        context.packageName
+                    )
+                } else {
+                    0
+                }
+                textView.text = item.text
+                textView.setCompoundDrawablesWithIntrinsicBounds(resId, 0, 0, 0)
+                //Add margin between image and text (support various screen densities)
+                val paddingDrawable = (5 * resources.displayMetrics.density + 0.5f).toInt()
+                textView.compoundDrawablePadding = paddingDrawable
+                return itemView
             }
-        )
-        builder.show()
+        }
+        AlertDialog.Builder(requireContext())
+            .setAdapter(adapter) { dialog, position ->
+                sendCurrentRecordAction(actions.get(position).name, selectedActionId)
+            }.show()
     }
 
     private fun sendAction(onResult: () -> Unit) {
