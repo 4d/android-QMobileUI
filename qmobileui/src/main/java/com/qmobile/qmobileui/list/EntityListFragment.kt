@@ -293,10 +293,21 @@ open class EntityListFragment : Fragment(), BaseFragment {
             }.show()
     }
 
-    private fun sendAction(onResult: () -> Unit) {
+    private fun sendAction(actionName: String, selectedActionId: String?) {
         delegate.checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
-                onResult()
+                entityListViewModel.sendAction(
+                    actionName,
+                    ActionContent(
+                        getActionContext(selectedActionId)
+                    )
+                ) { actionResponse ->
+                    actionResponse?.let {
+                        actionResponse.dataSynchro?.let { dataSynchro ->
+                            syncDataIfNeeded(dataSynchro)
+                        }
+                    }
+                }
             }
 
             override fun onServiceInaccessible() {
@@ -316,21 +327,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
             }
         })
     }
-    private fun sendCurrentRecordAction(actionName: String, selectedActionId: String?) {
-        sendAction {
-            entityListViewModel.sendAction(
-                actionName,
-                ActionContent(
-                    getActionContext(selectedActionId)
-                )
-            ) {
-                if (it != null) {
-                    it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
-                }
-            }
-        }
-    }
 
+    private fun sendCurrentRecordAction(actionName: String, selectedActionId: String?) {
+        sendAction(actionName, selectedActionId)
+    }
 
     private fun getActionContext(selectedActionId: String?): Map<String, Any> {
         val actionContext = mutableMapOf<String, Any>(
@@ -433,16 +433,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasTableActions()) {
             delegate.setupActionsMenu(menu, tableActions) { name ->
-                sendAction {
-                    entityListViewModel.sendAction(
-                        name,
-                        ActionContent(getActionContext(null))
-                    ) {
-                        if (it != null) {
-                            it.dataSynchro?.let { it1 -> syncDataIfNeeded(it1) }
-                        }
-                    }
-                }
+                sendAction(name, null)
             }
         }
     }
