@@ -13,7 +13,6 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.BR
-import timber.log.Timber
 
 class BaseViewHolder(
     private val dataBinding: ViewDataBinding,
@@ -72,15 +71,15 @@ class BaseViewHolder(
     }
 
     private fun setupObserver(entity: EntityModel) {
-        BaseApp.genericTableHelper.getManyToOneRelationsInfo(tableName, entity).let { relationMap ->
+        BaseApp.genericRelationHelper.getManyToOneRelationsInfo(tableName, entity).let { relationMap ->
             if (relationMap.isNotEmpty()) {
-                observeManyToOneRelations(relationMap, entity.__KEY)
+                observeManyToOneRelations(relationMap)
             }
         }
 
-        BaseApp.genericTableHelper.getOneToManyRelationsInfo(tableName, entity).let { relationMap ->
+        BaseApp.genericRelationHelper.getOneToManyRelationsInfo(tableName, entity).let { relationMap ->
             if (relationMap.isNotEmpty()) {
-                observeOneToManyRelations(relationMap, entity.__KEY)
+                observeOneToManyRelations(relationMap)
             }
         }
     }
@@ -89,16 +88,12 @@ class BaseViewHolder(
         BaseApp.genericTableFragmentHelper.unsetRelationBinding(dataBinding)
     }
 
-    private fun observeManyToOneRelations(
-        relations: Map<String, LiveData<RoomRelation>>,
-        key: String?
-    ) {
+    private fun observeManyToOneRelations(relations: Map<String, LiveData<RoomRelation>>) {
         for ((relationName, liveDataRelatedEntity) in relations) {
             liveDataRelatedEntity.observe(
                 requireNotNull(dataBinding.lifecycleOwner),
                 { roomRelation ->
                     roomRelation?.toOne?.let { relatedEntity ->
-                        Timber.d("[$tableName] Many to One Relation named \"$relationName\" retrieved for entity key $key")
                         BaseApp.genericTableFragmentHelper.setRelationBinding(
                             dataBinding,
                             relationName,
@@ -111,16 +106,12 @@ class BaseViewHolder(
         }
     }
 
-    private fun observeOneToManyRelations(
-        relations: Map<String, LiveData<RoomRelation>>,
-        key: String?
-    ) {
+    private fun observeOneToManyRelations(relations: Map<String, LiveData<RoomRelation>>) {
         for ((relationName, liveDataRelatedEntities) in relations) {
             liveDataRelatedEntities.observe(
                 requireNotNull(dataBinding.lifecycleOwner),
                 { roomRelation ->
                     roomRelation?.toMany?.let { toMany ->
-                        Timber.d("[$tableName] One to Many Relation named \"$relationName\" retrieved for entity key $key")
                         BaseApp.genericTableFragmentHelper.setRelationBinding(
                             dataBinding,
                             relationName,

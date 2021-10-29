@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.BR
-import com.qmobile.qmobileui.list.viewholder.BaseViewHolder
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
 class ViewPagerAdapter(fragment: Fragment, private val tableName: String) :

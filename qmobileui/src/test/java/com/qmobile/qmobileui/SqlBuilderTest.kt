@@ -10,7 +10,7 @@ import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.FieldMapping
-import com.qmobile.qmobiledatasync.utils.GenericTableHelper
+import com.qmobile.qmobiledatasync.utils.GenericRelationHelper
 import com.qmobile.qmobiledatasync.utils.RuntimeDataHolder
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import io.mockk.every
@@ -67,11 +67,11 @@ class SqlBuilderTest {
         }
 
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
-        val mockGenericTableHelper = Mockito.mock(GenericTableHelper::class.java)
+        val mockGenericRelationHelper = Mockito.mock(GenericRelationHelper::class.java)
         mockRuntimeDataHolder.customFormatters = mapOf()
         BaseApp.runtimeDataHolder = mockRuntimeDataHolder
-        BaseApp.genericTableHelper = mockGenericTableHelper
-        Mockito.`when`(mockGenericTableHelper.getRelatedTableName("Table_3", "relation4"))
+        BaseApp.genericRelationHelper = mockGenericRelationHelper
+        Mockito.`when`(mockGenericRelationHelper.getRelatedTableName("Table_3", "relation4"))
             .thenReturn("RELATED_TABLE")
 
         val formQueryBuilder = FormQueryBuilder(tableName = "Table_3", searchField = searchFields)
@@ -129,13 +129,13 @@ class SqlBuilderTest {
         }
 
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
-        val mockGenericTableHelper = Mockito.mock(GenericTableHelper::class.java)
+        val mockGenericRelationHelper = Mockito.mock(GenericRelationHelper::class.java)
         val customFormattersJsonObj = JSONObject(customFormattersJson)
         mockRuntimeDataHolder.customFormatters =
             FieldMapping.buildCustomFormatterBinding(customFormattersJsonObj)
         BaseApp.runtimeDataHolder = mockRuntimeDataHolder
-        BaseApp.genericTableHelper = mockGenericTableHelper
-        Mockito.`when`(mockGenericTableHelper.getRelatedTableName("Table_4", "relationField"))
+        BaseApp.genericRelationHelper = mockGenericRelationHelper
+        Mockito.`when`(mockGenericRelationHelper.getRelatedTableName("Table_4", "relationField"))
             .thenReturn("RELATED_TABLE")
 
         val formQueryBuilder = FormQueryBuilder(tableName = "Table_4", searchField = searchFields)

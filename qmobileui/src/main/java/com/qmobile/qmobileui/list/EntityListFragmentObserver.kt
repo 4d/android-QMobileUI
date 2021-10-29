@@ -50,7 +50,8 @@ class EntityListFragmentObserver(
             { scheduleRefresh ->
                 if (scheduleRefresh == ScheduleRefreshEnum.PERFORM) {
                     entityListViewModel.setScheduleRefreshState(ScheduleRefreshEnum.NO)
-                    val firstVisible = (fragment.binding.fragmentListRecyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    val layoutManager = fragment.binding.fragmentListRecyclerView.layoutManager as LinearLayoutManager
+                    val firstVisible = layoutManager.findFirstVisibleItemPosition()
                     val childCount = fragment.binding.fragmentListRecyclerView.childCount
                     fragment.adapter.notifyItemRangeChanged(firstVisible, childCount)
                 }

@@ -11,7 +11,7 @@ import androidx.databinding.BindingAdapter
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.FieldMapping
 import com.qmobile.qmobileui.formatters.FormatterUtils
-import com.qmobile.qmobileui.formatters.setFormatterDrawable
+import com.qmobile.qmobileui.formatters.ImageNamed
 import com.qmobile.qmobileui.utils.fieldAdjustment
 import com.qmobile.qmobileui.utils.tableNameAdjustment
 
@@ -92,7 +92,8 @@ private fun applyImageNamedFormat(
                 formatName,
                 drawableName
             )?.let { drawableResPair ->
-                view.setFormatterDrawable(
+                ImageNamed.setFormatterDrawable(
+                    view,
                     drawableResPair,
                     imageWidth,
                     imageHeight,

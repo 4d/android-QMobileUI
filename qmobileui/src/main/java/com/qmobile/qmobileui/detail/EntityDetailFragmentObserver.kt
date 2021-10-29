@@ -58,29 +58,26 @@ class EntityDetailFragmentObserver(
     }
 
     private fun setupObserver(entity: EntityModel) {
-        BaseApp.genericTableHelper.getManyToOneRelationsInfo(fragment.tableName, entity).let { relationMap ->
-            if (relationMap.isNotEmpty()) {
-                observeRelations(relationMap, entity.__KEY)
+        BaseApp.genericRelationHelper.getManyToOneRelationsInfo(fragment.tableName, entity)
+            .let { relationMap ->
+                if (relationMap.isNotEmpty()) {
+                    observeRelations(relationMap)
+                }
             }
-        }
-
-        BaseApp.genericTableHelper.getOneToManyRelationsInfo(fragment.tableName, entity).let { relationMap ->
-            if (relationMap.isNotEmpty()) {
-                observeRelations(relationMap, entity.__KEY)
+        BaseApp.genericRelationHelper.getOneToManyRelationsInfo(fragment.tableName, entity)
+            .let { relationMap ->
+                if (relationMap.isNotEmpty()) {
+                    observeRelations(relationMap)
+                }
             }
-        }
     }
 
-    private fun observeRelations(
-        relations: Map<String, LiveData<RoomRelation>>,
-        key: String?
-    ) {
+    private fun observeRelations(relations: Map<String, LiveData<RoomRelation>>) {
         for ((relationName, liveDataRelatedEntity) in relations) {
             liveDataRelatedEntity.observe(
                 requireNotNull(fragment.viewLifecycleOwner),
                 { roomRelation ->
                     roomRelation?.let {
-                        Timber.d("[${fragment.tableName}] Relation named \"$relationName\" retrieved for entity key $key")
                         entityViewModel.setRelationToLayout(relationName, roomRelation)
                     }
                 }

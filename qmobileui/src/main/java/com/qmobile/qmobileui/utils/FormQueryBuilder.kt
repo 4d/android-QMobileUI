@@ -10,6 +10,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
+import org.json.JSONArray
 import org.json.JSONObject
 
 class FormQueryBuilder(
@@ -23,7 +24,9 @@ class FormQueryBuilder(
         if (pattern.isNullOrEmpty())
             return SimpleSQLiteQuery(baseQuery)
         val stringBuffer = StringBuffer("$baseQuery AS T1 WHERE ")
-        appendPredicate(stringBuffer, pattern)
+        searchField.getSafeArray(tableName)?.let { columnsToFilter ->
+            appendPredicate(stringBuffer, columnsToFilter, pattern)
+        }
         return SimpleSQLiteQuery(stringBuffer.toString().removeSuffix("OR "))
     }
 
@@ -36,44 +39,45 @@ class FormQueryBuilder(
         if (pattern.isNullOrEmpty())
             return SimpleSQLiteQuery(baseRelationQuery)
         val stringBuffer = StringBuffer("$baseRelationQuery AND ( ")
-        appendPredicate(stringBuffer, pattern)
+        searchField.getSafeArray(tableName)?.let { columnsToFilter ->
+            appendPredicate(stringBuffer, columnsToFilter, pattern)
+        }
         return SimpleSQLiteQuery(stringBuffer.toString().removeSuffix("OR ").plus(")"))
     }
 
     private fun appendPredicate(
         stringBuffer: StringBuffer,
+        columnsToFilter: JSONArray,
         pattern: String
     ) {
-        searchField.getSafeArray(tableName)?.let { columnsToFilter ->
-            (0 until columnsToFilter.length()).forEach eachColumn@{
-                val field = columnsToFilter.getSafeString(it)
-                if (field !is String) return@eachColumn
+        (0 until columnsToFilter.length()).forEach eachColumn@{
+            val field = columnsToFilter.getSafeString(it)
+            if (field !is String) return@eachColumn
 
-                if (field.contains(".")) { // manager.FirstName
+            if (field.contains(".")) { // manager.FirstName
 
-                    val relation = field.split(".")[0] // manager
-                    val relatedField = field.split(".")[1] // FirstName
-                    val relatedTableName =
-                        BaseApp.genericTableHelper.getRelatedTableName(tableName, relation)
+                val relation = field.split(".")[0] // manager
+                val relatedField = field.split(".")[1] // FirstName
+                val relatedTableName =
+                    BaseApp.genericRelationHelper.getRelatedTableName(tableName, relation)
 
-                    stringBuffer.append(
-                        "EXISTS ( SELECT * FROM $relatedTableName as T2 WHERE " +
-                            "T1.__${relation}Key = T2.__KEY AND "
-                    )
-                    val appendFromFormat = appendFromFormat(field, pattern, "T2.$relatedField")
-                    if (appendFromFormat.isEmpty()) {
-                        stringBuffer.append("T2.$relatedField LIKE '%$pattern%' OR ")
-                    } else {
-                        stringBuffer.append("( T2.$relatedField LIKE '%$pattern%' OR $appendFromFormat")
-                        stringBuffer.removeSuffix("OR ")
-                        stringBuffer.append(") ")
-                    }
-                    stringBuffer.removeSuffix("OR ")
-                    stringBuffer.append(") OR ")
+                stringBuffer.append(
+                    "EXISTS ( SELECT * FROM $relatedTableName as T2 WHERE " +
+                        "T1.__${relation}Key = T2.__KEY AND "
+                )
+                val appendFromFormat = appendFromFormat(field, pattern, "T2.$relatedField")
+                if (appendFromFormat.isEmpty()) {
+                    stringBuffer.append("T2.$relatedField LIKE '%$pattern%' OR ")
                 } else {
-                    stringBuffer.append("`$field` LIKE \'%$pattern%\' OR ")
-                    stringBuffer.append(appendFromFormat(field, pattern))
+                    stringBuffer.append("( T2.$relatedField LIKE '%$pattern%' OR $appendFromFormat")
+                    stringBuffer.removeSuffix("OR ")
+                    stringBuffer.append(") ")
                 }
+                stringBuffer.removeSuffix("OR ")
+                stringBuffer.append(") OR ")
+            } else {
+                stringBuffer.append("`$field` LIKE \'%$pattern%\' OR ")
+                stringBuffer.append(appendFromFormat(field, pattern))
             }
         }
     }

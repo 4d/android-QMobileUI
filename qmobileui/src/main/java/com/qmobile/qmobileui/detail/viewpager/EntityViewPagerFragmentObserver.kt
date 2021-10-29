@@ -6,13 +6,9 @@
 
 package com.qmobile.qmobileui.detail.viewpager
 
-import androidx.lifecycle.lifecycleScope
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.launch
 
 class EntityViewPagerFragmentObserver(
     private val fragment: EntityViewPagerFragment,
@@ -40,10 +36,10 @@ class EntityViewPagerFragmentObserver(
 //        fragment.lifecycleScope.launch {
 //            entityListViewModel.entityListFlow.distinctUntilChanged().collectLatest {
 //                fragment.adapter.submitData(it)
-////                val index = it.indexOfFirst { entityModel -> entityModel.__KEY == key }
-////                if (index > -1) {
-////                    fragment.viewPager?.setCurrentItem(index, false)
-////                }
+// //                val index = it.indexOfFirst { entityModel -> entityModel.__KEY == key }
+// //                if (index > -1) {
+// //                    fragment.viewPager?.setCurrentItem(index, false)
+// //                }
 //            }
 //        }
     }
