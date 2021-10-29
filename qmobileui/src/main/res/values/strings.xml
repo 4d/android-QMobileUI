@@ -67,4 +67,9 @@
     <string name="previous">Previous</string>
     <string name="next">Next</string>
     <string name="search_title">search_title</string>
+
+    <!-- Actions -->
+    <string name="action_send_no_internet">Please check your network settings and data cover...</string>
+    <string name="action_send_server_not_accessible">The server is not available</string>
+
 </resources>
