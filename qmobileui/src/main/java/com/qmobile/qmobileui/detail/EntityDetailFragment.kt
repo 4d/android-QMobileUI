@@ -19,12 +19,17 @@ import androidx.fragment.app.Fragment
 import com.google.gson.Gson
 import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.utils.getSafeArray
+import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
 import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
+import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
 open class EntityDetailFragment : Fragment(), BaseFragment {
@@ -94,23 +99,46 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
             val actions = mutableListOf<Action>()
             val length = actionsJsonObject.getJSONArray(tableName).length()
             for (i in 0 until length) {
-                val jsonObject = actionsJsonObject.getJSONArray(tableName).getJSONObject(i)
-                actions.add(Gson().fromJson(jsonObject.toString(), Action::class.java))
+                val jsonObject = actionsJsonObject.getSafeArray(tableName)?.getSafeObject(i)
+                val action = Gson().fromJson(jsonObject.toString(), Action::class.java)
+                action?.let {
+                    actions.add(it)
+                }
             }
 
             delegate.setupActionsMenu(menu, actions) { name ->
-                entityViewModel.sendAction(
-                    name,
-                    ActionContent(
-                        getActionContext()
-                    )
-                ) {
-                    it?.dataSynchro?.let { shouldSyncData ->
-                        if (shouldSyncData) {
-                            forceSyncData()
+                delegate.checkNetwork(object : NetworkChecker {
+                    override fun onServerAccessible() {
+                        entityViewModel.sendAction(
+                            name,
+                            ActionContent(
+                                getActionContext()
+                            )
+                        ) {
+                            it?.dataSynchro?.let { shouldSyncData ->
+                                if (shouldSyncData) {
+                                    forceSyncData()
+                                }
+                            }
                         }
                     }
-                }
+
+                    override fun onServiceInaccessible() {
+                        entityViewModel.toastMessage.showMessage(
+                            context?.getString(R.string.action_send_server_not_accessible),
+                            tableName,
+                            MessageType.ERROR
+                        )
+                    }
+
+                    override fun onNoInternet() {
+                        entityViewModel.toastMessage.showMessage(
+                            context?.getString(R.string.action_send_no_internet),
+                            tableName,
+                            MessageType.ERROR
+                        )
+                    }
+                })
             }
         }
     }
