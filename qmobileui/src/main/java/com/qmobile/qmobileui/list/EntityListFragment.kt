@@ -53,7 +53,6 @@ import com.qmobile.qmobileui.utils.hideKeyboard
 import java.util.concurrent.atomic.AtomicBoolean
 import android.widget.TextView
 
-const val dialogIconPadding = 5
 
 @Suppress("TooManyFunctions")
 open class EntityListFragment : Fragment(), BaseFragment {
@@ -61,6 +60,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
     companion object {
         private const val CURRENT_QUERY_KEY = "currentQuery_key"
         private const val MAX_ACTIONS_VISIBLE = 3
+        private const val DIALOG_ICON_PADDING = 5
+
     }
 
     private lateinit var syncDataRequested: AtomicBoolean
@@ -283,7 +284,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 textView.text = item.text
                 textView.setCompoundDrawablesWithIntrinsicBounds(resId, 0, 0, 0)
                 //Add margin between image and text (support various screen densities)
-                val paddingDrawable = (dialogIconPadding * resources.displayMetrics.density).toInt()
+                val paddingDrawable = (DIALOG_ICON_PADDING * resources.displayMetrics.density).toInt()
                 textView.compoundDrawablePadding = paddingDrawable
                 return itemView
             }
