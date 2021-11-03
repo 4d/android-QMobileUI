@@ -30,8 +30,6 @@ import com.google.gson.Gson
 import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
-import com.qmobile.qmobileapi.utils.getSafeObject
-import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -45,8 +43,8 @@ import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.list.viewholder.SwipeHelper
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
-import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.ui.NetworkChecker
+import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
 
 @Suppress("TooManyFunctions")
@@ -140,7 +138,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
         hideKeyboard(activity)
         setSearchQuery()
         BaseApp.genericTableFragmentHelper.getCustomEntityListFragment(tableName, binding)
-            .onActivityCreated(savedInstanceState)
+            ?.onActivityCreated(savedInstanceState)
     }
 
     override fun onDestroyView() {
