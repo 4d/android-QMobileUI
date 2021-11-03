@@ -15,19 +15,18 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.LoginRequiredCallback
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
-import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
@@ -38,10 +37,9 @@ import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
+import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
-import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -209,12 +207,15 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      * Performs data sync, requested by a table request
      */
     override fun requestDataSync(currentTableName: String) {
+
         val entityListViewModel =
             entityListViewModelList.find { it.getAssociatedTableName() == currentTableName }
 
         checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
                 if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
+                    // This is to schedule a notifyDataSetChanged() because of cached images (only on first dataSync)
+                    entityListViewModel?.setScheduleRefreshState(ScheduleRefreshEnum.SCHEDULE)
                     requestAuthentication()
                 } else {
                     // AUTHENTICATED
@@ -222,7 +223,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
                         DataSyncStateEnum.UNSYNCHRONIZED -> prepareDataSync(null)
                         DataSyncStateEnum.SYNCHRONIZED -> {
                             job?.cancel()
-                            job = lifecycleScope?.launch {
+                            job = lifecycleScope.launch {
                                 entityListViewModel.getEntities { shouldSyncData ->
                                     if (shouldSyncData) {
                                         Timber.d("GlobalStamp changed, synchronization is required")
@@ -248,7 +249,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         })
     }
 
-
     override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
         when (authenticationState) {
             AuthenticationStateEnum.AUTHENTICATED -> {
@@ -270,8 +270,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         }
     }
 
-
-   override  fun setupActionsMenu(menu: Menu, actions: List<Action>, onMenuItemClick: (String) -> Unit) {
+    override fun setupActionsMenu(menu: Menu, actions: List<Action>, onMenuItemClick: (String) -> Unit) {
         actions.forEach { action ->
             val menuBuilder = menu as MenuBuilder
             menuBuilder.setOptionalIconsVisible(true)

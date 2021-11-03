@@ -32,19 +32,50 @@ class EntityDetailFragmentObserver(
             { entity ->
                 Timber.d("Observed entity from Room, json = ${BaseApp.mapper.parseToString(entity)}")
                 entity?.let {
-//                    val relationKeysMap = entityViewModel.getRelationsInfo(entity)
-                    val relationKeysMap =
-                        BaseApp.genericTableHelper.getRelationsInfo(fragment.tableName, entity)
-                    observeRelations(relationKeysMap)
+
+                    setupObserver(entity)
+
+                    entity.__KEY?.let { parentItemId ->
+                        BaseApp.runtimeDataHolder.oneToManyRelations[fragment.tableName]?.forEach { relationName ->
+                            BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForDetail(
+                                viewDataBinding = fragment.binding,
+                                relationName = relationName,
+                                parentItemId = parentItemId,
+                                entity = entity
+                            )
+                        }
+                        BaseApp.runtimeDataHolder.manyToOneRelations[fragment.tableName]?.forEach { relationName ->
+                            BaseApp.genericNavigationResolver.setupManyToOneRelationButtonOnClickActionForDetail(
+                                viewDataBinding = fragment.binding,
+                                relationName = relationName,
+                                entity = entity
+                            )
+                        }
+                    }
                 }
             }
         )
     }
 
-    private fun observeRelations(relationKeysMap: Map<String, LiveData<RoomRelation>>) {
-        for ((relationName, liveDataListRoomRelation) in relationKeysMap) {
-            liveDataListRoomRelation.observe(
-                fragment.viewLifecycleOwner,
+    private fun setupObserver(entity: EntityModel) {
+        BaseApp.genericRelationHelper.getManyToOneRelationsInfo(fragment.tableName, entity)
+            .let { relationMap ->
+                if (relationMap.isNotEmpty()) {
+                    observeRelations(relationMap)
+                }
+            }
+        BaseApp.genericRelationHelper.getOneToManyRelationsInfo(fragment.tableName, entity)
+            .let { relationMap ->
+                if (relationMap.isNotEmpty()) {
+                    observeRelations(relationMap)
+                }
+            }
+    }
+
+    private fun observeRelations(relations: Map<String, LiveData<RoomRelation>>) {
+        for ((relationName, liveDataRelatedEntity) in relations) {
+            liveDataRelatedEntity.observe(
+                requireNotNull(fragment.viewLifecycleOwner),
                 { roomRelation ->
                     roomRelation?.let {
                         entityViewModel.setRelationToLayout(relationName, roomRelation)

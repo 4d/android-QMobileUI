@@ -11,7 +11,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
-import androidx.paging.PagedListAdapter
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileui.list.viewholder.BaseViewHolder
@@ -20,10 +20,10 @@ import com.qmobile.qmobileui.utils.ResourcesHelper
 class EntityListAdapter internal constructor(
     private val tableName: String,
     private val lifecycleOwner: LifecycleOwner,
-    private val relationCallback: RelationCallback,
-    private val actionDialogClickedCallBack: (String?) -> Unit,
+    private val onItemClick: (ViewDataBinding, String) -> Unit,
+    private val actionDialogClickedCallBack: (String?) -> Unit
 ) :
-    PagedListAdapter<EntityModel, BaseViewHolder>(DIFF_CALLBACK) {
+    PagingDataAdapter<EntityModel, BaseViewHolder>(DIFF_CALLBACK) {
 
     companion object {
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<EntityModel>() {
@@ -45,39 +45,16 @@ class EntityListAdapter internal constructor(
         val dataBinding: ViewDataBinding =
             DataBindingUtil.inflate(
                 inflater,
-                ResourcesHelper.layoutFromTable(
-                    parent.context,
-                    "${ResourcesHelper.RV_ITEM_PREFIX}_$tableName".lowercase()
-                ),
+                ResourcesHelper.itemLayoutFromTable(parent.context, tableName),
                 parent,
                 false
             )
         dataBinding.lifecycleOwner = this@EntityListAdapter.lifecycleOwner
-        return BaseViewHolder(dataBinding, tableName)
+        return BaseViewHolder(dataBinding, tableName, onItemClick, actionDialogClickedCallBack)
     }
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
-        getItem(position).let { entity ->
-            holder.bind(entity, position)
-            holder.itemView.setOnLongClickListener {
-                actionDialogClickedCallBack(getItem(position)?.__KEY)
-                true
-            }
-            // unbind because of issue : item at position 11 receives binding of at item 0,
-            // item at position 12 receives binding of item at position 1, etc.
-            holder.unbindRelations()
-            entity?.let {
-                setupObserver(entity, holder, position)
-            }
-        }
-    }
-
-    private fun setupObserver(entity: EntityModel, holder: BaseViewHolder, position: Int) {
-        relationCallback.getRelations(entity).let { relationMap ->
-            if (relationMap.isNotEmpty()) {
-                holder.observeRelations(relationMap, position)
-            }
-        }
+        holder.bind(getItem(position))
     }
 
     fun getSelectedItem(position: Int): EntityModel? {

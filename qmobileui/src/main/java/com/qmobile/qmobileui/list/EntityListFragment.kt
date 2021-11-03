@@ -19,20 +19,19 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ListAdapter
+import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
-import com.qmobile.qmobileapi.utils.getSafeObject
-import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -47,12 +46,8 @@ import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.list.viewholder.SwipeHelper
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.ui.NetworkChecker
-import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
+import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
-import java.util.concurrent.atomic.AtomicBoolean
-import android.widget.TextView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-
 
 @Suppress("TooManyFunctions")
 open class EntityListFragment : Fragment(), BaseFragment {
@@ -61,24 +56,25 @@ open class EntityListFragment : Fragment(), BaseFragment {
         private const val CURRENT_QUERY_KEY = "currentQuery_key"
         private const val MAX_ACTIONS_VISIBLE = 3
         private const val DIALOG_ICON_PADDING = 5
-
     }
 
-    private lateinit var syncDataRequested: AtomicBoolean
     private lateinit var searchView: SearchView
     private lateinit var searchPlate: EditText
     private var searchableFields = BaseApp.runtimeDataHolder.searchField
     private var tableActionsJsonObject = BaseApp.runtimeDataHolder.listActions
-    private var currentRecorodActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
-    private lateinit var sqlQueryBuilderUtil: SqlQueryBuilderUtil
+    private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
+    private lateinit var formQueryBuilder: FormQueryBuilder
     private var currentQuery = ""
-    internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
+    private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
+    lateinit var adapter: EntityListAdapter
     private var _binding: FragmentListBinding? = null
 
     // This property is only valid between onCreateView and onDestroyView.
     val binding get() = _binding!!
-    var tableName: String = ""
-    lateinit var adapter: EntityListAdapter
+    private var tableName: String = ""
+    private var inverseName: String = ""
+    private var parentItemId: String = "0"
+    private var fromRelation = false
 
     private val tableActions = mutableListOf<Action>()
     private var currentRecordActions = mutableListOf<Action>()
@@ -91,11 +87,19 @@ open class EntityListFragment : Fragment(), BaseFragment {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Base entity list fragment
         arguments?.getString("tableName")?.let { tableName = it }
-        sqlQueryBuilderUtil = SqlQueryBuilderUtil(tableName)
+        // Entity list fragment from relation
+        arguments?.getString("destinationTable")?.let {
+            if (it.isNotEmpty()) {
+                tableName = it
+                fromRelation = true
+            }
+        }
+        arguments?.getString("currentItemId")?.let { parentItemId = it }
+        arguments?.getString("inverseName")?.let { inverseName = it }
 
-        // Every time we land on the fragment, we want refreshed data // not anymore
-        syncDataRequested = AtomicBoolean(true) // unused
+        formQueryBuilder = FormQueryBuilder(tableName)
 
         if (hasSearch() || hasTableActions())
             this.setHasOptionsMenu(true)
@@ -110,40 +114,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initActions()
-        initCellSwipe()
-    }
-
-    private fun initActions() {
-        tableActions.clear()
-        currentRecordActions.clear()
-        if (hasTableActions()) {
-            val length = tableActionsJsonObject.getJSONArray(tableName).length()
-            for (i in 0 until length) {
-                val jsonObject = tableActionsJsonObject.getSafeArray(tableName)?.getJSONObject(i)
-                tableActions.add(Gson().fromJson(jsonObject.toString(), Action::class.java))
-            }
-        }
-        if (hasCurrentRecordActions()) {
-            val length = currentRecorodActionsJsonObject.getSafeArray(tableName)?.length()
-            if (length != null) {
-                for (i in 0 until (length)) {
-                    val jsonObject =
-                        currentRecorodActionsJsonObject.getSafeArray(tableName)?.getSafeObject(i)
-                    jsonObject?.let {
-                        var action = Gson().fromJson(it.toString(), Action::class.java)
-                        currentRecordActions.add(action)
-                    }
-                }
-            }
-        }
-    }
-
     private fun hasSearch() = searchableFields.has(tableName)
     private fun hasTableActions() = tableActionsJsonObject.has(tableName)
-    private fun hasCurrentRecordActions() = currentRecorodActionsJsonObject.has(tableName)
+    private fun hasCurrentRecordActions() = currentRecordActionsJsonObject.has(tableName)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -160,11 +133,15 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        initActions()
+        initCellSwipe()
         initRecyclerView()
         initOnRefreshListener()
         EntityListFragmentObserver(this, entityListViewModel).initObservers()
         hideKeyboard(activity)
         setSearchQuery()
+        BaseApp.genericTableFragmentHelper.getCustomEntityListFragment(tableName, binding)
+            .onActivityCreated(savedInstanceState)
     }
 
     override fun onDestroyView() {
@@ -179,15 +156,22 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private fun initRecyclerView() {
         adapter = EntityListAdapter(
             tableName, viewLifecycleOwner,
-            object : RelationCallback {
-                override fun getRelations(entity: EntityModel): Map<String, LiveData<RoomRelation>> =
-                    BaseApp.genericTableHelper.getRelationsInfo(tableName, entity)
-//                    entityListViewModel.getRelationsInfo(entity)
+            { dataBinding, key ->
+                BaseApp.genericNavigationResolver.navigateFromListToViewPager(
+                    viewDataBinding = dataBinding,
+                    key = key,
+                    query = currentQuery,
+                    destinationTable = if (fromRelation) tableName else "",
+                    currentItemId = parentItemId,
+                    inverseName = inverseName
+                )
             },
             { selectedActionId ->
-                if ((hasCurrentRecordActions()) && (BaseApp.genericTableFragmentHelper.layoutType(
-                        tableName
-                    ) == "GRID")
+                if ((hasCurrentRecordActions()) && (
+                    BaseApp.genericTableFragmentHelper.layoutType(
+                            tableName
+                        ) == "GRID"
+                    )
                 ) {
                     showDialog(selectedActionId, currentRecordActions)
                 }
@@ -232,13 +216,36 @@ open class EntityListFragment : Fragment(), BaseFragment {
         }
     }
 
+    private fun initActions() {
+        tableActions.clear()
+        currentRecordActions.clear()
+        if (hasTableActions()) {
+            val length = tableActionsJsonObject.getJSONArray(tableName).length()
+            for (i in 0 until length) {
+                val jsonObject = tableActionsJsonObject.getSafeArray(tableName)?.getJSONObject(i)
+                tableActions.add(Gson().fromJson(jsonObject.toString(), Action::class.java))
+            }
+        }
+        if (hasCurrentRecordActions()) {
+            val length = currentRecordActionsJsonObject.getJSONArray(tableName).length()
+            for (i in 0 until (length)) {
+                val jsonObject =
+                    currentRecordActionsJsonObject.getJSONArray(tableName).getJSONObject(i)
+                var action = Gson().fromJson(jsonObject.toString(), Action::class.java)
+                currentRecordActions.add(action)
+            }
+        }
+    }
+
     /**
      * Initialize Swipe to delete
      */
     private fun initCellSwipe() {
-        if (hasCurrentRecordActions() && (BaseApp.genericTableFragmentHelper.layoutType(
-                tableName
-            ) == "LINEAR")
+        if (hasCurrentRecordActions() && (
+            BaseApp.genericTableFragmentHelper.layoutType(
+                    tableName
+                ) == "LINEAR"
+            )
         ) {
             val itemTouchHelper =
                 ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
@@ -277,7 +284,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 val itemView = super.getView(position, convertView, parent)
                 val textView = itemView.findViewById<View>(android.R.id.text1) as TextView
                 val item = items[position]
-                //Put the image on the TextView
+                // Put the image on the TextView
                 val resId = if (item.icon != null) {
                     resources.getIdentifier(
                         item.icon,
@@ -289,7 +296,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 }
                 textView.text = item.text
                 textView.setCompoundDrawablesWithIntrinsicBounds(resId, 0, 0, 0)
-                //Add margin between image and text (support various screen densities)
+                // Add margin between image and text (support various screen densities)
                 val paddingDrawable = (DIALOG_ICON_PADDING * resources.displayMetrics.density).toInt()
                 textView.compoundDrawablePadding = paddingDrawable
                 return itemView
@@ -345,8 +352,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     private fun getActionContext(selectedActionId: String?): Map<String, Any> {
         val actionContext = mutableMapOf<String, Any>(
-            "dataClass" to
-                    BaseApp.genericTableHelper.originalTableName(tableName)
+            "dataClass" to BaseApp.genericTableHelper.originalTableName(tableName)
         )
         if (selectedActionId != null) {
             actionContext["entity"] = mapOf("primaryKey" to selectedActionId)
@@ -423,22 +429,11 @@ open class EntityListFragment : Fragment(), BaseFragment {
         super.onPrepareOptionsMenu(menu)
     }
 
+    // Searchable implementation
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         setupActionsMenuIfNeeded(menu)
         setupSearchMenuIfNeeded(menu, inflater)
         super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString(CURRENT_QUERY_KEY, currentQuery)
-    }
-
-    private fun setSearchQuery() {
-        if (currentQuery.isEmpty())
-            entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.getAll())
-        else
-            entityListViewModel.setSearchQuery(sqlQueryBuilderUtil.sortQuery(currentQuery))
     }
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
@@ -482,5 +477,23 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 true
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(CURRENT_QUERY_KEY, currentQuery)
+    }
+
+    private fun setSearchQuery() {
+        val formQuery = if (fromRelation) {
+            formQueryBuilder.getRelationQuery(
+                parentItemId = parentItemId,
+                inverseName = inverseName,
+                pattern = currentQuery
+            )
+        } else {
+            formQueryBuilder.getQuery(currentQuery)
+        }
+        entityListViewModel.setSearchQuery(formQuery)
     }
 }

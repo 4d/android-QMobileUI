@@ -18,7 +18,7 @@ private const val ARGB_MAX_VALUE = 255
 object ColorHelper {
     fun getActionButtonColor(horizontalIndex: Int, context: Context): Int {
         val themeColor = context.getColorFromAttr(R.attr.colorPrimary)
-        val themeColorLuminance = ColorUtils.calculateLuminance(themeColor);
+        val themeColorLuminance = ColorUtils.calculateLuminance(themeColor)
 
         if (horizontalIndex == 0)
             return themeColor
@@ -55,5 +55,4 @@ object ColorHelper {
         }
         return colorTmp
     }
-
 }

@@ -14,25 +14,28 @@ import java.io.File
 object ResourcesHelper {
 
     private const val LAYOUT_RES_TYPE = "layout"
-    const val RV_ITEM_PREFIX = "recyclerview_item"
-    const val FRAGMENT_DETAIL_PREFIX = "fragment_detail"
+    private const val RV_ITEM_PREFIX = "recyclerview_item"
+    private const val FRAGMENT_DETAIL_PREFIX = "fragment_detail"
 
-    // Generic Layout Inflater
-    fun layoutFromTable(
-        context: Context,
-        tableName: String,
+    /**
+     * Provides the appropriate RecyclerView item layout
+     */
+    fun itemLayoutFromTable(context: Context, tableName: String): Int =
+        context.resources.getIdentifier(
+            "${RV_ITEM_PREFIX}_$tableName".lowercase(),
+            LAYOUT_RES_TYPE,
+            context.packageName
+        )
 
-    ): Int {
-        return when ((tableName.split("_"))[0]) {
-            "recyclerview" -> {
-                context.resources.getIdentifier(tableName, LAYOUT_RES_TYPE, context.packageName)
-            }
-            "fragment" -> {
-                context.resources.getIdentifier(tableName, LAYOUT_RES_TYPE, context.packageName)
-            }
-            else -> 0
-        }
-    }
+    /**
+     * Provides the appropriate detail layout
+     */
+    fun detailLayoutFromTable(context: Context, tableName: String): Int =
+        context.resources.getIdentifier(
+            "${FRAGMENT_DETAIL_PREFIX}_$tableName".lowercase(),
+            LAYOUT_RES_TYPE,
+            context.packageName
+        )
 
     /**
      * Gets a resource string to display to the user. As it's called in a ViewModel, there is no

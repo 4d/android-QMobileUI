@@ -266,27 +266,31 @@ object LogController {
                 "${file.name.substringBeforeLast(".")}_${LOG_FILE_TIME_FORMAT.format(Date())}.gz"
             )
 
-            FileInputStream(file).use { fis ->
-                FileOutputStream(compressed).use { fos ->
-                    GZIPOutputStream(fos).use { gzos ->
-
-                        val buffer = ByteArray(GZIP_BUFFER_SIZE)
-                        var length = fis.read(buffer)
-
-                        while (length > 0) {
-                            gzos.write(buffer, 0, length)
-                            length = fis.read(buffer)
-                        }
-
-                        // Finish file compressing and close all streams.
-                        gzos.finish()
-                    }
-                }
-            }
+            write(file, compressed)
         } catch (e: IOException) {
             Timber.e("An error occurred while compressing log file into gzip format")
             return false
         }
         return true
+    }
+
+    private fun write(file: File, compressed: File) {
+        FileInputStream(file).use { fis ->
+            FileOutputStream(compressed).use { fos ->
+                GZIPOutputStream(fos).use { gzos ->
+
+                    val buffer = ByteArray(GZIP_BUFFER_SIZE)
+                    var length = fis.read(buffer)
+
+                    while (length > 0) {
+                        gzos.write(buffer, 0, length)
+                        length = fis.read(buffer)
+                    }
+
+                    // Finish file compressing and close all streams.
+                    gzos.finish()
+                }
+            }
+        }
     }
 }
