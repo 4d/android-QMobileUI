@@ -289,7 +289,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 return itemView
             }
         }
-        AlertDialog.Builder(requireContext())
+        MaterialAlertDialogBuilder(
+            requireContext(),
+            R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
+        )
             .setAdapter(adapter) { dialog, position ->
                 sendCurrentRecordAction(actions.get(position).name, selectedActionId)
             }.show()
