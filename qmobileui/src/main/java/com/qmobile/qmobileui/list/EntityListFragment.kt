@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.list
 
-import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
@@ -186,7 +185,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
 //                    entityListViewModel.getRelationsInfo(entity)
             },
             { selectedActionId ->
-                if (hasCurrentRecordActions()) {
+                if ((hasCurrentRecordActions()) && (BaseApp.genericTableFragmentHelper.layoutType(
+                        tableName
+                    ) == "GRID")
+                ) {
                     showDialog(selectedActionId, currentRecordActions)
                 }
             }
@@ -234,7 +236,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
      * Initialize Swipe to delete
      */
     private fun initCellSwipe() {
-        if (hasCurrentRecordActions()) {
+        if (hasCurrentRecordActions() &&  (BaseApp.genericTableFragmentHelper.layoutType(
+                tableName
+            ) == "LINEAR")
+        ) {
             val itemTouchHelper =
                 ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
                     override fun instantiateUnderlayButton(position: Int): List<ItemActionButton> {
