@@ -236,7 +236,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
      * Initialize Swipe to delete
      */
     private fun initCellSwipe() {
-        if (hasCurrentRecordActions() &&  (BaseApp.genericTableFragmentHelper.layoutType(
+        if (hasCurrentRecordActions() && (BaseApp.genericTableFragmentHelper.layoutType(
                 tableName
             ) == "LINEAR")
         ) {
