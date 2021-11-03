@@ -6,9 +6,7 @@
 
 package com.qmobile.qmobileui.list
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.view.KeyEvent
@@ -18,7 +16,9 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.ListAdapter
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
@@ -50,6 +50,8 @@ import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.SqlQueryBuilderUtil
 import com.qmobile.qmobileui.utils.hideKeyboard
 import java.util.concurrent.atomic.AtomicBoolean
+import android.widget.TextView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
 @Suppress("TooManyFunctions")
@@ -58,6 +60,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
     companion object {
         private const val CURRENT_QUERY_KEY = "currentQuery_key"
         private const val MAX_ACTIONS_VISIBLE = 3
+        private const val DIALOG_ICON_PADDING = 5
+
     }
 
     private lateinit var syncDataRequested: AtomicBoolean
@@ -181,7 +185,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
 //                    entityListViewModel.getRelationsInfo(entity)
             },
             { selectedActionId ->
-                if (hasCurrentRecordActions()) {
+                if ((hasCurrentRecordActions()) && (BaseApp.genericTableFragmentHelper.layoutType(
+                        tableName
+                    ) == "GRID")
+                ) {
                     showDialog(selectedActionId, currentRecordActions)
                 }
             }
@@ -229,7 +236,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
      * Initialize Swipe to delete
      */
     private fun initCellSwipe() {
-        if (hasCurrentRecordActions()) {
+        if (hasCurrentRecordActions() && (BaseApp.genericTableFragmentHelper.layoutType(
+                tableName
+            ) == "LINEAR")
+        ) {
             val itemTouchHelper =
                 ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
                     override fun instantiateUnderlayButton(position: Int): List<ItemActionButton> {
@@ -250,15 +260,48 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun showDialog(selectedActionId: String?, actions: MutableList<Action>) {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-        val items = actions.map { it.getPreferredShortName() }
-        builder.setItems(
-            items.toTypedArray(),
-            DialogInterface.OnClickListener { dialog, position ->
-                sendCurrentRecordAction(actions[position].name, selectedActionId)
+        val items = actions.map {
+            DialogItem(
+                it.getPreferredShortName(),
+                it.getIconDrawablePath()
+            )
+        }.toTypedArray()
+
+        val adapter: ListAdapter = object : ArrayAdapter<DialogItem?>(
+            requireContext(),
+            android.R.layout.select_dialog_item,
+            android.R.id.text1,
+            items
+        ) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val itemView = super.getView(position, convertView, parent)
+                val textView = itemView.findViewById<View>(android.R.id.text1) as TextView
+                val item = items[position]
+                //Put the image on the TextView
+                val resId = if (item.icon != null) {
+                    resources.getIdentifier(
+                        item.icon,
+                        "drawable",
+                        context.packageName
+                    )
+                } else {
+                    0
+                }
+                textView.text = item.text
+                textView.setCompoundDrawablesWithIntrinsicBounds(resId, 0, 0, 0)
+                //Add margin between image and text (support various screen densities)
+                val paddingDrawable = (DIALOG_ICON_PADDING * resources.displayMetrics.density).toInt()
+                textView.compoundDrawablePadding = paddingDrawable
+                return itemView
             }
+        }
+        MaterialAlertDialogBuilder(
+            requireContext(),
+            R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
-        builder.show()
+            .setAdapter(adapter) { dialog, position ->
+                sendCurrentRecordAction(actions.get(position).name, selectedActionId)
+            }.show()
     }
 
     private fun sendAction(actionName: String, selectedActionId: String?) {
