@@ -10,6 +10,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatastore.data.RoomData
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.BR
@@ -73,7 +74,7 @@ class BaseViewHolder(
     private fun setupObserver(entity: EntityModel) {
         BaseApp.genericRelationHelper.getManyToOneRelationsInfo(tableName, entity).let { relationMap ->
             if (relationMap.isNotEmpty()) {
-                observeManyToOneRelations(relationMap)
+                observeManyToOneRelations(relationMap, entity)
             }
         }
 
@@ -88,7 +89,7 @@ class BaseViewHolder(
         BaseApp.genericTableFragmentHelper.unsetRelationBinding(dataBinding)
     }
 
-    private fun observeManyToOneRelations(relations: Map<String, LiveData<RoomRelation>>) {
+    private fun observeManyToOneRelations(relations: Map<String, LiveData<RoomRelation>>, entity: EntityModel) {
         for ((relationName, liveDataRelatedEntity) in relations) {
             liveDataRelatedEntity.observe(
                 requireNotNull(dataBinding.lifecycleOwner),
@@ -100,9 +101,26 @@ class BaseViewHolder(
                             relatedEntity
                         )
                         dataBinding.executePendingBindings()
+                        refreshOneToManyNavForNavbarTitle(entity, relatedEntity)
                     }
                 }
             )
+        }
+    }
+
+    private fun refreshOneToManyNavForNavbarTitle(entity: EntityModel, anyRelatedEntity: RoomData) {
+        entity.__KEY?.let { parentItemId ->
+            BaseApp.runtimeDataHolder.oneToManyRelations[tableName]?.forEach { relationName ->
+                if (relationName.contains(".")) {
+                    BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForCell(
+                        viewDataBinding = dataBinding,
+                        relationName = relationName,
+                        parentItemId = parentItemId,
+                        entity = entity,
+                        anyRelatedEntity = anyRelatedEntity
+                    )
+                }
+            }
         }
     }
 
