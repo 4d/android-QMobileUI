@@ -288,7 +288,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     0
                 }
                 textView.text = item.text
-                textView.setCompoundDrawablesWithIntrinsicBounds(resId, 0, 0, 0)
+                textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, resId, 0)
                 //Add margin between image and text (support various screen densities)
                 val paddingDrawable = (DIALOG_ICON_PADDING * resources.displayMetrics.density).toInt()
                 textView.compoundDrawablePadding = paddingDrawable
