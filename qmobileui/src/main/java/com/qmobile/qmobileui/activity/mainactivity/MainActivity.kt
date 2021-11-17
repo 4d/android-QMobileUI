@@ -12,8 +12,6 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
-import android.view.MenuItem
-import androidx.appcompat.view.menu.MenuBuilder
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.LifecycleObserver
@@ -27,7 +25,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.LoginRequiredCallback
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
-import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
@@ -39,9 +36,7 @@ import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
-import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -54,6 +49,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
+
+import android.view.WindowManager
+import android.widget.PopupWindow
+import android.widget.ImageButton
+import android.widget.ListView
 
 @Suppress("TooManyFunctions")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
@@ -270,35 +270,26 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         }
     }
 
-
-   override  fun setupActionsMenu(menu: Menu, actions: List<Action>, onMenuItemClick: (String) -> Unit) {
-        actions.forEach { action ->
-            val menuBuilder = menu as MenuBuilder
-            menuBuilder.setOptionalIconsVisible(true)
-            var menuItem = menu.add(
-                action.getPreferredName()
-            )
-            val iconDrawablePath = action.getIconDrawablePath()
-            val resId = if (iconDrawablePath != null) {
-                resources.getIdentifier(
-                    iconDrawablePath,
-                    "drawable",
-                    packageName
-                )
-            } else {
-                0
-            }
-            menuItem.run {
-                if (menu is MenuBuilder) {
-                    menu.setOptionalIconsVisible(true)
-                }
-                setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-                setIcon(resId)
-                setOnMenuItemClickListener {
-
-                    onMenuItemClick(action.name)
-                    true
-                }
+    override fun setupActionsMenu(
+        menu: Menu,
+        actions: List<Action>,
+        onMenuItemClick: (String) -> Unit
+    ) {
+        menuInflater.inflate(R.menu.menu_action, menu);
+        val menuItem =
+            menu.findItem(R.id.more).actionView.findViewById(R.id.drop_down_image) as ImageButton
+        menuItem.setOnClickListener { v ->
+            val popupWindow = PopupWindow(this)
+            val adapter = ActionDropDownAdapter(v.context, actions as ArrayList<Action>, onMenuItemClick)
+            val listViewSort = ListView(this)
+            listViewSort.dividerHeight = 1
+            listViewSort.adapter = adapter
+            popupWindow.apply {
+                isFocusable = true
+                width = 600
+                height = WindowManager.LayoutParams.WRAP_CONTENT
+                contentView = listViewSort
+                showAsDropDown(v, 0, 0)
             }
         }
     }
