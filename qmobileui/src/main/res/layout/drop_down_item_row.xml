@@ -26,8 +26,8 @@
 
     <ImageView
         android:id="@+id/dropDownItemImage"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_gravity="center_vertical"
         tools:background="@color/cardview_dark_background"
         android:src="@drawable/ic_error_outline"

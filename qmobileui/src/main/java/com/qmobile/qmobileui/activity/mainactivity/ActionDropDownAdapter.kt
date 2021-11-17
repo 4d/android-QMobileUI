@@ -53,7 +53,7 @@ import com.qmobile.qmobileui.R
             0
         }
         itemImage.setImageResource(resId)
-        itemText.setOnClickListener { v ->
+        convertView.setOnClickListener { v ->
             onMenuItemClick(item.name)
         }
         return convertView
