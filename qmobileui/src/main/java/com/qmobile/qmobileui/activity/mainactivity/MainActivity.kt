@@ -280,7 +280,10 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             menu.findItem(R.id.more).actionView.findViewById(R.id.drop_down_image) as ImageButton
         menuItem.setOnClickListener { v ->
             val popupWindow = PopupWindow(this)
-            val adapter = ActionDropDownAdapter(v.context, actions as ArrayList<Action>, onMenuItemClick)
+            val adapter = ActionDropDownAdapter(v.context, actions as ArrayList<Action>) {
+                popupWindow.dismiss()
+                onMenuItemClick(it)
+            }
             val listViewSort = ListView(this)
             listViewSort.dividerHeight = 1
             listViewSort.adapter = adapter
