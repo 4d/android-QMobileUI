@@ -55,6 +55,8 @@ import android.widget.PopupWindow
 import android.widget.ImageButton
 import android.widget.ListView
 
+const val DROP_DOWN_WIDTH = 600
+
 @Suppress("TooManyFunctions")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
 
@@ -289,7 +291,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             listViewSort.adapter = adapter
             popupWindow.apply {
                 isFocusable = true
-                width = 600
+                width = DROP_DOWN_WIDTH
                 height = WindowManager.LayoutParams.WRAP_CONTENT
                 contentView = listViewSort
                 showAsDropDown(v, 0, 0)
