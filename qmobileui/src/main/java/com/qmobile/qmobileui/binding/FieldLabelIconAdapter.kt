@@ -14,8 +14,6 @@ import androidx.databinding.BindingAdapter
 
 @BindingAdapter("icon")
 fun bindFieldLabelIcon(view: TextView, icon: String?) {
-    if (view.text.isNullOrEmpty())
-        return
     if (icon.isNullOrEmpty())
         return
 
