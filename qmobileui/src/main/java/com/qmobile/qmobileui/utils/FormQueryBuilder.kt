@@ -13,26 +13,42 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import org.json.JSONArray
 import org.json.JSONObject
 
-class SqlQueryBuilderUtil(
+class FormQueryBuilder(
     var tableName: String,
     private val searchField: JSONObject = BaseApp.runtimeDataHolder.searchField // has columns to Filter
 ) {
 
-    fun getAll() = SimpleSQLiteQuery("SELECT * FROM $tableName")
+    private val baseQuery = "SELECT * FROM $tableName"
 
-    fun sortQuery(dataToSort: String): SimpleSQLiteQuery {
-        val stringBuffer = StringBuffer("SELECT * FROM $tableName AS T1 WHERE ")
-        searchField.getSafeArray(tableName)?.let {
-            conditionAdder(it, stringBuffer, dataToSort)
+    fun getQuery(pattern: String? = null): SimpleSQLiteQuery {
+        if (pattern.isNullOrEmpty())
+            return SimpleSQLiteQuery(baseQuery)
+        val stringBuffer = StringBuffer("$baseQuery AS T1 WHERE ")
+        searchField.getSafeArray(tableName)?.let { columnsToFilter ->
+            appendPredicate(stringBuffer, columnsToFilter, pattern)
         }
-
         return SimpleSQLiteQuery(stringBuffer.toString().removeSuffix("OR "))
     }
 
-    private fun conditionAdder(
-        columnsToFilter: JSONArray,
+    fun getRelationQuery(
+        parentItemId: String,
+        inverseName: String,
+        pattern: String? = null
+    ): SimpleSQLiteQuery {
+        val baseRelationQuery = "$baseQuery AS T1 WHERE T1.__${inverseName}Key = $parentItemId"
+        if (pattern.isNullOrEmpty())
+            return SimpleSQLiteQuery(baseRelationQuery)
+        val stringBuffer = StringBuffer("$baseRelationQuery AND ( ")
+        searchField.getSafeArray(tableName)?.let { columnsToFilter ->
+            appendPredicate(stringBuffer, columnsToFilter, pattern)
+        }
+        return SimpleSQLiteQuery(stringBuffer.toString().removeSuffix("OR ").plus(")"))
+    }
+
+    private fun appendPredicate(
         stringBuffer: StringBuffer,
-        dataToSort: String
+        columnsToFilter: JSONArray,
+        pattern: String
     ) {
         (0 until columnsToFilter.length()).forEach eachColumn@{
             val field = columnsToFilter.getSafeString(it)
@@ -43,32 +59,32 @@ class SqlQueryBuilderUtil(
                 val relation = field.split(".")[0] // manager
                 val relatedField = field.split(".")[1] // FirstName
                 val relatedTableName =
-                    BaseApp.genericTableHelper.getRelatedTableName(tableName, relation)
+                    BaseApp.genericRelationHelper.getRelatedTableName(tableName, relation)
 
                 stringBuffer.append(
                     "EXISTS ( SELECT * FROM $relatedTableName as T2 WHERE " +
                         "T1.__${relation}Key = T2.__KEY AND "
                 )
-                val appendFromFormat = appendFromFormat(field, dataToSort, "T2.$relatedField")
+                val appendFromFormat = appendFromFormat(field, pattern, "T2.$relatedField")
                 if (appendFromFormat.isEmpty()) {
-                    stringBuffer.append("T2.$relatedField LIKE '%$dataToSort%' OR ")
+                    stringBuffer.append("T2.$relatedField LIKE '%$pattern%' OR ")
                 } else {
-                    stringBuffer.append("( T2.$relatedField LIKE '%$dataToSort%' OR $appendFromFormat")
+                    stringBuffer.append("( T2.$relatedField LIKE '%$pattern%' OR $appendFromFormat")
                     stringBuffer.removeSuffix("OR ")
                     stringBuffer.append(") ")
                 }
                 stringBuffer.removeSuffix("OR ")
                 stringBuffer.append(") OR ")
             } else {
-                stringBuffer.append("`$field` LIKE \'%$dataToSort%\' OR ")
-                stringBuffer.append(appendFromFormat(field, dataToSort))
+                stringBuffer.append("`$field` LIKE \'%$pattern%\' OR ")
+                stringBuffer.append(appendFromFormat(field, pattern))
             }
         }
     }
 
     private fun appendFromFormat(
         field: String,
-        dataToSort: String,
+        pattern: String,
         relatedField: String? = null
     ): String {
         var appendice = ""
@@ -83,14 +99,14 @@ class SqlQueryBuilderUtil(
                             appendFromFormatMap(
                                 choiceList,
                                 fieldForQuery,
-                                dataToSort
+                                pattern
                             )
                         }
                         is List<*> -> {
                             appendFromFormatList(
                                 choiceList,
                                 fieldForQuery,
-                                dataToSort
+                                pattern
                             )
                         }
                         else -> ""
@@ -103,11 +119,11 @@ class SqlQueryBuilderUtil(
     private fun appendFromFormatMap(
         choiceList: Map<*, *>,
         field: String,
-        dataToSort: String
+        pattern: String
     ): String {
         var appendice = ""
         for ((key, value) in choiceList) {
-            if ((value as? String?)?.containsIgnoreCase(dataToSort) == true) {
+            if ((value as? String?)?.containsIgnoreCase(pattern) == true) {
                 appendice += "$field == \'$key\' OR "
             }
         }
@@ -117,11 +133,11 @@ class SqlQueryBuilderUtil(
     private fun appendFromFormatList(
         choiceList: List<*>,
         field: String,
-        dataToSort: String
+        pattern: String
     ): String {
         var appendice = ""
         for ((i, value) in choiceList.withIndex()) {
-            if ((value as? String?)?.containsIgnoreCase(dataToSort) == true) {
+            if ((value as? String?)?.containsIgnoreCase(pattern) == true) {
                 appendice += "$field == \'$i\' OR "
             }
         }

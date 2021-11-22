@@ -13,12 +13,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -35,6 +35,7 @@ import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
+import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobileui.Action
@@ -211,12 +212,15 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      * Performs data sync, requested by a table request
      */
     override fun requestDataSync(currentTableName: String) {
+
         val entityListViewModel =
             entityListViewModelList.find { it.getAssociatedTableName() == currentTableName }
 
         checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
                 if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
+                    // This is to schedule a notifyDataSetChanged() because of cached images (only on first dataSync)
+                    entityListViewModel?.setScheduleRefreshState(ScheduleRefreshEnum.SCHEDULE)
                     requestAuthentication()
                 } else {
                     // AUTHENTICATED
@@ -224,7 +228,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
                         DataSyncStateEnum.UNSYNCHRONIZED -> prepareDataSync(null)
                         DataSyncStateEnum.SYNCHRONIZED -> {
                             job?.cancel()
-                            job = lifecycleScope?.launch {
+                            job = lifecycleScope.launch {
                                 entityListViewModel.getEntities { shouldSyncData ->
                                     if (shouldSyncData) {
                                         Timber.d("GlobalStamp changed, synchronization is required")
@@ -249,7 +253,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             }
         })
     }
-
 
     override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
         when (authenticationState) {

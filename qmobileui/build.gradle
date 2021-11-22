@@ -27,6 +27,7 @@ dependencies {
     implementation Libs.androidx_preference_ktx
     implementation Libs.kotlin_stdlib
     implementation Libs.swiperefreshlayout
+    implementation Libs.viewpager2
 
     // Lifecycle
     implementation Libs.lifecycle_process
@@ -43,7 +44,7 @@ dependencies {
     implementation Libs.jackson_yaml
 
     // Paging
-    implementation Libs.androidx_paging
+    implementation Libs.androidx_paging3
 
     // Glide
     implementation Libs.glide

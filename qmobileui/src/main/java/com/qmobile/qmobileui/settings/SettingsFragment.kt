@@ -34,7 +34,6 @@ import com.qmobile.qmobileui.ui.RemoteUrlChange
 import com.qmobile.qmobileui.utils.ToastHelper
 import timber.log.Timber
 
-// @Suppress("TooManyFunctions")
 class SettingsFragment :
     PreferenceFragmentCompat(),
     BaseFragment,
