@@ -12,8 +12,6 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
-import android.view.MenuItem
-import androidx.appcompat.view.menu.MenuBuilder
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LiveData
@@ -52,6 +50,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
+
+import android.view.WindowManager
+import android.widget.PopupWindow
+import android.widget.ImageButton
+import android.widget.ListView
+
+const val DROP_DOWN_WIDTH = 600
 
 @Suppress("TooManyFunctions")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
@@ -270,34 +275,29 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         }
     }
 
-    override fun setupActionsMenu(menu: Menu, actions: List<Action>, onMenuItemClick: (String) -> Unit) {
-        actions.forEach { action ->
-            val menuBuilder = menu as MenuBuilder
-            menuBuilder.setOptionalIconsVisible(true)
-            var menuItem = menu.add(
-                action.getPreferredName()
-            )
-            val iconDrawablePath = action.getIconDrawablePath()
-            val resId = if (iconDrawablePath != null) {
-                resources.getIdentifier(
-                    iconDrawablePath,
-                    "drawable",
-                    packageName
-                )
-            } else {
-                0
+    override fun setupActionsMenu(
+        menu: Menu,
+        actions: List<Action>,
+        onMenuItemClick: (String) -> Unit
+    ) {
+        menuInflater.inflate(R.menu.menu_action, menu);
+        val menuItem =
+            menu.findItem(R.id.more).actionView.findViewById(R.id.drop_down_image) as ImageButton
+        menuItem.setOnClickListener { v ->
+            val popupWindow = PopupWindow(this)
+            val adapter = ActionDropDownAdapter(v.context, actions as ArrayList<Action>) {
+                popupWindow.dismiss()
+                onMenuItemClick(it)
             }
-            menuItem.run {
-                if (menu is MenuBuilder) {
-                    menu.setOptionalIconsVisible(true)
-                }
-                setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-                setIcon(resId)
-                setOnMenuItemClickListener {
-
-                    onMenuItemClick(action.name)
-                    true
-                }
+            val listViewSort = ListView(this)
+            listViewSort.dividerHeight = 1
+            listViewSort.adapter = adapter
+            popupWindow.apply {
+                isFocusable = true
+                width = DROP_DOWN_WIDTH
+                height = WindowManager.LayoutParams.WRAP_CONTENT
+                contentView = listViewSort
+                showAsDropDown(v, 0, 0)
             }
         }
     }

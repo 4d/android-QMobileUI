@@ -16,10 +16,6 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.ListAdapter
-import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -48,6 +44,14 @@ import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
+import java.util.concurrent.atomic.AtomicBoolean
+import android.graphics.drawable.ColorDrawable
+import android.widget.ListView
+import android.widget.EditText
+import android.widget.ArrayAdapter
+import android.widget.ListAdapter
+import android.widget.TextView
+
 
 @Suppress("TooManyFunctions")
 open class EntityListFragment : Fragment(), BaseFragment {
@@ -284,7 +288,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 val itemView = super.getView(position, convertView, parent)
                 val textView = itemView.findViewById<View>(android.R.id.text1) as TextView
                 val item = items[position]
-                // Put the image on the TextView
                 val resId = if (item.icon != null) {
                     resources.getIdentifier(
                         item.icon,
@@ -295,20 +298,30 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     0
                 }
                 textView.text = item.text
-                textView.setCompoundDrawablesWithIntrinsicBounds(resId, 0, 0, 0)
-                // Add margin between image and text (support various screen densities)
-                val paddingDrawable = (DIALOG_ICON_PADDING * resources.displayMetrics.density).toInt()
+                textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, resId, 0)
+                //Add margin between image and text (support various screen densities)
+                val paddingDrawable =
+                    (DIALOG_ICON_PADDING * resources.displayMetrics.density).toInt()
                 textView.compoundDrawablePadding = paddingDrawable
                 return itemView
             }
         }
-        MaterialAlertDialogBuilder(
+        val dialogBuilder = MaterialAlertDialogBuilder(
             requireContext(),
             R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
-            .setAdapter(adapter) { dialog, position ->
-                sendCurrentRecordAction(actions.get(position).name, selectedActionId)
-            }.show()
+        dialogBuilder.setAdapter(adapter) { dialog, position ->
+            sendCurrentRecordAction(actions.get(position).name, selectedActionId)
+        }
+
+        val dialog = dialogBuilder.create()
+        dialog.listView.apply {
+            divider = ColorDrawable(Color.LTGRAY)
+            dividerHeight = 2
+            setFooterDividersEnabled(false);
+            addFooterView(View(context));
+        }
+        dialog.show()
     }
 
     private fun sendAction(actionName: String, selectedActionId: String?) {
