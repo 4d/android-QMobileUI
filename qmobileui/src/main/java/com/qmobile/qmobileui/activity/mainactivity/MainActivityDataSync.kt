@@ -72,8 +72,8 @@ class MainActivityDataSync(private val activity: MainActivity) {
         alreadyRefreshedTable?.let {
             entityViewModelIsToSyncList.find {
                 it.vm.getAssociatedTableName() == alreadyRefreshedTable
-            }?.isToSync = true
+            }?.isToSync = false
         }
-        dataSync.setObserver(entityViewModelIsToSyncList, null)
+        dataSync.setObserver(entityViewModelIsToSyncList, alreadyRefreshedTable)
     }
 }
