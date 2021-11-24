@@ -8,11 +8,11 @@ package com.qmobile.qmobileui.formatters
 
 import android.annotation.SuppressLint
 import com.qmobile.qmobileapi.utils.safeParse
+import java.lang.StringBuilder
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 
 @SuppressLint("SimpleDateFormat")
 object TimeFormat {
@@ -51,10 +51,25 @@ object TimeFormat {
             }
             "duration" -> {
                 formatNameMap[format]?.let {
-                    val timeFromString = getTimeFromString(baseText).time
-                    val df = DateFormat.getTimeInstance(it, Locale.getDefault())
-                    val time = df.format(timeFromString)
-                    time.removeSuffix("AM").removeSuffix("PM")
+                    val currentMillisTime = baseText.toLong()
+                    val totalSeconds: Long = currentMillisTime / 1000
+                    val seconds = totalSeconds.toInt() % 60
+                    val minutes = (totalSeconds / 60).toInt() % 60
+                    val hours = totalSeconds.toInt() / 3600
+                    val days = totalSeconds.toInt() / (24 * 3600)
+
+                    val builder = StringBuilder()
+                    val minutesSeconds = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+                    /*if (hours > 0) {
+                        val hoursStr = String.format("%02d", hours)
+                        builder.append(hoursStr).append(":")
+                    }*/
+                    if (days > 0) {
+                        val daysStr = String.format("%02d", days)
+                        builder.append(daysStr).append(":")
+                    }
+                    builder.append(minutesSeconds)
+                    builder.toString()
                 } ?: ""
             }
             else -> {
