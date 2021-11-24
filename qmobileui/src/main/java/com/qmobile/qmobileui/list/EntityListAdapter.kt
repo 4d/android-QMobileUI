@@ -36,7 +36,7 @@ class EntityListAdapter internal constructor(
             override fun areContentsTheSame(
                 oldItem: EntityModel,
                 newItem: EntityModel
-            ) = oldItem.__KEY == newItem.__KEY
+            ) = oldItem.__STAMP == newItem.__STAMP
         }
     }
 
