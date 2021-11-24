@@ -88,7 +88,7 @@ class FormatterTest {
         timeFormatTest(inputTime, "113480208800", "timeInteger")
         timeFormatTest(inputTime, "11:58:13 AM", "mediumTime")
         timeFormatTest(inputTime, "11:58 AM", "shortTime")
-        timeFormatTest(inputTime, "11:58:13", "duration")
+        timeFormatTest(inputTime, "262:58:13", "duration")
     }
 
     @Test

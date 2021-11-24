@@ -8,17 +8,18 @@ package com.qmobile.qmobileui.formatters
 
 import android.annotation.SuppressLint
 import com.qmobile.qmobileapi.utils.safeParse
+import java.lang.StringBuilder
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 
 @SuppressLint("SimpleDateFormat")
 object TimeFormat {
 
     private const val INT_3600 = 3600
     private const val INT_60: Int = 60
+    private const val INT_1000: Int = 1000
 
     private val formatNameMap: Map<String, Int> = mapOf(
         "shortTime" to DateFormat.SHORT,
@@ -31,11 +32,9 @@ object TimeFormat {
             "timeInteger" -> {
 
                 val newTimeArray = getTimeFromLong(baseText.toLong()).split(":")
-                (
-                    newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
-                        newTimeArray[1]
-                    ) * INT_3600
-                    )
+                (newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
+                    newTimeArray[1]
+                ) * INT_3600)
             }
             "shortTime" -> {
                 formatNameMap[format]?.let {
@@ -51,10 +50,21 @@ object TimeFormat {
             }
             "duration" -> {
                 formatNameMap[format]?.let {
-                    val timeFromString = getTimeFromString(baseText).time
-                    val df = DateFormat.getTimeInstance(it, Locale.getDefault())
-                    val time = df.format(timeFromString)
-                    time.removeSuffix("AM").removeSuffix("PM")
+                    val currentMillisTime = baseText.toLong()
+                    val totalSeconds: Long = currentMillisTime / INT_1000
+                    val seconds = totalSeconds.toInt() % INT_60
+                    val minutes = (totalSeconds / INT_60).toInt() % INT_60
+                    val hours = totalSeconds.toInt() / INT_3600
+//                    val days = totalSeconds.toInt() / (INT_24 * INT_3600)
+
+                    val builder = StringBuilder()
+                    val minutesSeconds = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+                    /*if (days > 0) {
+                        val daysStr = String.format("%02d", days)
+                        builder.append(daysStr).append(":")
+                    }*/
+                    builder.append(minutesSeconds)
+                    builder.toString()
                 } ?: ""
             }
             else -> {
