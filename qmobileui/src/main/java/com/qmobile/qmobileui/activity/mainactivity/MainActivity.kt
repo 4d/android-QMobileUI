@@ -38,7 +38,7 @@ import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
-import com.qmobile.qmobileui.Action
+import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
@@ -72,6 +72,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
+    lateinit var selectedAction: Action
 
     // ViewModels
     private lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
@@ -278,8 +279,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     override fun setupActionsMenu(
         menu: Menu,
         actions: List<Action>,
-        onMenuItemClick: (String) -> Unit
-    ) {
+        onMenuItemClick: (Action) -> Unit
+    ){
         menuInflater.inflate(R.menu.menu_action, menu);
         val menuItem =
             menu.findItem(R.id.more).actionView.findViewById(R.id.drop_down_image) as ImageButton
@@ -300,6 +301,14 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
                 showAsDropDown(v, 0, 0)
             }
         }
+    }
+
+    override fun setSelectAction(action: Action) {
+        selectedAction = action
+    }
+
+    override fun getSelectAction(): Action {
+        return selectedAction
     }
 
     override fun handleNetworkState(networkState: NetworkStateEnum) {

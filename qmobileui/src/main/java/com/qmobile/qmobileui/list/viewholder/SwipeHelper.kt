@@ -12,7 +12,7 @@ import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.qmobile.qmobileui.Action
+import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.utils.ColorHelper

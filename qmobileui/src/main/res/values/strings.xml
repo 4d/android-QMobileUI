@@ -71,5 +71,6 @@
     <!-- Actions -->
     <string name="action_send_no_internet">Please check your network settings and data cover...</string>
     <string name="action_send_server_not_accessible">The server is not available</string>
+    <string name="validate_action">Validate</string>
 
 </resources>

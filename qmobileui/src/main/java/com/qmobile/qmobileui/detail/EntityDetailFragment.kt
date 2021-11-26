@@ -16,7 +16,6 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import com.google.gson.Gson
 import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
@@ -25,10 +24,12 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
-import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.Action
+import com.qmobile.qmobileui.action.ActionFactory
+import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
@@ -96,19 +97,21 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
             val length = actionsJsonObject.getJSONArray(tableName).length()
             for (i in 0 until length) {
                 val jsonObject = actionsJsonObject.getSafeArray(tableName)?.getSafeObject(i)
-                val action = Gson().fromJson(jsonObject.toString(), Action::class.java)
-                action?.let {
-                    actions.add(it)
+                jsonObject?.let {
+                    actions.add(ActionFactory.createActionFromJsonObject(it))
                 }
             }
 
-            delegate.setupActionsMenu(menu, actions) { name ->
+            delegate.setupActionsMenu(menu, actions) { action ->
                 delegate.checkNetwork(object : NetworkChecker {
                     override fun onServerAccessible() {
                         entityViewModel.sendAction(
-                            name,
+                            action.name,
                             ActionContent(
-                                getActionContext()
+                                ActionHelper.getActionContext(
+                                    tableName,
+                                    entityViewModel.entity.value?.__KEY
+                                )
                             )
                         ) {
                             it?.dataSynchro?.let { shouldSyncData ->
@@ -137,17 +140,6 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                 })
             }
         }
-    }
-
-    private fun getActionContext(): Map<String, Any> {
-        return mapOf(
-            "dataClass" to BaseApp.genericTableHelper.originalTableName(tableName),
-            "entity" to
-                mapOf(
-                    "primaryKey" to
-                        entityViewModel.entity.value?.__KEY
-                )
-        )
     }
 
     private fun forceSyncData() {

@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.list
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -24,7 +25,11 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.gson.Gson
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.ListAdapter
+import android.widget.TextView
+
 import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
@@ -32,10 +37,12 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
-import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.Action
+import com.qmobile.qmobileui.action.ActionFactory
+import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
@@ -44,13 +51,6 @@ import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
-import java.util.concurrent.atomic.AtomicBoolean
-import android.graphics.drawable.ColorDrawable
-import android.widget.ListView
-import android.widget.EditText
-import android.widget.ArrayAdapter
-import android.widget.ListAdapter
-import android.widget.TextView
 
 
 @Suppress("TooManyFunctions")
@@ -172,10 +172,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
             },
             { selectedActionId ->
                 if ((hasCurrentRecordActions()) && (
-                    BaseApp.genericTableFragmentHelper.layoutType(
-                            tableName
-                        ) == "GRID"
-                    )
+                            BaseApp.genericTableFragmentHelper.layoutType(
+                                tableName
+                            ) == "GRID"
+                            )
                 ) {
                     showDialog(selectedActionId, currentRecordActions)
                 }
@@ -227,7 +227,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
             val length = tableActionsJsonObject.getJSONArray(tableName).length()
             for (i in 0 until length) {
                 val jsonObject = tableActionsJsonObject.getSafeArray(tableName)?.getJSONObject(i)
-                tableActions.add(Gson().fromJson(jsonObject.toString(), Action::class.java))
+                jsonObject?.let {
+                    tableActions.add(ActionFactory.createActionFromJsonObject(it))
+                }
+
             }
         }
         if (hasCurrentRecordActions()) {
@@ -235,8 +238,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
             for (i in 0 until (length)) {
                 val jsonObject =
                     currentRecordActionsJsonObject.getJSONArray(tableName).getJSONObject(i)
-                var action = Gson().fromJson(jsonObject.toString(), Action::class.java)
-                currentRecordActions.add(action)
+
+                jsonObject?.let {
+                    currentRecordActions.add(ActionFactory.createActionFromJsonObject(it))
+                }
             }
         }
     }
@@ -246,10 +251,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
      */
     private fun initCellSwipe() {
         if (hasCurrentRecordActions() && (
-            BaseApp.genericTableFragmentHelper.layoutType(
-                    tableName
-                ) == "LINEAR"
-            )
+                    BaseApp.genericTableFragmentHelper.layoutType(
+                        tableName
+                    ) == "LINEAR"
+                    )
         ) {
             val itemTouchHelper =
                 ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
@@ -330,7 +335,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 entityListViewModel.sendAction(
                     actionName,
                     ActionContent(
-                        getActionContext(selectedActionId)
+                        ActionHelper.getActionContext(tableName, selectedActionId)
                     )
                 ) { actionResponse ->
                     actionResponse?.let {
@@ -363,15 +368,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
         sendAction(actionName, selectedActionId)
     }
 
-    private fun getActionContext(selectedActionId: String?): Map<String, Any> {
-        val actionContext = mutableMapOf<String, Any>(
-            "dataClass" to BaseApp.genericTableHelper.originalTableName(tableName)
-        )
-        if (selectedActionId != null) {
-            actionContext["entity"] = mapOf("primaryKey" to selectedActionId)
-        }
-        return actionContext
-    }
 
     private fun syncDataIfNeeded(shouldSyncData: Boolean) {
         if (shouldSyncData) {
@@ -451,8 +447,20 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasTableActions()) {
-            delegate.setupActionsMenu(menu, tableActions) { name ->
-                sendAction(name, null)
+            delegate.setupActionsMenu(menu, tableActions) { action ->
+
+                if (action.parameters.length() > 0) {
+
+                    BaseApp.genericNavigationResolver.navigateToActionParameters(
+                        binding,
+                        destinationTable = if (fromRelation) tableName else ""
+                    )
+
+                    delegate.setSelectAction(action)
+                } else {
+                    sendAction(action.name, null)
+                }
+
             }
         }
     }
