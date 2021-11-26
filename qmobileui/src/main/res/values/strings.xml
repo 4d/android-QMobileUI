@@ -69,7 +69,10 @@
     <string name="search_title">search_title</string>
 
     <!-- Actions -->
-    <string name="action_send_no_internet">Please check your network settings and data cover...</string>
+    <string name="action_send_no_internet">Please check your network settings and data cover…</string>
     <string name="action_send_server_not_accessible">The server is not available</string>
+    <string name="action_image_content_description">Action dots</string>
+    <string name="action_item_image_content_description">Action item image</string>
+    <string name="action_menu_title">More Options</string>
 
 </resources>

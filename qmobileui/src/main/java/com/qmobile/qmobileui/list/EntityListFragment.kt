@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.list
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -16,6 +17,10 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.ListAdapter
+import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -24,18 +29,17 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.gson.Gson
 import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
-import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.actions.Action
+import com.qmobile.qmobileui.actions.addActions
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
@@ -44,14 +48,6 @@ import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
-import java.util.concurrent.atomic.AtomicBoolean
-import android.graphics.drawable.ColorDrawable
-import android.widget.ListView
-import android.widget.EditText
-import android.widget.ArrayAdapter
-import android.widget.ListAdapter
-import android.widget.TextView
-
 
 @Suppress("TooManyFunctions")
 open class EntityListFragment : Fragment(), BaseFragment {
@@ -224,20 +220,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
         tableActions.clear()
         currentRecordActions.clear()
         if (hasTableActions()) {
-            val length = tableActionsJsonObject.getJSONArray(tableName).length()
-            for (i in 0 until length) {
-                val jsonObject = tableActionsJsonObject.getSafeArray(tableName)?.getJSONObject(i)
-                tableActions.add(Gson().fromJson(jsonObject.toString(), Action::class.java))
-            }
+            tableActions.addActions(tableActionsJsonObject, tableName)
         }
         if (hasCurrentRecordActions()) {
-            val length = currentRecordActionsJsonObject.getJSONArray(tableName).length()
-            for (i in 0 until (length)) {
-                val jsonObject =
-                    currentRecordActionsJsonObject.getJSONArray(tableName).getJSONObject(i)
-                var action = Gson().fromJson(jsonObject.toString(), Action::class.java)
-                currentRecordActions.add(action)
-            }
+            currentRecordActions.addActions(currentRecordActionsJsonObject, tableName)
         }
     }
 
@@ -254,13 +240,13 @@ open class EntityListFragment : Fragment(), BaseFragment {
             val itemTouchHelper =
                 ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
                     override fun instantiateUnderlayButton(position: Int): List<ItemActionButton> {
-                        var buttons = mutableListOf<ItemActionButton>()
+                        val buttons = mutableListOf<ItemActionButton>()
                         for (i in 0 until (currentRecordActions.size)) {
                             if ((i + 1) > MAX_ACTIONS_VISIBLE) {
                                 buttons.add(createButton(position, null, i))
                                 break
                             }
-                            var action = currentRecordActions.get(i)
+                            val action = currentRecordActions[i]
                             buttons.add(createButton(position, action, i))
                         }
                         return buttons
@@ -299,7 +285,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 }
                 textView.text = item.text
                 textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, resId, 0)
-                //Add margin between image and text (support various screen densities)
+                // Add margin between image and text (support various screen densities)
                 val paddingDrawable =
                     (DIALOG_ICON_PADDING * resources.displayMetrics.density).toInt()
                 textView.compoundDrawablePadding = paddingDrawable
@@ -310,16 +296,16 @@ open class EntityListFragment : Fragment(), BaseFragment {
             requireContext(),
             R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
-        dialogBuilder.setAdapter(adapter) { dialog, position ->
-            sendCurrentRecordAction(actions.get(position).name, selectedActionId)
+        dialogBuilder.setAdapter(adapter) { _, position ->
+            sendCurrentRecordAction(actions[position].name, selectedActionId)
         }
 
         val dialog = dialogBuilder.create()
         dialog.listView.apply {
             divider = ColorDrawable(Color.LTGRAY)
             dividerHeight = 2
-            setFooterDividersEnabled(false);
-            addFooterView(View(context));
+            setFooterDividersEnabled(false)
+            addFooterView(View(context))
         }
         dialog.show()
     }
@@ -341,7 +327,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 }
             }
 
-            override fun onServiceInaccessible() {
+            override fun onServerInaccessible() {
                 entityListViewModel.toastMessage.showMessage(
                     context?.getString(R.string.action_send_server_not_accessible),
                     tableName,

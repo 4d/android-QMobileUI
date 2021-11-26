@@ -6,8 +6,8 @@
 
 package com.qmobile.qmobileui.activity.mainactivity
 
-import com.qmobile.qmobileapi.auth.LoginRequiredCallback
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.sync.EntityViewModelIsToSync
@@ -20,18 +20,15 @@ import com.qmobile.qmobileui.utils.ToastHelper
 
 class MainActivityDataSync(private val activity: MainActivity) {
 
-    lateinit var entityViewModelIsToSyncList: MutableList<EntityViewModelIsToSync>
+    private lateinit var entityViewModelIsToSyncList: MutableList<EntityViewModelIsToSync>
 
     // DataSync notifies MainActivity to go to login page
-    private val loginRequiredCallbackForDataSync: LoginRequiredCallback =
-        object : LoginRequiredCallback {
-            override fun loginRequired() {
-                if (!BaseApp.runtimeDataHolder.guestLogin) {
-                    dataSync.unsuccessfulSynchronizationNeedsLogin(entityViewModelIsToSyncList)
-                    activity.startLoginActivity()
-                }
-            }
+    private val loginRequiredCallbackForDataSync: LoginRequiredCallback = {
+        if (!BaseApp.runtimeDataHolder.guestLogin) {
+            dataSync.unsuccessfulSynchronizationNeedsLogin(entityViewModelIsToSyncList)
+            activity.startLoginActivity()
         }
+    }
 
     val dataSync = DataSync(activity, BaseApp.sharedPreferencesHolder, loginRequiredCallbackForDataSync)
 

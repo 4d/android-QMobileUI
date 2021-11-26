@@ -16,19 +16,17 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import com.google.gson.Gson
 import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.utils.getSafeArray
-import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
-import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.actions.Action
+import com.qmobile.qmobileui.actions.addActions
 import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
@@ -93,14 +91,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasActions()) {
             val actions = mutableListOf<Action>()
-            val length = actionsJsonObject.getJSONArray(tableName).length()
-            for (i in 0 until length) {
-                val jsonObject = actionsJsonObject.getSafeArray(tableName)?.getSafeObject(i)
-                val action = Gson().fromJson(jsonObject.toString(), Action::class.java)
-                action?.let {
-                    actions.add(it)
-                }
-            }
+            actions.addActions(actionsJsonObject, tableName)
 
             delegate.setupActionsMenu(menu, actions) { name ->
                 delegate.checkNetwork(object : NetworkChecker {
@@ -119,7 +110,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                         }
                     }
 
-                    override fun onServiceInaccessible() {
+                    override fun onServerInaccessible() {
                         entityViewModel.toastMessage.showMessage(
                             context?.getString(R.string.action_send_server_not_accessible),
                             tableName,

@@ -8,10 +8,10 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.qmobile.qmobileui.Action
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.actions.Action
 
- class ActionDropDownAdapter(
+class ActionDropDownAdapter(
     val context: Context,
     private val items: ArrayList<Action>,
     val onMenuItemClick: (String) -> Unit
@@ -30,16 +30,16 @@ import com.qmobile.qmobileui.R
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        var convertView = convertView
+        var newConvertView = convertView
         val item = getItem(position)
-        if (convertView == null) {
+        if (newConvertView == null) {
             val inflater = context
                 .getSystemService(AppCompatActivity.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-            convertView = inflater.inflate(R.layout.drop_down_item_row, null)
+            newConvertView = inflater.inflate(R.layout.drop_down_item_row, parent, false)
         }
-        val itemText = convertView?.findViewById<View>(R.id.dropDownItemName) as TextView
+        val itemText = newConvertView?.findViewById<View>(R.id.dropDownItemName) as TextView
         val itemImage: ImageView =
-            convertView.findViewById<View>(R.id.dropDownItemImage) as ImageView
+            newConvertView.findViewById<View>(R.id.dropDownItemImage) as ImageView
         itemText.text = item.getPreferredName()
 
         val iconDrawablePath = item.getIconDrawablePath()
@@ -53,9 +53,9 @@ import com.qmobile.qmobileui.R
             0
         }
         itemImage.setImageResource(resId)
-        convertView.setOnClickListener { v ->
+        newConvertView.setOnClickListener {
             onMenuItemClick(item.name)
         }
-        return convertView
+        return newConvertView
     }
 }
