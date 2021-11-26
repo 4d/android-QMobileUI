@@ -36,6 +36,7 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
 import com.qmobile.qmobiledatasync.relation.OneToManyRelation
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
+import com.qmobile.qmobiledatasync.sync.resetIsToSync
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
@@ -160,11 +161,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         when (event) {
-            Lifecycle.Event.ON_START -> {
+            Lifecycle.Event.ON_STOP -> {
                 Timber.d("[${Lifecycle.Event.ON_STOP}]")
                 shouldDelayOnForegroundEvent.set(false)
             }
-            Lifecycle.Event.ON_STOP -> {
+            Lifecycle.Event.ON_START -> {
                 if (loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED) {
                     Timber.d("[${Lifecycle.Event.ON_START}]")
                     applyOnForegroundEvent()
@@ -185,7 +186,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             // Refreshing it again, as a remoteUrl change would bring issues with post requests
             // going on previous remoteUrl
             refreshAllApiClients()
-            mainActivityDataSync.getEntityListViewModelsForSync(entityListViewModelList)
+            entityListViewModelList.resetIsToSync()
         }
         mainActivityDataSync.prepareDataSync(connectivityViewModel, null)
     }
@@ -252,7 +253,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                     ToastHelper.show(this, loginStatusText, MessageType.SUCCESS)
                     loginStatusText = ""
                 }
-                if (shouldDelayOnForegroundEvent.compareAndSet(true, false)) {
+                if (shouldDelayOnForegroundEvent.getAndSet(false)) {
                     applyOnForegroundEvent()
                 }
             }
