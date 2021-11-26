@@ -8,5 +8,6 @@
         android:id="@+id/drop_down_image"
         style="?android:attr/actionOverflowButtonStyle"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/action_image_content_description" />
 </LinearLayout>

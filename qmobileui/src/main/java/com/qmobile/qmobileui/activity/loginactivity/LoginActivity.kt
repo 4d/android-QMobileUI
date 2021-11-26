@@ -18,7 +18,6 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
@@ -66,7 +65,6 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
     private lateinit var remoteUrlDisplayDialog: View
     private lateinit var imageNetworkStatus: ImageView
     private lateinit var remoteUrlMessage: TextView
-    private lateinit var rootViewGroup: ViewGroup
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,8 +97,6 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
             binding =
                 DataBindingUtil.setContentView(this, R.layout.activity_login)
             binding.lifecycleOwner = this
-
-            rootViewGroup = findViewById(android.R.id.content)
 
             initViewModels()
             initLayout()
@@ -206,7 +202,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
         serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
 
         remoteUrlDisplayDialog = LayoutInflater.from(this)
-            .inflate(R.layout.login_remote_url_display_dialog, rootViewGroup, false)
+            .inflate(R.layout.login_remote_url_display_dialog, findViewById(android.R.id.content), false)
         imageNetworkStatus = remoteUrlDisplayDialog.findViewById(R.id.image_network_status)
         remoteUrlMessage = remoteUrlDisplayDialog.findViewById(R.id.remote_url_message)
 
@@ -275,7 +271,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
         serverAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
     }
 
-    override fun onServiceInaccessible() {
+    override fun onServerInaccessible() {
         remoteUrlMessage.text =
             getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
         serverNotAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }

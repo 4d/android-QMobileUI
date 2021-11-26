@@ -7,8 +7,8 @@
 package com.qmobile.qmobileui.utils
 
 import android.content.Context
-import android.util.Log
 import com.qmobile.qmobileui.R
+import timber.log.Timber
 import java.io.File
 
 object ResourcesHelper {
@@ -48,7 +48,7 @@ object ResourcesHelper {
         }
     }
 
-    fun correctIconPath(iconPath: String): String? {
+    fun correctIconPath(iconPath: String?): String? {
         if (iconPath.isNullOrEmpty())
             return null
         return try {
@@ -56,10 +56,10 @@ object ResourcesHelper {
                 .substring(0, iconPath.lastIndexOf('.')) // removes extension
                 .replace(".+/".toRegex(), "")
                 .removePrefix(File.separator)
-                .toLowerCase()
+                .lowercase()
                 .replace("[^a-z0-9]+".toRegex(), "_")
-        } catch (e: Exception) {
-            e.message?.let { Log.e("correctIconPath: ", it) }
+        } catch (e: StringIndexOutOfBoundsException) {
+            e.message?.let { Timber.e("Could not get iconPath : $it") }
             null
         }
     }

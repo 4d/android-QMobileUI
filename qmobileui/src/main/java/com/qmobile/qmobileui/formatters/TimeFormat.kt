@@ -32,9 +32,11 @@ object TimeFormat {
             "timeInteger" -> {
 
                 val newTimeArray = getTimeFromLong(baseText.toLong()).split(":")
-                (newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
-                    newTimeArray[1]
-                ) * INT_3600)
+                (
+                    newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
+                        newTimeArray[1]
+                    ) * INT_3600
+                    )
             }
             "shortTime" -> {
                 formatNameMap[format]?.let {

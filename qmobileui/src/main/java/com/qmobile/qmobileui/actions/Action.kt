@@ -1,10 +1,10 @@
 /*
- * Created by htemanni on 13/9/2021.
+ * Created by qmarciset on 25/11/2021.
  * 4D SAS
- * Copyright (c) 2021 htemanni. All rights reserved.
+ * Copyright (c) 2021 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui
+package com.qmobile.qmobileui.actions
 
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
@@ -13,13 +13,10 @@ class Action(
     private val icon: String?,
     private val label: String?,
     private val shortLabel: String?,
-    val parameters: Array<Pair<String, Any>>
+    val parameters: List<ActionParameters>?
 ) {
-    fun getIconDrawablePath(): String? {
-        return icon?.let {
-            ResourcesHelper.correctIconPath(it)
-        }
-    }
+    fun getIconDrawablePath(): String? =
+        ResourcesHelper.correctIconPath(icon)
 
     fun getPreferredName(): String {
         return if (!label.isNullOrEmpty())

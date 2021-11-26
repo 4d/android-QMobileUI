@@ -13,8 +13,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 abstract class PagedListPagerAdapter<T : Any>(fragment: Fragment) :
     FragmentStateAdapter(fragment) {
 
-    var pagedList: PagedList<T>? = null
-        private set
+    private var pagedList: PagedList<T>? = null
     private var callback = PagerCallback()
 
     override fun getItemCount(): Int = pagedList?.size ?: 0
