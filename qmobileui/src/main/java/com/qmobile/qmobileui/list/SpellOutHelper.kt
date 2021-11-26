@@ -1,9 +1,8 @@
 package com.qmobile.qmobileui.list
 
-import com.qmobile.qmobileui.list.SpellOutHelper
-import java.lang.NumberFormatException
 import java.text.DecimalFormat
 
+@SuppressWarnings("checkstyle:magicnumber")
 object SpellOutHelper {
     private val tensNames = arrayOf(
         "",
