@@ -13,7 +13,6 @@ import android.text.InputType
 import android.text.Selection
 import android.text.Spannable
 import android.text.TextWatcher
-import android.widget.Button
 import android.widget.CheckBox
 import android.widget.CompoundButton
 import android.widget.Switch
@@ -22,7 +21,6 @@ import android.widget.TextView
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.list.SpellOutHelper
 
-@Suppress( "MagicNumber","LongMethod")
 abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     abstract fun bind(item: Any, onValueChanged: (String, Any) -> Unit)
 }
@@ -30,8 +28,7 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
 /**
  * TEXT VIEW HOLDERS
  */
-
-@Suppress( "MagicNumber","LongMethod")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class TextViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
@@ -71,6 +68,7 @@ class TextViewHolder(itemView: View, val format: String) :
     }
 }
 
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class TextAreaViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
@@ -103,6 +101,7 @@ class TextAreaViewHolder(itemView: View) :
  * Number VIEW HOLDERS
  */
 
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class NumberViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
@@ -147,6 +146,7 @@ class NumberViewHolder(itemView: View, val format: String) :
     }
 }
 
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class SpellOutViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
@@ -201,6 +201,7 @@ class SpellOutViewHolder(itemView: View) :
 
 const val PERCENT_KEY = "%"
 
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class PercentageViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
@@ -238,6 +239,8 @@ class PercentageViewHolder(itemView: View) :
 /**
  * BOOLEAN VIEW HOLDERS
  */
+
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class BooleanSwitchViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
@@ -252,6 +255,8 @@ class BooleanSwitchViewHolder(itemView: View) :
         }
     }
 }
+
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 
 class BooleanCheckMarkViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
@@ -272,7 +277,6 @@ class BooleanCheckMarkViewHolder(itemView: View) :
 /**
  * IMAGE VIEW HOLDERS
  */
-
 class ImageViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
@@ -294,8 +298,8 @@ const val PM_KEY = "PM"
 const val SELECTED_HOUR = 12
 const val SELECTED_MINUTE = 30
 
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class TimeViewHolder(itemView: View, val format: String) :
-
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
     private var selectedTime: TextView = itemView.findViewById(R.id.selectedTime)
@@ -354,7 +358,7 @@ class TimeViewHolder(itemView: View, val format: String) :
 const val SELECTED_YEAR = 2000
 const val SELECTED_MONTH = 5
 const val SELECTED_DAY = 10
-
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class DateViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     val label: TextView = itemView.findViewById(R.id.label)
