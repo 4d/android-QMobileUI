@@ -1,8 +1,6 @@
 package com.qmobile.qmobileui.action
 
-import android.app.Activity
 import android.app.TimePickerDialog
-import android.content.Intent
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.R
@@ -32,6 +30,7 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
  * TEXT VIEW HOLDERS
  */
 
+@Suppress( "MagicNumber")
 class TextViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
@@ -57,9 +56,11 @@ class TextViewHolder(itemView: View, val format: String) :
         editText.hint = itemJsonObject.getSafeString("placeholder")
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
+                // Nothing to do
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Nothing to do
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -82,9 +83,11 @@ class TextAreaViewHolder(itemView: View) :
 
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
+                // Nothing to do
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Nothing to do
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -121,9 +124,11 @@ class NumberViewHolder(itemView: View, val format: String) :
         }
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
+                // Nothing to do
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Nothing to do
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -154,9 +159,11 @@ class SpellOutViewHolder(itemView: View) :
         editText.hint = itemJsonObject.getString("placeholder")
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
+                // Nothing to do
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Nothing to do
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -210,16 +217,18 @@ class PercentageViewHolder(itemView: View) :
         editText.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 onValueChanged(parameterName, s.toString())
-
+                // Nothing to do
             }
 
             override fun beforeTextChanged(
                 s: CharSequence, start: Int, count: Int,
                 after: Int
             ) {
+                // Nothing to do
             }
 
             override fun afterTextChanged(s: Editable) {
+                // Nothing to do
             }
         })
     }
@@ -266,18 +275,11 @@ class BooleanCheckMarkViewHolder(itemView: View) :
 class ImageViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
-    var buttonLoadImage: Button = itemView.findViewById(R.id.buttonLoadImage)
 
     override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
         label.text = parameterName
-        buttonLoadImage.setOnClickListener {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "image/*"
-            (itemView.context as Activity).startActivityForResult(intent, 33)
-
-        }
     }
 
 }
@@ -288,6 +290,8 @@ class ImageViewHolder(itemView: View) :
  */
 const val AM_KEY = "AM"
 const val PM_KEY = "PM"
+const val SELECTED_HOUR = 12
+const val SELECTED_MINUTE = 30
 
 class TimeViewHolder(itemView: View, val format: String) :
 
@@ -296,8 +300,8 @@ class TimeViewHolder(itemView: View, val format: String) :
     private var selectedTime: TextView = itemView.findViewById(R.id.selectedTime)
 
     override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
-        var selectedHour = 10
-        var selectedMinute = 20
+        var selectedHour = SELECTED_HOUR
+        var selectedMinute = SELECTED_MINUTE
         var is24HourFormat = format == "duration"
 
         val itemJsonObject = item as JSONObject
