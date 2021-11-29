@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import com.qmobile.qmobileui.R
 
 @Suppress("LongMethod")
-class ActionParameterViewHolderFactory {
+class ActionParameterViewHolderFactory private constructor(){
     companion object {
         fun createViewHolderFromViewType(
             viewType: Int,

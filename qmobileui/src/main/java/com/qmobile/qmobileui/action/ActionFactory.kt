@@ -5,7 +5,7 @@ import com.qmobile.qmobileapi.utils.getSafeString
 import org.json.JSONArray
 import org.json.JSONObject
 
-class ActionFactory {
+class ActionFactory private constructor(){
     companion object {
         fun createActionFromJsonObject(jsonObject: JSONObject): Action {
             jsonObject.apply {
