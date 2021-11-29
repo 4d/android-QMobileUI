@@ -64,6 +64,9 @@ dependencies {
     implementation Libs.retrofit_converter_gson
     implementation Libs.timber
 
+    //AutoFitEditText
+    implementation Libs.AutoFitEditText
+
     // Testing
     testImplementation Libs.json
     testImplementation Libs.junit
