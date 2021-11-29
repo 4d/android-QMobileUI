@@ -22,6 +22,7 @@ import android.widget.TextView
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.list.SpellOutHelper
 
+@Suppress( "MagicNumber","LongMethod")
 abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     abstract fun bind(item: Any, onValueChanged: (String, Any) -> Unit)
 }
@@ -30,7 +31,7 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
  * TEXT VIEW HOLDERS
  */
 
-@Suppress( "MagicNumber")
+@Suppress( "MagicNumber","LongMethod")
 class TextViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
