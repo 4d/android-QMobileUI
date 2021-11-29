@@ -34,6 +34,7 @@ class TextViewHolder(itemView: View, val format: String) :
     var label: TextView = itemView.findViewById(R.id.label)
     var editText: TextView = itemView.findViewById(R.id.editText)
 
+    @Suppress("MaxLineLength")
     override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
