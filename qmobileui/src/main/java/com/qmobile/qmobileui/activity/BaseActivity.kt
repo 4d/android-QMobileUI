@@ -144,7 +144,7 @@ abstract class BaseActivity : AppCompatActivity() {
                 if (isAccessible) {
                     networkChecker.onServerAccessible()
                 } else {
-                    networkChecker.onServiceInaccessible()
+                    networkChecker.onServerInaccessible()
                 }
             }
         } else {

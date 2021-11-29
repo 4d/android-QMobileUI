@@ -113,7 +113,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                 }
             }
 
-            override fun onServiceInaccessible() {
+            override fun onServerInaccessible() {
                 entityListViewModel.toastMessage.showMessage(
                     context?.getString(R.string.action_send_server_not_accessible),
                     tableName,

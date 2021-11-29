@@ -2,11 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="2dp"
-    android:background="#fff">
+    android:background="@android:color/white"
+    android:orientation="horizontal"
+    android:paddingHorizontal="2dp">
 
     <TextView
         android:id="@+id/dropDownItemName"
@@ -18,7 +18,7 @@
         android:minWidth="32dp"
         android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#000"
+        android:textColor="@android:color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -29,9 +29,10 @@
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_gravity="center_vertical"
-        tools:background="@color/cardview_dark_background"
+        android:contentDescription="@string/action_item_image_content_description"
         android:src="@drawable/ic_error_outline"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:background="@color/cardview_dark_background" />
 </androidx.constraintlayout.widget.ConstraintLayout>

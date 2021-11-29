@@ -9,11 +9,15 @@ package com.qmobile.qmobileui.activity.mainactivity
 
 import android.annotation.SuppressLint
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.lifecycleScope
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class MainActivityObserver(
@@ -44,6 +48,9 @@ class MainActivityObserver(
     // Observe when data are synchronized
     @SuppressLint("BinaryOperationInTimber")
     private fun observeDataSynchronized(entityListViewModel: EntityListViewModel<EntityModel>) {
+
+        var job: Job? = null
+
         entityListViewModel.dataSynchronized.observe(
             activity,
             { dataSyncState ->
@@ -52,6 +59,19 @@ class MainActivityObserver(
                         "Table : ${entityListViewModel.getAssociatedTableName()}, " +
                         "Instance : $entityListViewModel]"
                 )
+                when (dataSyncState) {
+                    DataSyncStateEnum.SYNCHRONIZING -> {
+                        if (entityListViewModel.isToSync.getAndSet(false)) {
+                            job?.cancel()
+                            job = activity.lifecycleScope.launch {
+                                entityListViewModel.getEntities {
+                                    Timber.v("Requested data for ${entityListViewModel.getAssociatedTableName()}")
+                                }
+                            }
+                        }
+                    }
+                    else -> {}
+                }
             }
         )
     }

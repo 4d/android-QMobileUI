@@ -8,6 +8,6 @@ package com.qmobile.qmobileui.ui
 
 interface NetworkChecker {
     fun onServerAccessible()
-    fun onServiceInaccessible()
+    fun onServerInaccessible()
     fun onNoInternet()
 }

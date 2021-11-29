@@ -102,6 +102,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                 }
             }
 
+
             delegate.setupActionsMenu(menu, actions) { action ->
                 delegate.checkNetwork(object : NetworkChecker {
                     override fun onServerAccessible() {
@@ -122,7 +123,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                         }
                     }
 
-                    override fun onServiceInaccessible() {
+                    override fun onServerInaccessible() {
                         entityViewModel.toastMessage.showMessage(
                             context?.getString(R.string.action_send_server_not_accessible),
                             tableName,

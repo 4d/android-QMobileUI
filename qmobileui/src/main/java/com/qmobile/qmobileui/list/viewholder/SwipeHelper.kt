@@ -13,6 +13,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.action.Action
+
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.utils.ColorHelper
@@ -88,7 +89,7 @@ abstract class SwipeHelper(
         actionState: Int,
         isCurrentlyActive: Boolean
     ) {
-        val position = viewHolder.adapterPosition
+        val position = viewHolder.bindingAdapterPosition
         var maxDX = dX
         val itemView = viewHolder.itemView
 
@@ -125,7 +126,7 @@ abstract class SwipeHelper(
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        val position = viewHolder.adapterPosition
+        val position = viewHolder.bindingAdapterPosition
         if (swipedPosition != position) recoverQueue.add(swipedPosition)
         swipedPosition = position
         recoverSwipedItem()
@@ -139,19 +140,16 @@ abstract class SwipeHelper(
     class ItemActionButton(
         private val context: Context,
         private val action: Action?,
-        horizontalIndex: Int,
+        private var horizontalIndex: Int,
         private val clickListener: UnderlayButtonClickListener
     ) {
-        private var title: String
+        private var title: String = action?.getPreferredShortName() ?: "..."
         private var clickableRegion: RectF? = null
         private val textSizeInPixel: Float =
             BUTTON_TEXT_SIZE * context.resources.displayMetrics.density // dp to px
         val intrinsicWidth: Float
-        private var horizontalIndex: Int
 
         init {
-            title = action?.getPreferredShortName() ?: "..."
-            this.horizontalIndex = horizontalIndex
             val paint = Paint()
             paint.textSize = textSizeInPixel
             paint.typeface = Typeface.DEFAULT_BOLD

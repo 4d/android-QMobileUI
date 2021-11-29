@@ -72,7 +72,7 @@ class SettingsFragment :
     private lateinit var serverNotAccessibleString: String
 
     // ViewModels
-    lateinit var loginViewModel: LoginViewModel
+    private lateinit var loginViewModel: LoginViewModel
     private lateinit var connectivityViewModel: ConnectivityViewModel
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -227,7 +227,7 @@ class SettingsFragment :
         remoteUrlPref?.icon = serverAccessibleDrawable
     }
 
-    override fun onServiceInaccessible() {
+    override fun onServerInaccessible() {
         remoteUrlPref?.summary =
             getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
         remoteUrlPref?.icon = serverNotAccessibleDrawable

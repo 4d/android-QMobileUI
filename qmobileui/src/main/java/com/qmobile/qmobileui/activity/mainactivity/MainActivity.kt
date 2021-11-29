@@ -12,10 +12,14 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.WindowManager
+import android.widget.ImageButton
+import android.widget.ListView
+import android.widget.PopupWindow
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -23,15 +27,16 @@ import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
-import com.qmobile.qmobileapi.auth.LoginRequiredCallback
 import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
+import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
 import com.qmobile.qmobiledatasync.relation.OneToManyRelation
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
+import com.qmobile.qmobiledatasync.sync.resetIsToSync
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
@@ -39,6 +44,7 @@ import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobileui.action.Action
+
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
@@ -51,22 +57,17 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
-import android.view.WindowManager
-import android.widget.PopupWindow
-import android.widget.ImageButton
-import android.widget.ListView
-
 const val DROP_DOWN_WIDTH = 600
 
 @Suppress("TooManyFunctions")
-class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
+class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver {
 
     private var loginStatusText = ""
     private var onLaunch = true
     private var authenticationRequested = true
     private var shouldDelayOnForegroundEvent = AtomicBoolean(false)
     private var currentNavController: LiveData<NavController>? = null
-    lateinit var mainActivityDataSync: MainActivityDataSync
+    private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
     private var job: Job? = null
 
@@ -75,16 +76,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
     lateinit var selectedAction: Action
 
     // ViewModels
-    private lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
-
-    // Interceptor notifies the MainActivity that we need to go to login page. First, stop syncing
-    private val loginRequiredCallbackForInterceptor: LoginRequiredCallback =
-        object : LoginRequiredCallback {
-            override fun loginRequired() {
-                if (!BaseApp.runtimeDataHolder.guestLogin)
-                    mainActivityDataSync.dataSync.loginRequired.set(true)
-            }
-        }
+    lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -152,6 +144,12 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
      */
     override fun refreshAllApiClients() {
         super.refreshApiClients()
+
+        // Interceptor notifies the MainActivity that we need to go to login page. First, stop syncing
+        val loginRequiredCallbackForInterceptor: LoginRequiredCallback = {
+            if (!BaseApp.runtimeDataHolder.guestLogin)
+                mainActivityDataSync.dataSync.loginRequired.set(true)
+        }
         apiService = ApiClient.getApiService(
             loginApiService = loginApiService,
             loginRequiredCallback = loginRequiredCallbackForInterceptor,
@@ -164,26 +162,22 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         }
     }
 
-    /**
-     * Listens to event ON_STOP - app going in background
-     */
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    fun onBackground() {
-        Timber.d("[${Lifecycle.Event.ON_STOP}]")
-        shouldDelayOnForegroundEvent.set(false)
-    }
-
-    /**
-     * Listens to event ON_START - app going in foreground
-     */
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun onForeground() {
-        if (loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED) {
-            Timber.d("[${Lifecycle.Event.ON_START}]")
-            applyOnForegroundEvent()
-        } else {
-            Timber.d("[${Lifecycle.Event.ON_START} - Delayed event, waiting for authentication]")
-            shouldDelayOnForegroundEvent.set(true)
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        when (event) {
+            Lifecycle.Event.ON_STOP -> {
+                Timber.d("[${Lifecycle.Event.ON_STOP}]")
+                shouldDelayOnForegroundEvent.set(false)
+            }
+            Lifecycle.Event.ON_START -> {
+                if (loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED) {
+                    Timber.d("[${Lifecycle.Event.ON_START}]")
+                    applyOnForegroundEvent()
+                } else {
+                    Timber.d("[${Lifecycle.Event.ON_START} - Delayed event, waiting for authentication]")
+                    shouldDelayOnForegroundEvent.set(true)
+                }
+            }
+            else -> {}
         }
     }
 
@@ -195,7 +189,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
             // Refreshing it again, as a remoteUrl change would bring issues with post requests
             // going on previous remoteUrl
             refreshAllApiClients()
-            mainActivityDataSync.getEntityListViewModelsForSync(entityListViewModelList)
+            entityListViewModelList.resetIsToSync()
         }
         mainActivityDataSync.prepareDataSync(connectivityViewModel, null)
     }
@@ -245,7 +239,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
                 }
             }
 
-            override fun onServiceInaccessible() {
+            override fun onServerInaccessible() {
                 // Nothing to do
             }
 
@@ -262,7 +256,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
                     ToastHelper.show(this, loginStatusText, MessageType.SUCCESS)
                     loginStatusText = ""
                 }
-                if (shouldDelayOnForegroundEvent.compareAndSet(true, false)) {
+                if (shouldDelayOnForegroundEvent.getAndSet(false)) {
                     applyOnForegroundEvent()
                 }
             }
@@ -282,6 +276,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleObserver {
         onMenuItemClick: (Action) -> Unit
     ){
         menuInflater.inflate(R.menu.menu_action, menu);
+
         val menuItem =
             menu.findItem(R.id.more).actionView.findViewById(R.id.drop_down_image) as ImageButton
         menuItem.setOnClickListener { v ->
