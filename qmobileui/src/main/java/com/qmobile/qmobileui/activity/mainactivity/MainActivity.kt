@@ -275,7 +275,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         actions: List<Action>,
         onMenuItemClick: (Action) -> Unit
     ){
-        menuInflater.inflate(R.menu.menu_action, menu);
+        menuInflater.inflate(R.menu.menu_action, menu)
 
         val menuItem =
             menu.findItem(R.id.more).actionView.findViewById(R.id.drop_down_image) as ImageButton

@@ -7,7 +7,8 @@ class ActionHelper {
         fun getActionContext(
             tableName: String,
             selectedActionId: String?,
-            paramsToSubmit: HashMap<String, Any>? = null
+            parameters: HashMap<String, Any>? = null,
+            metaData: HashMap<String, String>? = null
         ): Map<String, Any> {
             val actionContext = mutableMapOf<String, Any>(
                 "dataClass" to
@@ -17,8 +18,11 @@ class ActionHelper {
                 actionContext["entity"] = mapOf("primaryKey" to selectedActionId)
             }
 
-            if (paramsToSubmit != null && paramsToSubmit.isNotEmpty()) {
-                actionContext["parameters"] = paramsToSubmit
+            if (parameters != null && parameters.isNotEmpty()) {
+                actionContext["parameters"] = parameters
+            }
+            if (metaData != null && metaData.isNotEmpty()) {
+                actionContext["metadata"] = ActionMetaData(metaData)
             }
             return actionContext
         }

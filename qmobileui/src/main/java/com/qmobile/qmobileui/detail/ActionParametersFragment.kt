@@ -40,6 +40,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     lateinit var tableName: String
     override lateinit var delegate: FragmentCommunication
     private val paramsToSubmit = HashMap<String, Any>()
+    private val metaDataToSubmit = HashMap<String, String>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,10 +59,13 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             val adapter = ActionsParametersListAdapter(
                 requireContext(),
                 delegate.getSelectAction().parameters
-            ) { name: String, value: Any ->
+            ) { name: String, value: Any, metaData: String? ->
                 paramsToSubmit[name] = value
+                metaData?.let {
+                    metaDataToSubmit[name] = metaData
+                }
             }
-            val layoutManager =LinearLayoutManager(requireContext())
+            val layoutManager = LinearLayoutManager(requireContext())
             recyclerView.layoutManager = layoutManager
             recyclerView.adapter = adapter
 
@@ -100,7 +104,12 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                 entityListViewModel.sendAction(
                     actionName,
                     ActionContent(
-                        ActionHelper.getActionContext(tableName, selectedActionId, paramsToSubmit)
+                        ActionHelper.getActionContext(
+                            tableName,
+                            selectedActionId,
+                            paramsToSubmit,
+                            metaDataToSubmit
+                        )
                     )
                 ) { actionResponse ->
                     actionResponse?.let {

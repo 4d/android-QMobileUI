@@ -10,7 +10,7 @@ import org.json.JSONObject
 class ActionsParametersListAdapter(
     context: Context,
     val list: JSONArray,
-    val onValueChanged: (String, Any) -> Unit
+    val onValueChanged: (String, Any, String?) -> Unit
 ) :
     RecyclerView.Adapter<ActionParameterViewHolder>() {
 
@@ -29,8 +29,8 @@ class ActionsParametersListAdapter(
     }
 
     override fun onBindViewHolder(holder: ActionParameterViewHolder, position: Int) {
-        holder.bind(list[position]) { name: String, value: Any ->
-            onValueChanged(name, value)
+        holder.bind(list[position]) { name: String, value: Any, metaData: String? ->
+            onValueChanged(name, value, metaData)
         }
     }
 

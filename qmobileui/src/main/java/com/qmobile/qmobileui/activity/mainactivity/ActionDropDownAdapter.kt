@@ -53,7 +53,7 @@ class ActionDropDownAdapter(
             0
         }
         itemImage.setImageResource(resId)
-        convertView?.setOnClickListener { v ->
+        newConvertView.setOnClickListener { _ ->
             onMenuItemClick(item)
 
         }

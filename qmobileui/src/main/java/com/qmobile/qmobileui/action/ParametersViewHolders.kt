@@ -22,7 +22,7 @@ import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.list.SpellOutHelper
 
 abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    abstract fun bind(item: Any, onValueChanged: (String, Any) -> Unit)
+    abstract fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit)
 }
 
 /**
@@ -35,7 +35,7 @@ class TextViewHolder(itemView: View, val format: String) :
     var editText: TextView = itemView.findViewById(R.id.editText)
 
     @Suppress("MaxLineLength")
-    override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
+    override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
         label.text = parameterName
@@ -63,10 +63,11 @@ class TextViewHolder(itemView: View, val format: String) :
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                s?.let { onValueChanged(parameterName, s.toString()) }
+                s?.let { onValueChanged(parameterName, s.toString(), null) }
             }
         })
     }
+
 }
 
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber")
@@ -75,7 +76,7 @@ class TextAreaViewHolder(itemView: View) :
     var label: TextView = itemView.findViewById(R.id.label)
     var editText: TextView = itemView.findViewById(R.id.editText)
 
-    override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
+    override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
         editText.hint = itemJsonObject.getString("placeholder")
@@ -91,7 +92,7 @@ class TextAreaViewHolder(itemView: View) :
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                s?.let { onValueChanged(parameterName, s.toString()) }
+                s?.let { onValueChanged(parameterName, s.toString(), null) }
             }
         })
     }
@@ -106,9 +107,9 @@ class TextAreaViewHolder(itemView: View) :
 class NumberViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
-    var editText: TextView = itemView.findViewById(R.id.editText)
+    private var editText: TextView = itemView.findViewById(R.id.editText)
 
-    override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
+    override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
         label.text = parameterName
@@ -134,10 +135,11 @@ class NumberViewHolder(itemView: View, val format: String) :
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 s?.let {
-                    it.toString().toIntOrNull()?.let { it1 ->
+                    it.toString().toFloatOrNull()?.let { it1 ->
                         onValueChanged(
                             parameterName,
-                            it1
+                            it1,
+                            null
                         )
                     }
                 }
@@ -153,12 +155,12 @@ class SpellOutViewHolder(itemView: View) :
     var label: TextView = itemView.findViewById(R.id.label)
     var editText: TextView = itemView.findViewById(R.id.editText)
 
-    override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
+    override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
         var numericValue: Long? = null
         label.text = parameterName
-        editText.hint = itemJsonObject.getString("placeholder")
+        editText.hint = itemJsonObject.getSafeString("placeholder")
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 // Nothing to do
@@ -170,8 +172,8 @@ class SpellOutViewHolder(itemView: View) :
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 s?.let {
-                    it.toString().toIntOrNull()?.let { it1 ->
-                        numericValue = s.toString().toLong()
+                    it.toString().toLongOrNull()?.let { it1 ->
+                        numericValue = it1
                     }
                 }
             }
@@ -185,13 +187,16 @@ class SpellOutViewHolder(itemView: View) :
                 editText.text = numericValue.toString()
 
             } else {
+
                 numericValue?.let {
+                    onValueChanged(
+                        parameterName,
+                        it,
+                        null
+                    )
+
                     SpellOutHelper.convert(it).apply {
                         editText.text = this
-                        onValueChanged(
-                            parameterName,
-                            this
-                        )
                     }
 
                 }
@@ -208,19 +213,18 @@ class PercentageViewHolder(itemView: View) :
     var label: TextView = itemView.findViewById(R.id.label)
     var editText: TextView = itemView.findViewById(R.id.editText)
 
-    override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
+    override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
         label.text = parameterName
-        editText.hint = itemJsonObject.getString("placeholder")
+        editText.hint = itemJsonObject.getSafeString("placeholder")
         editText.inputType = InputType.TYPE_CLASS_NUMBER
         editText.text = PERCENT_KEY
         Selection.setSelection(editText.text as Spannable?, 0)
 
         editText.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                onValueChanged(parameterName, s.toString())
-                // Nothing to do
+                onValueChanged(parameterName, s.toString().replace(PERCENT_KEY, "").toInt(), null)
             }
 
             override fun beforeTextChanged(
@@ -247,12 +251,12 @@ class BooleanSwitchViewHolder(itemView: View) :
     var label: TextView = itemView.findViewById(R.id.label)
     var switch: Switch = itemView.findViewById(R.id.switchButton)
 
-    override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
+    override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
         label.text = parameterName
         switch.setOnCheckedChangeListener { _, checked ->
-            onValueChanged(parameterName, checked)
+            onValueChanged(parameterName, checked, null)
         }
     }
 }
@@ -264,12 +268,12 @@ class BooleanCheckMarkViewHolder(itemView: View) :
     var label: TextView = itemView.findViewById(R.id.label)
     var checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
 
-    override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
+    override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
         label.text = parameterName
         checkBox.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, b ->
-            onValueChanged(parameterName, b)
+            onValueChanged(parameterName, b, null)
         })
     }
 }
@@ -282,7 +286,7 @@ class ImageViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
 
-    override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
+    override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
         label.text = parameterName
@@ -305,7 +309,7 @@ class TimeViewHolder(itemView: View, val format: String) :
     var label: TextView = itemView.findViewById(R.id.label)
     private var selectedTime: TextView = itemView.findViewById(R.id.selectedTime)
 
-    override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
+    override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         var selectedHour = SELECTED_HOUR
         var selectedMinute = SELECTED_MINUTE
         var is24HourFormat = format == "duration"
@@ -317,7 +321,6 @@ class TimeViewHolder(itemView: View, val format: String) :
         val timeSetListener =
             TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
                 selectedHour = hourOfDay
-                selectedMinute = minute
 
                 var formattedResult: String
                 if (is24HourFormat) {
@@ -330,7 +333,8 @@ class TimeViewHolder(itemView: View, val format: String) :
                     }
                 }
                 selectedTime.text = formattedResult
-                onValueChanged(parameterName, formattedResult)
+                var numberOfSeconds = selectedHour * 60 * 60 + minute * 60
+                onValueChanged(parameterName, numberOfSeconds, null)
             }
 
         val timePickerDialog = TimePickerDialog(
@@ -359,13 +363,14 @@ class TimeViewHolder(itemView: View, val format: String) :
 const val SELECTED_YEAR = 2000
 const val SELECTED_MONTH = 5
 const val SELECTED_DAY = 10
+
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class DateViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     val label: TextView = itemView.findViewById(R.id.label)
     val selectedDate: TextView = itemView.findViewById<TextView>(R.id.selectedDate)
 
-    override fun bind(item: Any, onValueChanged: (String, Any) -> Unit) {
+    override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
         label.text = parameterName
@@ -379,12 +384,14 @@ class DateViewHolder(itemView: View, val format: String) :
                     ActionParameterEnum.DATE_FULL.format -> "fullDate"
                     else -> "shortDate"
                 }
+
+                val dateToSubmit = dayOfMonth.toString() + "!" + (monthOfYear + 1) + "!" + year
                 val formattedDate = FormatterUtils.applyFormat(
                     format,
-                    dayOfMonth.toString() + "!" + (monthOfYear + 1) + "!" + year
+                    dateToSubmit
                 )
                 selectedDate.text = formattedDate
-                onValueChanged(parameterName, formattedDate)
+                onValueChanged(parameterName, dateToSubmit, "simpleDate")
             }
 
         val datePickerDialog = DatePickerDialog(
