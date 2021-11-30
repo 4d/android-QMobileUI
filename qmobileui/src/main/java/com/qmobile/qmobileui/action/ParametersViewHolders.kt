@@ -53,6 +53,11 @@ class TextViewHolder(itemView: View, val format: String) :
         }
 
         editText.hint = itemJsonObject.getSafeString("placeholder")
+
+        itemJsonObject.getSafeString("default")?.let {
+            editText.text = it
+        }
+
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 // Nothing to do
@@ -79,9 +84,12 @@ class TextAreaViewHolder(itemView: View) :
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
-        editText.hint = itemJsonObject.getString("placeholder")
-        label.text = parameterName
 
+        label.text = parameterName
+        editText.hint = itemJsonObject.getString("placeholder")
+        itemJsonObject.getSafeString("default")?.let {
+            editText.text = it
+        }
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 // Nothing to do
@@ -114,6 +122,10 @@ class NumberViewHolder(itemView: View, val format: String) :
         val parameterName = itemJsonObject.getString("name")
         label.text = parameterName
         editText.hint = itemJsonObject.getString("placeholder")
+
+        itemJsonObject.getSafeString("default")?.let {
+            editText.text = it
+        }
         editText.inputType = when (format) {
             ActionParameterEnum.NUMBER_DEFAULT1.format,
             ActionParameterEnum.NUMBER_DEFAULT1.format,
@@ -160,6 +172,9 @@ class SpellOutViewHolder(itemView: View) :
         val parameterName = itemJsonObject.getString("name")
         var numericValue: Long? = null
         label.text = parameterName
+        itemJsonObject.getSafeString("default")?.let {
+            editText.text = it
+        }
         editText.hint = itemJsonObject.getSafeString("placeholder")
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -218,6 +233,9 @@ class PercentageViewHolder(itemView: View) :
         val parameterName = itemJsonObject.getString("name")
         label.text = parameterName
         editText.hint = itemJsonObject.getSafeString("placeholder")
+        itemJsonObject.getSafeString("default")?.let {
+            editText.text = it
+        }
         editText.inputType = InputType.TYPE_CLASS_NUMBER
         editText.text = PERCENT_KEY
         Selection.setSelection(editText.text as Spannable?, 0)
@@ -316,6 +334,9 @@ class TimeViewHolder(itemView: View, val format: String) :
 
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
+        itemJsonObject.getSafeString("default")?.let {
+            selectedTime.text = it
+        }
         label.text = parameterName
 
         val timeSetListener =
@@ -355,7 +376,6 @@ class TimeViewHolder(itemView: View, val format: String) :
     }
 }
 
-
 /**
  * DATE VIEW HOLDERS
  */
@@ -373,6 +393,9 @@ class DateViewHolder(itemView: View, val format: String) :
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         val itemJsonObject = item as JSONObject
         val parameterName = itemJsonObject.getString("name")
+        itemJsonObject.getSafeString("default")?.let {
+            selectedDate.text = it
+        }
         label.text = parameterName
         val dateSetListener =
             OnDateSetListener { view, year, monthOfYear, dayOfMonth ->

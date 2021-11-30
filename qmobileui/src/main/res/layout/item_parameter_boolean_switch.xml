@@ -1,39 +1,38 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#F6F6F6"
-    android:paddingLeft="16dp"
-    android:paddingTop="16dp"
-    android:paddingRight="16dp"
-    android:paddingBottom="16dp">
+    android:orientation="vertical">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_marginStart="7dp"
+        android:layout_marginTop="7dp"
+        android:text="TextView:"
+        android:textColor="#000" />
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="12dp"
-            android:textColor="#000"
-            tools:text="TextView:" />
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/param_item_min_height"
+        android:layout_marginTop="7dp"
+        android:background="#FFFFFF">
 
         <Switch
+            android:layout_centerVertical="true"
             android:id="@+id/switchButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginEnd="7dp"
             android:checked="true"
             android:switchMinWidth="56dp"
-            android:textOff="OFF"
-            android:textOn="ON"
+            android:thumbTint="#009688"
+            android:trackTint="#A19C9C"
             tools:ignore="UseSwitchCompatOrMaterialXml" />
+    </RelativeLayout>
 
-    </LinearLayout>
-
-</RelativeLayout>
-
+</LinearLayout>
