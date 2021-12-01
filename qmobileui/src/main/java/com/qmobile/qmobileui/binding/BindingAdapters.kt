@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.binding
 
 import android.net.Uri
 import android.view.View
+import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -18,6 +19,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
+import com.qmobile.qmobileui.webview.MyWebViewClient
 
 /**
  * Use Glide to load image url in a view
@@ -91,4 +93,13 @@ fun bindRelationLinkColor(view: TextView, textColor: Boolean?) {
     if (textColor == true) {
         view.setTextColor(ContextCompat.getColor(view.context, R.color.relation_link))
     }
+}
+
+@BindingAdapter("loadUrl")
+fun loadUrl(view: WebView, url: String?) {
+    if (url.isNullOrEmpty()) return
+//    view.settings.javaScriptEnabled = true
+//    view.addJavascriptInterface(WebInterface(view.context), "Android")
+    view.webViewClient = MyWebViewClient()
+    view.loadUrl(url)
 }
