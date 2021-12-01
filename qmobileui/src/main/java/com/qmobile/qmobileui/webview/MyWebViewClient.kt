@@ -8,6 +8,8 @@ package com.qmobile.qmobileui.webview
 
 import android.content.Intent
 import android.net.Uri
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
@@ -26,5 +28,13 @@ class MyWebViewClient : WebViewClient() {
             Toast.makeText(view!!.context, "start activity", Toast.LENGTH_SHORT).show()
         }
         return true
+    }
+
+    override fun onReceivedError(
+        view: WebView?,
+        request: WebResourceRequest?,
+        error: WebResourceError?
+    ) {
+        super.onReceivedError(view, request, error)
     }
 }

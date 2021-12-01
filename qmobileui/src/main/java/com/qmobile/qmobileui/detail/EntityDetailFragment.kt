@@ -32,6 +32,7 @@ import com.qmobile.qmobileui.actions.Action
 import com.qmobile.qmobileui.actions.addActions
 import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.ResourcesHelper
+import com.qmobile.qmobileui.webview.MyWebViewClient
 
 open class EntityDetailFragment : Fragment(), BaseFragment {
 
@@ -77,6 +78,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
         super.onViewCreated(view, savedInstanceState)
         checkIfChildIsWebView(view)?.let { foundWebView ->
             webView = foundWebView
+            webView.webViewClient = MyWebViewClient()
         }
         setHasOptionsMenu(::webView.isInitialized || hasActions())
     }
