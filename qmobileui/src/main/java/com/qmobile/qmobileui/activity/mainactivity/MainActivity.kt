@@ -232,6 +232,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                             }
                         }
                         DataSyncStateEnum.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
+                        else -> {}
                     }
                 }
             }
