@@ -65,7 +65,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     private var authenticationRequested = true
     private var shouldDelayOnForegroundEvent = AtomicBoolean(false)
     private var currentNavController: LiveData<NavController>? = null
-    private lateinit var mainActivityDataSync: MainActivityDataSync
+    lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
     private var job: Job? = null
 
@@ -221,9 +221,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                         DataSyncStateEnum.SYNCHRONIZED -> {
                             job?.cancel()
                             job = lifecycleScope.launch {
+                                mainActivityDataSync.dataSync.isDataSync = false
                                 entityListViewModel.getEntities { shouldSyncData ->
                                     if (shouldSyncData) {
                                         Timber.d("GlobalStamp changed, synchronization is required")
+                                        mainActivityDataSync.dataSync.isDataSync = true
                                         prepareDataSync(currentTableName)
                                     } else {
                                         Timber.d("GlobalStamp unchanged, no synchronization is required")

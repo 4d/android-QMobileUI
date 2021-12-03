@@ -14,6 +14,7 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
+import com.qmobile.qmobiledatasync.utils.collectWhenStarted
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import kotlinx.coroutines.Job
@@ -51,49 +52,42 @@ class MainActivityObserver(
 
         var job: Job? = null
 
-        entityListViewModel.dataSynchronized.observe(
-            activity,
-            { dataSyncState ->
-                Timber.d(
-                    "[DataSyncState : $dataSyncState, " +
+        activity.collectWhenStarted(entityListViewModel.dataSynchronized) { dataSyncState ->
+            Timber.d(
+                "[DataSyncState : $dataSyncState, " +
                         "Table : ${entityListViewModel.getAssociatedTableName()}, " +
                         "Instance : $entityListViewModel]"
-                )
-                when (dataSyncState) {
-                    DataSyncStateEnum.SYNCHRONIZING -> {
-                        if (entityListViewModel.isToSync.getAndSet(false)) {
-                            job?.cancel()
-                            job = activity.lifecycleScope.launch {
-                                entityListViewModel.getEntities {
-                                    Timber.v("Requested data for ${entityListViewModel.getAssociatedTableName()}")
-                                }
+            )
+            when (dataSyncState) {
+                DataSyncStateEnum.SYNCHRONIZING -> {
+                    if (entityListViewModel.isToSync.getAndSet(false)) {
+                        job?.cancel()
+                        job = activity.lifecycleScope.launch {
+                            activity.mainActivityDataSync.dataSync.isDataSync = true
+                            entityListViewModel.getEntities {
+                                Timber.v("Requested data for ${entityListViewModel.getAssociatedTableName()}")
+                                activity.mainActivityDataSync.dataSync.observe(entityListViewModel)
                             }
                         }
                     }
-                    else -> {}
                 }
+                else -> {}
             }
-        )
+        }
     }
 
     // Observe when there is a new related entity to be inserted in a dao
     private fun observeNewRelatedEntity(entityListViewModel: EntityListViewModel<EntityModel>) {
-        entityListViewModel.newRelatedEntity.observe(
-            activity,
-            { manyToOneRelation ->
-                activity.dispatchNewRelatedEntity(manyToOneRelation)
-            }
-        )
+        activity.collectWhenStarted(entityListViewModel.newRelatedEntity) { manyToOneRelation ->
+            manyToOneRelation?.let { activity.dispatchNewRelatedEntity(it) }
+        }
     }
 
     // Observe when there is a related entities to be inserted in a dao
     private fun observeNewRelatedEntities(entityListViewModel: EntityListViewModel<EntityModel>) {
-        entityListViewModel.newRelatedEntities.observe(
-            activity,
-            { oneToManyRelation ->
-                activity.dispatchNewRelatedEntities(oneToManyRelation)
-            }
-        )
+        activity.collectWhenStarted(entityListViewModel.newRelatedEntities) { oneToManyRelation ->
+            oneToManyRelation?.let { activity.dispatchNewRelatedEntities(it) }
+        }
     }
 
     // Observe any toast message from EntityList
