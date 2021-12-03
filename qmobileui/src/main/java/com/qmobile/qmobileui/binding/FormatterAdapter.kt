@@ -6,6 +6,8 @@
 
 package com.qmobile.qmobileui.binding
 
+import android.view.View
+import android.webkit.WebView
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.qmobile.qmobiledatasync.app.BaseApp
@@ -21,7 +23,7 @@ import com.qmobile.qmobileui.utils.tableNameAdjustment
     requireAll = false
 )
 fun applyFormatter(
-    view: TextView,
+    view: View,
     text: Any?,
     format: String?,
     tableName: String?,
@@ -31,18 +33,31 @@ fun applyFormatter(
 ) {
     if (text == null || text.toString().isEmpty())
         return
-    if (!format.isNullOrEmpty()) {
-        if (!format.startsWith("/")) {
-            view.text = FormatterUtils.applyFormat(format, text)
-            return
-        } else {
-            val fieldMappingFound =
-                applyCustomFormat(view, fieldName, tableName, text.toString(), imageWidth, imageHeight)
-            if (fieldMappingFound) return
-        }
+    if (view is WebView) {
+        WebViewAdapter.loadUrl(view, text.toString())
+        return
     }
-    view.text = text.toString()
-    return
+    if (view is TextView) {
+        if (!format.isNullOrEmpty()) {
+            if (!format.startsWith("/")) {
+                view.text = FormatterUtils.applyFormat(format, text)
+                return
+            } else {
+                val fieldMappingFound =
+                    applyCustomFormat(
+                        view,
+                        fieldName,
+                        tableName,
+                        text.toString(),
+                        imageWidth,
+                        imageHeight
+                    )
+                if (fieldMappingFound) return
+            }
+        }
+        view.text = text.toString()
+        return
+    }
 }
 
 /**
