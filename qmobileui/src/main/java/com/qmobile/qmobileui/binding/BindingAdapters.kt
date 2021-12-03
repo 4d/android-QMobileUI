@@ -8,7 +8,6 @@ package com.qmobile.qmobileui.binding
 
 import android.net.Uri
 import android.view.View
-import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -92,12 +91,4 @@ fun bindRelationLinkColor(view: TextView, textColor: Boolean?) {
     if (textColor == true) {
         view.setTextColor(ContextCompat.getColor(view.context, R.color.relation_link))
     }
-}
-
-@BindingAdapter("loadUrl")
-fun loadUrl(view: WebView, url: String?) {
-    if (url.isNullOrEmpty()) return
-//    view.settings.javaScriptEnabled = true
-//    view.addJavascriptInterface(WebInterface(view.context), "Android")
-    view.loadUrl(url)
 }
