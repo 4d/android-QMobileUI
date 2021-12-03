@@ -101,41 +101,51 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                 }
             }
 
-
             delegate.setupActionsMenu(menu, actions) { action ->
-                delegate.checkNetwork(object : NetworkChecker {
-                    override fun onServerAccessible() {
-                        entityViewModel.sendAction(
-                            action.name,
+                if (action.parameters.length() > 0) {
+
+                    BaseApp.genericNavigationResolver.navigateToActionParameters(
+                        binding,
+                        destinationTable = tableName
+                    )
+
+                    delegate.setSelectAction(action)
+                } else {
+                    delegate.checkNetwork(object : NetworkChecker {
+                        override fun onServerAccessible() {
+                            entityViewModel.sendAction(
+                                action.name,
                                 ActionHelper.getActionContent(
                                     tableName,
                                     entityViewModel.entity.value?.__KEY
-                            )
-                        ) {
-                            it?.dataSynchro?.let { shouldSyncData ->
-                                if (shouldSyncData) {
-                                    forceSyncData()
+                                )
+                            ) {
+                                it?.dataSynchro?.let { shouldSyncData ->
+                                    if (shouldSyncData) {
+                                        forceSyncData()
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    override fun onServerInaccessible() {
-                        entityViewModel.toastMessage.showMessage(
-                            context?.getString(R.string.action_send_server_not_accessible),
-                            tableName,
-                            MessageType.ERROR
-                        )
-                    }
+                        override fun onServerInaccessible() {
+                            entityViewModel.toastMessage.showMessage(
+                                context?.getString(R.string.action_send_server_not_accessible),
+                                tableName,
+                                MessageType.ERROR
+                            )
+                        }
 
-                    override fun onNoInternet() {
-                        entityViewModel.toastMessage.showMessage(
-                            context?.getString(R.string.action_send_no_internet),
-                            tableName,
-                            MessageType.ERROR
-                        )
-                    }
-                })
+                        override fun onNoInternet() {
+                            entityViewModel.toastMessage.showMessage(
+                                context?.getString(R.string.action_send_no_internet),
+                                tableName,
+                                MessageType.ERROR
+                            )
+                        }
+                    })
+
+                }
             }
         }
     }
