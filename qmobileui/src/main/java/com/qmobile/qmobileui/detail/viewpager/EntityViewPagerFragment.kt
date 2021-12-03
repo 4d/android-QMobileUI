@@ -22,6 +22,7 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.utils.ColorHelper
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 
 @Suppress("TooManyFunctions")
@@ -135,13 +136,22 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
     private fun handleActionPreviousEnability(newPos: Int) {
         if (this::actionPrevious.isInitialized) {
             actionPrevious.isEnabled = newPos > 0
+            shadowDisabledButton(actionPrevious)
         }
     }
 
     private fun handleActionNextEnability(newPos: Int) {
         if (this::actionNext.isInitialized) {
             actionNext.isEnabled = newPos < adapter.itemCount - 1
+            shadowDisabledButton(actionNext)
         }
+    }
+
+    private fun shadowDisabledButton(menuItem: MenuItem) {
+        menuItem.icon.alpha = if (!menuItem.isEnabled)
+            ColorHelper.ARGB_HALF_VALUE
+        else
+            ColorHelper.ARGB_MAX_VALUE
     }
 
     private fun setSearchQuery() {

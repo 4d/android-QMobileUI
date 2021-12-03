@@ -5,19 +5,35 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="AlwaysShowAction">
+
+    <item
+        android:id="@+id/action_web_view_refresh"
+        android:icon="@drawable/refresh"
+        android:title="@string/web_view_refresh"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_web_view_share"
+        android:icon="@drawable/share_variant"
+        android:title="@string/web_view_share"
+        android:visible="false"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/action_previous"
         android:enabled="false"
         android:icon="@drawable/baseline_chevron_left_24"
         android:title="@string/previous"
-        app:showAsAction="collapseActionView|ifRoom" />
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/action_next"
         android:enabled="false"
         android:icon="@drawable/baseline_chevron_right_24"
         android:title="@string/next"
-        app:showAsAction="collapseActionView|ifRoom" />
+        app:showAsAction="always" />
 </menu>
