@@ -4,11 +4,10 @@
  * Copyright (c) 2020 Quentin Marciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.detail
+package com.qmobile.qmobileui.action
 
 import android.content.Context
 import android.os.Bundle
-
 import android.view.MenuItem
 import android.view.MenuInflater
 import android.view.LayoutInflater
@@ -21,14 +20,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
-import com.qmobile.qmobileui.action.ActionsParametersListAdapter
 import androidx.recyclerview.widget.DividerItemDecoration
-import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
-import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.ui.NetworkChecker
 
@@ -98,46 +94,64 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         }
     }
 
+
+    private fun isFormValid(): Boolean {
+        val recyclerView = (binding as FragmentActionParametersBinding).recyclerView
+        val itemCount = recyclerView.adapter?.itemCount ?: 0
+        var isFormValid = true
+        for (i in 0 until itemCount) {
+            val holder = recyclerView.findViewHolderForAdapterPosition(i)
+            if (holder != null) {
+                val parameterViewHolder = (holder as ActionParameterViewHolder)
+                val isFieldValid = parameterViewHolder.validate()
+                if (!isFieldValid) {
+                    isFormValid = false
+                }
+            }
+        }
+        return isFormValid
+    }
+
     private fun sendAction(actionName: String, selectedActionId: String?) {
-        delegate.checkNetwork(object : NetworkChecker {
-            override fun onServerAccessible() {
-                entityListViewModel.sendAction(
-                    actionName,
-                    ActionContent(
-                        ActionHelper.getActionContext(
+        if (isFormValid()) {
+            delegate.checkNetwork(object : NetworkChecker {
+                override fun onServerAccessible() {
+                    entityListViewModel.sendAction(
+                        actionName,
+                        ActionHelper.getActionContent(
                             tableName,
                             selectedActionId,
                             paramsToSubmit,
                             metaDataToSubmit
                         )
-                    )
-                ) { actionResponse ->
-                    actionResponse?.let {
-                        actionResponse.dataSynchro?.let { dataSynchro ->
-                            if (dataSynchro) {
-                                delegate.requestDataSync(tableName)
+                    ) { actionResponse ->
+                        actionResponse?.let {
+                            actionResponse.dataSynchro?.let { dataSynchro ->
+                                if (dataSynchro) {
+                                    delegate.requestDataSync(tableName)
+                                }
+                                activity?.onBackPressed()
                             }
                         }
                     }
                 }
-            }
 
-            override fun onServerInaccessible() {
-                entityListViewModel.toastMessage.showMessage(
-                    context?.getString(R.string.action_send_server_not_accessible),
-                    tableName,
-                    MessageType.ERROR
-                )
-            }
+                override fun onServerInaccessible() {
+                    entityListViewModel.toastMessage.showMessage(
+                        context?.getString(R.string.action_send_server_not_accessible),
+                        tableName,
+                        MessageType.ERROR
+                    )
+                }
 
-            override fun onNoInternet() {
-                entityListViewModel.toastMessage.showMessage(
-                    context?.getString(R.string.action_send_no_internet),
-                    tableName,
-                    MessageType.ERROR
-                )
-            }
-        })
+                override fun onNoInternet() {
+                    entityListViewModel.toastMessage.showMessage(
+                        context?.getString(R.string.action_send_no_internet),
+                        tableName,
+                        MessageType.ERROR
+                    )
+                }
+            })
+        }
     }
-
 }

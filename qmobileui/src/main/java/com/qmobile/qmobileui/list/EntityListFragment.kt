@@ -29,7 +29,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobiledatasync.app.BaseApp
@@ -243,6 +242,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             }
         }
     }
+
     /**
      * Initialize Swipe to delete
      */
@@ -331,9 +331,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             override fun onServerAccessible() {
                 entityListViewModel.sendAction(
                     actionName,
-                    ActionContent(
-                        ActionHelper.getActionContext(tableName, selectedActionId)
-                    )
+                    ActionHelper.getActionContent(tableName, selectedActionId)
                 ) { actionResponse ->
                     actionResponse?.let {
                         actionResponse.dataSynchro?.let { dataSynchro ->

@@ -13,16 +13,74 @@ import android.text.InputType
 import android.text.Selection
 import android.text.Spannable
 import android.text.TextWatcher
+import android.util.Patterns
 import android.widget.CheckBox
-import android.widget.CompoundButton
+import android.widget.EditText
 import android.widget.Switch
 import android.widget.TextView
+import com.qmobile.qmobileapi.utils.getSafeArray
+import com.qmobile.qmobileapi.utils.getSafeInt
+import com.qmobile.qmobileapi.utils.getSafeObject
 
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.list.SpellOutHelper
+import java.text.DecimalFormat
 
 abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    abstract fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit)
+    lateinit var itemJsonObject: JSONObject
+    var label: TextView = itemView.findViewById(R.id.label)
+    var errorlabel: TextView = itemView.findViewById(R.id.error_label)
+    lateinit var parameterName: String
+
+    open fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
+        itemJsonObject = item as JSONObject
+        parameterName = itemJsonObject.getString("name")
+        if (isMandatory()) {
+            "$parameterName *".also { label.text = it }
+        } else {
+            label.text = parameterName
+        }
+    }
+
+    abstract fun validate(): Boolean
+    fun isMandatory(): Boolean {
+        return itemJsonObject.getSafeArray("rules")?.toString()?.contains("mandatory") ?: false
+    }
+
+    fun getMin(): Int? {
+        itemJsonObject.getSafeArray("rules")?.let { jsonArray ->
+            for (i in 0 until jsonArray.length()) {
+
+                val rule = jsonArray.getSafeObject(i)
+                rule?.getSafeInt("min")?.let {
+                    return it
+                }
+            }
+        }
+        return null
+    }
+
+    fun getMax(): Int? {
+        itemJsonObject.getSafeArray("rules")?.let { jsonArray ->
+            for (i in 0 until jsonArray.length()) {
+
+                val rule = jsonArray.getSafeObject(i)
+                rule?.getSafeInt("max")?.let {
+                    return it
+                }
+            }
+        }
+        return null
+    }
+
+    fun showError(text: String) {
+        errorlabel.visibility = View.VISIBLE
+        errorlabel.setText(text)
+    }
+
+    fun dismissErrorIfNeeded() {
+        errorlabel.visibility = View.GONE
+    }
 }
 
 /**
@@ -31,14 +89,11 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class TextViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
-    var label: TextView = itemView.findViewById(R.id.label)
     var editText: TextView = itemView.findViewById(R.id.editText)
 
     @Suppress("MaxLineLength")
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
-        val itemJsonObject = item as JSONObject
-        val parameterName = itemJsonObject.getString("name")
-        label.text = parameterName
+        super.bind(item, onValueChanged)
         editText.inputType = when (format) {
             ActionParameterEnum.TEXT_DEFAULT.format -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
             ActionParameterEnum.TEXT_ZIP.format,
@@ -54,10 +109,11 @@ class TextViewHolder(itemView: View, val format: String) :
 
         editText.hint = itemJsonObject.getSafeString("placeholder")
 
-        itemJsonObject.getSafeString("default")?.let {
-            editText.text = it
+        if (editText.text.toString().isEmpty()) {
+            itemJsonObject.getSafeString("default")?.let {
+                editText.text = it
+            }
         }
-
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 // Nothing to do
@@ -73,19 +129,42 @@ class TextViewHolder(itemView: View, val format: String) :
         })
     }
 
+    override fun validate(): Boolean {
+        if (isMandatory() && editText.text.trim().isEmpty()) {
+            showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+            return false
+        }
+
+        if (isMandatory() && (format == ActionParameterEnum.TEXT_EMAIL.format)) {
+            val isValidEmail = Patterns.EMAIL_ADDRESS.matcher(editText.text).matches()
+            if (!isValidEmail) {
+                showError(itemView.context.resources.getString(R.string.action_parameter_invalid_email_error))
+                return false
+            }
+        }
+
+        if (isMandatory() && (format == ActionParameterEnum.TEXT_URL.format)) {
+            val isValidUrl = Patterns.WEB_URL.matcher(editText.text).matches();
+            if (!isValidUrl) {
+                showError(itemView.context.resources.getString(R.string.action_parameter_invalid_url_error))
+                return false
+            }
+        }
+
+        dismissErrorIfNeeded()
+        return true
+    }
+
+
 }
 
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class TextAreaViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
-    var label: TextView = itemView.findViewById(R.id.label)
     var editText: TextView = itemView.findViewById(R.id.editText)
 
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
-        val itemJsonObject = item as JSONObject
-        val parameterName = itemJsonObject.getString("name")
-
-        label.text = parameterName
+        super.bind(item, onValueChanged)
         editText.hint = itemJsonObject.getString("placeholder")
         itemJsonObject.getSafeString("default")?.let {
             editText.text = it
@@ -104,8 +183,16 @@ class TextAreaViewHolder(itemView: View) :
             }
         })
     }
-}
 
+    override fun validate(): Boolean {
+        if (isMandatory() && editText.text.trim().isEmpty()) {
+            showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+            return false
+        }
+        dismissErrorIfNeeded()
+        return true
+    }
+}
 
 /**
  * Number VIEW HOLDERS
@@ -114,13 +201,10 @@ class TextAreaViewHolder(itemView: View) :
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class NumberViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
-    var label: TextView = itemView.findViewById(R.id.label)
     private var editText: TextView = itemView.findViewById(R.id.editText)
 
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
-        val itemJsonObject = item as JSONObject
-        val parameterName = itemJsonObject.getString("name")
-        label.text = parameterName
+        super.bind(item, onValueChanged)
         editText.hint = itemJsonObject.getString("placeholder")
 
         itemJsonObject.getSafeString("default")?.let {
@@ -128,8 +212,8 @@ class NumberViewHolder(itemView: View, val format: String) :
         }
         editText.inputType = when (format) {
             ActionParameterEnum.NUMBER_DEFAULT1.format,
-            ActionParameterEnum.NUMBER_DEFAULT1.format,
-            ActionParameterEnum.NUMBER_SCIENTIFIC.format ->
+            ActionParameterEnum.NUMBER_DEFAULT1.format
+            ->
                 InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             ActionParameterEnum.NUMBER_INTEGER.format -> {
                 InputType.TYPE_CLASS_NUMBER
@@ -159,19 +243,53 @@ class NumberViewHolder(itemView: View, val format: String) :
         })
 
     }
+
+    override fun validate(): Boolean {
+        if (isMandatory() && editText.text.trim().isEmpty()) {
+            showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+            return false
+        }
+
+        editText.text.toString().toFloatOrNull()?.let { value ->
+
+            getMin()?.let { mix ->
+                if (value < mix) {
+                    showError(
+                        itemView.resources.getString(
+                            R.string.action_parameter_min_value_error,
+                            mix.toString()
+                        )
+                    )
+                    return false
+                }
+            }
+
+            getMax()?.let { max ->
+                if (value > max) {
+                    showError(
+                        itemView.resources.getString(
+                            R.string.action_parameter_max_value_error,
+                            max.toString()
+                        )
+                    )
+                    return false
+                }
+            }
+        }
+
+        dismissErrorIfNeeded()
+        return true
+    }
 }
 
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class SpellOutViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
-    var label: TextView = itemView.findViewById(R.id.label)
     var editText: TextView = itemView.findViewById(R.id.editText)
+    var numericValue: Long? = null
 
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
-        val itemJsonObject = item as JSONObject
-        val parameterName = itemJsonObject.getString("name")
-        var numericValue: Long? = null
-        label.text = parameterName
+        super.bind(item, onValueChanged)
         itemJsonObject.getSafeString("default")?.let {
             editText.text = it
         }
@@ -202,6 +320,96 @@ class SpellOutViewHolder(itemView: View) :
                 editText.text = numericValue.toString()
 
             } else {
+                numericValue?.let {
+                    onValueChanged(
+                        parameterName,
+                        it,
+                        null
+                    )
+                    SpellOutHelper.convert(it).apply {
+                        editText.text = this
+                    }
+                }
+            }
+        }
+    }
+
+    override fun validate(): Boolean {
+        if (isMandatory() && editText.text.trim().isEmpty()) {
+            showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+            return false
+        }
+
+        numericValue.toString().toFloatOrNull()?.let { value ->
+
+            getMin()?.let { mix ->
+                if (value < mix) {
+                    showError(
+                        itemView.resources.getString(
+                            R.string.action_parameter_min_value_error,
+                            mix.toString()
+                        )
+                    )
+                    return false
+                }
+            }
+
+            getMax()?.let { max ->
+                if (value > max) {
+                    showError(
+                        itemView.resources.getString(
+                            R.string.action_parameter_max_value_error,
+                            max.toString()
+                        )
+                    )
+                    return false
+                }
+            }
+        }
+        dismissErrorIfNeeded()
+        return true
+    }
+}
+
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
+class ScientificViewHolder(itemView: View) :
+    ActionParameterViewHolder(itemView) {
+    var editText: TextView = itemView.findViewById(R.id.editText)
+    var numericValue: Float? = null
+
+    override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
+        super.bind(item, onValueChanged)
+        itemJsonObject.getSafeString("default")?.let {
+            editText.text = it
+        }
+        editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+
+        editText.hint = itemJsonObject.getSafeString("placeholder")
+        editText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                // Nothing to do
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Nothing to do
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                s?.let {
+                    it.toString().toFloatOrNull()?.let { it1 ->
+                        numericValue = it1
+                    }
+                }
+            }
+        })
+        editText.setOnFocusChangeListener { view, hasFocus ->
+            if (editText.text.isEmpty())
+                return@setOnFocusChangeListener
+
+            if (hasFocus && (numericValue != null)) {
+                editText.text = numericValue.toString()
+
+            } else {
 
                 numericValue?.let {
                     onValueChanged(
@@ -210,39 +418,85 @@ class SpellOutViewHolder(itemView: View) :
                         null
                     )
 
-                    SpellOutHelper.convert(it).apply {
-                        editText.text = this
-                    }
+                    val numFormat = DecimalFormat("0.#####E0")
+                    editText.text = numFormat.format(numericValue)
 
                 }
             }
         }
     }
+
+    override fun validate(): Boolean {
+        if (isMandatory() && editText.text.trim().isEmpty()) {
+            showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+            return false
+        }
+        numericValue.toString().toFloatOrNull()?.let { value ->
+            getMin()?.let { mix ->
+                if (value < mix) {
+                    showError(
+                        itemView.resources.getString(
+                            R.string.action_parameter_min_value_error,
+                            mix.toString()
+                        )
+                    )
+                    return false
+                }
+            }
+            getMax()?.let { max ->
+                if (value > max) {
+                    showError(
+                        itemView.resources.getString(
+                            R.string.action_parameter_max_value_error,
+                            max.toString()
+                        )
+                    )
+                    return false
+                }
+            }
+        }
+
+        dismissErrorIfNeeded()
+        return true
+    }
 }
 
 const val PERCENT_KEY = "%"
+const val PERCENT_MULTIPLIER = 0.01F
 
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class PercentageViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
-    var label: TextView = itemView.findViewById(R.id.label)
     var editText: TextView = itemView.findViewById(R.id.editText)
 
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
-        val itemJsonObject = item as JSONObject
-        val parameterName = itemJsonObject.getString("name")
-        label.text = parameterName
+        super.bind(item, onValueChanged)
+
         editText.hint = itemJsonObject.getSafeString("placeholder")
         itemJsonObject.getSafeString("default")?.let {
             editText.text = it
         }
+
+        (editText as EditText).addSuffix(PERCENT_KEY)
         editText.inputType = InputType.TYPE_CLASS_NUMBER
-        editText.text = PERCENT_KEY
-        Selection.setSelection(editText.text as Spannable?, 0)
+        //editText.text = PERCENT_KEY
+        Selection.setSelection(editText.text as Spannable?, editText.text.length - 1)
 
         editText.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                onValueChanged(parameterName, s.toString().replace(PERCENT_KEY, "").toInt(), null)
+                s.toString().replace(PERCENT_KEY, "").let {
+                    if (it.isNotEmpty()) {
+                        val percentValue =
+                            "%.2f".format(it.toFloatOrNull()?.times(PERCENT_MULTIPLIER))
+                        if (percentValue != null) {
+                            onValueChanged(
+                                parameterName,
+                                percentValue,
+                                null
+                            )
+                        }
+                    }
+                }
             }
 
             override fun beforeTextChanged(
@@ -257,6 +511,43 @@ class PercentageViewHolder(itemView: View) :
             }
         })
     }
+
+    override fun validate(): Boolean {
+        val textWithoutPercent = editText.text.toString().replace(PERCENT_KEY, "").trim()
+        if (isMandatory() && textWithoutPercent.isEmpty()) {
+            showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+            return false
+        }
+
+        textWithoutPercent.toFloatOrNull()?.let { value ->
+            getMin()?.let { mix ->
+                if (value < mix) {
+                    showError(
+                        itemView.resources.getString(
+                            R.string.action_parameter_min_value_error,
+                            mix.toString()
+                        )
+                    )
+                    return false
+                }
+            }
+
+            getMax()?.let { max ->
+                if (value > max) {
+                    showError(
+                        itemView.resources.getString(
+                            R.string.action_parameter_max_value_error,
+                            max.toString()
+                        )
+                    )
+                    return false
+                }
+            }
+        }
+
+        dismissErrorIfNeeded()
+        return true
+    }
 }
 
 /**
@@ -266,16 +557,17 @@ class PercentageViewHolder(itemView: View) :
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class BooleanSwitchViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
-    var label: TextView = itemView.findViewById(R.id.label)
     var switch: Switch = itemView.findViewById(R.id.switchButton)
 
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
-        val itemJsonObject = item as JSONObject
-        val parameterName = itemJsonObject.getString("name")
-        label.text = parameterName
+        super.bind(item, onValueChanged)
         switch.setOnCheckedChangeListener { _, checked ->
             onValueChanged(parameterName, checked, null)
         }
+    }
+
+    override fun validate(): Boolean {
+        return true
     }
 }
 
@@ -283,16 +575,17 @@ class BooleanSwitchViewHolder(itemView: View) :
 
 class BooleanCheckMarkViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
-    var label: TextView = itemView.findViewById(R.id.label)
-    var checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
+    private var checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
 
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
-        val itemJsonObject = item as JSONObject
-        val parameterName = itemJsonObject.getString("name")
-        label.text = parameterName
-        checkBox.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, b ->
+        super.bind(item, onValueChanged)
+        checkBox.setOnCheckedChangeListener { _, b ->
             onValueChanged(parameterName, b, null)
-        })
+        }
+    }
+
+    override fun validate(): Boolean {
+        return true
     }
 }
 
@@ -302,19 +595,18 @@ class BooleanCheckMarkViewHolder(itemView: View) :
  */
 class ImageViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
-    var label: TextView = itemView.findViewById(R.id.label)
 
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
-        val itemJsonObject = item as JSONObject
-        val parameterName = itemJsonObject.getString("name")
-        label.text = parameterName
+        super.bind(item, onValueChanged)
     }
 
+    override fun validate(): Boolean {
+        return true
+    }
 }
 
-
 /**
- * VIEW TIME HOLDERS
+ * TIME VIEW HOLDERS
  */
 const val AM_KEY = "AM"
 const val PM_KEY = "PM"
@@ -324,37 +616,33 @@ const val SELECTED_MINUTE = 30
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class TimeViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
-    var label: TextView = itemView.findViewById(R.id.label)
     private var selectedTime: TextView = itemView.findViewById(R.id.selectedTime)
 
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
-        var selectedHour = SELECTED_HOUR
-        var selectedMinute = SELECTED_MINUTE
-        var is24HourFormat = format == "duration"
+        super.bind(item, onValueChanged)
 
-        val itemJsonObject = item as JSONObject
-        val parameterName = itemJsonObject.getString("name")
+        var selectedHour = SELECTED_HOUR
+        val selectedMinute = SELECTED_MINUTE
+        val is24HourFormat = format == "duration"
+
         itemJsonObject.getSafeString("default")?.let {
             selectedTime.text = it
         }
-        label.text = parameterName
-
         val timeSetListener =
             TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
                 selectedHour = hourOfDay
 
-                var formattedResult: String
-                if (is24HourFormat) {
-                    formattedResult = "$selectedHour hours $minute minutes"
+                val formattedResult: String = if (is24HourFormat) {
+                    "$selectedHour hours $minute minutes"
                 } else {
-                    formattedResult = if (selectedHour >= 12) {
+                    if (selectedHour >= 12) {
                         "${selectedHour - 12}:$minute $PM_KEY"
                     } else {
                         "$selectedHour:$minute $AM_KEY"
                     }
                 }
                 selectedTime.text = formattedResult
-                var numberOfSeconds = selectedHour * 60 * 60 + minute * 60
+                val numberOfSeconds = selectedHour * 60 * 60 + minute * 60
                 onValueChanged(parameterName, numberOfSeconds, null)
             }
 
@@ -374,6 +662,16 @@ class TimeViewHolder(itemView: View, val format: String) :
             timePickerDialog.show()
         }
     }
+
+    override fun validate(): Boolean {
+        if (isMandatory() && selectedTime.text.trim().isEmpty()) {
+            showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+            return false
+        }
+
+        dismissErrorIfNeeded()
+        return true
+    }
 }
 
 /**
@@ -387,16 +685,13 @@ const val SELECTED_DAY = 10
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber")
 class DateViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
-    val label: TextView = itemView.findViewById(R.id.label)
-    val selectedDate: TextView = itemView.findViewById<TextView>(R.id.selectedDate)
+    private val selectedDate: TextView = itemView.findViewById<TextView>(R.id.selectedDate)
 
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
-        val itemJsonObject = item as JSONObject
-        val parameterName = itemJsonObject.getString("name")
+        super.bind(item, onValueChanged)
         itemJsonObject.getSafeString("default")?.let {
             selectedDate.text = it
         }
-        label.text = parameterName
         val dateSetListener =
             OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
                 val format = when (format) {
@@ -430,6 +725,17 @@ class DateViewHolder(itemView: View, val format: String) :
             datePickerDialog.show()
         }
     }
+
+    override fun validate(): Boolean {
+        if (isMandatory() && selectedDate.text.trim().isEmpty()) {
+            showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+            return false
+        }
+
+        dismissErrorIfNeeded()
+        return true
+    }
+
 }
 
 

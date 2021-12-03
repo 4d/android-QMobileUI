@@ -16,7 +16,6 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeObject
@@ -108,11 +107,9 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                     override fun onServerAccessible() {
                         entityViewModel.sendAction(
                             action.name,
-                            ActionContent(
-                                ActionHelper.getActionContext(
+                                ActionHelper.getActionContent(
                                     tableName,
                                     entityViewModel.entity.value?.__KEY
-                                )
                             )
                         ) {
                             it?.dataSynchro?.let { shouldSyncData ->

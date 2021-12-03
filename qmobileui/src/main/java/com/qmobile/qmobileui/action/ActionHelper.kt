@@ -4,12 +4,13 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 
 class ActionHelper {
     companion object {
-        fun getActionContext(
+        fun getActionContent(
             tableName: String,
             selectedActionId: String?,
             parameters: HashMap<String, Any>? = null,
             metaData: HashMap<String, String>? = null
-        ): Map<String, Any> {
+        ): MutableMap<String, Any> {
+            val map: MutableMap<String, Any> = mutableMapOf()
             val actionContext = mutableMapOf<String, Any>(
                 "dataClass" to
                         BaseApp.genericTableHelper.originalTableName(tableName)
@@ -17,14 +18,11 @@ class ActionHelper {
             if (selectedActionId != null) {
                 actionContext["entity"] = mapOf("primaryKey" to selectedActionId)
             }
-
-            if (parameters != null && parameters.isNotEmpty()) {
-                actionContext["parameters"] = parameters
-            }
-            if (metaData != null && metaData.isNotEmpty()) {
-                actionContext["metadata"] = ActionMetaData(metaData)
-            }
-            return actionContext
+            map["context"] = actionContext
+            parameters?.let { map.put("parameters", parameters) }
+            metaData?.let { map.put("metadata", ActionMetaData(metaData)) }
+            return map
         }
     }
+
 }

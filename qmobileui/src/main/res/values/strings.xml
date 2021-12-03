@@ -77,4 +77,10 @@
     <string name="action_item_image_content_description">Action item image</string>
     <string name="action_menu_title">More Options</string>
 
+    <string name="action_parameter_mandatory_error">Field required!</string>
+    <string name="action_parameter_min_value_error">Field value must be greater or equal than %s</string>
+    <string name="action_parameter_max_value_error">Field value must be smaller or equal than %s</string>
+    <string name="action_parameter_invalid_email_error">"Field value should be a valid email!"</string>
+    <string name="action_parameter_invalid_url_error">"Field value must be an URL!"</string>
+
 </resources>

@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import com.qmobile.qmobileui.R
 
 @Suppress("LongMethod")
-class ActionParameterViewHolderFactory private constructor(){
+class ActionParameterViewHolderFactory private constructor() {
     companion object {
         fun createViewHolderFromViewType(
             viewType: Int,
@@ -49,8 +49,7 @@ class ActionParameterViewHolderFactory private constructor(){
                 //Number
                 ActionParameterEnum.NUMBER_DEFAULT1,
                 ActionParameterEnum.NUMBER_DEFAULT2,
-                ActionParameterEnum.NUMBER_INTEGER,
-                ActionParameterEnum.NUMBER_SCIENTIFIC ->
+                ActionParameterEnum.NUMBER_INTEGER ->
                     NumberViewHolder(
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_number, parent, false), itemType.format
@@ -62,6 +61,11 @@ class ActionParameterViewHolderFactory private constructor(){
                     )
                 ActionParameterEnum.NUMBER_PERCENTAGE ->
                     PercentageViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_number, parent, false)
+                    )
+                ActionParameterEnum.NUMBER_SCIENTIFIC ->
+                    ScientificViewHolder(
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_number, parent, false)
                     )

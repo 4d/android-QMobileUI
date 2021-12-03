@@ -14,19 +14,30 @@
         android:text="TextView:"
         android:textColor="#000" />
 
-    <com.autofit.et.lib.AutoFitEditText
+    <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/editText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="left"
         android:layout_marginTop="7dp"
         android:background="#FFFFFF"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:gravity="center_vertical|center_horizontal"
+
         android:inputType="textMultiLine"
-        android:isScrollContainer="false"
-        android:minLines="5"
-        android:textColorHint="#A5A1A1"
-        android:textColor="@android:color/black" />
+        android:maxLines="15"
+        android:minLines="3"
+        android:paddingLeft="@dimen/param_edit_text_padding_left" />
+
+    <TextView
+        android:id="@+id/error_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_marginStart="7dp"
+        android:layout_marginTop="7dp"
+        android:textColor="@color/error_light"
+        android:textSize="@dimen/error_label_text_size"
+        android:visibility="gone"
+        tools:text="@string/action_parameter_mandatory_error"
+        tools:visibility="visible" />
 </LinearLayout>
 
