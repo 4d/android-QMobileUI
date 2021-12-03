@@ -86,7 +86,7 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
 /**
  * TEXT VIEW HOLDERS
  */
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class TextViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     var editText: TextView = itemView.findViewById(R.id.editText)
@@ -158,7 +158,7 @@ class TextViewHolder(itemView: View, val format: String) :
 
 }
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber","ReturnCount")
 class TextAreaViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var editText: TextView = itemView.findViewById(R.id.editText)
@@ -198,7 +198,7 @@ class TextAreaViewHolder(itemView: View) :
  * Number VIEW HOLDERS
  */
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber","ReturnCount")
 class NumberViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     private var editText: TextView = itemView.findViewById(R.id.editText)
@@ -282,7 +282,7 @@ class NumberViewHolder(itemView: View, val format: String) :
     }
 }
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber","ReturnCount")
 class SpellOutViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var editText: TextView = itemView.findViewById(R.id.editText)
@@ -371,7 +371,7 @@ class SpellOutViewHolder(itemView: View) :
     }
 }
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber","ReturnCount")
 class ScientificViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var editText: TextView = itemView.findViewById(R.id.editText)
@@ -464,7 +464,7 @@ class ScientificViewHolder(itemView: View) :
 const val PERCENT_KEY = "%"
 const val PERCENT_MULTIPLIER = 0.01F
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class PercentageViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var editText: TextView = itemView.findViewById(R.id.editText)
@@ -554,7 +554,7 @@ class PercentageViewHolder(itemView: View) :
  * BOOLEAN VIEW HOLDERS
  */
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class BooleanSwitchViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var switch: Switch = itemView.findViewById(R.id.switchButton)
@@ -571,7 +571,7 @@ class BooleanSwitchViewHolder(itemView: View) :
     }
 }
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 
 class BooleanCheckMarkViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
@@ -613,7 +613,7 @@ const val PM_KEY = "PM"
 const val SELECTED_HOUR = 12
 const val SELECTED_MINUTE = 30
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class TimeViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     private var selectedTime: TextView = itemView.findViewById(R.id.selectedTime)
@@ -682,7 +682,7 @@ const val SELECTED_YEAR = 2000
 const val SELECTED_MONTH = 5
 const val SELECTED_DAY = 10
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class DateViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     private val selectedDate: TextView = itemView.findViewById<TextView>(R.id.selectedDate)
