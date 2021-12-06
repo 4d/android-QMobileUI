@@ -221,11 +221,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                         DataSyncStateEnum.SYNCHRONIZED -> {
                             job?.cancel()
                             job = lifecycleScope.launch {
-                                mainActivityDataSync.dataSync.isDataSync = false
                                 entityListViewModel.getEntities { shouldSyncData ->
                                     if (shouldSyncData) {
                                         Timber.d("GlobalStamp changed, synchronization is required")
-                                        mainActivityDataSync.dataSync.isDataSync = true
                                         prepareDataSync(currentTableName)
                                     } else {
                                         Timber.d("GlobalStamp unchanged, no synchronization is required")

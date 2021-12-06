@@ -63,7 +63,6 @@ class MainActivityObserver(
                     if (entityListViewModel.isToSync.getAndSet(false)) {
                         job?.cancel()
                         job = activity.lifecycleScope.launch {
-                            activity.mainActivityDataSync.dataSync.isDataSync = true
                             entityListViewModel.getEntities {
                                 Timber.v("Requested data for ${entityListViewModel.getAssociatedTableName()}")
                                 activity.mainActivityDataSync.dataSync.observe(entityListViewModel)
