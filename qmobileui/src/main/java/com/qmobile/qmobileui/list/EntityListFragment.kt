@@ -167,10 +167,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 )
             },
             { selectedActionId ->
-                if ((hasCurrentRecordActions()) && (
-                    BaseApp.genericTableFragmentHelper.layoutType(
-                            tableName
-                        ) == "GRID"
+                if ((hasCurrentRecordActions()) &&
+                    !BaseApp.genericTableFragmentHelper.isSwipeAllowed(
+                        tableName
                     )
                 ) {
                     showDialog(selectedActionId, currentRecordActions)
@@ -231,10 +230,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
      * Initialize Swipe to delete
      */
     private fun initCellSwipe() {
-        if (hasCurrentRecordActions() && (
-            BaseApp.genericTableFragmentHelper.layoutType(
-                    tableName
-                ) == "LINEAR"
+        if (hasCurrentRecordActions() && BaseApp.genericTableFragmentHelper.isSwipeAllowed(
+                tableName
             )
         ) {
             val itemTouchHelper =
