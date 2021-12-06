@@ -104,7 +104,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
             delegate.setupActionsMenu(menu, actions) { action ->
                 if (action.parameters.length() > 0) {
 
-                    BaseApp.genericNavigationResolver.navigateToActionParameters(
+                    BaseApp.genericNavigationResolver.navigateToActionForm(
                         binding,
                         destinationTable = tableName
                     )

@@ -446,7 +446,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
                 if (action.parameters.length() > 0) {
 
-                    BaseApp.genericNavigationResolver.navigateToActionParameters(
+                    BaseApp.genericNavigationResolver.navigateToActionForm(
                         binding,
                         destinationTable = if (fromRelation) tableName else ""
                     )
