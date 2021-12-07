@@ -98,7 +98,7 @@ object Libs {
     const val swiperefreshlayout =
         "androidx.swiperefreshlayout:swiperefreshlayout:${Versions.swiperefreshlayout}"
     const val viewpager2 = "androidx.viewpager2:viewpager2:${Versions.viewpager2}"
-    
+
     // Room
     const val androidx_room = "androidx.room:room-ktx:${Versions.room}"
     const val androidx_room_runtime = "androidx.room:room-runtime:${Versions.room}"
