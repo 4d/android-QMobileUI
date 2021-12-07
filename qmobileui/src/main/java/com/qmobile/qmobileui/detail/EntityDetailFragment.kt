@@ -27,7 +27,6 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
-import com.qmobile.qmobileui.action.ActionFactory
 import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.ResourcesHelper
@@ -97,7 +96,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
             for (i in 0 until length) {
                 val jsonObject = actionsJsonObject.getSafeArray(tableName)?.getSafeObject(i)
                 jsonObject?.let {
-                    actions.add(ActionFactory.createActionFromJsonObject(it))
+                    actions.add(ActionHelper.createActionFromJsonObject(it))
                 }
             }
 

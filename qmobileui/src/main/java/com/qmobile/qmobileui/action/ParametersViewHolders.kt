@@ -165,7 +165,7 @@ class TextAreaViewHolder(itemView: View) :
 
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         super.bind(item, onValueChanged)
-        editText.hint = itemJsonObject.getString("placeholder")
+        editText.hint = itemJsonObject.getSafeString("placeholder")
         itemJsonObject.getSafeString("default")?.let {
             editText.text = it
         }
@@ -205,7 +205,7 @@ class NumberViewHolder(itemView: View, val format: String) :
 
     override fun bind(item: Any, onValueChanged: (String, Any, String?) -> Unit) {
         super.bind(item, onValueChanged)
-        editText.hint = itemJsonObject.getString("placeholder")
+        editText.hint = itemJsonObject.getSafeString("placeholder")
 
         itemJsonObject.getSafeString("default")?.let {
             editText.text = it

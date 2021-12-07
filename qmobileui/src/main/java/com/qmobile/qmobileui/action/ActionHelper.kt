@@ -1,6 +1,10 @@
 package com.qmobile.qmobileui.action
 
+import com.qmobile.qmobileapi.utils.getSafeArray
+import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
+import org.json.JSONArray
+import org.json.JSONObject
 
 class ActionHelper {
     companion object {
@@ -22,6 +26,18 @@ class ActionHelper {
             parameters?.let { map.put("parameters", parameters) }
             metaData?.let { map.put("metadata", ActionMetaData(metaData)) }
             return map
+        }
+
+        fun createActionFromJsonObject(jsonObject: JSONObject): Action {
+            jsonObject.apply {
+                return Action(
+                    name = getSafeString("name") ?: "",
+                    icon = getSafeString("icon"),
+                    shortLabel = getSafeString("shortLabel"),
+                    label = getSafeString("label"),
+                    parameters = getSafeArray("parameters") ?: JSONArray()
+                )
+            }
         }
     }
 

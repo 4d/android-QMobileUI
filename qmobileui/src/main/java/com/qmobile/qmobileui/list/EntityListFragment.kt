@@ -39,7 +39,6 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
-import com.qmobile.qmobileui.action.ActionFactory
 import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
@@ -225,7 +224,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             for (i in 0 until length) {
                 val jsonObject = tableActionsJsonObject.getSafeArray(tableName)?.getJSONObject(i)
                 jsonObject?.let {
-                    tableActions.add(ActionFactory.createActionFromJsonObject(it))
+                    tableActions.add(ActionHelper.createActionFromJsonObject(it))
                 }
 
             }
@@ -237,7 +236,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     currentRecordActionsJsonObject.getJSONArray(tableName).getJSONObject(i)
 
                 jsonObject?.let {
-                    currentRecordActions.add(ActionFactory.createActionFromJsonObject(it))
+                    currentRecordActions.add(ActionHelper.createActionFromJsonObject(it))
                 }
             }
         }
