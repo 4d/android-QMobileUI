@@ -7,12 +7,15 @@
 package com.qmobile.qmobileui.detail
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
+import androidx.core.view.children
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -30,6 +33,7 @@ import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.ResourcesHelper
+import com.qmobile.qmobileui.webview.MyWebViewClient
 
 open class EntityDetailFragment : Fragment(), BaseFragment {
 
@@ -41,6 +45,8 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
     val binding get() = _binding!!
     var tableName: String = ""
     private var actionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
+
+    private lateinit var webView: WebView
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -65,13 +71,66 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
             BaseApp.genericTableFragmentHelper.setEntityViewModel(this, entityViewModel)
             lifecycleOwner = viewLifecycleOwner
         }
-        setHasOptionsMenu(hasActions())
+
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        checkIfChildIsWebView(view)?.let { foundWebView ->
+            webView = foundWebView
+            webView.webViewClient = MyWebViewClient()
+        }
+        setHasOptionsMenu(::webView.isInitialized || hasActions())
+    }
+
+    @Suppress("ReturnCount")
+    private fun checkIfChildIsWebView(view: View): WebView? {
+        if (view is WebView) return view
+        if (view as? ViewGroup != null) {
+            (view as? ViewGroup)?.children?.forEach { child ->
+                if (child as? ViewGroup != null) {
+                    return checkIfChildIsWebView(child)
+                }
+                if (child is WebView) return child
+            }
+        }
+        return null
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         setupActionsMenuIfNeeded(menu)
+        setupWebViewMenuIfNeeded(menu)
         super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    private fun setupWebViewMenuIfNeeded(menu: Menu) {
+        menu.findItem(R.id.action_web_view_share).apply {
+            isVisible = ::webView.isInitialized
+            if (::webView.isInitialized) {
+                setOnMenuItemClickListener {
+                    val sendIntent: Intent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_TEXT, "This is my text to send.")
+                        type = "text/plain"
+                    }
+
+//                    val shareIntent = Intent.createChooser(sendIntent, "Share using")
+                    startActivity(sendIntent)
+
+                    true
+                }
+            }
+        }
+        menu.findItem(R.id.action_web_view_refresh).apply {
+            isVisible = ::webView.isInitialized
+            if (::webView.isInitialized) {
+                setOnMenuItemClickListener {
+                    webView.reload()
+                    true
+                }
+            }
+        }
     }
 
     private fun hasActions() = actionsJsonObject.has(tableName)

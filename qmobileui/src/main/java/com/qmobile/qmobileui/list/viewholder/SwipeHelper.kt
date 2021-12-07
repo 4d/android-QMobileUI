@@ -24,6 +24,7 @@ import kotlin.math.max
 const val HORIZONTAL_PADDING = 50.0f
 const val BUTTON_TEXT_SIZE = 14.0f
 const val ICON_RATIO = 0.25F
+const val ICON_WIDTH_RATIO = 0.75F
 const val TITLE_MARGIN_TOP_RATIO = 0.75F
 
 abstract class SwipeHelper(
@@ -182,8 +183,7 @@ abstract class SwipeHelper(
                     context,
                     iconResId
                 )
-                val iconWith = rect.width() * ICON_RATIO
-                val iconHeight = rect.height() * ICON_RATIO
+                val iconWith = rect.width() * ICON_WIDTH_RATIO + HORIZONTAL_PADDING.div(2)
 
                 iconDrawable?.apply {
                     setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
@@ -191,7 +191,7 @@ abstract class SwipeHelper(
                         (rect.left + rect.width() / 2 - iconWith.div(2))
                     val iconTop =
                         (rect.top + rect.height() * ICON_RATIO)
-                    val iconBottom = iconTop + iconHeight
+                    val iconBottom = iconTop + iconWith
                     val iconRight = iconLeft + iconWith
                     setBounds(
                         iconLeft.toInt(),

@@ -64,6 +64,8 @@
     <string name="network_status_image">Network Status Image</string>
     <string name="https_hint">https://…</string>
 
+    <string name="web_view_refresh">Refresh</string>
+    <string name="web_view_share">Share</string>
     <string name="previous">Previous</string>
     <string name="next">Next</string>
     <string name="search_title">search_title</string>
