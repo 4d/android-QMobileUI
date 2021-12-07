@@ -16,11 +16,8 @@ class Action(
     private val shortLabel: String?,
     val parameters: JSONArray
 ) {
-    fun getIconDrawablePath(): String? {
-        return icon?.let {
-            ResourcesHelper.correctIconPath(it)
-        }
-    }
+    fun getIconDrawablePath(): String? =
+        ResourcesHelper.correctIconPath(icon)
 
     fun getPreferredName(): String {
         return if (!label.isNullOrEmpty())
