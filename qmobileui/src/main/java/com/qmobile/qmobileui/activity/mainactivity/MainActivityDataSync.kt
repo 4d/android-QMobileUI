@@ -9,7 +9,7 @@ package com.qmobile.qmobileui.activity.mainactivity
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSync
-import com.qmobile.qmobiledatasync.sync.unsuccessfulSynchronizationNeedsLogin
+import com.qmobile.qmobiledatasync.sync.notifyDataUnSynced
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobileui.R
@@ -20,12 +20,13 @@ class MainActivityDataSync(private val activity: MainActivity) {
     // DataSync notifies MainActivity to go to login page
     private val loginRequiredCallbackForDataSync: LoginRequiredCallback = {
         if (!BaseApp.runtimeDataHolder.guestLogin) {
-            dataSync.unsuccessfulSynchronizationNeedsLogin(activity.entityListViewModelList)
+            activity.entityListViewModelList.notifyDataUnSynced()
             activity.startLoginActivity()
         }
     }
 
-    val dataSync = DataSync(activity, BaseApp.sharedPreferencesHolder, loginRequiredCallbackForDataSync)
+    val dataSync =
+        DataSync(activity, BaseApp.sharedPreferencesHolder, loginRequiredCallbackForDataSync)
 
     fun prepareDataSync(
         connectivityViewModel: ConnectivityViewModel,
@@ -34,7 +35,8 @@ class MainActivityDataSync(private val activity: MainActivity) {
         if (connectivityViewModel.isConnected()) {
             connectivityViewModel.isServerConnectionOk { isAccessible ->
                 if (isAccessible) {
-                    setDataSyncObserver(alreadyRefreshedTable)
+                    prepareViewModelsForDataSync(alreadyRefreshedTable)
+                    dataSync.setObserver(activity.entityListViewModelList)
                 } // else : Nothing to do, errors already provided in isServerConnectionOk
             }
         } else {
@@ -46,13 +48,12 @@ class MainActivityDataSync(private val activity: MainActivity) {
         }
     }
 
-    private fun setDataSyncObserver(alreadyRefreshedTable: String?) {
+    private fun prepareViewModelsForDataSync(alreadyRefreshedTable: String?) {
         activity.entityListViewModelList.map { it.isToSync.set(true) }
         alreadyRefreshedTable?.let {
             activity.entityListViewModelList.find {
                 it.getAssociatedTableName() == alreadyRefreshedTable
             }?.isToSync?.set(false)
         }
-        dataSync.setObserver(activity.entityListViewModelList, alreadyRefreshedTable)
     }
 }

@@ -36,8 +36,8 @@ class EntityListFragmentObserver(
         fragment.collectWhenStarted(entityListViewModel.dataSynchronized) { dataSyncState ->
             Timber.d(
                 "[DataSyncState : $dataSyncState, " +
-                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                        "Instance : $entityListViewModel]"
+                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+                    "Instance : $entityListViewModel]"
             )
         }
     }

@@ -65,7 +65,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     private var authenticationRequested = true
     private var shouldDelayOnForegroundEvent = AtomicBoolean(false)
     private var currentNavController: LiveData<NavController>? = null
-    lateinit var mainActivityDataSync: MainActivityDataSync
+    private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
     private var job: Job? = null
 
@@ -188,7 +188,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             refreshAllApiClients()
             entityListViewModelList.resetIsToSync()
         }
-        mainActivityDataSync.prepareDataSync(connectivityViewModel, null)
+        prepareDataSync(null)
     }
 
     override fun requestAuthentication() {
@@ -196,7 +196,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         tryAutoLogin()
     }
 
-    fun prepareDataSync(alreadyRefreshedTable: String?) {
+    private fun prepareDataSync(alreadyRefreshedTable: String?) {
         mainActivityDataSync.prepareDataSync(connectivityViewModel, alreadyRefreshedTable)
     }
 
@@ -232,17 +232,27 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                             }
                         }
                         DataSyncStateEnum.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
+                        DataSyncStateEnum.RESYNC ->
+                            Timber.d("Resynchronization table, because globalStamp changed while performing a dataSync")
                         else -> {}
                     }
                 }
             }
 
             override fun onServerInaccessible() {
-                // Nothing to do
+                connectivityViewModel.toastMessage.showMessage(
+                    getString(R.string.action_send_server_not_accessible),
+                    currentTableName,
+                    MessageType.ERROR
+                )
             }
 
             override fun onNoInternet() {
-                // Nothing to do
+                connectivityViewModel.toastMessage.showMessage(
+                    getString(R.string.action_send_no_internet),
+                    currentTableName,
+                    MessageType.ERROR
+                )
             }
         })
     }

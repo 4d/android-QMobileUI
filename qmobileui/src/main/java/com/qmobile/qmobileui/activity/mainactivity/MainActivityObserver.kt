@@ -55,17 +55,16 @@ class MainActivityObserver(
         activity.collectWhenStarted(entityListViewModel.dataSynchronized) { dataSyncState ->
             Timber.d(
                 "[DataSyncState : $dataSyncState, " +
-                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                        "Instance : $entityListViewModel]"
+                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+                    "Instance : $entityListViewModel]"
             )
             when (dataSyncState) {
-                DataSyncStateEnum.SYNCHRONIZING -> {
+                DataSyncStateEnum.SYNCHRONIZING, DataSyncStateEnum.RESYNC -> {
                     if (entityListViewModel.isToSync.getAndSet(false)) {
                         job?.cancel()
                         job = activity.lifecycleScope.launch {
                             entityListViewModel.getEntities {
                                 Timber.v("Requested data for ${entityListViewModel.getAssociatedTableName()}")
-                                activity.mainActivityDataSync.dataSync.observe(entityListViewModel)
                             }
                         }
                     }
