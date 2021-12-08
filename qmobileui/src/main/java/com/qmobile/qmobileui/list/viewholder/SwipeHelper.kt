@@ -24,7 +24,7 @@ import kotlin.math.max
 
 const val HORIZONTAL_PADDING = 50.0f
 const val BUTTON_TEXT_SIZE = 14.0f
-const val ICON_RATIO = 0.25F
+const val VERTICAL_MARGIN = 25F //Use as margin bottom from the center for icon and  as margin top from the center for title
 
 abstract class SwipeHelper(
     private val recyclerView: RecyclerView
@@ -177,16 +177,17 @@ abstract class SwipeHelper(
                         context.packageName
                     )
             }
-            val iconWith = rect.width() * (0.75F)
-            val iconHeight = rect.width() * (0.75F)
+            val iconWith = rect.width() * (0.5F)
+            val iconHeight = iconWith
+
             val iconLeft =
                 (rect.left + rect.width() / 2 - iconWith.div(2))
-            val iconTop =
-                (rect.top + rect.height() * ICON_RATIO)
-            val iconBottom = iconTop + iconHeight
+
+            val iconBottom = rect.bottom- rect.height()/2
+            val iconTop = iconBottom - iconHeight
             val iconRight = iconLeft + iconWith
 
-            var iconDrawable: Drawable?
+            val iconDrawable: Drawable?
             if (iconResId != 0) {
                 iconDrawable = AppCompatResources.getDrawable(
                     context,
@@ -211,11 +212,11 @@ abstract class SwipeHelper(
             paint.textSize = textSizeInPixel
             paint.typeface = Typeface.DEFAULT_BOLD
             paint.textAlign = Paint.Align.LEFT
+
             val titleBounds = Rect()
             paint.getTextBounds(title, 0, title.length, titleBounds)
             val x = rect.width() / 2 + titleBounds.width() / 2 - titleBounds.right
-            val y = rect.height() / 2 + titleBounds.height() / 2 - titleBounds.bottom
-            canvas.drawText(title, rect.left + x, rect.top + y, paint)
+            canvas.drawText(title, rect.left + x, iconBottom+ VERTICAL_MARGIN, paint)
             clickableRegion = rect
         }
 
