@@ -7,6 +7,8 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
@@ -22,9 +24,7 @@ import kotlin.math.max
 
 const val HORIZONTAL_PADDING = 50.0f
 const val BUTTON_TEXT_SIZE = 14.0f
-const val ICON_RATIO = 0.25F
-const val ICON_WIDTH_RATIO = 0.75F
-const val TITLE_MARGIN_TOP_RATIO = 0.75F
+const val VERTICAL_MARGIN = 25F //Use as margin bottom from the center for icon and  as margin top from the center for title
 
 abstract class SwipeHelper(
     private val recyclerView: RecyclerView
@@ -165,6 +165,7 @@ abstract class SwipeHelper(
             // Draw background
             paint.color = ColorHelper.getActionButtonColor(horizontalIndex, context)
             canvas.drawRect(rect, paint)
+
             // Draw icon
             var iconResId = 0
             val iconDrawablePath = action?.getIconDrawablePath()
@@ -176,53 +177,46 @@ abstract class SwipeHelper(
                         context.packageName
                     )
             }
+            val iconWith = rect.width() * (0.5F)
+            val iconHeight = iconWith
 
+            val iconLeft =
+                (rect.left + rect.width() / 2 - iconWith.div(2))
+
+            val iconBottom = rect.bottom- rect.height()/2
+            val iconTop = iconBottom - iconHeight
+            val iconRight = iconLeft + iconWith
+
+            val iconDrawable: Drawable?
             if (iconResId != 0) {
-                val iconDrawable = AppCompatResources.getDrawable(
+                iconDrawable = AppCompatResources.getDrawable(
                     context,
                     iconResId
                 )
-                val iconWith = rect.width() * ICON_WIDTH_RATIO + HORIZONTAL_PADDING.div(2)
-
-                iconDrawable?.apply {
-                    setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
-                    val iconLeft =
-                        (rect.left + rect.width() / 2 - iconWith.div(2))
-                    val iconTop =
-                        (rect.top + rect.height() * ICON_RATIO)
-                    val iconBottom = iconTop + iconWith
-                    val iconRight = iconLeft + iconWith
-                    setBounds(
-                        iconLeft.toInt(),
-                        iconTop.toInt(),
-                        iconRight.toInt(),
-                        iconBottom.toInt()
-                    )
-                    draw(canvas)
-
-                    // Draw title
-                    paint.color = context.getColorFromAttr(R.attr.colorOnPrimary)
-                    paint.textSize = textSizeInPixel
-                    paint.typeface = Typeface.DEFAULT
-                    paint.textAlign = Paint.Align.LEFT
-                    val titleBounds = Rect()
-                    paint.getTextBounds(title, 0, title.length, titleBounds)
-                    val x = rect.width() / 2 + titleBounds.width().div(2) - titleBounds.right
-                    val y = rect.top + rect.height() * TITLE_MARGIN_TOP_RATIO
-                    canvas.drawText(title, rect.left + x, y, paint)
-                }
+                iconDrawable?.setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
             } else {
-                // Draw title
-                paint.color = context.getColorFromAttr(R.attr.colorOnPrimary)
-                paint.textSize = textSizeInPixel
-                paint.typeface = Typeface.DEFAULT_BOLD
-                paint.textAlign = Paint.Align.LEFT
-                val titleBounds = Rect()
-                paint.getTextBounds(title, 0, title.length, titleBounds)
-                val x = rect.width() / 2 + titleBounds.width() / 2 - titleBounds.right
-                val y = rect.height() / 2 + titleBounds.height() / 2 - titleBounds.bottom
-                canvas.drawText(title, rect.left + x, rect.top + y, paint)
+                iconDrawable =
+                    ColorDrawable(ColorHelper.getActionButtonColor(horizontalIndex, context));
             }
+
+            iconDrawable?.setBounds(
+                iconLeft.toInt(),
+                iconTop.toInt(),
+                iconRight.toInt(),
+                iconBottom.toInt()
+            )
+            iconDrawable?.draw(canvas)
+
+            // Draw title
+            paint.color = context.getColorFromAttr(R.attr.colorOnPrimary)
+            paint.textSize = textSizeInPixel
+            paint.typeface = Typeface.DEFAULT_BOLD
+            paint.textAlign = Paint.Align.LEFT
+
+            val titleBounds = Rect()
+            paint.getTextBounds(title, 0, title.length, titleBounds)
+            val x = rect.width() / 2 + titleBounds.width() / 2 - titleBounds.right
+            canvas.drawText(title, rect.left + x, iconBottom+ VERTICAL_MARGIN, paint)
             clickableRegion = rect
         }
 
