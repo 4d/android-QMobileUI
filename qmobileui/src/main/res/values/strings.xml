@@ -73,8 +73,16 @@
     <!-- Actions -->
     <string name="action_send_no_internet">Please check your network settings and data cover…</string>
     <string name="action_send_server_not_accessible">The server is not available</string>
+    <string name="validate_action">Validate</string>
+
     <string name="action_image_content_description">Action dots</string>
     <string name="action_item_image_content_description">Action item image</string>
     <string name="action_menu_title">More Options</string>
+
+    <string name="action_parameter_mandatory_error">Field required!</string>
+    <string name="action_parameter_min_value_error">Field value must be greater or equal than %s</string>
+    <string name="action_parameter_max_value_error">Field value must be smaller or equal than %s</string>
+    <string name="action_parameter_invalid_email_error">"Field value should be a valid email!"</string>
+    <string name="action_parameter_invalid_url_error">"Field value must be an URL!"</string>
 
 </resources>

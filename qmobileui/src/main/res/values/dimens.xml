@@ -20,4 +20,9 @@
     <!--    Error Fragment -->
     <dimen name="fragment_error_text_vertical_padding">24dp</dimen>
     <dimen name="fragment_error_text_horizontal_padding">56dp</dimen>
+
+    <!-- Action parameters item -->
+    <dimen name="param_item_min_height">40dp</dimen>
+    <dimen name="error_label_text_size">12sp</dimen>
+    <dimen name="param_edit_text_padding_left">7sp</dimen>
 </resources>

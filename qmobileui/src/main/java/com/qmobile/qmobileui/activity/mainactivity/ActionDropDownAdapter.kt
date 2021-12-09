@@ -8,13 +8,13 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.actions.Action
 
 class ActionDropDownAdapter(
     val context: Context,
     private val items: ArrayList<Action>,
-    val onMenuItemClick: (String) -> Unit
+    val onMenuItemClick: (Action) -> Unit
 ) :
     BaseAdapter() {
     override fun getCount(): Int {
@@ -53,8 +53,9 @@ class ActionDropDownAdapter(
             0
         }
         itemImage.setImageResource(resId)
-        newConvertView.setOnClickListener {
-            onMenuItemClick(item.name)
+        newConvertView.setOnClickListener { _ ->
+            onMenuItemClick(item)
+
         }
         return newConvertView
     }
