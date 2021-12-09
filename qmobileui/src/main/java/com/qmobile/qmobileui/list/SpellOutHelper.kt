@@ -2,8 +2,6 @@ package com.qmobile.qmobileui.list
 
 import java.text.DecimalFormat
 
-@Suppress( "MagicNumber")
-
 object SpellOutHelper {
     private val tensNames = arrayOf(
         "",
@@ -99,5 +97,4 @@ object SpellOutHelper {
         // remove extra spaces!
         return result.replace("^\\s+".toRegex(), "").replace("\\b\\s{2,}\\b".toRegex(), " ")
     }
-
 }

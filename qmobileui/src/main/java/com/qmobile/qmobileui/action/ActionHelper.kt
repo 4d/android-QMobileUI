@@ -17,7 +17,7 @@ class ActionHelper {
             val map: MutableMap<String, Any> = mutableMapOf()
             val actionContext = mutableMapOf<String, Any>(
                 "dataClass" to
-                        BaseApp.genericTableHelper.originalTableName(tableName)
+                    BaseApp.genericTableHelper.originalTableName(tableName)
             )
             if (selectedActionId != null) {
                 actionContext["entity"] = mapOf("primaryKey" to selectedActionId)

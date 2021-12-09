@@ -46,13 +46,14 @@ class ActionParameterViewHolderFactory private constructor() {
                             .inflate(R.layout.item_parameter_boolean_check_mark, parent, false)
                     )
 
-                //Number
+                // Number
                 ActionParameterEnum.NUMBER_DEFAULT1,
                 ActionParameterEnum.NUMBER_DEFAULT2,
                 ActionParameterEnum.NUMBER_INTEGER ->
                     NumberViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_number, parent, false), itemType.format
+                            .inflate(R.layout.item_parameter_number, parent, false),
+                        itemType.format
                     )
                 ActionParameterEnum.NUMBER_SPELL_OUT ->
                     SpellOutViewHolder(
@@ -78,7 +79,8 @@ class ActionParameterViewHolderFactory private constructor() {
                 ActionParameterEnum.DATE_LONG ->
                     DateViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_date, parent, false), itemType.format
+                            .inflate(R.layout.item_parameter_date, parent, false),
+                        itemType.format
                     )
 
                 // Time
@@ -86,7 +88,8 @@ class ActionParameterViewHolderFactory private constructor() {
                 ActionParameterEnum.TIME_DURATION ->
                     TimeViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_time, parent, false), itemType.format
+                            .inflate(R.layout.item_parameter_time, parent, false),
+                        itemType.format
                     )
 
                 // Image

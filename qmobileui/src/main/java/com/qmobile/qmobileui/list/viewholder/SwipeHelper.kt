@@ -14,9 +14,8 @@ import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.qmobile.qmobileui.action.Action
-
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.utils.ColorHelper
 import java.util.LinkedList
@@ -25,7 +24,7 @@ import kotlin.math.max
 
 const val HORIZONTAL_PADDING = 50.0f
 const val BUTTON_TEXT_SIZE = 14.0f
-//Use as margin bottom from the center for icon and  as margin top from the center for title
+// Use as margin bottom from the center for icon and  as margin top from the center for title
 const val VERTICAL_MARGIN = 25F
 const val ICON_WIDTH_FACTOR = 0.5F
 
@@ -186,7 +185,7 @@ abstract class SwipeHelper(
             val iconLeft =
                 (rect.left + rect.width() / 2 - iconWith.div(2))
 
-            val iconBottom = rect.bottom- rect.height()/2
+            val iconBottom = rect.bottom - rect.height() / 2
             val iconTop = iconBottom - iconHeight
             val iconRight = iconLeft + iconWith
 
@@ -199,7 +198,7 @@ abstract class SwipeHelper(
                 iconDrawable?.setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
             } else {
                 iconDrawable =
-                    ColorDrawable(ColorHelper.getActionButtonColor(horizontalIndex, context));
+                    ColorDrawable(ColorHelper.getActionButtonColor(horizontalIndex, context))
             }
 
             iconDrawable?.setBounds(
@@ -219,7 +218,7 @@ abstract class SwipeHelper(
             val titleBounds = Rect()
             paint.getTextBounds(title, 0, title.length, titleBounds)
             val x = rect.width() / 2 + titleBounds.width() / 2 - titleBounds.right
-            canvas.drawText(title, rect.left + x, iconBottom+ VERTICAL_MARGIN, paint)
+            canvas.drawText(title, rect.left + x, iconBottom + VERTICAL_MARGIN, paint)
             clickableRegion = rect
         }
 

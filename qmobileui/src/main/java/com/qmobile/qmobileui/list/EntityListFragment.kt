@@ -171,8 +171,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
                 if ((hasCurrentRecordActions()) &&
                     !BaseApp.genericTableFragmentHelper.isSwipeAllowed(
-                        tableName
-                    )
+                            tableName
+                        )
                 ) {
                     showDialog(selectedActionId, currentRecordActions)
                 }
@@ -228,7 +228,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 jsonObject?.let {
                     tableActions.add(ActionHelper.createActionFromJsonObject(it))
                 }
-
             }
         }
         if (hasCurrentRecordActions()) {
@@ -363,7 +362,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
         sendAction(actionName, selectedActionId)
     }
 
-
     private fun syncDataIfNeeded(shouldSyncData: Boolean) {
         if (shouldSyncData) {
             forceSyncData()
@@ -448,14 +446,13 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
                     BaseApp.genericNavigationResolver.navigateToActionForm(
                         binding,
-                        destinationTable =  tableName
+                        destinationTable = tableName
                     )
 
                     delegate.setSelectAction(action)
                 } else {
                     sendAction(action.name, null)
                 }
-
             }
         }
     }

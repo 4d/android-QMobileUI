@@ -43,10 +43,9 @@ import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
-import com.qmobile.qmobileui.action.Action
-
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.network.NetworkChecker
@@ -286,7 +285,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         menu: Menu,
         actions: List<Action>,
         onMenuItemClick: (Action) -> Unit
-    ){
+    ) {
         menuInflater.inflate(R.menu.menu_action, menu)
 
         val menuItem =

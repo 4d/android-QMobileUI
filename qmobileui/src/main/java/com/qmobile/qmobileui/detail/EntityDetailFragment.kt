@@ -173,10 +173,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                         override fun onServerAccessible() {
                             entityViewModel.sendAction(
                                 action.name,
-                                ActionHelper.getActionContent(
-                                    tableName,
-                                    entityViewModel.entity.value?.__KEY
-                                )
+                                ActionHelper.getActionContent(tableName, itemId)
                             ) {
                                 it?.dataSynchro?.let { shouldSyncData ->
                                     if (shouldSyncData) {
@@ -202,7 +199,6 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                             )
                         }
                     })
-
                 }
             }
         }

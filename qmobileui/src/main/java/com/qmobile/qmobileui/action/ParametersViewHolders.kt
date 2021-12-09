@@ -1,29 +1,28 @@
 package com.qmobile.qmobileui.action
 
-import android.app.TimePickerDialog
-import android.view.View
-import androidx.recyclerview.widget.RecyclerView
-import com.qmobile.qmobileui.R
-import org.json.JSONObject
-import com.qmobile.qmobileapi.utils.getSafeString
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
+import android.app.TimePickerDialog
 import android.text.Editable
 import android.text.InputType
 import android.text.Selection
 import android.text.Spannable
 import android.text.TextWatcher
 import android.util.Patterns
+import android.view.View
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Switch
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeObject
-
+import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.list.SpellOutHelper
+import org.json.JSONObject
 import java.text.DecimalFormat
 
 abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -144,7 +143,7 @@ class TextViewHolder(itemView: View, val format: String) :
         }
 
         if (isMandatory() && (format == ActionParameterEnum.TEXT_URL.format)) {
-            val isValidUrl = Patterns.WEB_URL.matcher(editText.text).matches();
+            val isValidUrl = Patterns.WEB_URL.matcher(editText.text).matches()
             if (!isValidUrl) {
                 showError(itemView.context.resources.getString(R.string.action_parameter_invalid_url_error))
                 return false
@@ -154,11 +153,9 @@ class TextViewHolder(itemView: View, val format: String) :
         dismissErrorIfNeeded()
         return true
     }
-
-
 }
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber","ReturnCount")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class TextAreaViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var editText: TextView = itemView.findViewById(R.id.editText)
@@ -198,7 +195,7 @@ class TextAreaViewHolder(itemView: View) :
  * Number VIEW HOLDERS
  */
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber","ReturnCount")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class NumberViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     private var editText: TextView = itemView.findViewById(R.id.editText)
@@ -241,7 +238,6 @@ class NumberViewHolder(itemView: View, val format: String) :
                 }
             }
         })
-
     }
 
     override fun validate(): Boolean {
@@ -282,7 +278,7 @@ class NumberViewHolder(itemView: View, val format: String) :
     }
 }
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber","ReturnCount")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class SpellOutViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var editText: TextView = itemView.findViewById(R.id.editText)
@@ -318,7 +314,6 @@ class SpellOutViewHolder(itemView: View) :
 
             if (hasFocus && (numericValue != null)) {
                 editText.text = numericValue.toString()
-
             } else {
                 numericValue?.let {
                     onValueChanged(
@@ -371,7 +366,7 @@ class SpellOutViewHolder(itemView: View) :
     }
 }
 
-@Suppress("ComplexMethod", "LongMethod", "MagicNumber","ReturnCount")
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class ScientificViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var editText: TextView = itemView.findViewById(R.id.editText)
@@ -408,7 +403,6 @@ class ScientificViewHolder(itemView: View) :
 
             if (hasFocus && (numericValue != null)) {
                 editText.text = numericValue.toString()
-
             } else {
 
                 numericValue?.let {
@@ -420,7 +414,6 @@ class ScientificViewHolder(itemView: View) :
 
                     val numFormat = DecimalFormat("0.#####E0")
                     editText.text = numFormat.format(numericValue)
-
                 }
             }
         }
@@ -479,7 +472,7 @@ class PercentageViewHolder(itemView: View) :
 
         (editText as EditText).addSuffix(PERCENT_KEY)
         editText.inputType = InputType.TYPE_CLASS_NUMBER
-        //editText.text = PERCENT_KEY
+        // editText.text = PERCENT_KEY
         Selection.setSelection(editText.text as Spannable?, editText.text.length - 1)
 
         editText.addTextChangedListener(object : TextWatcher {
@@ -500,7 +493,9 @@ class PercentageViewHolder(itemView: View) :
             }
 
             override fun beforeTextChanged(
-                s: CharSequence, start: Int, count: Int,
+                s: CharSequence,
+                start: Int,
+                count: Int,
                 after: Int
             ) {
                 // Nothing to do
@@ -588,7 +583,6 @@ class BooleanCheckMarkViewHolder(itemView: View) :
         return true
     }
 }
-
 
 /**
  * IMAGE VIEW HOLDERS
@@ -735,7 +729,4 @@ class DateViewHolder(itemView: View, val format: String) :
         dismissErrorIfNeeded()
         return true
     }
-
 }
-
-
