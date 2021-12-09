@@ -29,8 +29,8 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.ui.NetworkChecker
-import com.qmobile.qmobileui.ui.RemoteUrlChange
+import com.qmobile.qmobileui.network.NetworkChecker
+import com.qmobile.qmobileui.network.RemoteUrlChange
 import com.qmobile.qmobileui.ui.ViewUtils
 import com.qmobile.qmobileui.ui.clearViewInParent
 import com.qmobile.qmobileui.utils.ResourcesHelper

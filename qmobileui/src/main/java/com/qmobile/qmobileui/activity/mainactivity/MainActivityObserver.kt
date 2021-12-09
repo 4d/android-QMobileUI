@@ -8,7 +8,6 @@
 package com.qmobile.qmobileui.activity.mainactivity
 
 import android.annotation.SuppressLint
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
@@ -18,6 +17,7 @@ import com.qmobile.qmobiledatasync.utils.collectWhenStarted
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -37,13 +37,10 @@ class MainActivityObserver(
     }
 
     // Observe any toast message from Entity Detail
-    fun observeEntityToastMessage(message: LiveData<Event<ToastMessageHolder>>) {
-        message.observe(
-            activity,
-            { event ->
-                activity.handleEvent(event)
-            }
-        )
+    fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>) {
+        activity.collectWhenStarted(message) { event ->
+            activity.handleEvent(event)
+        }
     }
 
     // Observe when data are synchronized
@@ -77,24 +74,21 @@ class MainActivityObserver(
     // Observe when there is a new related entity to be inserted in a dao
     private fun observeNewRelatedEntity(entityListViewModel: EntityListViewModel<EntityModel>) {
         activity.collectWhenStarted(entityListViewModel.newRelatedEntity) { manyToOneRelation ->
-            manyToOneRelation?.let { activity.dispatchNewRelatedEntity(it) }
+            activity.dispatchNewRelatedEntity(manyToOneRelation)
         }
     }
 
     // Observe when there is a related entities to be inserted in a dao
     private fun observeNewRelatedEntities(entityListViewModel: EntityListViewModel<EntityModel>) {
         activity.collectWhenStarted(entityListViewModel.newRelatedEntities) { oneToManyRelation ->
-            oneToManyRelation?.let { activity.dispatchNewRelatedEntities(it) }
+            activity.dispatchNewRelatedEntities(oneToManyRelation)
         }
     }
 
     // Observe any toast message from EntityList
     private fun observeEntityListToastMessage(entityListViewModel: EntityListViewModel<EntityModel>) {
-        entityListViewModel.toastMessage.message.observe(
-            activity,
-            { event ->
-                activity.handleEvent(event)
-            }
-        )
+        activity.collectWhenStarted(entityListViewModel.toastMessage.message) { event ->
+            activity.handleEvent(event)
+        }
     }
 }

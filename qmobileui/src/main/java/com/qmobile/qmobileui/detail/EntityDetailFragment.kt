@@ -30,7 +30,7 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.actions.Action
 import com.qmobile.qmobileui.actions.addActions
-import com.qmobile.qmobileui.ui.NetworkChecker
+import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.webview.MyWebViewClient
 
@@ -192,11 +192,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
     private fun getActionContext(): Map<String, Any> {
         return mapOf(
             "dataClass" to BaseApp.genericTableHelper.originalTableName(tableName),
-            "entity" to
-                mapOf(
-                    "primaryKey" to
-                        entityViewModel.entity.value?.__KEY
-                )
+            "entity" to mapOf("primaryKey" to itemId)
         )
     }
 

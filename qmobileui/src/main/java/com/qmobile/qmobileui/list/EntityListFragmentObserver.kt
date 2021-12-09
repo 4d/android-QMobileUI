@@ -56,7 +56,7 @@ class EntityListFragmentObserver(
 
     private fun observeEntityList() {
         fragment.lifecycleScope.launch {
-            entityListViewModel.entityListFlow.distinctUntilChanged().collectLatest {
+            entityListViewModel.entityListPagingDataFlow.distinctUntilChanged().collectLatest {
                 fragment.adapter.submitData(it)
             }
         }

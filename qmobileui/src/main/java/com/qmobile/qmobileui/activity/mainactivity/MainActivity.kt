@@ -49,10 +49,11 @@ import com.qmobile.qmobileui.actions.Action
 import com.qmobile.qmobileui.actions.DROP_DOWN_WIDTH
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
-import com.qmobile.qmobileui.ui.NetworkChecker
+import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.setupWithNavController
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
@@ -327,7 +328,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     }
 
     // Observe any toast message from Entity Detail
-    override fun observeEntityToastMessage(message: LiveData<Event<ToastMessageHolder>>) {
+    override fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>) {
         mainActivityObserver.observeEntityToastMessage(message)
     }
 

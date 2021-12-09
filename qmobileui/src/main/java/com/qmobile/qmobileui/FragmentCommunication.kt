@@ -8,15 +8,15 @@ package com.qmobile.qmobileui
 
 import android.net.ConnectivityManager
 import android.view.Menu
-import androidx.lifecycle.LiveData
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobileui.actions.Action
-import com.qmobile.qmobileui.ui.NetworkChecker
-import com.qmobile.qmobileui.ui.RemoteUrlChange
+import com.qmobile.qmobileui.network.NetworkChecker
+import com.qmobile.qmobileui.network.RemoteUrlChange
+import kotlinx.coroutines.flow.SharedFlow
 
 /**
  * Interface implemented by MainActivity to provide elements that depend on generated type
@@ -41,7 +41,7 @@ interface FragmentCommunication {
 
     fun checkNetwork(networkChecker: NetworkChecker)
 
-    fun observeEntityToastMessage(message: LiveData<Event<ToastMessageHolder>>)
+    fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>)
 
     fun setupActionsMenu(menu: Menu, actions: List<Action>, onMenuItemClick: (String) -> Unit)
 }
