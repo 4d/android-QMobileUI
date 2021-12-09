@@ -27,7 +27,8 @@ class BounceEdgeEffectFactory : RecyclerView.EdgeEffectFactory() {
 
         return object : EdgeEffect(recyclerView.context) {
 
-            // A reference to the [SpringAnimation] for this RecyclerView used to bring the item back after the over-scroll effect.
+            // A reference to the [SpringAnimation] for this RecyclerView used to bring the item
+            // back after the over-scroll effect.
             var translationAnim: SpringAnimation? = null
 
             override fun onPull(deltaDistance: Float) {
@@ -88,7 +89,6 @@ class BounceEdgeEffectFactory : RecyclerView.EdgeEffectFactory() {
                         .setDampingRatio(SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY)
                         .setStiffness(SpringForce.STIFFNESS_LOW)
                 )
-
         }
     }
 }

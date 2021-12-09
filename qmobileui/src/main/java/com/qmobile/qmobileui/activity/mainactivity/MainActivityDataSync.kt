@@ -26,9 +26,14 @@ class MainActivityDataSync(private val activity: MainActivity) {
     }
 
     val dataSync =
-        DataSync(activity, BaseApp.sharedPreferencesHolder, loginRequiredCallbackForDataSync)
+        DataSync(
+            activity,
+            activity.entityListViewModelList,
+            BaseApp.sharedPreferencesHolder,
+            loginRequiredCallbackForDataSync
+        )
 
-    fun prepareDataSync(
+    fun dataSync(
         connectivityViewModel: ConnectivityViewModel,
         alreadyRefreshedTable: String?
     ) {
@@ -36,7 +41,7 @@ class MainActivityDataSync(private val activity: MainActivity) {
             connectivityViewModel.isServerConnectionOk { isAccessible ->
                 if (isAccessible) {
                     prepareViewModelsForDataSync(alreadyRefreshedTable)
-                    dataSync.setObserver(activity.entityListViewModelList)
+                    dataSync.perform()
                 } // else : Nothing to do, errors already provided in isServerConnectionOk
             }
         } else {

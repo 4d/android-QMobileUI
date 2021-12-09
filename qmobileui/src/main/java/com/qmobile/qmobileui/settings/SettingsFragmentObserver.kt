@@ -6,7 +6,7 @@
 
 package com.qmobile.qmobileui.settings
 
-import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
+import com.qmobile.qmobiledatasync.network.NetworkStateEnum
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 

@@ -30,9 +30,9 @@ import androidx.databinding.DataBindingUtil
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.auth.isEmailValid
-import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.network.NetworkStateEnum
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity

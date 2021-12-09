@@ -27,12 +27,12 @@ import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
-import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.network.NetworkStateEnum
 import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
 import com.qmobile.qmobiledatasync.relation.OneToManyRelation
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
@@ -80,9 +80,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Init data sync class
-        mainActivityDataSync = MainActivityDataSync(this)
-
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -100,6 +97,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         mainActivityObserver = MainActivityObserver(this, entityListViewModelList).apply {
             initObservers()
         }
+
+        // Init data sync class
+        mainActivityDataSync = MainActivityDataSync(this)
 
         // Follow activity lifecycle and check when activity enters foreground for data sync
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
@@ -189,7 +189,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             refreshAllApiClients()
             entityListViewModelList.resetIsToSync()
         }
-        prepareDataSync(null)
+        dataSync()
     }
 
     override fun requestAuthentication() {
@@ -197,8 +197,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         tryAutoLogin()
     }
 
-    private fun prepareDataSync(alreadyRefreshedTable: String?) {
-        mainActivityDataSync.prepareDataSync(connectivityViewModel, alreadyRefreshedTable)
+    private fun dataSync(alreadyRefreshedTable: String? = null) {
+        mainActivityDataSync.dataSync(connectivityViewModel, alreadyRefreshedTable)
     }
 
     /**
@@ -218,14 +218,14 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                 } else {
                     // AUTHENTICATED
                     when (entityListViewModel?.dataSynchronized?.value) {
-                        DataSyncStateEnum.UNSYNCHRONIZED -> prepareDataSync(null)
+                        DataSyncStateEnum.UNSYNCHRONIZED -> dataSync()
                         DataSyncStateEnum.SYNCHRONIZED -> {
                             job?.cancel()
                             job = lifecycleScope.launch {
                                 entityListViewModel.getEntities { shouldSyncData ->
                                     if (shouldSyncData) {
                                         Timber.d("GlobalStamp changed, synchronization is required")
-                                        prepareDataSync(currentTableName)
+                                        dataSync(currentTableName)
                                     } else {
                                         Timber.d("GlobalStamp unchanged, no synchronization is required")
                                     }
