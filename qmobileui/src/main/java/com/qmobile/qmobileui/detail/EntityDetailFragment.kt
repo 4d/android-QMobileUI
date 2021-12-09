@@ -19,8 +19,9 @@ import androidx.core.view.children
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.utils.getSafeArray
+import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
@@ -28,8 +29,8 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.actions.Action
-import com.qmobile.qmobileui.actions.addActions
+import com.qmobile.qmobileui.action.Action
+import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.webview.MyWebViewClient
@@ -150,50 +151,61 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasActions()) {
             val actions = mutableListOf<Action>()
-            actions.addActions(actionsJsonObject, tableName)
+            val length = actionsJsonObject.getJSONArray(tableName).length()
+            for (i in 0 until length) {
+                val jsonObject = actionsJsonObject.getSafeArray(tableName)?.getSafeObject(i)
+                jsonObject?.let {
+                    actions.add(ActionHelper.createActionFromJsonObject(it))
+                }
+            }
 
-            delegate.setupActionsMenu(menu, actions) { name ->
-                delegate.checkNetwork(object : NetworkChecker {
-                    override fun onServerAccessible() {
-                        entityViewModel.sendAction(
-                            name,
-                            ActionContent(
-                                getActionContext()
-                            )
-                        ) {
-                            it?.dataSynchro?.let { shouldSyncData ->
-                                if (shouldSyncData) {
-                                    forceSyncData()
+            delegate.setupActionsMenu(menu, actions) { action ->
+                if (action.parameters.length() > 0) {
+
+                    BaseApp.genericNavigationResolver.navigateToActionForm(
+                        binding,
+                        destinationTable = tableName
+                    )
+
+                    delegate.setSelectAction(action)
+                } else {
+                    delegate.checkNetwork(object : NetworkChecker {
+                        override fun onServerAccessible() {
+                            entityViewModel.sendAction(
+                                action.name,
+                                ActionHelper.getActionContent(
+                                    tableName,
+                                    entityViewModel.entity.value?.__KEY
+                                )
+                            ) {
+                                it?.dataSynchro?.let { shouldSyncData ->
+                                    if (shouldSyncData) {
+                                        forceSyncData()
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    override fun onServerInaccessible() {
-                        entityViewModel.toastMessage.showMessage(
-                            context?.getString(R.string.action_send_server_not_accessible),
-                            tableName,
-                            MessageType.ERROR
-                        )
-                    }
+                        override fun onServerInaccessible() {
+                            entityViewModel.toastMessage.showMessage(
+                                context?.getString(R.string.action_send_server_not_accessible),
+                                tableName,
+                                MessageType.ERROR
+                            )
+                        }
 
-                    override fun onNoInternet() {
-                        entityViewModel.toastMessage.showMessage(
-                            context?.getString(R.string.action_send_no_internet),
-                            tableName,
-                            MessageType.ERROR
-                        )
-                    }
-                })
+                        override fun onNoInternet() {
+                            entityViewModel.toastMessage.showMessage(
+                                context?.getString(R.string.action_send_no_internet),
+                                tableName,
+                                MessageType.ERROR
+                            )
+                        }
+                    })
+
+                }
             }
         }
-    }
-
-    private fun getActionContext(): Map<String, Any> {
-        return mapOf(
-            "dataClass" to BaseApp.genericTableHelper.originalTableName(tableName),
-            "entity" to mapOf("primaryKey" to itemId)
-        )
     }
 
     private fun forceSyncData() {

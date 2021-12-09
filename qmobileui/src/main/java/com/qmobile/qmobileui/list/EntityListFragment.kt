@@ -29,8 +29,8 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmobile.qmobileapi.model.action.ActionContent
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -38,8 +38,8 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.actions.Action
-import com.qmobile.qmobileui.actions.addActions
+import com.qmobile.qmobileui.action.Action
+import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
@@ -168,10 +168,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 )
             },
             { selectedActionId ->
-                if ((hasCurrentRecordActions()) && (
-                    BaseApp.genericTableFragmentHelper.layoutType(
-                            tableName
-                        ) == "GRID"
+
+                if ((hasCurrentRecordActions()) &&
+                    !BaseApp.genericTableFragmentHelper.isSwipeAllowed(
+                        tableName
                     )
                 ) {
                     showDialog(selectedActionId, currentRecordActions)
@@ -222,10 +222,25 @@ open class EntityListFragment : Fragment(), BaseFragment {
         tableActions.clear()
         currentRecordActions.clear()
         if (hasTableActions()) {
-            tableActions.addActions(tableActionsJsonObject, tableName)
+            val length = tableActionsJsonObject.getJSONArray(tableName).length()
+            for (i in 0 until length) {
+                val jsonObject = tableActionsJsonObject.getSafeArray(tableName)?.getJSONObject(i)
+                jsonObject?.let {
+                    tableActions.add(ActionHelper.createActionFromJsonObject(it))
+                }
+
+            }
         }
         if (hasCurrentRecordActions()) {
-            currentRecordActions.addActions(currentRecordActionsJsonObject, tableName)
+            val length = currentRecordActionsJsonObject.getJSONArray(tableName).length()
+            for (i in 0 until (length)) {
+                val jsonObject =
+                    currentRecordActionsJsonObject.getJSONArray(tableName).getJSONObject(i)
+
+                jsonObject?.let {
+                    currentRecordActions.add(ActionHelper.createActionFromJsonObject(it))
+                }
+            }
         }
     }
 
@@ -233,10 +248,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
      * Initialize Swipe to delete
      */
     private fun initCellSwipe() {
-        if (hasCurrentRecordActions() && (
-            BaseApp.genericTableFragmentHelper.layoutType(
-                    tableName
-                ) == "LINEAR"
+
+        if (hasCurrentRecordActions() && BaseApp.genericTableFragmentHelper.isSwipeAllowed(
+                tableName
             )
         ) {
             val itemTouchHelper =
@@ -317,9 +331,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             override fun onServerAccessible() {
                 entityListViewModel.sendAction(
                     actionName,
-                    ActionContent(
-                        getActionContext(selectedActionId)
-                    )
+                    ActionHelper.getActionContent(tableName, selectedActionId)
                 ) { actionResponse ->
                     actionResponse?.let {
                         actionResponse.dataSynchro?.let { dataSynchro ->
@@ -351,15 +363,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
         sendAction(actionName, selectedActionId)
     }
 
-    private fun getActionContext(selectedActionId: String?): Map<String, Any> {
-        val actionContext = mutableMapOf<String, Any>(
-            "dataClass" to BaseApp.genericTableHelper.originalTableName(tableName)
-        )
-        if (selectedActionId != null) {
-            actionContext["entity"] = mapOf("primaryKey" to selectedActionId)
-        }
-        return actionContext
-    }
 
     private fun syncDataIfNeeded(shouldSyncData: Boolean) {
         if (shouldSyncData) {
@@ -439,8 +442,20 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasTableActions()) {
-            delegate.setupActionsMenu(menu, tableActions) { name ->
-                sendAction(name, null)
+            delegate.setupActionsMenu(menu, tableActions) { action ->
+
+                if (action.parameters.length() > 0) {
+
+                    BaseApp.genericNavigationResolver.navigateToActionForm(
+                        binding,
+                        destinationTable =  tableName
+                    )
+
+                    delegate.setSelectAction(action)
+                } else {
+                    sendAction(action.name, null)
+                }
+
             }
         }
     }

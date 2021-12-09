@@ -43,10 +43,10 @@ import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
+import com.qmobile.qmobileui.action.Action
+
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.actions.Action
-import com.qmobile.qmobileui.actions.DROP_DOWN_WIDTH
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.network.NetworkChecker
@@ -57,6 +57,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
+
+const val DROP_DOWN_WIDTH = 600
 
 @Suppress("TooManyFunctions")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver {
@@ -72,6 +74,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
+    lateinit var selectedAction: Action
 
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
@@ -282,9 +285,10 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     override fun setupActionsMenu(
         menu: Menu,
         actions: List<Action>,
-        onMenuItemClick: (String) -> Unit
-    ) {
+        onMenuItemClick: (Action) -> Unit
+    ){
         menuInflater.inflate(R.menu.menu_action, menu)
+
         val menuItem =
             menu.findItem(R.id.more).actionView.findViewById(R.id.drop_down_image) as ImageButton
         menuItem.setOnClickListener { v ->
@@ -304,6 +308,14 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                 showAsDropDown(v, 0, 0)
             }
         }
+    }
+
+    override fun setSelectAction(action: Action) {
+        selectedAction = action
+    }
+
+    override fun getSelectAction(): Action {
+        return selectedAction
     }
 
     override fun handleNetworkState(networkState: NetworkStateEnum) {

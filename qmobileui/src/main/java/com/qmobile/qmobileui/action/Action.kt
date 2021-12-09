@@ -1,19 +1,20 @@
 /*
- * Created by qmarciset on 25/11/2021.
+ * Created by htemanni on 13/9/2021.
  * 4D SAS
- * Copyright (c) 2021 qmarciset. All rights reserved.
+ * Copyright (c) 2021 htemanni. All rights reserved.
  */
 
-package com.qmobile.qmobileui.actions
+package com.qmobile.qmobileui.action
 
 import com.qmobile.qmobileui.utils.ResourcesHelper
+import org.json.JSONArray
 
 class Action(
-    val name: String,
+    val name: String = "",
     private val icon: String?,
     private val label: String?,
     private val shortLabel: String?,
-    val parameters: List<ActionParameters>?
+    val parameters: JSONArray
 ) {
     fun getIconDrawablePath(): String? =
         ResourcesHelper.correctIconPath(icon)

@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.binding
 
 import android.net.Uri
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -91,4 +92,12 @@ fun bindRelationLinkColor(view: TextView, textColor: Boolean?) {
     if (textColor == true) {
         view.setTextColor(ContextCompat.getColor(view.context, R.color.relation_link))
     }
+}
+
+@BindingAdapter(
+    value = ["buttonText", "entryRelation", "altButtonText"],
+    requireAll = false
+)
+fun buttonText(view: Button, buttonText: String?, entryRelation: Any?, altButtonText: String?) {
+    view.text = if (entryRelation == null) altButtonText else buttonText
 }
