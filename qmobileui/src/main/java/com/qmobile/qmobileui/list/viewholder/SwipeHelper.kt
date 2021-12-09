@@ -25,7 +25,9 @@ import kotlin.math.max
 
 const val HORIZONTAL_PADDING = 50.0f
 const val BUTTON_TEXT_SIZE = 14.0f
-const val VERTICAL_MARGIN = 25F //Use as margin bottom from the center for icon and  as margin top from the center for title
+//Use as margin bottom from the center for icon and  as margin top from the center for title
+const val VERTICAL_MARGIN = 25F
+const val ICON_WIDTH_FACTOR = 0.5F
 
 abstract class SwipeHelper(
     private val recyclerView: RecyclerView
@@ -178,7 +180,7 @@ abstract class SwipeHelper(
                         context.packageName
                     )
             }
-            val iconWith = rect.width() * (0.5F)
+            val iconWith = rect.width() * (ICON_WIDTH_FACTOR)
             val iconHeight = iconWith
 
             val iconLeft =

@@ -5,7 +5,6 @@ import android.text.Selection
 import android.text.TextWatcher
 import android.widget.EditText
 
-
 fun EditText.addSuffix(suffix: String) {
     val editText = this
     val formattedSuffix = " $suffix"
@@ -50,7 +49,7 @@ fun EditText.addSuffix(suffix: String) {
         }
 
         override fun onTextChanged(charSequence: CharSequence?, start: Int, before: Int, count: Int) {
+            // Nothing to do
         }
     })
 }
-
