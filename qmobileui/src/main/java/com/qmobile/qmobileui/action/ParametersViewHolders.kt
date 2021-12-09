@@ -308,7 +308,7 @@ class SpellOutViewHolder(itemView: View) :
             }
         })
         editText.inputType = InputType.TYPE_CLASS_NUMBER
-        editText.setOnFocusChangeListener { view, hasFocus ->
+        editText.setOnFocusChangeListener { _, hasFocus ->
             if (editText.text.isEmpty())
                 return@setOnFocusChangeListener
 
@@ -397,7 +397,7 @@ class ScientificViewHolder(itemView: View) :
                 }
             }
         })
-        editText.setOnFocusChangeListener { view, hasFocus ->
+        editText.setOnFocusChangeListener { _, hasFocus ->
             if (editText.text.isEmpty())
                 return@setOnFocusChangeListener
 
@@ -481,13 +481,11 @@ class PercentageViewHolder(itemView: View) :
                     if (it.isNotEmpty()) {
                         val percentValue =
                             "%.2f".format(it.toFloatOrNull()?.times(PERCENT_MULTIPLIER))
-                        if (percentValue != null) {
-                            onValueChanged(
-                                parameterName,
-                                percentValue,
-                                null
-                            )
-                        }
+                        onValueChanged(
+                            parameterName,
+                            percentValue,
+                            null
+                        )
                     }
                 }
             }
@@ -623,7 +621,7 @@ class TimeViewHolder(itemView: View, val format: String) :
             selectedTime.text = it
         }
         val timeSetListener =
-            TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
+            TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
                 selectedHour = hourOfDay
 
                 val formattedResult: String = if (is24HourFormat) {
@@ -687,7 +685,7 @@ class DateViewHolder(itemView: View, val format: String) :
             selectedDate.text = it
         }
         val dateSetListener =
-            OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+            OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
                 val format = when (format) {
                     ActionParameterEnum.DATE_DEFAULT2.format,
                     ActionParameterEnum.DATE_DEFAULT1.format -> "mediumDate"

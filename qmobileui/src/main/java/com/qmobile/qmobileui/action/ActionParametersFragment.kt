@@ -26,7 +26,7 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
-import com.qmobile.qmobileui.ui.NetworkChecker
+import com.qmobile.qmobileui.network.NetworkChecker
 
 open class ActionParametersFragment : Fragment(), BaseFragment {
 
