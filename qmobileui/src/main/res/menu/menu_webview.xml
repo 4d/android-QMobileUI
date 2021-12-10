@@ -10,16 +10,16 @@
     tools:ignore="AlwaysShowAction">
 
     <item
-        android:id="@+id/action_previous"
-        android:enabled="false"
-        android:icon="@drawable/baseline_chevron_left_24"
-        android:title="@string/previous"
+        android:id="@+id/action_web_view_refresh"
+        android:icon="@drawable/refresh"
+        android:title="@string/web_view_refresh"
+        android:visible="false"
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_next"
-        android:enabled="false"
-        android:icon="@drawable/baseline_chevron_right_24"
-        android:title="@string/next"
+        android:id="@+id/action_web_view_share"
+        android:icon="@drawable/share_variant"
+        android:title="@string/web_view_share"
+        android:visible="false"
         app:showAsAction="always" />
 </menu>

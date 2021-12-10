@@ -15,6 +15,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.webkit.WebView
+import androidx.core.view.children
 import com.qmobile.qmobileui.R
 
 object ViewUtils {
@@ -50,4 +52,18 @@ fun View.setOnVeryLongClickListener(listener: () -> Unit) {
 fun View.clearViewInParent() {
     if (this.parent != null)
         (this.parent as ViewGroup).removeView(this)
+}
+
+@Suppress("ReturnCount")
+fun View.checkIfChildIsWebView(): WebView? {
+    if (this is WebView) return this
+    if (this as? ViewGroup != null) {
+        (this as? ViewGroup)?.children?.forEach { child ->
+            if (child as? ViewGroup != null) {
+                return child.checkIfChildIsWebView()
+            }
+            if (child is WebView) return child
+        }
+    }
+    return null
 }
