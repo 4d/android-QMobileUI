@@ -4,17 +4,15 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.view.Display
 import android.view.MotionEvent
 import android.view.View
-import android.view.WindowManager
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.action.Action
@@ -157,12 +155,7 @@ abstract class SwipeHelper(
         val intrinsicWidth: Float
 
         init {
-            val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val display: Display = wm.defaultDisplay
-            val size = Point()
-            display.getSize(size)
-            val screenWidth: Int = size.x
-
+            val screenWidth: Int = context.resources.displayMetrics.widthPixels
             val paint = Paint()
             paint.textSize = textSizeInPixel
             paint.typeface = Typeface.DEFAULT_BOLD
@@ -209,7 +202,7 @@ abstract class SwipeHelper(
                 iconDrawable?.setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
             } else {
                 iconDrawable =
-                    ColorDrawable(context.resources.getColor(android.R.color.transparent));
+                    ColorDrawable(ContextCompat.getColor(context, android.R.color.transparent))
             }
 
             iconDrawable?.setBounds(
