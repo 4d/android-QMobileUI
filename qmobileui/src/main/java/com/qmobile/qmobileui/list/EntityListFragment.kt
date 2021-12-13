@@ -54,7 +54,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     companion object {
         private const val CURRENT_QUERY_KEY = "currentQuery_key"
-        private const val MAX_ACTIONS_VISIBLE = 3
+        private const val MAX_ACTIONS_VISIBLE = 2
         private const val DIALOG_ICON_PADDING = 5
     }
 

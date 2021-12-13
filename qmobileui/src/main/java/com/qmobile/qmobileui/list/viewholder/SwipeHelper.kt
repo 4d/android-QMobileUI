@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable
 import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.action.Action
@@ -24,10 +25,11 @@ import kotlin.math.abs
 import kotlin.math.max
 
 const val HORIZONTAL_PADDING = 50.0f
-const val BUTTON_TEXT_SIZE = 14.0f
+const val BUTTON_TEXT_SIZE = 10.0f
+
 //Use as margin bottom from the center for icon and  as margin top from the center for title
 const val VERTICAL_MARGIN = 25F
-const val ICON_WIDTH_FACTOR = 0.5F
+const val ICON_WIDTH_FACTOR = 0.3F
 
 abstract class SwipeHelper(
     private val recyclerView: RecyclerView
@@ -153,6 +155,7 @@ abstract class SwipeHelper(
         val intrinsicWidth: Float
 
         init {
+            val screenWidth: Int = context.resources.displayMetrics.widthPixels
             val paint = Paint()
             paint.textSize = textSizeInPixel
             paint.typeface = Typeface.DEFAULT_BOLD
@@ -160,7 +163,7 @@ abstract class SwipeHelper(
             val titleBounds = Rect()
 
             paint.getTextBounds(title, 0, title.length, titleBounds)
-            intrinsicWidth = titleBounds.width() + 2 * HORIZONTAL_PADDING
+            intrinsicWidth = (screenWidth / 4).toFloat() //Fix button width to screenWidth/4
         }
 
         fun draw(canvas: Canvas, rect: RectF) {
@@ -186,7 +189,7 @@ abstract class SwipeHelper(
             val iconLeft =
                 (rect.left + rect.width() / 2 - iconWith.div(2))
 
-            val iconBottom = rect.bottom- rect.height()/2
+            val iconBottom = rect.bottom - rect.height() / 2
             val iconTop = iconBottom - iconHeight
             val iconRight = iconLeft + iconWith
 
@@ -199,7 +202,7 @@ abstract class SwipeHelper(
                 iconDrawable?.setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
             } else {
                 iconDrawable =
-                    ColorDrawable(ColorHelper.getActionButtonColor(horizontalIndex, context));
+                    ColorDrawable(ContextCompat.getColor(context, android.R.color.transparent))
             }
 
             iconDrawable?.setBounds(
@@ -216,10 +219,11 @@ abstract class SwipeHelper(
             paint.typeface = Typeface.DEFAULT_BOLD
             paint.textAlign = Paint.Align.LEFT
 
+            title = ellipsize(title, paint, intrinsicWidth - HORIZONTAL_PADDING)
             val titleBounds = Rect()
             paint.getTextBounds(title, 0, title.length, titleBounds)
             val x = rect.width() / 2 + titleBounds.width() / 2 - titleBounds.right
-            canvas.drawText(title, rect.left + x, iconBottom+ VERTICAL_MARGIN, paint)
+            canvas.drawText(title, rect.left + x, iconBottom + VERTICAL_MARGIN, paint)
             clickableRegion = rect
         }
 
@@ -231,6 +235,16 @@ abstract class SwipeHelper(
             }
         }
     }
+}
+
+
+fun ellipsize(input: String, paint: Paint, maxWidth: Float): String {
+    val titleBounds = Rect()
+    paint.getTextBounds(input, 0, input.length, titleBounds)
+    return if (titleBounds.width() < maxWidth)
+        input
+    else
+        ellipsize(input.substring(0, input.length - 5) + "...", paint, maxWidth)
 }
 
 private fun List<SwipeHelper.ItemActionButton>.intrinsicWidth(): Float {
