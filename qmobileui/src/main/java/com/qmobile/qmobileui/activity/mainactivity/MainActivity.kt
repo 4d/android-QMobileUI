@@ -74,6 +74,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     // FragmentCommunication
     override lateinit var apiService: ApiService
     lateinit var selectedAction: Action
+    var entity: EntityModel? = null
 
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
@@ -305,6 +306,14 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
     override fun getSelectAction(): Action {
         return selectedAction
+    }
+
+    override fun setSelectedEntity(entityModel: EntityModel?) {
+       entity = entityModel
+    }
+
+    override fun getSelectedEntity(): EntityModel? {
+        return  entity
     }
 
     override fun handleNetworkState(networkState: NetworkStateEnum) {

@@ -9,6 +9,7 @@ package com.qmobile.qmobileui
 import android.net.ConnectivityManager
 import android.view.Menu
 import androidx.lifecycle.LiveData
+import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.network.LoginApiService
@@ -48,4 +49,8 @@ interface FragmentCommunication {
     fun setSelectAction(action: Action)
 
     fun getSelectAction(): Action
+
+    fun setSelectedEntity(entityModel: EntityModel?)
+
+    fun getSelectedEntity(): EntityModel?
 }

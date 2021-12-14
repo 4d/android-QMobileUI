@@ -54,7 +54,8 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             lifecycleOwner = viewLifecycleOwner
             val adapter = ActionsParametersListAdapter(
                 requireContext(),
-                delegate.getSelectAction().parameters
+                delegate.getSelectAction().parameters,
+                delegate.getSelectedEntity()
             ) { name: String, value: Any, metaData: String? ->
                 paramsToSubmit[name] = value
                 metaData?.let {
