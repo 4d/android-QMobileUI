@@ -166,14 +166,14 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     inverseName = inverseName
                 )
             },
-            { selectedActionId ->
+            { currentEntity ->
 
                 if ((hasCurrentRecordActions()) &&
                     !BaseApp.genericTableFragmentHelper.isSwipeAllowed(
                         tableName
                     )
                 ) {
-                    showDialog(selectedActionId, currentRecordActions)
+                    showDialog(currentEntity, currentRecordActions)
                 }
             }
         )
@@ -270,7 +270,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
         }
     }
 
-    private fun showDialog(selectedActionId: String?, actions: MutableList<Action>) {
+    private fun showDialog(currentEntity: EntityModel?, actions: MutableList<Action>) {
         val items = actions.map {
             DialogItem(
                 it.getPreferredShortName(),
@@ -311,7 +311,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
         dialogBuilder.setAdapter(adapter) { _, position ->
-            sendCurrentRecordAction(actions[position].name, selectedActionId)
+                onCurrentActionCLicked(actions[position], currentEntity)
         }
 
         val dialog = dialogBuilder.create()
@@ -322,6 +322,20 @@ open class EntityListFragment : Fragment(), BaseFragment {
             addFooterView(View(context))
         }
         dialog.show()
+    }
+
+    private fun onCurrentActionCLicked(action: Action, currentEntityModel: EntityModel?) {
+        if (action.parameters.length() > 0) {
+            BaseApp.genericNavigationResolver.navigateToActionForm(
+                binding,
+                destinationTable =  tableName
+            )
+            delegate.setSelectAction(action)
+            delegate.setSelectedEntity(currentEntityModel)
+
+        } else{
+            sendCurrentRecordAction(action.name, currentEntityModel?.__KEY)
+        }
     }
 
     private fun sendAction(actionName: String, selectedActionId: String?) {
@@ -382,12 +396,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 override fun onClick() {
                     // the case of "..." button
                     if (action == null) {
-                        showDialog(adapter.getSelectedItem(position)?.__KEY, currentRecordActions)
+                        showDialog(adapter.getSelectedItem(position), currentRecordActions)
                     } else {
-                        sendCurrentRecordAction(
-                            action.name,
-                            adapter.getSelectedItem(position)?.__KEY
-                        )
+                        onCurrentActionCLicked(action, adapter.getSelectedItem(position))
                     }
                 }
             }

@@ -21,7 +21,7 @@ class EntityListAdapter internal constructor(
     private val tableName: String,
     private val lifecycleOwner: LifecycleOwner,
     private val onItemClick: (ViewDataBinding, String) -> Unit,
-    private val actionDialogClickedCallBack: (String?) -> Unit
+    private val actionDialogClickedCallBack: (EntityModel?) -> Unit
 ) :
     PagingDataAdapter<EntityModel, BaseViewHolder>(DIFF_CALLBACK) {
 
