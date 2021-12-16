@@ -142,6 +142,7 @@ abstract class SwipeHelper(
         fun onClick()
     }
 
+    @Suppress("MagicNumber")
     class ItemActionButton(
         private val context: Context,
         private val action: Action?,
@@ -237,7 +238,7 @@ abstract class SwipeHelper(
     }
 }
 
-
+@Suppress("MagicNumber")
 fun ellipsize(input: String, paint: Paint, maxWidth: Float): String {
     val titleBounds = Rect()
     paint.getTextBounds(input, 0, input.length, titleBounds)
