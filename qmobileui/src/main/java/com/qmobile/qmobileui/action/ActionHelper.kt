@@ -6,7 +6,8 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import org.json.JSONArray
 import org.json.JSONObject
 
-class ActionHelper {
+class ActionHelper private constructor() {
+
     companion object {
         fun getActionContent(
             tableName: String,
