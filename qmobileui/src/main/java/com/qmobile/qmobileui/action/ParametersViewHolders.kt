@@ -838,6 +838,10 @@ class TimeViewHolder(itemView: View, val format: String) :
         val selectedMinute = SELECTED_MINUTE
         val is24HourFormat = format == "duration"
 
+        itemJsonObject.getSafeString("placeholder")?.let {
+            selectedTime.hint = it
+        }
+
         itemJsonObject.getSafeString("default")?.let {
             selectedTime.text = it
         }
@@ -923,6 +927,9 @@ class DateViewHolder(itemView: View, val format: String) :
         onValueChanged: (String, Any, String?) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
+        itemJsonObject.getSafeString("placeholder")?.let {
+            selectedDate.hint = it
+        }
         itemJsonObject.getSafeString("default")?.let {
             selectedDate.text = it
         }
