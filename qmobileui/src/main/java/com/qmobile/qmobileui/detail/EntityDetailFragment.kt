@@ -148,13 +148,12 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
             delegate.setupActionsMenu(menu, actions) { action ->
                 if (action.parameters.length() > 0) {
-
                     BaseApp.genericNavigationResolver.navigateToActionForm(
                         binding,
                         destinationTable = tableName
                     )
-
                     delegate.setSelectAction(action)
+                    delegate.setSelectedEntity(entityViewModel.entity.value)
                 } else {
                     delegate.checkNetwork(object : NetworkChecker {
                         override fun onServerAccessible() {
