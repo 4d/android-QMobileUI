@@ -37,12 +37,13 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
     open fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         itemJsonObject = item as JSONObject
         parameterName = itemJsonObject.getString("name")
         if (isMandatory()) {
             "$parameterName *".also { label.text = it }
+            onValueChanged(parameterName, "", null, validate())
         } else {
             label.text = parameterName
         }
@@ -52,7 +53,7 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
     abstract fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, isValid: Boolean) -> Unit
     )
 
     abstract fun validate(): Boolean
@@ -109,7 +110,7 @@ class TextViewHolder(itemView: View, val format: String) :
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
         editText.inputType = when (format) {
@@ -142,7 +143,7 @@ class TextViewHolder(itemView: View, val format: String) :
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                s?.let { onValueChanged(parameterName, s.toString(), null) }
+                s?.let { onValueChanged(parameterName, s.toString(), null, validate()) }
             }
         })
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
@@ -151,14 +152,14 @@ class TextViewHolder(itemView: View, val format: String) :
     override fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
                     editText.text = value
-                    onValueChanged(parameterName, value, null)
+                    onValueChanged(parameterName, value, null, validate())
                 }
             }
         }
@@ -199,7 +200,7 @@ class TextAreaViewHolder(itemView: View) :
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
         editText.hint = itemJsonObject.getSafeString("placeholder")
@@ -216,7 +217,7 @@ class TextAreaViewHolder(itemView: View) :
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                s?.let { onValueChanged(parameterName, s.toString(), null) }
+                s?.let { onValueChanged(parameterName, s.toString(), null, validate()) }
             }
         })
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
@@ -234,14 +235,14 @@ class TextAreaViewHolder(itemView: View) :
     override fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
                     editText.text = value
-                    onValueChanged(parameterName, value, null)
+                    onValueChanged(parameterName, value, null, validate())
                 }
             }
         }
@@ -260,7 +261,7 @@ class NumberViewHolder(itemView: View, val format: String) :
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
         editText.hint = itemJsonObject.getSafeString("placeholder")
@@ -293,7 +294,8 @@ class NumberViewHolder(itemView: View, val format: String) :
                         onValueChanged(
                             parameterName,
                             it1,
-                            null
+                            null,
+                            validate()
                         )
                     }
                 }
@@ -341,7 +343,7 @@ class NumberViewHolder(itemView: View, val format: String) :
     override fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
@@ -353,7 +355,8 @@ class NumberViewHolder(itemView: View, val format: String) :
                         onValueChanged(
                             parameterName,
                             value,
-                            null
+                            null,
+                            validate()
                         )
                     }
             }
@@ -370,7 +373,7 @@ class SpellOutViewHolder(itemView: View) :
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
         itemJsonObject.getSafeString("default")?.let {
@@ -407,7 +410,8 @@ class SpellOutViewHolder(itemView: View) :
                     onValueChanged(
                         parameterName,
                         it,
-                        null
+                        null,
+                        validate()
                     )
                     SpellOutHelper.convert(it).apply {
                         editText.text = this
@@ -456,7 +460,7 @@ class SpellOutViewHolder(itemView: View) :
     override fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
@@ -466,7 +470,8 @@ class SpellOutViewHolder(itemView: View) :
                     onValueChanged(
                         parameterName,
                         value,
-                        null
+                        null,
+                        validate()
                     )
                 }
 
@@ -484,7 +489,7 @@ class ScientificViewHolder(itemView: View) :
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
         itemJsonObject.getSafeString("default")?.let {
@@ -523,7 +528,8 @@ class ScientificViewHolder(itemView: View) :
                     onValueChanged(
                         parameterName,
                         it,
-                        null
+                        null,
+                        validate()
                     )
 
                     val numFormat = DecimalFormat("0.#####E0")
@@ -570,7 +576,7 @@ class ScientificViewHolder(itemView: View) :
     override fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
@@ -580,7 +586,8 @@ class ScientificViewHolder(itemView: View) :
                     onValueChanged(
                         parameterName,
                         it,
-                        null
+                        null,
+                        validate()
                     )
                 }
             }
@@ -599,7 +606,7 @@ class PercentageViewHolder(itemView: View) :
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
 
@@ -623,7 +630,8 @@ class PercentageViewHolder(itemView: View) :
                             onValueChanged(
                                 parameterName,
                                 percentValue,
-                                null
+                                null,
+                                validate()
                             )
                         }
                     }
@@ -685,7 +693,7 @@ class PercentageViewHolder(itemView: View) :
     override fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
@@ -695,7 +703,8 @@ class PercentageViewHolder(itemView: View) :
                     onValueChanged(
                         parameterName,
                         value,
-                        null
+                        null,
+                        validate()
                     )
                 }
             }
@@ -715,11 +724,11 @@ class BooleanSwitchViewHolder(itemView: View) :
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
         switch.setOnCheckedChangeListener { _, checked ->
-            onValueChanged(parameterName, checked, null)
+            onValueChanged(parameterName, checked, null, true)
         }
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
     }
@@ -731,14 +740,14 @@ class BooleanSwitchViewHolder(itemView: View) :
     override fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 EntityHelper.readInstanceProperty<Boolean>(it, defaultField).also { value ->
                     switch.isChecked = value
-                    onValueChanged(parameterName, value, null)
+                    onValueChanged(parameterName, value, null, true)
                 }
             }
         }
@@ -754,11 +763,11 @@ class BooleanCheckMarkViewHolder(itemView: View) :
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
         checkBox.setOnCheckedChangeListener { _, b ->
-            onValueChanged(parameterName, b, null)
+            onValueChanged(parameterName, b, null, true)
         }
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
     }
@@ -770,7 +779,7 @@ class BooleanCheckMarkViewHolder(itemView: View) :
     override fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
@@ -779,7 +788,8 @@ class BooleanCheckMarkViewHolder(itemView: View) :
                 onValueChanged(
                     parameterName,
                     EntityHelper.readInstanceProperty(it, defaultField),
-                    null
+                    null,
+                    true
                 )
             }
         }
@@ -796,7 +806,7 @@ class ImageViewHolder(itemView: View) :
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
     }
@@ -808,7 +818,7 @@ class ImageViewHolder(itemView: View) :
     override fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         // nothing to do
 
@@ -830,7 +840,7 @@ class TimeViewHolder(itemView: View, val format: String) :
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
 
@@ -860,7 +870,7 @@ class TimeViewHolder(itemView: View, val format: String) :
                 }
                 selectedTime.text = formattedResult
                 val numberOfSeconds = selectedHour * 60 * 60 + minute * 60
-                onValueChanged(parameterName, numberOfSeconds, null)
+                onValueChanged(parameterName, numberOfSeconds, null, validate())
             }
 
         val timePickerDialog = TimePickerDialog(
@@ -894,14 +904,14 @@ class TimeViewHolder(itemView: View, val format: String) :
     override fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
                     selectedTime.text = value
-                    onValueChanged(parameterName, value, null)
+                    onValueChanged(parameterName, value, null, validate())
                 }
             }
         }
@@ -924,7 +934,7 @@ class DateViewHolder(itemView: View, val format: String) :
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
         itemJsonObject.getSafeString("placeholder")?.let {
@@ -950,7 +960,7 @@ class DateViewHolder(itemView: View, val format: String) :
                     dateToSubmit
                 )
                 selectedDate.text = formattedDate
-                onValueChanged(parameterName, dateToSubmit, "simpleDate")
+                onValueChanged(parameterName, dateToSubmit, "simpleDate", validate())
             }
 
         val datePickerDialog = DatePickerDialog(
@@ -981,14 +991,14 @@ class DateViewHolder(itemView: View, val format: String) :
     override fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?) -> Unit
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
                     selectedDate.text = EntityHelper.readInstanceProperty<String>(it, defaultField)
-                    onValueChanged(parameterName, it, null)
+                    onValueChanged(parameterName, it, null, validate())
                 }
             }
         }
