@@ -40,7 +40,7 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         itemJsonObject = item as JSONObject
-        parameterName = itemJsonObject.getString("label")
+        parameterName = itemJsonObject.getSafeString("label")?:""
         if (isMandatory()) {
             "$parameterName *".also { label.text = it }
             onValueChanged(parameterName, "", null, validate())
