@@ -25,7 +25,6 @@
         android:paddingLeft="@dimen/param_edit_text_padding_left"
         android:paddingEnd="7dp"
         android:textColor="#000"
-        android:textColorHint="#000000"
         tools:text="--:--" />
 
     <TextView
