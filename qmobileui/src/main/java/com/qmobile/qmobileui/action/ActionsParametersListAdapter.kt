@@ -12,7 +12,7 @@ class ActionsParametersListAdapter(
     context: Context,
     val list: JSONArray,
     private val currentEntity: EntityModel?,
-    val onValueChanged: (String, Any, String?, Boolean) -> Unit
+    val onValueChanged: (String, Any?, String?, Boolean) -> Unit
 ) :
     RecyclerView.Adapter<ActionParameterViewHolder>() {
 
@@ -34,7 +34,7 @@ class ActionsParametersListAdapter(
         holder.bind(
             list[position],
             currentEntity
-        ) { name: String, value: Any, metaData: String?, isValid: Boolean ->
+        ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
             onValueChanged(name, value, metaData, isValid)
         }
     }
