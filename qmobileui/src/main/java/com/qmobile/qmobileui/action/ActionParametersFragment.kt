@@ -62,9 +62,9 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                 requireContext(),
                 delegate.getSelectAction().parameters,
                 delegate.getSelectedEntity()
-            ) { name: String, value: Any, metaData: String?, isValid: Boolean ->
+            ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 validationMap[name] = isValid
-                paramsToSubmit[name] = value
+                paramsToSubmit[name] = value ?: ""
                 metaData?.let {
                     metaDataToSubmit[name] = metaData
                 }
