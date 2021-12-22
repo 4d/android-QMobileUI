@@ -36,6 +36,7 @@ class ActionHelper private constructor() {
                     icon = getSafeString("icon"),
                     shortLabel = getSafeString("shortLabel"),
                     label = getSafeString("label"),
+                    preset = getSafeString("preset"),
                     parameters = getSafeArray("parameters") ?: JSONArray()
                 )
             }

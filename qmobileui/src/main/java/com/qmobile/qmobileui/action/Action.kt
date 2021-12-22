@@ -14,6 +14,7 @@ class Action(
     private val icon: String?,
     private val label: String?,
     private val shortLabel: String?,
+    val preset: String?,
     val parameters: JSONArray
 ) {
     fun getIconDrawablePath(): String? =
