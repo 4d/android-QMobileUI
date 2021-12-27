@@ -40,8 +40,8 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         itemJsonObject = item as JSONObject
-        parameterName = itemJsonObject.getSafeString("name")?:""
-        val parameterLabel = itemJsonObject.getSafeString("label")?:""
+        parameterName = itemJsonObject.getSafeString("name") ?: ""
+        val parameterLabel = itemJsonObject.getSafeString("label") ?: ""
         if (isMandatory()) {
             "$parameterLabel *".also { label.text = it }
             onValueChanged(parameterName, "", null, validate())
@@ -930,7 +930,15 @@ const val SELECTED_DAY = 10
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class DateViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
-    private val selectedDate: TextView = itemView.findViewById<TextView>(R.id.selectedDate)
+    private val selectedDate: TextView = itemView.findViewById(R.id.selectedDate)
+    private var dateFormat: String = when (format) {
+        ActionParameterEnum.DATE_DEFAULT2.format,
+        ActionParameterEnum.DATE_DEFAULT1.format -> "mediumDate"
+        ActionParameterEnum.DATE_LONG.format -> "longDate"
+        ActionParameterEnum.DATE_SHORT.format -> "shortDate"
+        ActionParameterEnum.DATE_FULL.format -> "fullDate"
+        else -> "shortDate"
+    }
 
     override fun bind(
         item: Any,
@@ -946,18 +954,9 @@ class DateViewHolder(itemView: View, val format: String) :
         }
         val dateSetListener =
             OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
-                val format = when (format) {
-                    ActionParameterEnum.DATE_DEFAULT2.format,
-                    ActionParameterEnum.DATE_DEFAULT1.format -> "mediumDate"
-                    ActionParameterEnum.DATE_LONG.format -> "longDate"
-                    ActionParameterEnum.DATE_SHORT.format -> "shortDate"
-                    ActionParameterEnum.DATE_FULL.format -> "fullDate"
-                    else -> "shortDate"
-                }
-
                 val dateToSubmit = dayOfMonth.toString() + "!" + (monthOfYear + 1) + "!" + year
                 val formattedDate = FormatterUtils.applyFormat(
-                    format,
+                    dateFormat,
                     dateToSubmit
                 )
                 selectedDate.text = formattedDate
@@ -998,7 +997,11 @@ class DateViewHolder(itemView: View, val format: String) :
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
-                    selectedDate.text = EntityHelper.readInstanceProperty<String>(it, defaultField)
+                    val formattedDate = FormatterUtils.applyFormat(
+                        dateFormat,
+                        value
+                    )
+                    selectedDate.text = formattedDate
                     onValueChanged(parameterName, it, null, validate())
                 }
             }
