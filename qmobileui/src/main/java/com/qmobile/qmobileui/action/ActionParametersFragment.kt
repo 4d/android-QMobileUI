@@ -27,6 +27,7 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.network.NetworkChecker
+import androidx.recyclerview.widget.RecyclerView
 
 open class ActionParametersFragment : Fragment(), BaseFragment {
 
@@ -37,6 +38,10 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     override lateinit var delegate: FragmentCommunication
     private val paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
+    private val validationMap = HashMap<String, Boolean>()
+
+    // Is set to true if all recyclerView items are seen at lean once
+    private var areAllItemsSeen = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,9 +59,11 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             lifecycleOwner = viewLifecycleOwner
             val adapter = ActionsParametersListAdapter(
                 requireContext(),
-                delegate.getSelectAction().parameters
-            ) { name: String, value: Any, metaData: String? ->
-                paramsToSubmit[name] = value
+                delegate.getSelectAction().parameters,
+                delegate.getSelectedEntity()
+            ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+                validationMap[name] = isValid
+                paramsToSubmit[name] = value ?: ""
                 metaData?.let {
                     metaDataToSubmit[name] = metaData
                 }
@@ -70,6 +77,17 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                 layoutManager.orientation
             )
             recyclerView.addItemDecoration(dividerItemDecoration)
+            recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+                        areAllItemsSeen = true
+                    }
+                    super.onScrolled(recyclerView, dx, dy)
+                }
+            })
+            if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+                areAllItemsSeen = true
+            }
         }
 
         return binding.root
@@ -82,7 +100,13 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.validate) {
-            sendAction(delegate.getSelectAction().name, null)
+            var selectedActionId: String?  = null
+            delegate.getSelectAction().preset?.let {
+                if (it == "edit"){
+                    selectedActionId = delegate.getSelectedEntity()?.__KEY
+                }
+            }
+            sendAction(delegate.getSelectAction().name, selectedActionId)
         }
         return super.onOptionsItemSelected(item)
     }
@@ -95,20 +119,14 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     }
 
     private fun isFormValid(): Boolean {
-        val recyclerView = (binding as FragmentActionParametersBinding).recyclerView
-        val itemCount = recyclerView.adapter?.itemCount ?: 0
-        var isFormValid = true
-        for (i in 0 until itemCount) {
-            val holder = recyclerView.findViewHolderForAdapterPosition(i)
-            if (holder != null) {
-                val parameterViewHolder = (holder as ActionParameterViewHolder)
-                val isFieldValid = parameterViewHolder.validate()
-                if (!isFieldValid) {
-                    isFormValid = false
-                }
+        if (!areAllItemsSeen)
+            return false
+        validationMap.forEach {
+            if (!it.value) {
+                return false
             }
         }
-        return isFormValid
+        return true
     }
 
     private fun sendAction(actionName: String, selectedActionId: String?) {

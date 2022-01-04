@@ -15,7 +15,6 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
-import androidx.core.view.children
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -32,6 +31,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.network.NetworkChecker
+import com.qmobile.qmobileui.ui.checkIfChildIsWebView
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.webview.MyWebViewClient
 
@@ -77,28 +77,15 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        checkIfChildIsWebView(view)?.let { foundWebView ->
+        view.checkIfChildIsWebView()?.let { foundWebView ->
             webView = foundWebView
             webView.webViewClient = MyWebViewClient()
         }
         setHasOptionsMenu(::webView.isInitialized || hasActions())
     }
 
-    @Suppress("ReturnCount")
-    private fun checkIfChildIsWebView(view: View): WebView? {
-        if (view is WebView) return view
-        if (view as? ViewGroup != null) {
-            (view as? ViewGroup)?.children?.forEach { child ->
-                if (child as? ViewGroup != null) {
-                    return checkIfChildIsWebView(child)
-                }
-                if (child is WebView) return child
-            }
-        }
-        return null
-    }
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_webview, menu)
         setupActionsMenuIfNeeded(menu)
         setupWebViewMenuIfNeeded(menu)
         super.onCreateOptionsMenu(menu, inflater)
@@ -161,13 +148,12 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
             delegate.setupActionsMenu(menu, actions) { action ->
                 if (action.parameters.length() > 0) {
-
                     BaseApp.genericNavigationResolver.navigateToActionForm(
                         binding,
                         destinationTable = tableName
                     )
-
                     delegate.setSelectAction(action)
+                    delegate.setSelectedEntity(entityViewModel.entity.value)
                 } else {
                     delegate.checkNetwork(object : NetworkChecker {
                         override fun onServerAccessible() {

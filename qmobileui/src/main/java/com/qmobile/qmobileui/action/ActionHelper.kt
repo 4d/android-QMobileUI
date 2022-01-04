@@ -6,7 +6,8 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import org.json.JSONArray
 import org.json.JSONObject
 
-class ActionHelper {
+class ActionHelper private constructor() {
+
     companion object {
         fun getActionContent(
             tableName: String,
@@ -35,6 +36,7 @@ class ActionHelper {
                     icon = getSafeString("icon"),
                     shortLabel = getSafeString("shortLabel"),
                     label = getSafeString("label"),
+                    preset = getSafeString("preset"),
                     parameters = getSafeArray("parameters") ?: JSONArray()
                 )
             }

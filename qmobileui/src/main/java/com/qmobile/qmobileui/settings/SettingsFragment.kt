@@ -9,17 +9,11 @@ package com.qmobile.qmobileui.settings
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
@@ -45,10 +39,6 @@ class SettingsFragment :
     private var logoutDialogMessage = ""
     private var logoutDialogPositive = ""
     private var logoutDialogNegative = ""
-    private var prefRemoteUrlTitle = ""
-    private var remoteUrlDialogPositive = ""
-    private var remoteUrlDialogCancel = ""
-    private var remoteUrlInvalid = ""
     private var remoteUrlPref: Preference? = null
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
@@ -56,12 +46,7 @@ class SettingsFragment :
     private lateinit var remoteUrlPrefKey: String
     private lateinit var logoutPrefKey: String
     private lateinit var remoteUrl: String
-    private lateinit var remoteUrlEditDialogBuilder: MaterialAlertDialogBuilder
     private lateinit var logoutDialogBuilder: MaterialAlertDialogBuilder
-    private lateinit var shakeAnimation: Animation
-    private lateinit var remoteUrlEditLayout: TextInputLayout
-    private lateinit var remoteUrlEditEditText: TextInputEditText
-    private lateinit var remoteUrlEditDialog: View
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -99,24 +84,6 @@ class SettingsFragment :
             context,
             R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
-        remoteUrlEditDialogBuilder = MaterialAlertDialogBuilder(
-            context,
-            R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
-        )
-        shakeAnimation = AnimationUtils.loadAnimation(context, R.anim.shake)
-
-        remoteUrlEditDialog = LayoutInflater.from(context)
-            .inflate(
-                R.layout.remote_url_edit_dialog,
-                view?.findViewById(android.R.id.content),
-                false
-            )
-        remoteUrlEditLayout = remoteUrlEditDialog.findViewById(R.id.remote_url_edit_layout)
-        remoteUrlEditEditText = remoteUrlEditDialog.findViewById(R.id.remote_url_edit_edittext)
-        prefRemoteUrlTitle = getString(R.string.pref_remote_url_title)
-        remoteUrlDialogPositive = getString(R.string.remote_url_dialog_positive)
-        remoteUrlDialogCancel = getString(R.string.remote_url_dialog_cancel)
-        remoteUrlInvalid = resources.getString(R.string.remote_url_invalid)
 
         logoutDialogTitle = resources.getString(R.string.logout_dialog_title)
         logoutDialogMessage = resources.getString(R.string.logout_dialog_message)
@@ -155,7 +122,6 @@ class SettingsFragment :
             return when (preference.key) {
 
                 remoteUrlPrefKey -> {
-//                    showRemoteUrlEditDialog()
                     delegate.showRemoteUrlEditDialog(remoteUrl, this)
                     true
                 }

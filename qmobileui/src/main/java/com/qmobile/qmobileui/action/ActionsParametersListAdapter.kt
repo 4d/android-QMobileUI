@@ -3,6 +3,7 @@ package com.qmobile.qmobileui.action
 import android.content.Context
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeString
 import org.json.JSONArray
 import org.json.JSONObject
@@ -10,7 +11,8 @@ import org.json.JSONObject
 class ActionsParametersListAdapter(
     context: Context,
     val list: JSONArray,
-    val onValueChanged: (String, Any, String?) -> Unit
+    private val currentEntity: EntityModel?,
+    val onValueChanged: (String, Any?, String?, Boolean) -> Unit
 ) :
     RecyclerView.Adapter<ActionParameterViewHolder>() {
 
@@ -29,8 +31,11 @@ class ActionsParametersListAdapter(
     }
 
     override fun onBindViewHolder(holder: ActionParameterViewHolder, position: Int) {
-        holder.bind(list[position]) { name: String, value: Any, metaData: String? ->
-            onValueChanged(name, value, metaData)
+        holder.bind(
+            list[position],
+            currentEntity
+        ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+            onValueChanged(name, value, metaData, isValid)
         }
     }
 

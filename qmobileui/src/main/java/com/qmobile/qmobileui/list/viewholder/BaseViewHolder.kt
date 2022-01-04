@@ -19,7 +19,7 @@ class BaseViewHolder(
     private val dataBinding: ViewDataBinding,
     private val tableName: String,
     private val onItemClick: (ViewDataBinding, String) -> Unit,
-    private val actionDialogClickedCallBack: (String?) -> Unit
+    private val actionDialogClickedCallBack: (EntityModel?) -> Unit
 ) :
     RecyclerView.ViewHolder(dataBinding.root) {
 
@@ -45,7 +45,7 @@ class BaseViewHolder(
                 onItemClick(dataBinding, key)
             }
             itemView.setOnLongClickListener {
-                actionDialogClickedCallBack(key)
+                actionDialogClickedCallBack(entity)
                 true
             }
         }
