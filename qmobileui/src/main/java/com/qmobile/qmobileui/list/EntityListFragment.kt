@@ -44,8 +44,9 @@ import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.list.viewholder.SwipeHelper
+import com.qmobile.qmobileui.network.NetworkChecker
+import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
-import com.qmobile.qmobileui.ui.NetworkChecker
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
 
@@ -170,8 +171,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
                 if ((hasCurrentRecordActions()) &&
                     !BaseApp.genericTableFragmentHelper.isSwipeAllowed(
-                        tableName
-                    )
+                            tableName
+                        )
                 ) {
                     showDialog(currentEntity, currentRecordActions)
                 }
@@ -203,6 +204,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             }
 
         binding.fragmentListRecyclerView.adapter = adapter
+        binding.fragmentListRecyclerView.edgeEffectFactory = BounceEdgeEffectFactory()
     }
 
     /**
@@ -226,7 +228,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
                 jsonObject?.let {
                     tableActions.add(ActionHelper.createActionFromJsonObject(it))
                 }
-
             }
         }
         if (hasCurrentRecordActions()) {
@@ -375,7 +376,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
         sendAction(actionName, selectedActionId)
     }
 
-
     private fun syncDataIfNeeded(shouldSyncData: Boolean) {
         if (shouldSyncData) {
             forceSyncData()
@@ -457,14 +457,13 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
                     BaseApp.genericNavigationResolver.navigateToActionForm(
                         binding,
-                        destinationTable =  tableName
+                        destinationTable = tableName
                     )
 
                     delegate.setSelectAction(action)
                 } else {
                     sendAction(action.name, null)
                 }
-
             }
         }
     }

@@ -24,7 +24,7 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.ui.RemoteUrlChange
+import com.qmobile.qmobileui.network.RemoteUrlChange
 import com.qmobile.qmobileui.utils.ToastHelper
 import timber.log.Timber
 

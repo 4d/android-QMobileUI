@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.activity
 
+import com.qmobile.qmobiledatasync.utils.collectWhenStarted
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import timber.log.Timber
@@ -25,13 +26,10 @@ class BaseActivityObserver(
 
     // Observe authentication state
     private fun observeAuthenticationState() {
-        loginViewModel.authenticationState.observe(
-            activity,
-            { authenticationState ->
-                Timber.i("[AuthenticationState : $authenticationState]")
-                activity.handleAuthenticationState(authenticationState)
-            }
-        )
+        activity.collectWhenStarted(loginViewModel.authenticationState) { authenticationState ->
+            Timber.i("[AuthenticationState : $authenticationState]")
+            activity.handleAuthenticationState(authenticationState)
+        }
     }
 
     // Observe network status
@@ -46,20 +44,14 @@ class BaseActivityObserver(
     }
 
     private fun observeConnectivityToastMessage() {
-        connectivityViewModel.toastMessage.message.observe(
-            activity,
-            { event ->
-                activity.handleEvent(event)
-            }
-        )
+        activity.collectWhenStarted(connectivityViewModel.toastMessage.message) { event ->
+            activity.handleEvent(event)
+        }
     }
 
     private fun observeLoginToastMessage() {
-        loginViewModel.toastMessage.message.observe(
-            activity,
-            { event ->
-                activity.handleEvent(event)
-            }
-        )
+        activity.collectWhenStarted(loginViewModel.toastMessage.message) { event ->
+            activity.handleEvent(event)
+        }
     }
 }

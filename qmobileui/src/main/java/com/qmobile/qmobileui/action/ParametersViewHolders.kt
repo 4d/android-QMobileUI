@@ -1,31 +1,30 @@
 package com.qmobile.qmobileui.action
 
-import android.app.TimePickerDialog
-import android.view.View
-import androidx.recyclerview.widget.RecyclerView
-import com.qmobile.qmobileui.R
-import org.json.JSONObject
-import com.qmobile.qmobileapi.utils.getSafeString
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
+import android.app.TimePickerDialog
 import android.text.Editable
 import android.text.InputType
 import android.text.Selection
 import android.text.Spannable
 import android.text.TextWatcher
 import android.util.Patterns
+import android.view.View
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Switch
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityHelper
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeObject
-
+import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.list.SpellOutHelper
+import org.json.JSONObject
 import java.text.DecimalFormat
 
 abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -182,7 +181,7 @@ class TextViewHolder(itemView: View, val format: String) :
         }
 
         if (isMandatory() && (format == ActionParameterEnum.TEXT_URL.format)) {
-            val isValidUrl = Patterns.WEB_URL.matcher(editText.text).matches();
+            val isValidUrl = Patterns.WEB_URL.matcher(editText.text).matches()
             if (!isValidUrl) {
                 showError(itemView.context.resources.getString(R.string.action_parameter_invalid_url_error))
                 return false
@@ -399,13 +398,12 @@ class SpellOutViewHolder(itemView: View) :
             }
         })
         editText.inputType = InputType.TYPE_CLASS_NUMBER
-        editText.setOnFocusChangeListener { view, hasFocus ->
+        editText.setOnFocusChangeListener { _, hasFocus ->
             if (editText.text.isEmpty())
                 return@setOnFocusChangeListener
 
             if (hasFocus && (numericValue != null)) {
                 editText.text = numericValue.toString()
-
             } else {
                 numericValue?.let {
                     onValueChanged(
@@ -516,13 +514,12 @@ class ScientificViewHolder(itemView: View) :
                 }
             }
         })
-        editText.setOnFocusChangeListener { view, hasFocus ->
+        editText.setOnFocusChangeListener { _, hasFocus ->
             if (editText.text.isEmpty())
                 return@setOnFocusChangeListener
 
             if (hasFocus && (numericValue != null)) {
                 editText.text = numericValue.toString()
-
             } else {
 
                 numericValue?.let {
@@ -618,7 +615,7 @@ class PercentageViewHolder(itemView: View) :
 
         (editText as EditText).addSuffix(PERCENT_KEY)
         editText.inputType = InputType.TYPE_CLASS_NUMBER
-        //editText.text = PERCENT_KEY
+        // editText.text = PERCENT_KEY
         Selection.setSelection(editText.text as Spannable?, editText.text.length - 1)
 
         editText.addTextChangedListener(object : TextWatcher {
@@ -640,7 +637,9 @@ class PercentageViewHolder(itemView: View) :
             }
 
             override fun beforeTextChanged(
-                s: CharSequence, start: Int, count: Int,
+                s: CharSequence,
+                start: Int,
+                count: Int,
                 after: Int
             ) {
                 // Nothing to do
@@ -797,7 +796,6 @@ class BooleanCheckMarkViewHolder(itemView: View) :
     }
 }
 
-
 /**
  * IMAGE VIEW HOLDERS
  */
@@ -857,7 +855,7 @@ class TimeViewHolder(itemView: View, val format: String) :
             selectedTime.text = it
         }
         val timeSetListener =
-            TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
+            TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
                 selectedHour = hourOfDay
 
                 val formattedResult: String = if (is24HourFormat) {
@@ -1008,5 +1006,3 @@ class DateViewHolder(itemView: View, val format: String) :
         }
     }
 }
-
-

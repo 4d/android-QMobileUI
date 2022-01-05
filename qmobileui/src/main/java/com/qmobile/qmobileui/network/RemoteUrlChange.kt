@@ -4,7 +4,7 @@
  * Copyright (c) 2021 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.ui
+package com.qmobile.qmobileui.network
 
 interface RemoteUrlChange : NetworkChecker {
     fun onValidRemoteUrlChange(newRemoteUrl: String)

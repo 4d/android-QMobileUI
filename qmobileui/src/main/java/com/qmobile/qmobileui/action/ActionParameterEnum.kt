@@ -1,7 +1,7 @@
 package com.qmobile.qmobileui.action
 
 enum class ActionParameterEnum(val type: String, val format: String = "default") {
-    //Text
+    // Text
     TEXT_DEFAULT("string", "default"),
     TEXT_EMAIL("string", "email"),
     TEXT_PASSWORD("string", "password"),
@@ -11,7 +11,7 @@ enum class ActionParameterEnum(val type: String, val format: String = "default")
     TEXT_ACCOUNT("string", "account"),
     TEXT_AREA("string", "textArea"),
 
-    //Boolean
+    // Boolean
     BOOLEAN_DEFAULT("bool", "default"),
     BOOLEAN_CHECK("bool", "check"),
 

@@ -2,7 +2,7 @@ package com.qmobile.qmobileui.list
 
 import java.text.DecimalFormat
 
-@Suppress( "MagicNumber")
+@Suppress("MagicNumber")
 
 object SpellOutHelper {
     private val tensNames = arrayOf(
@@ -60,21 +60,20 @@ object SpellOutHelper {
         if (number == 0L) {
             return "zero"
         }
-        var snumber = number.toString()
 
         // pad with "0"
         val mask = "000000000000"
         val df = DecimalFormat(mask)
-        snumber = df.format(number)
+        val sNumber = df.format(number)
 
         // XXXnnnnnnnnn
-        val billions = snumber.substring(0, 3).toInt()
+        val billions = sNumber.substring(0, 3).toInt()
         // nnnXXXnnnnnn
-        val millions = snumber.substring(3, 6).toInt()
+        val millions = sNumber.substring(3, 6).toInt()
         // nnnnnnXXXnnn
-        val hundredThousands = snumber.substring(6, 9).toInt()
+        val hundredThousands = sNumber.substring(6, 9).toInt()
         // nnnnnnnnnXXX
-        val thousands = snumber.substring(9, 12).toInt()
+        val thousands = sNumber.substring(9, 12).toInt()
         val tradBillions: String = when (billions) {
             0 -> ""
             1 -> convertLessThanOneThousand(billions) + " billion "
@@ -99,5 +98,4 @@ object SpellOutHelper {
         // remove extra spaces!
         return result.replace("^\\s+".toRegex(), "").replace("\\b\\s{2,}\\b".toRegex(), " ")
     }
-
 }

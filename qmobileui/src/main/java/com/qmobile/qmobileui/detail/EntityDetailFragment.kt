@@ -30,7 +30,7 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
-import com.qmobile.qmobileui.ui.NetworkChecker
+import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.checkIfChildIsWebView
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.webview.MyWebViewClient
@@ -159,10 +159,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                         override fun onServerAccessible() {
                             entityViewModel.sendAction(
                                 action.name,
-                                ActionHelper.getActionContent(
-                                    tableName,
-                                    entityViewModel.entity.value?.__KEY
-                                )
+                                ActionHelper.getActionContent(tableName, itemId)
                             ) {
                                 it?.dataSynchro?.let { shouldSyncData ->
                                     if (shouldSyncData) {

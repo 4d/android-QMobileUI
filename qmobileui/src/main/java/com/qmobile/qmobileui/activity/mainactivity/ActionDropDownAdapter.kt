@@ -8,8 +8,8 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.Action
 
 class ActionDropDownAdapter(
     val context: Context,
@@ -55,7 +55,6 @@ class ActionDropDownAdapter(
         itemImage.setImageResource(resId)
         newConvertView.setOnClickListener { _ ->
             onMenuItemClick(item)
-
         }
         return newConvertView
     }

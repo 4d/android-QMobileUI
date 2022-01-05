@@ -8,27 +8,26 @@ package com.qmobile.qmobileui.action
 
 import android.content.Context
 import android.os.Bundle
-import android.view.MenuItem
-import android.view.MenuInflater
 import android.view.LayoutInflater
 import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.qmobile.qmobileui.BaseFragment
-import com.qmobile.qmobileui.FragmentCommunication
-import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobileui.BaseFragment
+import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.ui.NetworkChecker
+import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
+import com.qmobile.qmobileui.network.NetworkChecker
 import androidx.recyclerview.widget.RecyclerView
-
 
 open class ActionParametersFragment : Fragment(), BaseFragment {
 

@@ -15,9 +15,8 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.qmobile.qmobileui.action.Action
-
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.utils.ColorHelper
 import java.util.LinkedList
@@ -26,8 +25,7 @@ import kotlin.math.max
 
 const val HORIZONTAL_PADDING = 50.0f
 const val BUTTON_TEXT_SIZE = 10.0f
-
-//Use as margin bottom from the center for icon and  as margin top from the center for title
+//Use as margin bottom from the center for icon and as margin top from the center for title
 const val VERTICAL_MARGIN = 25F
 const val ICON_WIDTH_FACTOR = 0.3F
 

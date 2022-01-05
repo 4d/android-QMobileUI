@@ -27,12 +27,12 @@ import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
-import com.qmobile.qmobileapi.connectivity.NetworkStateEnum
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.network.NetworkStateEnum
 import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
 import com.qmobile.qmobiledatasync.relation.OneToManyRelation
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
@@ -43,16 +43,16 @@ import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
-import com.qmobile.qmobileui.action.Action
-
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
-import com.qmobile.qmobileui.ui.NetworkChecker
+import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.setupWithNavController
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
@@ -83,9 +83,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Init data sync class
-        mainActivityDataSync = MainActivityDataSync(this)
-
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -103,6 +100,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         mainActivityObserver = MainActivityObserver(this, entityListViewModelList).apply {
             initObservers()
         }
+
+        // Init data sync class
+        mainActivityDataSync = MainActivityDataSync(this)
 
         // Follow activity lifecycle and check when activity enters foreground for data sync
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
@@ -192,7 +192,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             refreshAllApiClients()
             entityListViewModelList.resetIsToSync()
         }
-        mainActivityDataSync.prepareDataSync(connectivityViewModel, null)
+        dataSync()
     }
 
     override fun requestAuthentication() {
@@ -200,8 +200,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         tryAutoLogin()
     }
 
-    fun prepareDataSync(alreadyRefreshedTable: String?) {
-        mainActivityDataSync.prepareDataSync(connectivityViewModel, alreadyRefreshedTable)
+    private fun dataSync(alreadyRefreshedTable: String? = null) {
+        mainActivityDataSync.dataSync(connectivityViewModel, alreadyRefreshedTable)
     }
 
     /**
@@ -221,14 +221,14 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                 } else {
                     // AUTHENTICATED
                     when (entityListViewModel?.dataSynchronized?.value) {
-                        DataSyncStateEnum.UNSYNCHRONIZED -> prepareDataSync(null)
+                        DataSyncStateEnum.UNSYNCHRONIZED -> dataSync()
                         DataSyncStateEnum.SYNCHRONIZED -> {
                             job?.cancel()
                             job = lifecycleScope.launch {
                                 entityListViewModel.getEntities { shouldSyncData ->
                                     if (shouldSyncData) {
                                         Timber.d("GlobalStamp changed, synchronization is required")
-                                        prepareDataSync(currentTableName)
+                                        dataSync(currentTableName)
                                     } else {
                                         Timber.d("GlobalStamp unchanged, no synchronization is required")
                                     }
@@ -236,17 +236,27 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                             }
                         }
                         DataSyncStateEnum.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
+                        DataSyncStateEnum.RESYNC ->
+                            Timber.d("Resynchronization table, because globalStamp changed while performing a dataSync")
                         else -> {}
                     }
                 }
             }
 
             override fun onServerInaccessible() {
-                // Nothing to do
+                connectivityViewModel.toastMessage.showMessage(
+                    getString(R.string.action_send_server_not_accessible),
+                    currentTableName,
+                    MessageType.ERROR
+                )
             }
 
             override fun onNoInternet() {
-                // Nothing to do
+                connectivityViewModel.toastMessage.showMessage(
+                    getString(R.string.action_send_no_internet),
+                    currentTableName,
+                    MessageType.ERROR
+                )
             }
         })
     }
@@ -276,7 +286,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         menu: Menu,
         actions: List<Action>,
         onMenuItemClick: (Action) -> Unit
-    ){
+    ) {
         menuInflater.inflate(R.menu.menu_action, menu)
 
         val menuItem =
@@ -338,7 +348,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     }
 
     // Observe any toast message from Entity Detail
-    override fun observeEntityToastMessage(message: LiveData<Event<ToastMessageHolder>>) {
+    override fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>) {
         mainActivityObserver.observeEntityToastMessage(message)
     }
 
