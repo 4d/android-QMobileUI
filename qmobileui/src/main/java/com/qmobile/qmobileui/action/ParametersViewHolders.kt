@@ -49,7 +49,6 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
         }
     }
 
-
     abstract fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
@@ -164,7 +163,6 @@ class TextViewHolder(itemView: View, val format: String) :
             }
         }
     }
-
 
     override fun validate(): Boolean {
         if (isMandatory() && editText.text.trim().isEmpty()) {
@@ -473,7 +471,6 @@ class SpellOutViewHolder(itemView: View) :
                         validate()
                     )
                 }
-
             }
         }
     }
@@ -820,7 +817,6 @@ class ImageViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         // nothing to do
-
     }
 }
 

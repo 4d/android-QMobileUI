@@ -25,7 +25,7 @@ import kotlin.math.max
 
 const val HORIZONTAL_PADDING = 50.0f
 const val BUTTON_TEXT_SIZE = 10.0f
-//Use as margin bottom from the center for icon and as margin top from the center for title
+// Use as margin bottom from the center for icon and as margin top from the center for title
 const val VERTICAL_MARGIN = 25F
 const val ICON_WIDTH_FACTOR = 0.3F
 
@@ -162,7 +162,7 @@ abstract class SwipeHelper(
             val titleBounds = Rect()
 
             paint.getTextBounds(title, 0, title.length, titleBounds)
-            intrinsicWidth = (screenWidth / 4).toFloat() //Fix button width to screenWidth/4
+            intrinsicWidth = (screenWidth / 4).toFloat() // Fix button width to screenWidth/4
         }
 
         fun draw(canvas: Canvas, rect: RectF) {

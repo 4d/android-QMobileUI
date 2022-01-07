@@ -312,7 +312,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
         dialogBuilder.setAdapter(adapter) { _, position ->
-                onCurrentActionCLicked(actions[position], currentEntity)
+            onCurrentActionClicked(actions[position], currentEntity)
         }
 
         val dialog = dialogBuilder.create()
@@ -325,16 +325,15 @@ open class EntityListFragment : Fragment(), BaseFragment {
         dialog.show()
     }
 
-    private fun onCurrentActionCLicked(action: Action, currentEntityModel: EntityModel?) {
+    private fun onCurrentActionClicked(action: Action, currentEntityModel: EntityModel?) {
         if (action.parameters.length() > 0) {
             BaseApp.genericNavigationResolver.navigateToActionForm(
                 binding,
-                destinationTable =  tableName
+                destinationTable = tableName
             )
             delegate.setSelectAction(action)
             delegate.setSelectedEntity(currentEntityModel)
-
-        } else{
+        } else {
             sendCurrentRecordAction(action.name, currentEntityModel?.__KEY)
         }
     }
@@ -398,7 +397,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     if (action == null) {
                         showDialog(adapter.getSelectedItem(position), currentRecordActions)
                     } else {
-                        onCurrentActionCLicked(action, adapter.getSelectedItem(position))
+                        onCurrentActionClicked(action, adapter.getSelectedItem(position))
                     }
                 }
             }
@@ -451,8 +450,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasTableActions()) {
-            delegate.setupActionsMenu(menu, tableActions) { action ->
 
+            delegate.setupActionsMenu(menu, tableActions) { action ->
                 if (action.parameters.length() > 0) {
 
                     BaseApp.genericNavigationResolver.navigateToActionForm(

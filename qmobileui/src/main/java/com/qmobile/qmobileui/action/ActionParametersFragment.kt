@@ -18,6 +18,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -27,7 +28,6 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.network.NetworkChecker
-import androidx.recyclerview.widget.RecyclerView
 
 open class ActionParametersFragment : Fragment(), BaseFragment {
 
@@ -100,9 +100,9 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.validate) {
-            var selectedActionId: String?  = null
+            var selectedActionId: String? = null
             delegate.getSelectAction().preset?.let {
-                if (it == "edit"){
+                if (it == "edit") {
                     selectedActionId = delegate.getSelectedEntity()?.__KEY
                 }
             }
