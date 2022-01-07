@@ -12,10 +12,8 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
-import android.view.WindowManager
-import android.widget.ImageButton
-import android.widget.ListView
-import android.widget.PopupWindow
+import android.view.MenuItem
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -46,6 +44,7 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
+import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.network.NetworkChecker
@@ -56,8 +55,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
-
-const val DROP_DOWN_WIDTH = 600
 
 @Suppress("TooManyFunctions")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver {
@@ -282,31 +279,28 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         }
     }
 
+    @Suppress("RestrictedApi")
     override fun setupActionsMenu(
         menu: Menu,
         actions: List<Action>,
         onMenuItemClick: (Action) -> Unit
     ) {
-        menuInflater.inflate(R.menu.menu_action, menu)
 
-        val menuItem =
-            menu.findItem(R.id.more).actionView.findViewById(R.id.drop_down_image) as ImageButton
-        menuItem.setOnClickListener { v ->
-            val popupWindow = PopupWindow(this)
-            val adapter = ActionDropDownAdapter(v.context, actions as ArrayList<Action>) {
-                popupWindow.dismiss()
-                onMenuItemClick(it)
-            }
-            val listViewSort = ListView(this)
-            listViewSort.dividerHeight = 1
-            listViewSort.adapter = adapter
-            popupWindow.apply {
-                isFocusable = true
-                width = DROP_DOWN_WIDTH
-                height = WindowManager.LayoutParams.WRAP_CONTENT
-                contentView = listViewSort
-                showAsDropDown(v, 0, 0)
-            }
+        (menu as? MenuBuilder)?.setOptionalIconsVisible(true)
+
+        val withIcons = actions.firstOrNull { it.getIconDrawablePath() != null } != null
+
+        actions.forEach { action ->
+            val drawable =
+                if (withIcons) ActionHelper.getActionIconDrawable(this, action) else null
+
+            menu.add(action.getPreferredName())
+                .setOnMenuItemClickListener {
+                    onMenuItemClick(action)
+                    true
+                }
+                .setIcon(drawable)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         }
     }
 
@@ -319,11 +313,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     }
 
     override fun setSelectedEntity(entityModel: EntityModel?) {
-       entity = entityModel
+        entity = entityModel
     }
 
     override fun getSelectedEntity(): EntityModel? {
-        return  entity
+        return entity
     }
 
     override fun handleNetworkState(networkState: NetworkStateEnum) {

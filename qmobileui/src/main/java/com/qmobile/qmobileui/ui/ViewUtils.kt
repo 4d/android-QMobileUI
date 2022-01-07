@@ -54,16 +54,22 @@ fun View.clearViewInParent() {
         (this.parent as ViewGroup).removeView(this)
 }
 
+fun View.checkIfChildIsWebView(): WebView? = when (this) {
+    is ViewGroup -> this.checkIfContainsWebView()
+    is WebView -> this
+    else -> null
+}
+
 @Suppress("ReturnCount")
-fun View.checkIfChildIsWebView(): WebView? {
-    if (this is WebView) return this
-    if (this as? ViewGroup != null) {
-        (this as? ViewGroup)?.children?.forEach { child ->
-            if (child as? ViewGroup != null) {
-                return child.checkIfChildIsWebView()
-            }
-            if (child is WebView) return child
+fun ViewGroup.checkIfContainsWebView(): WebView? {
+    var childContainsWebView: WebView? = null
+    this.children.forEach { child ->
+        if (child is WebView) return child
+        if (child is ViewGroup) {
+            childContainsWebView = child.checkIfContainsWebView()
+            if (childContainsWebView != null)
+                return childContainsWebView
         }
     }
-    return null
+    return childContainsWebView
 }

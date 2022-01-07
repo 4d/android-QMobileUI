@@ -8,7 +8,6 @@ package com.qmobile.qmobileui.list
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -22,6 +21,7 @@ import android.widget.EditText
 import android.widget.ListAdapter
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
+import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
@@ -56,7 +56,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
     companion object {
         private const val CURRENT_QUERY_KEY = "currentQuery_key"
         private const val MAX_ACTIONS_VISIBLE = 2
-        private const val DIALOG_ICON_PADDING = 5
     }
 
     private lateinit var searchView: SearchView
@@ -69,6 +68,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
     lateinit var adapter: EntityListAdapter
     private var _binding: FragmentListBinding? = null
+    private lateinit var currentRecordActionsDialog: MaterialAlertDialogBuilder
+    private lateinit var currentRecordActionsDialogAdapter: ListAdapter
 
     // This property is only valid between onCreateView and onDestroyView.
     val binding get() = _binding!!
@@ -240,6 +241,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     currentRecordActions.add(ActionHelper.createActionFromJsonObject(it))
                 }
             }
+
+            setupCurrentRecordActionsDialog(currentRecordActions)
         }
     }
 
@@ -271,58 +274,47 @@ open class EntityListFragment : Fragment(), BaseFragment {
         }
     }
 
-    private fun showDialog(currentEntity: EntityModel?, actions: MutableList<Action>) {
-        val items = actions.map {
-            DialogItem(
-                it.getPreferredShortName(),
-                it.getIconDrawablePath()
-            )
-        }.toTypedArray()
+    private fun setupCurrentRecordActionsDialog(actions: MutableList<Action>) {
 
-        val adapter: ListAdapter = object : ArrayAdapter<DialogItem?>(
+        val withIcons = actions.firstOrNull { it.getIconDrawablePath() != null } != null
+
+        currentRecordActionsDialogAdapter = object : ArrayAdapter<Action>(
             requireContext(),
             android.R.layout.select_dialog_item,
             android.R.id.text1,
-            items
+            actions
         ) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val itemView = super.getView(position, convertView, parent)
                 val textView = itemView.findViewById<View>(android.R.id.text1) as TextView
-                val item = items[position]
-                val resId = if (item.icon != null) {
-                    resources.getIdentifier(
-                        item.icon,
-                        "drawable",
-                        context.packageName
-                    )
-                } else {
-                    0
+                val action = actions[position]
+
+                if (withIcons) {
+                    val drawable = ActionHelper.getActionIconDrawable(context, action)
+                    textView.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
+                    TextViewCompat.setCompoundDrawableTintList(textView, textView.textColors)
+                    // Add margin between image and text (support various screen densities)
+                    textView.compoundDrawablePadding =
+                        ActionHelper.getActionDrawablePadding(context)
                 }
-                textView.text = item.text
-                textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, resId, 0)
-                // Add margin between image and text (support various screen densities)
-                val paddingDrawable =
-                    (DIALOG_ICON_PADDING * resources.displayMetrics.density).toInt()
-                textView.compoundDrawablePadding = paddingDrawable
+
+                textView.text = action.getPreferredName()
                 return itemView
             }
         }
-        val dialogBuilder = MaterialAlertDialogBuilder(
+
+        currentRecordActionsDialog = MaterialAlertDialogBuilder(
             requireContext(),
             R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
-        dialogBuilder.setAdapter(adapter) { _, position ->
+    }
+
+    private fun showDialog(currentEntity: EntityModel?, actions: MutableList<Action>) {
+
+        currentRecordActionsDialog.setAdapter(currentRecordActionsDialogAdapter) { _, position ->
             onCurrentActionClicked(actions[position], currentEntity)
         }
-
-        val dialog = dialogBuilder.create()
-        dialog.listView.apply {
-            divider = ColorDrawable(Color.LTGRAY)
-            dividerHeight = 2
-            setFooterDividersEnabled(false)
-            addFooterView(View(context))
-        }
-        dialog.show()
+        currentRecordActionsDialog.create().show()
     }
 
     private fun onCurrentActionClicked(action: Action, currentEntityModel: EntityModel?) {

@@ -8,7 +8,10 @@ package com.qmobile.qmobileui.binding
 
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.InsetDrawable
 import android.net.Uri
+import android.os.Build
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
@@ -23,6 +26,7 @@ object ImageHelper {
     const val drawableStartHeight = 24
     const val drawableSpace = 8
     const val luminanceThreshold = 0.5
+    const val ICON_MARGIN = 8
 
     fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Uri? {
         BaseApp.runtimeDataHolder.embeddedFiles.find {
@@ -32,6 +36,26 @@ object ImageHelper {
             return Uri.parse("file:///android_asset/$path")
         }
         return null
+    }
+
+    fun Drawable?.adjustActionDrawableMargins(context: Context): Drawable {
+        val iconMarginPx =
+            TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                ImageHelper.ICON_MARGIN.toFloat(),
+                context.resources.displayMetrics
+            )
+                .toInt()
+
+        return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            InsetDrawable(this, iconMarginPx, 0, iconMarginPx, 0)
+        } else {
+            object : InsetDrawable(this, iconMarginPx, 0, iconMarginPx, 0) {
+                override fun getIntrinsicWidth(): Int {
+                    return intrinsicHeight + iconMarginPx + iconMarginPx
+                }
+            }
+        }
     }
 }
 
