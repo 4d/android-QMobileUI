@@ -7,6 +7,9 @@
 package com.qmobile.qmobileui.action
 
 import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -18,6 +21,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -27,7 +31,11 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.network.NetworkChecker
-import androidx.recyclerview.widget.RecyclerView
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
+import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
+import java.io.IOException
 
 open class ActionParametersFragment : Fragment(), BaseFragment {
 
@@ -38,7 +46,9 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     override lateinit var delegate: FragmentCommunication
     private val paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
+    private val imagesToUpload = HashMap<String, Any>()
     private val validationMap = HashMap<String, Boolean>()
+    lateinit var adapter: ActionsParametersListAdapter
 
     // Is set to true if all recyclerView items are seen at lean once
     private var areAllItemsSeen = false
@@ -57,7 +67,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             false
         ).apply {
             lifecycleOwner = viewLifecycleOwner
-            val adapter = ActionsParametersListAdapter(
+            adapter = ActionsParametersListAdapter(
                 requireContext(),
                 delegate.getSelectAction().parameters,
                 delegate.getSelectedEntity()
@@ -89,7 +99,6 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                 areAllItemsSeen = true
             }
         }
-
         return binding.root
     }
 
@@ -100,13 +109,18 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.validate) {
-            var selectedActionId: String?  = null
+            var selectedActionId: String? = null
             delegate.getSelectAction().preset?.let {
-                if (it == "edit"){
+                if (it == "edit") {
                     selectedActionId = delegate.getSelectedEntity()?.__KEY
                 }
             }
-            sendAction(delegate.getSelectAction().name, selectedActionId)
+
+            if (imagesToUpload.isNotEmpty()) {
+                uploadImages(delegate.getSelectAction().name, selectedActionId)
+            } else {
+                sendAction(delegate.getSelectAction().name, selectedActionId)
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -169,6 +183,58 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                     )
                 }
             })
+        }
+    }
+
+    private fun uploadImages(actionName: String, selectedActionId: String?) {
+        val bodies = imagesToUpload.map {
+            val fileUri = it.value as Uri
+            val stream = activity?.contentResolver?.openInputStream(fileUri)
+            val body = stream?.readBytes()?.let { it1 ->
+                RequestBody.create(
+                    "application/octet".toMediaTypeOrNull(),
+                    it1
+                )
+            }
+            return@map it.key to body
+        }
+        entityListViewModel.uploadImage(bodies, { parameterName, receivedId ->
+            paramsToSubmit[parameterName] = receivedId
+            metaDataToSubmit[parameterName] = "uploaded"
+        }) {
+            sendAction(actionName, selectedActionId)
+        }
+    }
+
+    fun handleResult(requestCode: Int, data: Intent) {
+        // the request code is te equivalent of position of item in adapter
+
+        // case of image picked from gallery
+        val uri = data.data
+        if (uri != null) {
+            adapter.getUpdatedImageParameterName(requestCode)?.let {
+                imagesToUpload[it] = uri
+            }
+            adapter.updateImageForPosition(requestCode, uri)
+        } else {
+            // case of image token from camera
+            val thumbnail = data.extras?.get("data") as Bitmap?
+            val bytes = ByteArrayOutputStream()
+            thumbnail?.compress(Bitmap.CompressFormat.JPEG, 90, bytes)
+            val destination = createImageFile(requireContext())
+            val fileOutputStream: FileOutputStream
+            try {
+                fileOutputStream = FileOutputStream(destination)
+                fileOutputStream.write(bytes.toByteArray())
+                fileOutputStream.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+
+            adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->
+                imagesToUpload[parameterName] = Uri.fromFile(destination)
+            }
+            data.extras?.get("data")?.let { adapter.updateImageForPosition(requestCode, it) }
         }
     }
 }

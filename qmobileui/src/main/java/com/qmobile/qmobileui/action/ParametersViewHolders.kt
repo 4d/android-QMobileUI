@@ -1,8 +1,13 @@
 package com.qmobile.qmobileui.action
 
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.app.TimePickerDialog
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.InputType
 import android.text.Selection
@@ -12,9 +17,12 @@ import android.util.Patterns
 import android.view.View
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Switch
 import android.widget.TextView
+import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityHelper
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
@@ -25,6 +33,8 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.list.SpellOutHelper
 import org.json.JSONObject
+import java.io.File
+import java.io.IOException
 import java.text.DecimalFormat
 
 abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -38,6 +48,7 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
+
         itemJsonObject = item as JSONObject
         parameterName = itemJsonObject.getSafeString("name") ?: ""
         val parameterLabel = itemJsonObject.getSafeString("label") ?: ""
@@ -48,7 +59,6 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
             label.text = parameterLabel
         }
     }
-
 
     abstract fun setDefaultFieldIfNeeded(
         currentEntity: EntityModel?,
@@ -164,7 +174,6 @@ class TextViewHolder(itemView: View, val format: String) :
             }
         }
     }
-
 
     override fun validate(): Boolean {
         if (isMandatory() && editText.text.trim().isEmpty()) {
@@ -398,7 +407,7 @@ class SpellOutViewHolder(itemView: View) :
             }
         })
         editText.inputType = InputType.TYPE_CLASS_NUMBER
-        editText.setOnFocusChangeListener { _, hasFocus ->
+        editText.setOnFocusChangeListener { view, hasFocus ->
             if (editText.text.isEmpty())
                 return@setOnFocusChangeListener
 
@@ -473,7 +482,6 @@ class SpellOutViewHolder(itemView: View) :
                         validate()
                     )
                 }
-
             }
         }
     }
@@ -514,7 +522,7 @@ class ScientificViewHolder(itemView: View) :
                 }
             }
         })
-        editText.setOnFocusChangeListener { _, hasFocus ->
+        editText.setOnFocusChangeListener { view, hasFocus ->
             if (editText.text.isEmpty())
                 return@setOnFocusChangeListener
 
@@ -629,7 +637,7 @@ class PercentageViewHolder(itemView: View) :
                                 parameterName,
                                 percentValue,
                                 null,
-                                validate()
+                                validate(),
                             )
                         }
                     }
@@ -801,6 +809,7 @@ class BooleanCheckMarkViewHolder(itemView: View) :
  */
 class ImageViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
+    var imageButton: ImageView = itemView.findViewById(R.id.image_button)
 
     override fun bind(
         item: Any,
@@ -808,6 +817,45 @@ class ImageViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
+        imageButton.setOnClickListener {
+            // setup the alert builder
+            val builder = MaterialAlertDialogBuilder(itemView.context)
+            builder.setTitle("Choose a picture")
+            val options = arrayOf("Camera", "Gallery")
+            builder.setItems(options) { dialog, which ->
+                when (which) {
+                    0 -> {
+                        capturePhoto()
+                    }
+                    1 -> {
+                        pickImageFromGallery()
+                    }
+                }
+            }
+            // create and show the alert dialog
+            val dialog = builder.create()
+            dialog.show()
+        }
+        displaySelectedImageIfNeed()
+    }
+
+    private fun displaySelectedImageIfNeed() {
+        try {
+            if (itemJsonObject.get("bitmap") != null) {
+                imageButton.setImageBitmap(itemJsonObject.get("bitmap") as Bitmap)
+                itemJsonObject.remove("bitmap")
+            }
+        } catch (e: Exception) {
+        }
+
+        try {
+            if (itemJsonObject.get("uri") != null) {
+                val uri = itemJsonObject.get("uri") as Uri
+                imageButton.setImageURI(uri)
+                itemJsonObject.remove("uri")
+            }
+        } catch (e: Exception) {
+        }
     }
 
     override fun validate(): Boolean {
@@ -820,7 +868,44 @@ class ImageViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         // nothing to do
+    }
 
+    private fun capturePhoto() {
+        val context = itemView.context
+
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            // Ensure that there's a camera activity to handle the intent
+            takePictureIntent.resolveActivity(context.packageManager)?.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile(itemView.context)
+                } catch (ex: IOException) {
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                        context,
+                        "com.4D.android.fileprovider",
+                        it
+                    )
+                    (context as Activity).startActivityForResult(
+                        takePictureIntent,
+                        bindingAdapterPosition // Send position as request code, so we can update image preview only for the selected item
+                    )
+                }
+            }
+        }
+    }
+
+    private fun pickImageFromGallery() {
+        val context = itemView.context
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        (context as Activity).startActivityForResult(
+            intent,
+            bindingAdapterPosition // Send position as request code, so we can update image preview only for the selected item
+        )
     }
 }
 
@@ -855,7 +940,7 @@ class TimeViewHolder(itemView: View, val format: String) :
             selectedTime.text = it
         }
         val timeSetListener =
-            TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
+            TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
                 selectedHour = hourOfDay
 
                 val formattedResult: String = if (is24HourFormat) {

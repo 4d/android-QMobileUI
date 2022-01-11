@@ -312,7 +312,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
         dialogBuilder.setAdapter(adapter) { _, position ->
-                onCurrentActionCLicked(actions[position], currentEntity)
+            onCurrentActionCLicked(actions[position], currentEntity)
         }
 
         val dialog = dialogBuilder.create()
@@ -329,12 +329,11 @@ open class EntityListFragment : Fragment(), BaseFragment {
         if (action.parameters.length() > 0) {
             BaseApp.genericNavigationResolver.navigateToActionForm(
                 binding,
-                destinationTable =  tableName
+                destinationTable = tableName
             )
             delegate.setSelectAction(action)
             delegate.setSelectedEntity(currentEntityModel)
-
-        } else{
+        } else {
             sendCurrentRecordAction(action.name, currentEntityModel?.__KEY)
         }
     }
