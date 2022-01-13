@@ -16,7 +16,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
-import com.qmobile.qmobileapi.auth.isRemoteUrlValid
+import com.qmobile.qmobileapi.auth.isUrlValid
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.LoginApiService
@@ -121,7 +121,7 @@ abstract class BaseActivity : AppCompatActivity() {
                 setOnShowListener {
                     getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                         val newRemoteUrl = remoteUrlEditLayout.editText?.text.toString()
-                        if (newRemoteUrl.isRemoteUrlValid()) {
+                        if (newRemoteUrl.isUrlValid()) {
                             remoteUrlChange.onValidRemoteUrlChange(newRemoteUrl)
                             checkNetwork(remoteUrlChange)
                             dismiss()

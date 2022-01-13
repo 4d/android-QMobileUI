@@ -14,9 +14,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
@@ -28,20 +26,32 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.network.NetworkChecker
+import com.qmobile.qmobileui.ui.CenterLayoutManager
+import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
+import com.qmobile.qmobileui.utils.hideKeyboard
 
 open class ActionParametersFragment : Fragment(), BaseFragment {
 
-    private var _binding: ViewDataBinding? = null
+    private var _binding: FragmentActionParametersBinding? = null
     internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
     val binding get() = _binding!!
     lateinit var tableName: String
     override lateinit var delegate: FragmentCommunication
     private val paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
-    private val validationMap = HashMap<String, Boolean>()
+    private val validationMap = mutableMapOf<String, Boolean>()
+    private lateinit var adapter: ActionsParametersListAdapter
 
-    // Is set to true if all recyclerView items are seen at lean once
-    private var areAllItemsSeen = false
+    private var scrollPos = 0
+
+    private val onScrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                triggerError(scrollPos)
+                recyclerView.removeOnScrollListener(this)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,10 +67,11 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             false
         ).apply {
             lifecycleOwner = viewLifecycleOwner
-            val adapter = ActionsParametersListAdapter(
+            adapter = ActionsParametersListAdapter(
                 requireContext(),
                 delegate.getSelectAction().parameters,
-                delegate.getSelectedEntity()
+                delegate.getSelectedEntity(),
+                { onHideKeyboardCallback() }
             ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 validationMap[name] = isValid
                 paramsToSubmit[name] = value ?: ""
@@ -68,29 +79,19 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                     metaDataToSubmit[name] = metaData
                 }
             }
-            val layoutManager = LinearLayoutManager(requireContext())
-            recyclerView.layoutManager = layoutManager
+            val smoothScroller = CenterLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+            recyclerView.layoutManager = smoothScroller
             recyclerView.adapter = adapter
-
-            val dividerItemDecoration = DividerItemDecoration(
-                recyclerView.context,
-                layoutManager.orientation
-            )
-            recyclerView.addItemDecoration(dividerItemDecoration)
-            recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-                        areAllItemsSeen = true
-                    }
-                    super.onScrolled(recyclerView, dx, dy)
-                }
-            })
-            if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-                areAllItemsSeen = true
-            }
+            // Important line : prevent recycled views to get their content reset
+            recyclerView.setItemViewCacheSize(delegate.getSelectAction().parameters.length())
         }
-
         return binding.root
+    }
+
+    private fun onHideKeyboardCallback() {
+        activity?.let {
+            hideKeyboard(it)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -119,14 +120,56 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     }
 
     private fun isFormValid(): Boolean {
-        if (!areAllItemsSeen)
+
+        // first check if visible items are valid
+        val firstNotValidItemPosition = validationMap.values.indexOfFirst { !it }
+        if (firstNotValidItemPosition > -1) {
+            scrollTo(firstNotValidItemPosition)
+            triggerError(firstNotValidItemPosition)
             return false
-        validationMap.forEach {
-            if (!it.value) {
-                return false
+        }
+
+        // second check if there are not yet visible items
+        val nbItems = adapter.itemCount
+        val viewedItems = validationMap.size
+        if (viewedItems < nbItems) {
+            val pos =
+                (binding.recyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+            if (pos < nbItems - 1) {
+                scrollTo(pos + 1)
+            }
+            return false
+        }
+
+        // third check any not valid item
+        var formIsValid = true
+        validationMap.values.forEachIndexed { index, isValid ->
+            if (!isValid) {
+                if (formIsValid) { // scroll to first not valid
+                    scrollTo(index)
+                }
+                formIsValid = false
+                triggerError(index)
             }
         }
+        if (!formIsValid) {
+            return false
+        }
+
         return true
+    }
+
+    private fun scrollTo(position: Int) {
+        scrollPos = position
+        binding.recyclerView.removeOnScrollListener(onScrollListener)
+        binding.recyclerView.addOnScrollListener(onScrollListener)
+        binding.recyclerView.smoothScrollToPosition(position)
+    }
+
+    private fun triggerError(position: Int) {
+        (binding.recyclerView.findViewHolderForLayoutPosition(position) as BaseViewHolder?)?.validate(
+            true
+        )
     }
 
     private fun sendAction(actionName: String, selectedActionId: String?) {

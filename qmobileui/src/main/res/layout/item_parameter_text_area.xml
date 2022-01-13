@@ -1,43 +1,54 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by Quentin Marciset on 13/2/2020.
+  ~ 4D SAS
+  ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/label"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_marginStart="7dp"
-        android:layout_marginTop="7dp"
-        android:text="TextView:"
-        android:textColor="#000" />
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:scrollbars="none"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:textColor="?colorOnSurface"
+        app:layout_constraintBottom_toTopOf="@+id/container"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Label" />
 
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/editText"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/container"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_marginTop="7dp"
-        android:background="#FFFFFF"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:textColorHint="@android:color/darker_gray"
+        app:errorEnabled="true"
+        app:errorTextAppearance="@style/ErrorTextAppearance"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/label">
 
-        android:inputType="textMultiLine"
-        android:maxLines="15"
-        android:minLines="3"
-        android:paddingLeft="@dimen/param_edit_text_padding_left" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:maxLines="15"
+            android:minLines="3" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:id="@+id/error_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_marginStart="7dp"
-        android:layout_marginTop="7dp"
-        android:textColor="@color/error_light"
-        android:textSize="@dimen/error_label_text_size"
-        android:visibility="gone"
-        tools:text="@string/action_parameter_mandatory_error"
-        tools:visibility="visible" />
-</LinearLayout>
-
+</androidx.constraintlayout.widget.ConstraintLayout>

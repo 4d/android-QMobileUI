@@ -4,6 +4,16 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
+import com.qmobile.qmobileui.action.viewholders.BooleanViewHolder
+import com.qmobile.qmobileui.action.viewholders.DateViewHolder
+import com.qmobile.qmobileui.action.viewholders.ImageViewHolder
+import com.qmobile.qmobileui.action.viewholders.NumberViewHolder
+import com.qmobile.qmobileui.action.viewholders.PercentageViewHolder
+import com.qmobile.qmobileui.action.viewholders.ScientificViewHolder
+import com.qmobile.qmobileui.action.viewholders.SpellOutViewHolder
+import com.qmobile.qmobileui.action.viewholders.TextViewHolder
+import com.qmobile.qmobileui.action.viewholders.TimeViewHolder
 
 @Suppress("LongMethod")
 class ActionParameterViewHolderFactory private constructor() {
@@ -11,8 +21,9 @@ class ActionParameterViewHolderFactory private constructor() {
         fun createViewHolderFromViewType(
             viewType: Int,
             parent: ViewGroup,
-            context: Context
-        ): ActionParameterViewHolder {
+            context: Context,
+            hideKeyboardCallback: () -> Unit
+        ): BaseViewHolder {
 
             return when (val itemType = ActionParameterEnum.values()[viewType]) {
                 // Text
@@ -26,24 +37,29 @@ class ActionParameterViewHolderFactory private constructor() {
                     TextViewHolder(
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_text, parent, false),
-                        itemType.format
+                        itemType.format,
+                        hideKeyboardCallback
                     )
                 ActionParameterEnum.TEXT_AREA ->
-                    TextAreaViewHolder(
+                    TextViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_text_area, parent, false)
+                            .inflate(R.layout.item_parameter_text_area, parent, false),
+                        itemType.format,
+                        hideKeyboardCallback
                     )
 
                 // Boolean
                 ActionParameterEnum.BOOLEAN_DEFAULT ->
-                    BooleanSwitchViewHolder(
+                    BooleanViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_boolean_switch, parent, false)
+                            .inflate(R.layout.item_parameter_boolean_switch, parent, false),
+                        hideKeyboardCallback
                     )
                 ActionParameterEnum.BOOLEAN_CHECK ->
-                    BooleanCheckMarkViewHolder(
+                    BooleanViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_boolean_check_mark, parent, false)
+                            .inflate(R.layout.item_parameter_boolean_check_mark, parent, false),
+                        hideKeyboardCallback
                     )
 
                 // Number
@@ -52,23 +68,30 @@ class ActionParameterViewHolderFactory private constructor() {
                 ActionParameterEnum.NUMBER_INTEGER ->
                     NumberViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_number, parent, false),
-                        itemType.format
+                            .inflate(R.layout.item_parameter_text, parent, false),
+                        itemType.format,
+                        hideKeyboardCallback
                     )
                 ActionParameterEnum.NUMBER_SPELL_OUT ->
                     SpellOutViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_number, parent, false)
+                            .inflate(R.layout.item_parameter_text, parent, false),
+                        itemType.format,
+                        hideKeyboardCallback
                     )
                 ActionParameterEnum.NUMBER_PERCENTAGE ->
                     PercentageViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_number, parent, false)
+                            .inflate(R.layout.item_parameter_text, parent, false),
+                        itemType.format,
+                        hideKeyboardCallback
                     )
                 ActionParameterEnum.NUMBER_SCIENTIFIC ->
                     ScientificViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_number, parent, false)
+                            .inflate(R.layout.item_parameter_text, parent, false),
+                        itemType.format,
+                        hideKeyboardCallback
                     )
 
                 // Date
@@ -79,8 +102,9 @@ class ActionParameterViewHolderFactory private constructor() {
                 ActionParameterEnum.DATE_LONG ->
                     DateViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_date, parent, false),
-                        itemType.format
+                            .inflate(R.layout.item_parameter_text, parent, false),
+                        itemType.format,
+                        hideKeyboardCallback
                     )
 
                 // Time
@@ -88,15 +112,17 @@ class ActionParameterViewHolderFactory private constructor() {
                 ActionParameterEnum.TIME_DURATION ->
                     TimeViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_time, parent, false),
-                        itemType.format
+                            .inflate(R.layout.item_parameter_text, parent, false),
+                        itemType.format,
+                        hideKeyboardCallback
                     )
 
                 // Image
                 ActionParameterEnum.IMAGE ->
                     ImageViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_image, parent, false)
+                            .inflate(R.layout.item_parameter_image, parent, false),
+                        hideKeyboardCallback
                     )
             }
         }

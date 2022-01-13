@@ -42,7 +42,7 @@ object ImageHelper {
         val iconMarginPx =
             TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
-                ImageHelper.ICON_MARGIN.toFloat(),
+                ICON_MARGIN.toFloat(),
                 context.resources.displayMetrics
             )
                 .toInt()

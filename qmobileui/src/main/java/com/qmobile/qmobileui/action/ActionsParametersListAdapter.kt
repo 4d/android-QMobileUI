@@ -5,24 +5,25 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
 import org.json.JSONArray
 import org.json.JSONObject
 
 class ActionsParametersListAdapter(
-    context: Context,
-    val list: JSONArray,
+    private val context: Context,
+    private val list: JSONArray,
     private val currentEntity: EntityModel?,
-    val onValueChanged: (String, Any?, String?, Boolean) -> Unit
+    private val hideKeyboardCallback: () -> Unit,
+    private val onValueChanged: (String, Any?, String?, Boolean) -> Unit
 ) :
-    RecyclerView.Adapter<ActionParameterViewHolder>() {
+    RecyclerView.Adapter<BaseViewHolder>() {
 
-    private val context: Context = context
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ActionParameterViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         return ActionParameterViewHolderFactory.createViewHolderFromViewType(
             viewType,
             parent,
-            context
+            context,
+            hideKeyboardCallback
         )
     }
 
@@ -30,7 +31,7 @@ class ActionsParametersListAdapter(
         return list.length()
     }
 
-    override fun onBindViewHolder(holder: ActionParameterViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         holder.bind(
             list[position],
             currentEntity
