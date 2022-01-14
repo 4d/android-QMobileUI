@@ -2,6 +2,7 @@ package com.qmobile.qmobileui.action
 
 import android.content.Context
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeString
@@ -13,6 +14,7 @@ class ActionsParametersListAdapter(
     private val context: Context,
     private val list: JSONArray,
     private val currentEntity: EntityModel?,
+    private val fragmentManager: FragmentManager?,
     private val hideKeyboardCallback: () -> Unit,
     private val onValueChanged: (String, Any?, String?, Boolean) -> Unit
 ) :
@@ -23,6 +25,7 @@ class ActionsParametersListAdapter(
             viewType,
             parent,
             context,
+            fragmentManager,
             hideKeyboardCallback
         )
     }

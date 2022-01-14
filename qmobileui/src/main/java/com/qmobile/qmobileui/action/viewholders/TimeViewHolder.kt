@@ -6,33 +6,24 @@
 
 package com.qmobile.qmobileui.action.viewholders
 
-import android.app.TimePickerDialog
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
-import android.widget.TextView
-import com.qmobile.qmobileapi.model.entity.EntityHelper
+import androidx.fragment.app.FragmentManager
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
+import com.google.android.material.timepicker.TimeFormat
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.utils.getSafeArray
-import com.qmobile.qmobileapi.utils.getSafeString
-import com.qmobile.qmobileui.R
-import org.json.JSONObject
-import java.text.DecimalFormat
+import com.qmobile.qmobileui.action.ActionParameterEnum
 
-class TimeViewHolder(itemView: View, format: String, hideKeyboardCallback: () -> Unit): BaseViewHolder(itemView, hideKeyboardCallback) {
+class TimeViewHolder(
+    itemView: View,
+    format: String,
+    private val fragmentManager: FragmentManager?,
+    hideKeyboardCallback: () -> Unit
+) : BaseDateTimeViewHolder(itemView, hideKeyboardCallback) {
 
-    companion object {
-        const val AM_KEY = "AM"
-        const val PM_KEY = "PM"
-        const val SELECTED_HOUR = 12
-        const val SELECTED_MINUTE = 30
-    }
+    private val isDuration = format == ActionParameterEnum.TIME_DURATION.format
 
-    private var selectedTime: TextView = itemView.findViewById(R.id.selectedTime)
-    private var selectedHour = SELECTED_HOUR
-    private val selectedMinute = SELECTED_MINUTE
-    private val is24HourFormat = format == "duration"
-
+    @Suppress("MagicNumber")
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
@@ -40,67 +31,39 @@ class TimeViewHolder(itemView: View, format: String, hideKeyboardCallback: () ->
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
 
-        itemJsonObject.getSafeString("placeholder")?.let {
-            selectedTime.hint = it
-        }
+        val clockFormat = if (isDuration) TimeFormat.CLOCK_24H else TimeFormat.CLOCK_12H
 
-        itemJsonObject.getSafeString("default")?.let {
-            selectedTime.text = it
-        }
-
-
-        super.bind(item, currentEntityJsonObject, onValueChanged)
-
-        val timeSetListener =
-            TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
-                selectedHour = hourOfDay
-
-                val formattedResult: String = if (is24HourFormat) {
-                    "$selectedHour hours $minute minutes"
-                } else {
-                    if (selectedHour >= 12) {
-                        "${selectedHour - 12}:$minute $PM_KEY"
-                    } else {
-                        "$selectedHour:$minute $AM_KEY"
-                    }
-                }
-                selectedTime.text = formattedResult
-                val numberOfSeconds = selectedHour * 60 * 60 + minute * 60
-                onValueChanged(parameterName, numberOfSeconds, null, validate(false))
+        var defaultHour = 12
+        var defaultMinute = 30
+        input.text.toString().split(":").forEachIndexed { index, s ->
+            when (index) {
+                0 -> s.toIntOrNull()?.takeIf { it in 0..23 }?.let { defaultHour = it }
+                1 -> s.toIntOrNull()?.takeIf { it in 0..59 }?.let { defaultMinute = it }
             }
-
-        val timePickerDialog = TimePickerDialog(
-            itemView.context,
-            android.R.style.Theme_Holo_Light_Dialog_NoActionBar,
-            timeSetListener,
-            selectedHour, selectedMinute,
-            is24HourFormat
-        )
-
-        itemView.setOnClickListener {
-            timePickerDialog.show()
         }
 
-        selectedTime.setOnClickListener {
-            timePickerDialog.show()
+        val picker =
+            MaterialTimePicker.Builder()
+                .setTimeFormat(clockFormat)
+                .setHour(defaultHour)
+                .setMinute(defaultMinute)
+                .setTitleText(container.hint)
+                .setInputMode(INPUT_MODE_KEYBOARD)
+                .build()
+
+        picker.addOnPositiveButtonClickListener {
+            val hour = picker.hour
+            val minute = picker.minute
+            val formattedResult: String = when {
+                isDuration -> "$hour hours $minute minutes"
+                hour >= 12 -> "${hour - 12}:$minute PM"
+                else -> "$hour:$minute AM"
+            }
+            input.setText(formattedResult)
+            val numberOfSeconds = picker.hour * 60 * 60 + picker.minute * 60
+            onValueChanged(parameterName, numberOfSeconds, null, validate(false))
         }
 
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged) {
-            selectedTime.text = it.toString()
-        }
-    }
-
-    override fun validate(displayError: Boolean): Boolean {
-        if (isMandatory() && selectedTime.text.trim().isEmpty()) {
-            if (displayError)
-//                showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
-            return false
-        }
-
-        return true
-    }
-
-    override fun getInputType(format: String): Int {
-        return -1
+        configureInputLayout(fragmentManager, picker)
     }
 }

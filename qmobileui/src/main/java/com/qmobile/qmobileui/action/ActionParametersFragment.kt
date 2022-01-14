@@ -24,10 +24,10 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.CenterLayoutManager
-import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
 import com.qmobile.qmobileui.utils.hideKeyboard
 
 open class ActionParametersFragment : Fragment(), BaseFragment {
@@ -71,6 +71,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                 requireContext(),
                 delegate.getSelectAction().parameters,
                 delegate.getSelectedEntity(),
+                activity?.supportFragmentManager,
                 { onHideKeyboardCallback() }
             ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 validationMap[name] = isValid
@@ -119,6 +120,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         }
     }
 
+    @Suppress("ReturnCount")
     private fun isFormValid(): Boolean {
 
         // first check if visible items are valid

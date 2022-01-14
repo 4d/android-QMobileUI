@@ -3,15 +3,13 @@ package com.qmobile.qmobileui.action
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentManager
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
 import com.qmobile.qmobileui.action.viewholders.BooleanViewHolder
 import com.qmobile.qmobileui.action.viewholders.DateViewHolder
 import com.qmobile.qmobileui.action.viewholders.ImageViewHolder
 import com.qmobile.qmobileui.action.viewholders.NumberViewHolder
-import com.qmobile.qmobileui.action.viewholders.PercentageViewHolder
-import com.qmobile.qmobileui.action.viewholders.ScientificViewHolder
-import com.qmobile.qmobileui.action.viewholders.SpellOutViewHolder
 import com.qmobile.qmobileui.action.viewholders.TextViewHolder
 import com.qmobile.qmobileui.action.viewholders.TimeViewHolder
 
@@ -22,6 +20,7 @@ class ActionParameterViewHolderFactory private constructor() {
             viewType: Int,
             parent: ViewGroup,
             context: Context,
+            fragmentManager: FragmentManager?,
             hideKeyboardCallback: () -> Unit
         ): BaseViewHolder {
 
@@ -33,17 +32,11 @@ class ActionParameterViewHolderFactory private constructor() {
                 ActionParameterEnum.TEXT_ZIP,
                 ActionParameterEnum.TEXT_PHONE,
                 ActionParameterEnum.TEXT_ACCOUNT,
-                ActionParameterEnum.TEXT_URL ->
-                    TextViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_text, parent, false),
-                        itemType.format,
-                        hideKeyboardCallback
-                    )
+                ActionParameterEnum.TEXT_URL,
                 ActionParameterEnum.TEXT_AREA ->
                     TextViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_text_area, parent, false),
+                            .inflate(R.layout.item_parameter_text, parent, false),
                         itemType.format,
                         hideKeyboardCallback
                     )
@@ -65,29 +58,11 @@ class ActionParameterViewHolderFactory private constructor() {
                 // Number
                 ActionParameterEnum.NUMBER_DEFAULT1,
                 ActionParameterEnum.NUMBER_DEFAULT2,
-                ActionParameterEnum.NUMBER_INTEGER ->
-                    NumberViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_text, parent, false),
-                        itemType.format,
-                        hideKeyboardCallback
-                    )
+                ActionParameterEnum.NUMBER_INTEGER,
+                ActionParameterEnum.NUMBER_PERCENTAGE,
+                ActionParameterEnum.NUMBER_SCIENTIFIC,
                 ActionParameterEnum.NUMBER_SPELL_OUT ->
-                    SpellOutViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_text, parent, false),
-                        itemType.format,
-                        hideKeyboardCallback
-                    )
-                ActionParameterEnum.NUMBER_PERCENTAGE ->
-                    PercentageViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_text, parent, false),
-                        itemType.format,
-                        hideKeyboardCallback
-                    )
-                ActionParameterEnum.NUMBER_SCIENTIFIC ->
-                    ScientificViewHolder(
+                    NumberViewHolder(
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_text, parent, false),
                         itemType.format,
@@ -104,6 +79,7 @@ class ActionParameterViewHolderFactory private constructor() {
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_text, parent, false),
                         itemType.format,
+                        fragmentManager,
                         hideKeyboardCallback
                     )
 
@@ -114,6 +90,7 @@ class ActionParameterViewHolderFactory private constructor() {
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_text, parent, false),
                         itemType.format,
+                        fragmentManager,
                         hideKeyboardCallback
                     )
 

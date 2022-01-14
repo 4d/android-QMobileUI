@@ -6,24 +6,20 @@
 
 package com.qmobile.qmobileui.action.viewholders
 
-import android.app.DatePickerDialog
 import android.view.View
-import android.widget.TextView
-import com.qmobile.qmobileapi.model.entity.EntityHelper
+import androidx.fragment.app.FragmentManager
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.utils.getSafeArray
-import com.qmobile.qmobileapi.utils.getSafeString
-import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionParameterEnum
 import com.qmobile.qmobileui.formatters.FormatterUtils
-import org.json.JSONObject
+import java.util.Calendar
 
-const val SELECTED_YEAR = 2000
-const val SELECTED_MONTH = 5
-const val SELECTED_DAY = 10
-
-class DateViewHolder(itemView: View, format: String, hideKeyboardCallback: () -> Unit): BaseViewHolder(itemView, hideKeyboardCallback) {
-    private val selectedDate: TextView = itemView.findViewById(R.id.selectedDate)
+class DateViewHolder(
+    itemView: View,
+    format: String,
+    private val fragmentManager: FragmentManager?,
+    hideKeyboardCallback: () -> Unit
+) : BaseDateTimeViewHolder(itemView, hideKeyboardCallback) {
 
     private var dateFormat: String = when (format) {
         ActionParameterEnum.DATE_DEFAULT2.format,
@@ -40,50 +36,31 @@ class DateViewHolder(itemView: View, format: String, hideKeyboardCallback: () ->
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
-        itemJsonObject.getSafeString("placeholder")?.let {
-            selectedDate.hint = it
-        }
-        itemJsonObject.getSafeString("default")?.let {
-            selectedDate.text = it
-        }
-        val dateSetListener =
-            DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
-                val dateToSubmit = dayOfMonth.toString() + "!" + (monthOfYear + 1) + "!" + year
-                val formattedDate = FormatterUtils.applyFormat(
-                    dateFormat,
-                    dateToSubmit
-                )
-                selectedDate.text = formattedDate
-                onValueChanged(parameterName, dateToSubmit, "simpleDate", validate(false))
-            }
 
-        val datePickerDialog = DatePickerDialog(
-            itemView.context,
-            android.R.style.Theme_Holo_Light_Dialog_NoActionBar,
-            dateSetListener, SELECTED_YEAR, SELECTED_MONTH, SELECTED_DAY
-        )
-        itemView.setOnClickListener {
-            datePickerDialog.show()
-        }
+        val datePicker =
+            MaterialDatePicker.Builder.datePicker()
+                .setTitleText(container.hint)
+                .setInputMode(MaterialDatePicker.INPUT_MODE_TEXT)
+                .build()
 
-        selectedDate.setOnClickListener {
-            datePickerDialog.show()
-        }
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged) {
-            selectedDate.text = it.toString()
+        val calendar = Calendar.getInstance()
+
+        datePicker.addOnPositiveButtonClickListener {
+            calendar.timeInMillis = it
+
+            val dateToSubmit = calendar.get(Calendar.DAY_OF_MONTH).toString() + "!" + (
+                calendar.get(
+                    Calendar.MONTH
+                ) + 1
+                ) + "!" + calendar.get(Calendar.YEAR)
+            val formattedDate = FormatterUtils.applyFormat(
+                dateFormat,
+                dateToSubmit
+            )
+            input.setText(formattedDate)
+            onValueChanged(parameterName, dateToSubmit, "simpleDate", validate(false))
         }
 
-    }
-
-    override fun validate(displayError: Boolean): Boolean {
-        if (isMandatory() && selectedDate.text.trim().isEmpty()) {
-//            showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
-            return false
-        }
-        return true
-    }
-
-    override fun getInputType(format: String): Int {
-        return -1
+        configureInputLayout(fragmentManager, datePicker)
     }
 }

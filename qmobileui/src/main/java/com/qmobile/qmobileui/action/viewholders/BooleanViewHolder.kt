@@ -6,21 +6,18 @@
 
 package com.qmobile.qmobileui.action.viewholders
 
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
-import android.widget.CheckBox
 import android.widget.CompoundButton
-import com.qmobile.qmobileapi.model.entity.EntityHelper
+import android.widget.TextView
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
-import org.json.JSONObject
 
-class BooleanViewHolder(itemView: View, hideKeyboardCallback: () -> Unit): BaseViewHolder(itemView, hideKeyboardCallback) {
+class BooleanViewHolder(itemView: View, hideKeyboardCallback: () -> Unit) :
+    BaseViewHolder(itemView, hideKeyboardCallback) {
 
     private var compoundButton: CompoundButton = itemView.findViewById(R.id.compoundButton)
+    private val label: TextView = itemView.findViewById(R.id.label)
 
     override fun bind(
         item: Any,
@@ -28,6 +25,14 @@ class BooleanViewHolder(itemView: View, hideKeyboardCallback: () -> Unit): BaseV
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
+
+        itemJsonObject.getSafeString("label")?.let { parameterLabel ->
+            label.text = if (isMandatory()) {
+                "$parameterLabel *"
+            } else {
+                parameterLabel
+            }
+        }
 
         compoundButton.setOnCheckedChangeListener { _, b ->
             onValueChanged(parameterName, b, null, true)
@@ -45,5 +50,4 @@ class BooleanViewHolder(itemView: View, hideKeyboardCallback: () -> Unit): BaseV
     override fun getInputType(format: String): Int {
         return -1
     }
-
 }

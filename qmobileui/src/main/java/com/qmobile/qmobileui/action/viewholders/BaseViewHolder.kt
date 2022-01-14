@@ -7,15 +7,11 @@
 package com.qmobile.qmobileui.action.viewholders
 
 import android.view.View
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityHelper
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
-import com.qmobile.qmobileapi.utils.getSafeInt
-import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
-import com.qmobile.qmobileui.R
 import org.json.JSONObject
 
 abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: () -> Unit) :
@@ -23,7 +19,6 @@ abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: 
 
     lateinit var parameterName: String
     lateinit var itemJsonObject: JSONObject
-    val label: TextView = itemView.findViewById(R.id.label)
 
     open fun bind(
         item: Any,
@@ -32,14 +27,6 @@ abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: 
     ) {
         itemJsonObject = item as JSONObject
         parameterName = itemJsonObject.getSafeString("name") ?: ""
-
-        itemJsonObject.getSafeString("label")?.let { parameterLabel ->
-            label.text = if (isMandatory()) {
-                "$parameterLabel *"
-            } else {
-                parameterLabel
-            }
-        }
 
         if (isMandatory()) {
             onValueChanged(parameterName, "", null, validate(false))
@@ -61,7 +48,7 @@ abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: 
         valueCallback: (Any) -> Unit
     ) {
         currentEntity?.let {
-            itemJsonObject.getSafeString("defaultField")?.let { defaultField ->  // "defaultField" ? semble pas exister
+            itemJsonObject.getSafeString("defaultField")?.let { defaultField ->
                 EntityHelper.readInstanceProperty(it, defaultField).also { value ->
                     valueCallback(value)
                 }
@@ -71,31 +58,5 @@ abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: 
 
     fun isMandatory(): Boolean {
         return itemJsonObject.getSafeArray("rules")?.toString()?.contains("mandatory") ?: false
-    }
-
-    fun getMin(): Int? {
-        itemJsonObject.getSafeArray("rules")?.let { jsonArray ->
-            for (i in 0 until jsonArray.length()) {
-
-                val rule = jsonArray.getSafeObject(i)
-                rule?.getSafeInt("min")?.let {
-                    return it
-                }
-            }
-        }
-        return null
-    }
-
-    fun getMax(): Int? {
-        itemJsonObject.getSafeArray("rules")?.let { jsonArray ->
-            for (i in 0 until jsonArray.length()) {
-
-                val rule = jsonArray.getSafeObject(i)
-                rule?.getSafeInt("max")?.let {
-                    return it
-                }
-            }
-        }
-        return null
     }
 }

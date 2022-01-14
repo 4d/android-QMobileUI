@@ -7,11 +7,9 @@
 package com.qmobile.qmobileui.action.viewholders
 
 import android.view.View
-import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.utils.getSafeString
-import org.json.JSONObject
 
-class ImageViewHolder(itemView: View, hideKeyboardCallback: () -> Unit): BaseViewHolder(itemView, hideKeyboardCallback) {
+class ImageViewHolder(itemView: View, hideKeyboardCallback: () -> Unit) :
+    BaseViewHolder(itemView, hideKeyboardCallback) {
     override fun validate(displayError: Boolean): Boolean {
         return true
     }

@@ -285,11 +285,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         actions: List<Action>,
         onMenuItemClick: (Action) -> Unit
     ) {
-
         (menu as? MenuBuilder)?.setOptionalIconsVisible(true)
 
         val withIcons = actions.firstOrNull { it.getIconDrawablePath() != null } != null
-
         actions.forEach { action ->
             val drawable =
                 if (withIcons) ActionHelper.getActionIconDrawable(this, action) else null
