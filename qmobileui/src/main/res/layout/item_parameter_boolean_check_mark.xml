@@ -9,15 +9,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="28dp"
-    android:layout_marginVertical="8dp">
+    android:layout_marginHorizontal="@dimen/large_margin"
+    android:layout_marginVertical="@dimen/small_margin">
 
     <TextView
         android:id="@+id/label"
         style="@style/Widget.MaterialComponents.TextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="@dimen/small_margin"
         android:alpha="0.6"
         android:scrollbars="none"
         android:singleLine="true"

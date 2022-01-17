@@ -22,7 +22,8 @@
     <dimen name="fragment_error_text_horizontal_padding">56dp</dimen>
 
     <!-- Action parameters item -->
-    <dimen name="param_item_min_height">40dp</dimen>
-    <dimen name="error_label_text_size">12sp</dimen>
-    <dimen name="param_edit_text_padding_left">7sp</dimen>
+    <dimen name="large_margin">28dp</dimen>
+    <dimen name="medium_plus_margin">16dp</dimen>
+    <dimen name="medium_margin">12dp</dimen>
+    <dimen name="small_margin">8dp</dimen>
 </resources>
