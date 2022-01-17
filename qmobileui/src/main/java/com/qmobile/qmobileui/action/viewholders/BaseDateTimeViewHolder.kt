@@ -47,7 +47,7 @@ abstract class BaseDateTimeViewHolder(
             input.setText(itemJsonObject.getSafeString("placeholder"))
 
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged) {
-            input.setText(it.toString())
+            input.setText(formatToDisplay(it.toString()))
         }
     }
 
@@ -87,4 +87,6 @@ abstract class BaseDateTimeViewHolder(
             }
         }
     }
+
+    abstract fun formatToDisplay(input: String): String
 }

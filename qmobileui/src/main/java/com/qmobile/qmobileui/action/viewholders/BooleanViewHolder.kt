@@ -41,6 +41,8 @@ class BooleanViewHolder(itemView: View, hideKeyboardCallback: () -> Unit) :
             if (it is Boolean)
                 compoundButton.isChecked = it
         }
+
+        onValueChanged(parameterName, compoundButton.isChecked, null, validate(false))
     }
 
     override fun validate(displayError: Boolean): Boolean {

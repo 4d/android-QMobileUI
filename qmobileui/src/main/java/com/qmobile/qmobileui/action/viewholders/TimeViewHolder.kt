@@ -23,7 +23,10 @@ class TimeViewHolder(
 
     private val isDuration = format == ActionParameterEnum.TIME_DURATION.format
 
-    @Suppress("MagicNumber")
+    private val dayFactor = 60 * 60 * 24
+    private val hourFactor = 60 * 60
+    private val secondFactor = 60
+
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
@@ -38,7 +41,8 @@ class TimeViewHolder(
         input.text.toString().split(":").forEachIndexed { index, s ->
             when (index) {
                 0 -> s.toIntOrNull()?.takeIf { it in 0..23 }?.let { defaultHour = it }
-                1 -> s.toIntOrNull()?.takeIf { it in 0..59 }?.let { defaultMinute = it }
+                1 -> s.substringBefore(" ").toIntOrNull()?.takeIf { it in 0..59 }
+                    ?.let { defaultMinute = it }
             }
         }
 
@@ -54,16 +58,73 @@ class TimeViewHolder(
         picker.addOnPositiveButtonClickListener {
             val hour = picker.hour
             val minute = picker.minute
-            val formattedResult: String = when {
-                isDuration -> "$hour hours $minute minutes"
-                hour >= 12 -> "${hour - 12}:$minute PM"
-                else -> "$hour:$minute AM"
-            }
-            input.setText(formattedResult)
-            val numberOfSeconds = picker.hour * 60 * 60 + picker.minute * 60
-            onValueChanged(parameterName, numberOfSeconds, null, validate(false))
+            input.setText(getFormattedString(Triple(0, hour, minute)))
+            onValueChanged(
+                parameterName,
+                convertToSeconds(picker.hour, picker.minute),
+                null,
+                validate(false)
+            )
         }
+
+        onValueChanged(
+            parameterName,
+            convertToSeconds(defaultHour, defaultMinute),
+            null,
+            validate(false)
+        )
 
         configureInputLayout(fragmentManager, picker)
     }
+
+    private fun convertToSeconds(hour: Int, minute: Int): Int =
+        hour * hourFactor + minute * secondFactor
+
+    override fun formatToDisplay(input: String): String {
+        convertToDaysHoursAndMinutes(input.toIntOrNull())?.let {
+            return getFormattedString(it)
+        }
+        return ""
+    }
+
+    // Returns a triple of days, hours and minutes
+    private fun convertToDaysHoursAndMinutes(seconds: Int?): Triple<Int, Int, Int>? {
+        if (seconds == null) return null
+        val days = seconds / dayFactor
+        val daysSecond = days * dayFactor
+        val hour = (seconds - daysSecond) / hourFactor
+        val hoursSecond = hour * hourFactor
+        val minute = (seconds - daysSecond - hoursSecond) / secondFactor
+        return Triple(days, hour, minute)
+    }
+
+    private fun getFormattedString(daysHoursAndMinutes: Triple<Int, Int, Int>): String {
+        val days = daysHoursAndMinutes.first
+        val hours = daysHoursAndMinutes.second
+        val minutes = daysHoursAndMinutes.third
+        return if (isDuration)
+            getDurationString(days, hours, minutes)
+        else
+            getTimeString(hours, minutes)
+    }
+
+    private fun getTimeString(hours: Int, minutes: Int): String = when {
+        hours >= 12 -> "${hours - 12}:${getMinutes(minutes)} PM"
+        else -> "$hours:${getMinutes(minutes)} AM"
+    }
+
+    private fun getDurationString(days: Int, hours: Int, minutes: Int): String = when {
+        days > 0 -> "$days ${getDayWord(days)} $hours ${getHourWord(hours)} ${getMinutes(minutes)} ${
+        getMinuteWord(
+            minutes
+        )
+        }"
+        hours > 0 -> "$hours ${getHourWord(hours)} ${getMinutes(minutes)} ${getMinuteWord(minutes)}"
+        else -> "${getMinutes(minutes)} ${getMinuteWord(minutes)}"
+    }
+
+    private fun getDayWord(days: Int): String = if (days <= 1) "day" else "days"
+    private fun getHourWord(hours: Int): String = if (hours <= 1) "hour" else "hours"
+    private fun getMinuteWord(minutes: Int): String = if (minutes <= 1) "minute" else "minutes"
+    private fun getMinutes(minutes: Int): String = if (minutes < 10) "0$minutes" else "$minutes"
 }

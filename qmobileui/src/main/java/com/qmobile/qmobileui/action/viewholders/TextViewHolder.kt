@@ -19,7 +19,7 @@ import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionParameterEnum
 import com.qmobile.qmobileui.action.addSuffix
-import com.qmobile.qmobileui.list.SpellOutHelper
+import com.qmobile.qmobileui.formatters.SpellOutFormat
 import com.qmobile.qmobileui.ui.ViewUtils
 
 open class TextViewHolder(
@@ -169,9 +169,7 @@ open class TextViewHolder(
                 }
             }
             ActionParameterEnum.NUMBER_SPELL_OUT.format -> {
-                input.text.toString().toLongOrNull()?.let {
-                    input.setText(SpellOutHelper.convert(it))
-                }
+                input.setText(SpellOutFormat.convertNumberToWord(input.text.toString()))
             }
         }
     }

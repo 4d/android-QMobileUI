@@ -30,6 +30,8 @@ class DateViewHolder(
         else -> "shortDate"
     }
 
+    private val calendar = Calendar.getInstance()
+
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
@@ -43,24 +45,31 @@ class DateViewHolder(
                 .setInputMode(MaterialDatePicker.INPUT_MODE_TEXT)
                 .build()
 
-        val calendar = Calendar.getInstance()
-
         datePicker.addOnPositiveButtonClickListener {
             calendar.timeInMillis = it
 
-            val dateToSubmit = calendar.get(Calendar.DAY_OF_MONTH).toString() + "!" + (
-                calendar.get(
-                    Calendar.MONTH
-                ) + 1
-                ) + "!" + calendar.get(Calendar.YEAR)
-            val formattedDate = FormatterUtils.applyFormat(
-                dateFormat,
-                dateToSubmit
-            )
-            input.setText(formattedDate)
+            val dateToSubmit = getDateToSubmit()
+            input.setText(formatToDisplay(dateToSubmit))
             onValueChanged(parameterName, dateToSubmit, "simpleDate", validate(false))
         }
 
+        onValueChanged(
+            parameterName,
+            getDateToSubmit(),
+            null,
+            validate(false)
+        )
+
         configureInputLayout(fragmentManager, datePicker)
     }
+
+    private fun getDateToSubmit(): String =
+        calendar.get(Calendar.DAY_OF_MONTH).toString() + "!" + (
+            calendar.get(
+                Calendar.MONTH
+            ) + 1
+            ) + "!" + calendar.get(Calendar.YEAR)
+
+    override fun formatToDisplay(input: String): String =
+        FormatterUtils.applyFormat(dateFormat, input)
 }

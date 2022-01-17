@@ -123,31 +123,34 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     @Suppress("ReturnCount")
     private fun isFormValid(): Boolean {
 
-        // first check if visible items are valid
+        // first: check if visible items are valid
         val firstNotValidItemPosition = validationMap.values.indexOfFirst { !it }
         if (firstNotValidItemPosition > -1) {
+            onHideKeyboardCallback()
             scrollTo(firstNotValidItemPosition)
             triggerError(firstNotValidItemPosition)
             return false
         }
 
-        // second check if there are not yet visible items
+        // second: check if there are not yet visible items
         val nbItems = adapter.itemCount
         val viewedItems = validationMap.size
         if (viewedItems < nbItems) {
             val pos =
                 (binding.recyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
             if (pos < nbItems - 1) {
+                onHideKeyboardCallback()
                 scrollTo(pos + 1)
             }
             return false
         }
 
-        // third check any not valid item
+        // third: check any not valid item
         var formIsValid = true
         validationMap.values.forEachIndexed { index, isValid ->
             if (!isValid) {
                 if (formIsValid) { // scroll to first not valid
+                    onHideKeyboardCallback()
                     scrollTo(index)
                 }
                 formIsValid = false
@@ -192,8 +195,8 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                                 if (dataSynchro) {
                                     delegate.requestDataSync(tableName)
                                 }
-                                activity?.onBackPressed()
                             }
+                            activity?.onBackPressed()
                         }
                     }
                 }
