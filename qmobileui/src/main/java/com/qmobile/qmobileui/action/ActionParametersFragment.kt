@@ -126,7 +126,6 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         // first: check if visible items are valid
         val firstNotValidItemPosition = validationMap.values.indexOfFirst { !it }
         if (firstNotValidItemPosition > -1) {
-            onHideKeyboardCallback()
             scrollTo(firstNotValidItemPosition)
             triggerError(firstNotValidItemPosition)
             return false
@@ -139,7 +138,6 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             val pos =
                 (binding.recyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
             if (pos < nbItems - 1) {
-                onHideKeyboardCallback()
                 scrollTo(pos + 1)
             }
             return false
@@ -150,7 +148,6 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         validationMap.values.forEachIndexed { index, isValid ->
             if (!isValid) {
                 if (formIsValid) { // scroll to first not valid
-                    onHideKeyboardCallback()
                     scrollTo(index)
                 }
                 formIsValid = false
@@ -165,6 +162,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     }
 
     private fun scrollTo(position: Int) {
+        onHideKeyboardCallback()
         scrollPos = position
         binding.recyclerView.removeOnScrollListener(onScrollListener)
         binding.recyclerView.addOnScrollListener(onScrollListener)

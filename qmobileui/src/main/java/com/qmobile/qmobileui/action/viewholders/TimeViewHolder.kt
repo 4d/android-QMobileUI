@@ -14,6 +14,7 @@ import com.google.android.material.timepicker.TimeFormat
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileui.action.ActionParameterEnum
 
+@Suppress("MagicNumber")
 class TimeViewHolder(
     itemView: View,
     format: String,
@@ -21,11 +22,13 @@ class TimeViewHolder(
     hideKeyboardCallback: () -> Unit
 ) : BaseDateTimeViewHolder(itemView, hideKeyboardCallback) {
 
-    private val isDuration = format == ActionParameterEnum.TIME_DURATION.format
+    companion object {
+        private const val dayFactor = 60 * 60 * 24
+        private const val hourFactor = 60 * 60
+        private const val secondFactor = 60
+    }
 
-    private val dayFactor = 60 * 60 * 24
-    private val hourFactor = 60 * 60
-    private val secondFactor = 60
+    private val isDuration = format == ActionParameterEnum.TIME_DURATION.format
 
     override fun bind(
         item: Any,
