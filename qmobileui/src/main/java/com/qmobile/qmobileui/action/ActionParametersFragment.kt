@@ -50,9 +50,6 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         savedInstanceState: Bundle?
     ): View? {
 
-        (requireActivity() as AppCompatActivity).supportActionBar?.title =
-            delegate.getSelectAction().getPreferredShortName()
-
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
