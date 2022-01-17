@@ -151,7 +151,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                     BaseApp.genericNavigationResolver.navigateToActionForm(
                         binding,
                         destinationTable = tableName,
-                        preferredShortName = action.getPreferredShortName()
+                        navBarTitle = action.getPreferredShortName()
                     )
                     delegate.setSelectAction(action)
                     delegate.setSelectedEntity(entityViewModel.entity.value)

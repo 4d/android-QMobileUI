@@ -330,7 +330,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             BaseApp.genericNavigationResolver.navigateToActionForm(
                 binding,
                 destinationTable = tableName,
-                preferredShortName = action.getPreferredShortName()
+                navBarTitle = action.getPreferredShortName()
             )
             delegate.setSelectAction(action)
             delegate.setSelectedEntity(currentEntityModel)
@@ -458,7 +458,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     BaseApp.genericNavigationResolver.navigateToActionForm(
                         binding,
                         destinationTable = tableName,
-                        action.getPreferredShortName()
+                        navBarTitle = action.getPreferredShortName()
                     )
 
                     delegate.setSelectAction(action)
