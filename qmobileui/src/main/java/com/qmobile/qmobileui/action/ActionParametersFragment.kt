@@ -14,6 +14,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -48,6 +49,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
