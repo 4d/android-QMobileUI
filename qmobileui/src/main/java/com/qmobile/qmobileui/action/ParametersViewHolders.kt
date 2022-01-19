@@ -807,6 +807,8 @@ class BooleanCheckMarkViewHolder(itemView: View) :
 /**
  * IMAGE VIEW HOLDERS
  */
+
+@Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class ImageViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var imageButton: ImageView = itemView.findViewById(R.id.image_button)
