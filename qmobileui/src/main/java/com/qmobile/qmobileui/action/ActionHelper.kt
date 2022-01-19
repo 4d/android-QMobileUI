@@ -13,16 +13,48 @@ class ActionHelper private constructor() {
             tableName: String,
             selectedActionId: String?,
             parameters: HashMap<String, Any>? = null,
-            metaData: HashMap<String, String>? = null
+            metaData: HashMap<String, String>? = null,
+            relationName: String? = null,
+            parentPrimaryKey: String? = null,
+            parentTableName: String? = null,
+            parentRelationName: String? = null
         ): MutableMap<String, Any> {
             val map: MutableMap<String, Any> = mutableMapOf()
             val actionContext = mutableMapOf<String, Any>(
                 "dataClass" to
                     BaseApp.genericTableHelper.originalTableName(tableName)
             )
+
+            // entity
+            val entity = HashMap<String, Any>()
             if (selectedActionId != null) {
-                actionContext["entity"] = mapOf("primaryKey" to selectedActionId)
+                entity["primaryKey"] = selectedActionId
             }
+            if (!relationName.isNullOrEmpty()) {
+                entity["relationName"] = relationName
+            }
+            if (entity.isNotEmpty()) {
+                actionContext["entity"] = entity
+            }
+
+            // parent
+            if ((parentPrimaryKey != null) && (parentPrimaryKey != "0")) {
+                val parent = HashMap<String, Any>()
+
+                parent["primaryKey"] = parentPrimaryKey
+                if (!parentRelationName.isNullOrEmpty()) {
+                    parent["relationName"] = parentRelationName
+                }
+
+                if (!parentTableName.isNullOrEmpty()) {
+                    parent["dataClass"] = parentTableName
+                }
+
+                if (parent.isNotEmpty()) {
+                    actionContext["parent"] = parent
+                }
+            }
+
             map["context"] = actionContext
             parameters?.let { map.put("parameters", parameters) }
             metaData?.let { map.put("metadata", ActionMetaData(metaData)) }

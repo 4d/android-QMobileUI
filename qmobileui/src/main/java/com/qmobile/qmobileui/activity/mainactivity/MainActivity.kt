@@ -319,11 +319,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     }
 
     override fun setSelectedEntity(entityModel: EntityModel?) {
-       entity = entityModel
+        entity = entityModel
     }
 
     override fun getSelectedEntity(): EntityModel? {
-        return  entity
+        return entity
     }
 
     override fun handleNetworkState(networkState: NetworkStateEnum) {
