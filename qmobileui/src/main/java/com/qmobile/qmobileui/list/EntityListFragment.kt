@@ -107,7 +107,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             parentTableName =
                 BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
             parentRelationName =
-                BaseApp.genericRelationHelper.getParentRelationName(tableName, inverseName)
+                BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
         }
 
         formQueryBuilder = FormQueryBuilder(tableName)

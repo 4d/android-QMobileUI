@@ -74,7 +74,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
             parentTableName =
                 BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
             parentRelationName =
-                BaseApp.genericRelationHelper.getParentRelationName(tableName, inverseName)
+                BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
         }
 
         // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
