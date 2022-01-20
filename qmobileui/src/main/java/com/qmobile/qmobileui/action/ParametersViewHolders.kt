@@ -33,6 +33,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.list.SpellOutHelper
 import org.json.JSONObject
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.text.DecimalFormat
@@ -848,6 +849,7 @@ class ImageViewHolder(itemView: View) :
                 itemJsonObject.remove("bitmap")
             }
         } catch (e: Exception) {
+            Timber.e("ActionParameterViewHolder: ",e.localizedMessage)
         }
 
         try {
@@ -857,6 +859,7 @@ class ImageViewHolder(itemView: View) :
                 itemJsonObject.remove("uri")
             }
         } catch (e: Exception) {
+            Timber.e("ActionParameterViewHolder: ",e.localizedMessage)
         }
     }
 
