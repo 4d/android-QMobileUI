@@ -201,12 +201,33 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             }
             return@map it.key to body
         }
-        entityListViewModel.uploadImage(bodies, { parameterName, receivedId ->
-            paramsToSubmit[parameterName] = receivedId
-            metaDataToSubmit[parameterName] = "uploaded"
-        }) {
-            sendAction(actionName, selectedActionId)
-        }
+        
+        delegate.checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                entityListViewModel.uploadImage(bodies, { parameterName, receivedId ->
+                    paramsToSubmit[parameterName] = receivedId
+                    metaDataToSubmit[parameterName] = "uploaded"
+                }) {
+                    sendAction(actionName, selectedActionId)
+                }
+            }
+
+            override fun onServerInaccessible() {
+                entityListViewModel.toastMessage.showMessage(
+                    context?.getString(R.string.action_send_server_not_accessible),
+                    tableName,
+                    MessageType.ERROR
+                )
+            }
+
+            override fun onNoInternet() {
+                entityListViewModel.toastMessage.showMessage(
+                    context?.getString(R.string.action_send_no_internet),
+                    tableName,
+                    MessageType.ERROR
+                )
+            }
+        })
     }
 
     fun handleResult(requestCode: Int, data: Intent) {
