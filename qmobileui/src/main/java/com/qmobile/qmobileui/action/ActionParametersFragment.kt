@@ -37,6 +37,8 @@ import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.io.IOException
 
+const val IMAGE_QUALITY = 90
+
 open class ActionParametersFragment : Fragment(), BaseFragment {
 
     private var _binding: ViewDataBinding? = null
@@ -132,6 +134,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         }
     }
 
+    @Suppress( "ReturnCount")
     private fun isFormValid(): Boolean {
         if (!areAllItemsSeen)
             return false
@@ -220,7 +223,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             // case of image token from camera
             val thumbnail = data.extras?.get("data") as Bitmap?
             val bytes = ByteArrayOutputStream()
-            thumbnail?.compress(Bitmap.CompressFormat.JPEG, 90, bytes)
+            thumbnail?.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, bytes)
             val destination = createImageFile(requireContext())
             val fileOutputStream: FileOutputStream
             try {
