@@ -14,13 +14,13 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
@@ -36,10 +36,15 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
     val binding get() = _binding!!
     lateinit var tableName: String
+    private var inverseName: String = ""
+    private var parentItemId: String = "0"
+    private var parentRelationName: String = ""
+    private var parentTableName: String? = null
     override lateinit var delegate: FragmentCommunication
     private val paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
     private val validationMap = HashMap<String, Boolean>()
+    private var fromRelation = false
 
     // Is set to true if all recyclerView items are seen at lean once
     private var areAllItemsSeen = false
@@ -52,6 +57,17 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
 
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
+        arguments?.getString("currentItemId")?.let { parentItemId = it }
+        arguments?.getBoolean("fromRelation")?.let { fromRelation = it }
+        arguments?.getString("inverseName")?.let { inverseName = it }
+
+        if (fromRelation) {
+            parentTableName =
+                BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
+            parentRelationName =
+                BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
+        }
+
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
         _binding = FragmentActionParametersBinding.inflate(
             inflater,
@@ -141,7 +157,11 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                             tableName,
                             selectedActionId,
                             paramsToSubmit,
-                            metaDataToSubmit
+                            metaDataToSubmit,
+                            relationName = inverseName,
+                            parentPrimaryKey = parentItemId,
+                            parentTableName = parentTableName,
+                            parentRelationName = parentRelationName
                         )
                     ) { actionResponse ->
                         actionResponse?.let {
