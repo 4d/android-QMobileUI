@@ -19,7 +19,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
