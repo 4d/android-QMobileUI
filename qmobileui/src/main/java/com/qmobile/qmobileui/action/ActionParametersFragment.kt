@@ -33,6 +33,7 @@ import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.io.IOException
@@ -194,14 +195,15 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             val fileUri = it.value as Uri
             val stream = activity?.contentResolver?.openInputStream(fileUri)
             val body = stream?.readBytes()?.let { it1 ->
-                RequestBody.create(
-                    "application/octet".toMediaTypeOrNull(),
-                    it1
-                )
+                it1
+                    .toRequestBody(
+                        "application/octet".toMediaTypeOrNull(),
+                        0, it1.size
+                    )
             }
             return@map it.key to body
         }
-        
+
         delegate.checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
                 entityListViewModel.uploadImage(bodies, { parameterName, receivedId ->
