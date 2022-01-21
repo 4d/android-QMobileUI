@@ -7,20 +7,10 @@ before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
   - chmod +x ./gradlew
 
-#cache:
-#  paths:
-#    - .gradle/wrapper
-#    - .gradle/caches
 cache:
-    key:
-      files:
-        - gradle/wrapper/gradle-wrapper.properties
-    paths:
+  paths:
     - .gradle/wrapper
     - .gradle/caches
-    - cache/caches/ 
-    - cache/notifications/ 
-    - cache/wrapper/ 
 
 .prepare_sdk: &prepare_sdk |
   export ANDROID_HOME=/Users/4d/builds/khqL5qp1/0/qmobile/android/android-sdk
@@ -34,10 +24,12 @@ cache:
 lint:
   stage: lint
   script:
+    - rm -fr .gradle/caches
+    - rm -fr .gradle/wrapper
     - *prepare_sdk
 #    - rm -fr build
-    - ./gradlew ktlintFormat --build-cache --gradle-user-home cache/ --console=rich
-    - ./gradlew detekt --build-cache --gradle-user-home cache/ --console=rich
+    - ./gradlew ktlintFormat --console=rich
+    - ./gradlew detekt --console=rich
   artifacts:
     name: "reports_${CI_PROJECT_NAME}_${CI_BUILD_REF_NAME}"
     when: on_failure
@@ -52,8 +44,8 @@ build:
   script:
     - *prepare_sdk
 #    - ./gradlew clean --console=rich
-    - ./gradlew assemble --build-cache --gradle-user-home cache/ --console=rich
-    - ./gradlew artifactoryPublish --build-cache --gradle-user-home cache/ --console=rich
+    - ./gradlew assemble --console=rich
+    - ./gradlew artifactoryPublish --console=rich
   tags:
     - osx
   artifacts:
@@ -64,7 +56,7 @@ unitTests:
   stage: test
   script:
     - *prepare_sdk
-    - ./gradlew -x lint jacocoTestReport --build-cache --gradle-user-home cache/ --console=rich
+    - ./gradlew -x lint jacocoTestReport --console=rich
   #  - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print 100*covered/instructions, "% covered" }' qmobileui/build/reports/jacoco/jacocoTestReport/jacocoTestReport.csv
   tags:
     - osx
