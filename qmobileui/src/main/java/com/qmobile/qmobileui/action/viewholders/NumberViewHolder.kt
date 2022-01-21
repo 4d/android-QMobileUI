@@ -60,11 +60,7 @@ class NumberViewHolder(
     private fun getMin(): Int {
         itemJsonObject.getSafeArray("rules")?.let { jsonArray ->
             for (i in 0 until jsonArray.length()) {
-
-                val rule = jsonArray.getSafeObject(i)
-                rule?.getSafeInt("min")?.let {
-                    return it
-                }
+                jsonArray.getSafeObject(i)?.getSafeInt("min")?.let { return it }
             }
         }
         return Int.MIN_VALUE
@@ -73,11 +69,7 @@ class NumberViewHolder(
     private fun getMax(): Int {
         itemJsonObject.getSafeArray("rules")?.let { jsonArray ->
             for (i in 0 until jsonArray.length()) {
-
-                val rule = jsonArray.getSafeObject(i)
-                rule?.getSafeInt("max")?.let {
-                    return it
-                }
+                jsonArray.getSafeObject(i)?.getSafeInt("max")?.let { return it }
             }
         }
         return Int.MAX_VALUE

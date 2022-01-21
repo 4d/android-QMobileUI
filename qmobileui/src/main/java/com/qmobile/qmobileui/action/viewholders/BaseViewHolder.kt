@@ -12,6 +12,7 @@ import com.qmobile.qmobileapi.model.entity.EntityHelper
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileapi.utils.getStringList
 import org.json.JSONObject
 
 abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: () -> Unit) :
@@ -57,6 +58,6 @@ abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: 
     }
 
     fun isMandatory(): Boolean {
-        return itemJsonObject.getSafeArray("rules")?.toString()?.contains("mandatory") ?: false
+        return itemJsonObject.getSafeArray("rules")?.getStringList()?.contains("mandatory") ?: false
     }
 }

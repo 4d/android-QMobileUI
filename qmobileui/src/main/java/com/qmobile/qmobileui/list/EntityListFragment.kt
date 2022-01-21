@@ -30,7 +30,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -61,7 +60,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private lateinit var searchView: SearchView
     private lateinit var searchPlate: EditText
     private var searchableFields = BaseApp.runtimeDataHolder.searchField
-    private var tableActionsJsonObject = BaseApp.runtimeDataHolder.listActions
+    private var tableActionsJsonObject = BaseApp.runtimeDataHolder.tableActions
     private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
     private lateinit var formQueryBuilder: FormQueryBuilder
     private var currentQuery = ""
@@ -231,26 +230,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
         tableActions.clear()
         currentRecordActions.clear()
         if (hasTableActions()) {
-            val length = tableActionsJsonObject.getJSONArray(tableName).length()
-            for (i in 0 until length) {
-                val jsonObject = tableActionsJsonObject.getSafeArray(tableName)?.getJSONObject(i)
-                jsonObject?.let {
-                    tableActions.add(ActionHelper.createActionFromJsonObject(it))
-                }
-            }
+            ActionHelper.fillActionList(tableActionsJsonObject, tableName, tableActions)
         }
         if (hasCurrentRecordActions()) {
-            val length = currentRecordActionsJsonObject.getJSONArray(tableName).length()
-            for (i in 0 until (length)) {
-                val jsonObject =
-                    currentRecordActionsJsonObject.getJSONArray(tableName).getJSONObject(i)
-
-                jsonObject?.let {
-                    currentRecordActions.add(ActionHelper.createActionFromJsonObject(it))
-                }
-            }
-
-            setupCurrentRecordActionsDialog(currentRecordActions)
+            ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
         }
     }
 

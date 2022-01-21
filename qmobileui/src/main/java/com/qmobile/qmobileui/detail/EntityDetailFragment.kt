@@ -20,7 +20,6 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
-import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
@@ -48,7 +47,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
     private var parentItemId: String = "0"
     private var parentRelationName: String = ""
     private var parentTableName: String? = null
-    private var actionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
+    private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
     private var fromRelation = false
 
     private lateinit var webView: WebView
@@ -138,7 +137,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
         }
     }
 
-    private fun hasActions() = actionsJsonObject.has(tableName)
+    private fun hasActions() = currentRecordActionsJsonObject.has(tableName)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -155,16 +154,10 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasActions()) {
-            val actions = mutableListOf<Action>()
-            val length = actionsJsonObject.getJSONArray(tableName).length()
-            for (i in 0 until length) {
-                val jsonObject = actionsJsonObject.getSafeArray(tableName)?.getSafeObject(i)
-                jsonObject?.let {
-                    actions.add(ActionHelper.createActionFromJsonObject(it))
-                }
-            }
+            val currentRecordActions = mutableListOf<Action>()
+            ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
 
-            delegate.setupActionsMenu(menu, actions) { action ->
+            delegate.setupActionsMenu(menu, currentRecordActions) { action ->
                 if (action.parameters.length() > 0) {
                     BaseApp.genericNavigationResolver.navigateToActionForm(
                         binding,

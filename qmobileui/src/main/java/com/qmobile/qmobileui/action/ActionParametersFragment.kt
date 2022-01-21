@@ -120,8 +120,8 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.validate) {
             var selectedActionId: String? = null
-            delegate.getSelectAction().preset?.let {
-                if (it == "edit") {
+            delegate.getSelectAction().preset?.let { preset ->
+                if (preset == "edit") {
                     selectedActionId = delegate.getSelectedEntity()?.__KEY
                 }
             }

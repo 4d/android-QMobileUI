@@ -11,10 +11,13 @@ import org.json.JSONArray
 
 class Action(
     val name: String = "",
-    private val icon: String?,
-    private val label: String?,
-    private val shortLabel: String?,
-    val preset: String?,
+    val shortLabel: String? = null,
+    val label: String? = null,
+    val scope: String? = null,
+    val tableNumber: Int? = null,
+    val icon: String? = null,
+    val preset: String? = null,
+    val style: String? = null,
     val parameters: JSONArray
 ) {
     fun getIconDrawablePath(): String? =

@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
 import com.qmobile.qmobileapi.utils.getSafeArray
+import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
@@ -67,14 +68,17 @@ class ActionHelper private constructor() {
             return map
         }
 
-        fun createActionFromJsonObject(jsonObject: JSONObject): Action {
+        private fun createActionFromJsonObject(jsonObject: JSONObject): Action {
             jsonObject.apply {
                 return Action(
                     name = getSafeString("name") ?: "",
-                    icon = getSafeString("icon"),
                     shortLabel = getSafeString("shortLabel"),
                     label = getSafeString("label"),
+                    scope = getSafeString("scope"),
+                    tableNumber = getSafeInt("tableNumber"),
+                    icon = getSafeString("icon"),
                     preset = getSafeString("preset"),
+                    style = getSafeString("style"),
                     parameters = getSafeArray("parameters") ?: JSONArray()
                 )
             }
@@ -101,5 +105,15 @@ class ActionHelper private constructor() {
 
         fun getActionDrawablePadding(context: Context): Int =
             (ImageHelper.ICON_MARGIN * context.resources.displayMetrics.density).toInt()
+
+        fun fillActionList(json: JSONObject, tableName: String, actionList: MutableList<Action>) {
+            json.getSafeArray(tableName)?.let { currentRecordActionsArray ->
+                for (i in 0 until currentRecordActionsArray.length()) {
+                    currentRecordActionsArray.getJSONObject(i)?.let {
+                        actionList.add(createActionFromJsonObject(it))
+                    }
+                }
+            }
+        }
     }
 }

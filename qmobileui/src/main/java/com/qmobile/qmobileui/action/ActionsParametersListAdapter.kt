@@ -12,7 +12,7 @@ import org.json.JSONObject
 
 class ActionsParametersListAdapter(
     private val context: Context,
-    private val list: JSONArray,
+    private val parameters: JSONArray,
     private val currentEntity: EntityModel?,
     private val fragmentManager: FragmentManager?,
     private val hideKeyboardCallback: () -> Unit,
@@ -31,12 +31,12 @@ class ActionsParametersListAdapter(
     }
 
     override fun getItemCount(): Int {
-        return list.length()
+        return parameters.length()
     }
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         holder.bind(
-            list[position],
+            parameters[position],
             currentEntity
         ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
             onValueChanged(name, value, metaData, isValid)
@@ -44,7 +44,7 @@ class ActionsParametersListAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        val itemJsonObject = list[position] as JSONObject
+        val itemJsonObject = parameters[position] as JSONObject
         val type = itemJsonObject.getSafeString("type")
         val format = itemJsonObject.getSafeString("format") ?: "default"
         return ActionParameterEnum.values().find { it.type == type && it.format == format }?.ordinal
