@@ -24,8 +24,6 @@ cache:
 lint:
   stage: lint
   script:
-    - rm -fr .gradle/caches
-    - rm -fr .gradle/wrapper
     - *prepare_sdk
 #    - rm -fr build
     - ./gradlew ktlintFormat --console=rich
