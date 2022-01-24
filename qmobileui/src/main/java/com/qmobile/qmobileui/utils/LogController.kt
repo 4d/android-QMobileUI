@@ -93,7 +93,7 @@ object LogController {
      * The FileTree is the additional log handler which we plant.
      * It's role is to buffer logs and periodically write them to disk.
      */
-    @SuppressLint("CheckResult")
+    // @SuppressLint("CheckResult")
     class FileTree : Timber.Tree() {
 
         /**

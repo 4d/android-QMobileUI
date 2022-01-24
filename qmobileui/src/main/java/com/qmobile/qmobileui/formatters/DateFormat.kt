@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-@SuppressLint("SimpleDateFormat")
 object DateFormat {
 
     private val formatNameMap: Map<String, Int> = mapOf(
@@ -56,6 +55,7 @@ object DateFormat {
         }
     }
 
+    // @SuppressLint("SimpleDateFormat")
     private fun getDateFromString(date: String): Calendar = Calendar.getInstance().apply {
         val dateFormat = SimpleDateFormat("dd!MM!yyyy")
         dateFormat.safeParse(date)?.let { date ->

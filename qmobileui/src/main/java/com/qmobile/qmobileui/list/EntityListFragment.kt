@@ -50,7 +50,7 @@ import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
 
-@Suppress("TooManyFunctions")
+//@Suppress("TooManyFunctions")
 open class EntityListFragment : Fragment(), BaseFragment {
 
     companion object {

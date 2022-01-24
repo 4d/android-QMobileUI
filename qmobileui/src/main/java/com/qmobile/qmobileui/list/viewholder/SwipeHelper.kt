@@ -44,7 +44,7 @@ abstract class SwipeHelper(
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    // @SuppressLint("ClickableViewAccessibility")
     private val touchListener = View.OnTouchListener { _, event ->
         if (swipedPosition < 0) return@OnTouchListener false
         buttonsBuffer[swipedPosition]?.forEach { it.handle(event) }
@@ -140,7 +140,7 @@ abstract class SwipeHelper(
         fun onClick()
     }
 
-    @Suppress("MagicNumber")
+//    @Suppress("MagicNumber")
     class ItemActionButton(
         private val context: Context,
         private val action: Action?,
@@ -236,7 +236,7 @@ abstract class SwipeHelper(
     }
 }
 
-@Suppress("MagicNumber")
+//@Suppress("MagicNumber")
 fun ellipsize(input: String, paint: Paint, maxWidth: Float): String {
     val titleBounds = Rect()
     paint.getTextBounds(input, 0, input.length, titleBounds)

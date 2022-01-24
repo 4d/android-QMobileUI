@@ -11,10 +11,9 @@ import com.qmobile.qmobileapi.utils.safeParse
 import java.lang.StringBuilder
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
+import java.util.*
 
-@SuppressLint("SimpleDateFormat")
+// @SuppressLint("SimpleDateFormat")
 object TimeFormat {
 
     private const val INT_3600 = 3600
@@ -60,7 +59,7 @@ object TimeFormat {
 //                    val days = totalSeconds.toInt() / (INT_24 * INT_3600)
 
                     val builder = StringBuilder()
-                    val minutesSeconds = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+                    val minutesSeconds = String.format(locale = Locale.getDefault(), format = "%02d:%02d:%02d", hours, minutes, seconds)
                     /*if (days > 0) {
                         val daysStr = String.format("%02d", days)
                         builder.append(daysStr).append(":")

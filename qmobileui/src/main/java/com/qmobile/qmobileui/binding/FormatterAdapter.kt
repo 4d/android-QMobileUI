@@ -17,7 +17,7 @@ import com.qmobile.qmobileui.formatters.ImageNamed
 import com.qmobile.qmobileui.utils.fieldAdjustment
 import com.qmobile.qmobileui.utils.tableNameAdjustment
 
-@Suppress("ReturnCount", "LongParameterList")
+//@Suppress("ReturnCount")
 @BindingAdapter(
     value = ["text", "format", "tableName", "fieldName", "imageWidth", "imageHeight"],
     requireAll = false

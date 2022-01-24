@@ -25,7 +25,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.ColorHelper
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 
-@Suppress("TooManyFunctions")
+//@Suppress("TooManyFunctions")
 class EntityViewPagerFragment : Fragment(), BaseFragment {
 
     var key: String = ""

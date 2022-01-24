@@ -31,13 +31,12 @@ class EntityListFragmentObserver(
     }
 
     // Observe when data are synchronized
-    @SuppressLint("BinaryOperationInTimber")
+//    // @SuppressLint("BinaryOperationInTimber")
     private fun observeDataSynchronized() {
         fragment.collectWhenStarted(entityListViewModel.dataSynchronized) { dataSyncState ->
             Timber.d(
                 "[DataSyncState : $dataSyncState, " +
-                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                    "Instance : $entityListViewModel]"
+                    "Table : ${entityListViewModel.getAssociatedTableName()}] "
             )
         }
     }

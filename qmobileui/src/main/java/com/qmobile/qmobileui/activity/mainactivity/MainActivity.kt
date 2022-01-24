@@ -59,7 +59,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 const val DROP_DOWN_WIDTH = 600
 
-@Suppress("TooManyFunctions")
+//@Suppress("TooManyFunctions")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver {
 
     private var loginStatusText = ""
