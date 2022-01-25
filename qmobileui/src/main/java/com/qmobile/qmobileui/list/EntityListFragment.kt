@@ -49,7 +49,6 @@ import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
 
-@Suppress("TooManyFunctions")
 open class EntityListFragment : Fragment(), BaseFragment {
 
     companion object {
@@ -91,7 +90,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
         savedInstanceState: Bundle?
     ): View {
         // Base entity list fragment
-        arguments?.getString("tableName")?.let { tableName = it }
+        arguments?.getString("tableName")?.let {
+            tableName = it
+        }
         // Entity list fragment from relation
         arguments?.getString("destinationTable")?.let {
             if (it.isNotEmpty()) {
@@ -119,7 +120,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
             viewModel = entityListViewModel
             lifecycleOwner = viewLifecycleOwner
         }
-
         return binding.root
     }
 

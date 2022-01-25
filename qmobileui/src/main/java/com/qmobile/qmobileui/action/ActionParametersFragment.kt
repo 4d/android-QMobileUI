@@ -64,6 +64,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("currentItemId")?.let { parentItemId = it }

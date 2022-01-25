@@ -56,7 +56,6 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
-@Suppress("TooManyFunctions")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver {
 
     private var loginStatusText = ""
@@ -70,7 +69,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
-    lateinit var selectedAction: Action
+    private lateinit var selectedAction: Action
     var entity: EntityModel? = null
 
     // ViewModels

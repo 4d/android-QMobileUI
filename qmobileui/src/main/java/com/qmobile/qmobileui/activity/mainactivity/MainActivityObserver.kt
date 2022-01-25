@@ -3,11 +3,9 @@
  * 4D SAS
  * Copyright (c) 2020 Quentin Marciset. All rights reserved.
  */
-@file:Suppress("TooManyFunctions")
 
 package com.qmobile.qmobileui.activity.mainactivity
 
-import android.annotation.SuppressLint
 import androidx.lifecycle.lifecycleScope
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
@@ -44,7 +42,6 @@ class MainActivityObserver(
     }
 
     // Observe when data are synchronized
-    @SuppressLint("BinaryOperationInTimber")
     private fun observeDataSynchronized(entityListViewModel: EntityListViewModel<EntityModel>) {
 
         var job: Job? = null

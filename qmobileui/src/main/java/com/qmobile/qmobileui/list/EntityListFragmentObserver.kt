@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.list
 
-import android.annotation.SuppressLint
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.qmobile.qmobileapi.model.entity.EntityModel
@@ -31,13 +30,11 @@ class EntityListFragmentObserver(
     }
 
     // Observe when data are synchronized
-    @SuppressLint("BinaryOperationInTimber")
     private fun observeDataSynchronized() {
         fragment.collectWhenStarted(entityListViewModel.dataSynchronized) { dataSyncState ->
             Timber.d(
                 "[DataSyncState : $dataSyncState, " +
-                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                    "Instance : $entityListViewModel]"
+                    "Table : ${entityListViewModel.getAssociatedTableName()}] "
             )
         }
     }

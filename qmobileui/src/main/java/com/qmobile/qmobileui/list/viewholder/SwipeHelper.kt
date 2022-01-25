@@ -28,7 +28,10 @@ const val BUTTON_TEXT_SIZE = 10.0f
 // Use as margin bottom from the center for icon and as margin top from the center for title
 const val VERTICAL_MARGIN = 25F
 const val ICON_WIDTH_FACTOR = 0.3F
+const val SCREEN_WIDTH_FACTOR = 4
+const val TRUNCATE_FACTOR = 5
 
+@SuppressLint("ClickableViewAccessibility")
 abstract class SwipeHelper(
     private val recyclerView: RecyclerView
 ) : ItemTouchHelper.SimpleCallback(
@@ -44,7 +47,6 @@ abstract class SwipeHelper(
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     private val touchListener = View.OnTouchListener { _, event ->
         if (swipedPosition < 0) return@OnTouchListener false
         buttonsBuffer[swipedPosition]?.forEach { it.handle(event) }
@@ -140,7 +142,6 @@ abstract class SwipeHelper(
         fun onClick()
     }
 
-    @Suppress("MagicNumber")
     class ItemActionButton(
         private val context: Context,
         private val action: Action?,
@@ -162,7 +163,7 @@ abstract class SwipeHelper(
             val titleBounds = Rect()
 
             paint.getTextBounds(title, 0, title.length, titleBounds)
-            intrinsicWidth = (screenWidth / 4).toFloat() // Fix button width to screenWidth/4
+            intrinsicWidth = (screenWidth / SCREEN_WIDTH_FACTOR).toFloat() // Fix button width to screenWidth/4
         }
 
         fun draw(canvas: Canvas, rect: RectF) {
@@ -236,14 +237,13 @@ abstract class SwipeHelper(
     }
 }
 
-@Suppress("MagicNumber")
 fun ellipsize(input: String, paint: Paint, maxWidth: Float): String {
     val titleBounds = Rect()
     paint.getTextBounds(input, 0, input.length, titleBounds)
     return if (titleBounds.width() < maxWidth)
         input
     else
-        ellipsize(input.substring(0, input.length - 5) + "...", paint, maxWidth)
+        ellipsize(input.substring(0, input.length - TRUNCATE_FACTOR) + "...", paint, maxWidth)
 }
 
 private fun List<SwipeHelper.ItemActionButton>.intrinsicWidth(): Float {
