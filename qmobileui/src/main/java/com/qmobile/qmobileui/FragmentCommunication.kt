@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.SharedFlow
 /**
  * Interface implemented by MainActivity to provide elements that depend on generated type
  */
+@Suppress("TooManyFunctions")
 interface FragmentCommunication {
 
     val apiService: ApiService

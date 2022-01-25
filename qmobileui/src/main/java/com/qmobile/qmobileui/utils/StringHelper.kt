@@ -4,6 +4,8 @@
  * Copyright (c) 2021 Quentin Marciset. All rights reserved.
  */
 
+@file:Suppress("TooManyFunctions")
+
 package com.qmobile.qmobileui.utils
 
 import java.text.Normalizer

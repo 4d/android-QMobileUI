@@ -6,14 +6,14 @@
 
 package com.qmobile.qmobileui.formatters
 
-import android.annotation.SuppressLint
 import com.qmobile.qmobileapi.utils.safeParse
 import java.lang.StringBuilder
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
-// @SuppressLint("SimpleDateFormat")
 object TimeFormat {
 
     private const val INT_3600 = 3600
@@ -59,7 +59,13 @@ object TimeFormat {
 //                    val days = totalSeconds.toInt() / (INT_24 * INT_3600)
 
                     val builder = StringBuilder()
-                    val minutesSeconds = String.format(locale = Locale.getDefault(), format = "%02d:%02d:%02d", hours, minutes, seconds)
+                    val minutesSeconds = String.format(
+                        locale = Locale.getDefault(),
+                        format = "%02d:%02d:%02d",
+                        hours,
+                        minutes,
+                        seconds
+                    )
                     /*if (days > 0) {
                         val daysStr = String.format("%02d", days)
                         builder.append(daysStr).append(":")
@@ -76,12 +82,12 @@ object TimeFormat {
 
     private fun getTimeFromString(time: String): Calendar = Calendar.getInstance().apply {
         val longTime: String = getTimeFromLong(time.toLong())
-        val dateFormat = SimpleDateFormat("hh:mm:ss")
+        val dateFormat = SimpleDateFormat("hh:mm:ss", Locale.getDefault())
         dateFormat.safeParse(longTime)?.let { date ->
             setTime(date)
         }
     }
 
     private fun getTimeFromLong(timestamp: Long) =
-        SimpleDateFormat("hh:mm:ss").format(Date(timestamp)).toString()
+        SimpleDateFormat("hh:mm:ss", Locale.getDefault()).format(Date(timestamp)).toString()
 }

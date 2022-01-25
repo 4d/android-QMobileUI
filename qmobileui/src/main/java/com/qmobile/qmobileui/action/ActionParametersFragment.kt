@@ -136,16 +136,11 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         }
     }
 
-    private fun isFormValid(): Boolean {
+    private fun isFormValid(): Boolean =
         if (!areAllItemsSeen)
-            return false
-        validationMap.forEach {
-            if (!it.value) {
-                return false
-            }
-        }
-        return true
-    }
+            false
+        else
+            validationMap.values.firstOrNull { !it } == null
 
     private fun sendAction(actionName: String, selectedActionId: String?) {
         if (isFormValid()) {

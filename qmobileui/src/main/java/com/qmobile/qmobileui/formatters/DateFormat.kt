@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.formatters
 
-import android.annotation.SuppressLint
 import com.qmobile.qmobileapi.utils.safeParse
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -55,9 +54,8 @@ object DateFormat {
         }
     }
 
-    // @SuppressLint("SimpleDateFormat")
     private fun getDateFromString(date: String): Calendar = Calendar.getInstance().apply {
-        val dateFormat = SimpleDateFormat("dd!MM!yyyy")
+        val dateFormat = SimpleDateFormat("dd!MM!yyyy", Locale.getDefault())
         dateFormat.safeParse(date)?.let { date ->
             time = date
         }
