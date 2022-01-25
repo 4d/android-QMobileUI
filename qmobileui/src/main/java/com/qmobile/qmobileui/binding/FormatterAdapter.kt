@@ -17,7 +17,6 @@ import com.qmobile.qmobileui.formatters.ImageNamed
 import com.qmobile.qmobileui.utils.fieldAdjustment
 import com.qmobile.qmobileui.utils.tableNameAdjustment
 
-@Suppress("ReturnCount", "LongParameterList")
 @BindingAdapter(
     value = ["text", "format", "tableName", "fieldName", "imageWidth", "imageHeight"],
     requireAll = false
@@ -38,26 +37,37 @@ fun applyFormatter(
         return
     }
     if (view is TextView) {
-        if (!format.isNullOrEmpty()) {
-            if (!format.startsWith("/")) {
-                view.text = FormatterUtils.applyFormat(format, text)
-                return
-            } else {
-                val fieldMappingFound =
-                    applyCustomFormat(
-                        view,
-                        fieldName,
-                        tableName,
-                        text.toString(),
-                        imageWidth,
-                        imageHeight
-                    )
-                if (fieldMappingFound) return
-            }
+        if (!handleAsTextView(view, text, format, tableName, fieldName, imageWidth, imageHeight)) {
+            view.text = text.toString()
         }
-        view.text = text.toString()
-        return
     }
+}
+
+private fun handleAsTextView(
+    view: TextView,
+    text: Any,
+    format: String?,
+    tableName: String?,
+    fieldName: String?,
+    imageWidth: Int?,
+    imageHeight: Int?
+): Boolean {
+    if (!format.isNullOrEmpty()) {
+        return if (!format.startsWith("/")) {
+            view.text = FormatterUtils.applyFormat(format, text)
+            true
+        } else {
+            applyCustomFormat(
+                view,
+                fieldName,
+                tableName,
+                text.toString(),
+                imageWidth,
+                imageHeight
+            )
+        }
+    }
+    return false
 }
 
 /**
