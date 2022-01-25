@@ -43,8 +43,8 @@ object ColorHelper {
     }
 
     private fun manipulateColor(color: Int, factor: Float, horizontalIndex: Int): Int {
-        var colorTmp = color
-        for (i in 1..horizontalIndex) {
+        var colorTmp: Int = color
+        repeat((1..horizontalIndex).count()) {
             val a = Color.alpha(colorTmp)
             val r = (Color.red(colorTmp) * factor).roundToInt()
             val g = (Color.green(colorTmp) * factor).roundToInt()

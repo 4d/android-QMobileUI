@@ -59,7 +59,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 const val DROP_DOWN_WIDTH = 600
 
-@Suppress("TooManyFunctions")
 class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver {
 
     private var loginStatusText = ""
@@ -73,7 +72,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
-    lateinit var selectedAction: Action
+    private lateinit var selectedAction: Action
     var entity: EntityModel? = null
 
     // ViewModels

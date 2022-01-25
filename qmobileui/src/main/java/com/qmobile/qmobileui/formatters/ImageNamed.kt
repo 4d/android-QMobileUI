@@ -14,6 +14,7 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 
 object ImageNamed {
 
+    @Suppress("ComplexCondition")
     fun setFormatterDrawable(
         view: TextView,
         drawableResPair: Pair<Int, Int>,

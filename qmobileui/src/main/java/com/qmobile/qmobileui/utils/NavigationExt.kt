@@ -9,7 +9,6 @@ package com.qmobile.qmobileui.utils
 import android.content.Intent
 import android.util.SparseArray
 import androidx.core.util.forEach
-import androidx.core.util.set
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -60,7 +59,7 @@ fun BottomNavigationView.setupWithNavController(
         }
 
         // Save to the map
-        graphIdToTagMap[graphId] = fragmentTag
+        graphIdToTagMap.put(graphId, fragmentTag)
 
         // Attach or detach nav host fragment depending on whether it's the selected item.
         if (this.selectedItemId == graphId) {
@@ -85,7 +84,7 @@ fun BottomNavigationView.setupWithNavController(
     var isOnFirstFragment = selectedItemTag == firstFragmentTag
 
     // When a navigation item is selected
-    setOnNavigationItemSelectedListener { item ->
+    setOnItemSelectedListener { item ->
         // Don't do anything if the state is state has already been saved.
         if (fragmentManager.isStateSaved) {
             false
