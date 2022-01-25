@@ -76,6 +76,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private var inverseName: String = ""
     private var parentItemId: String = "0"
     private var fromRelation = false
+    private var parentRelationName: String = ""
+    private var parentTableName: String? = null
 
     private val tableActions = mutableListOf<Action>()
     private var currentRecordActions = mutableListOf<Action>()
@@ -89,7 +91,9 @@ open class EntityListFragment : Fragment(), BaseFragment {
         savedInstanceState: Bundle?
     ): View {
         // Base entity list fragment
-        arguments?.getString("tableName")?.let { tableName = it }
+        arguments?.getString("tableName")?.let {
+            tableName = it
+        }
         // Entity list fragment from relation
         arguments?.getString("destinationTable")?.let {
             if (it.isNotEmpty()) {
@@ -99,6 +103,12 @@ open class EntityListFragment : Fragment(), BaseFragment {
         }
         arguments?.getString("currentItemId")?.let { parentItemId = it }
         arguments?.getString("inverseName")?.let { inverseName = it }
+        if (fromRelation) {
+            parentTableName =
+                BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
+            parentRelationName =
+                BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
+        }
 
         formQueryBuilder = FormQueryBuilder(tableName)
 
@@ -111,7 +121,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
             viewModel = entityListViewModel
             lifecycleOwner = viewLifecycleOwner
         }
-
         return binding.root
     }
 
@@ -312,7 +321,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
         dialogBuilder.setAdapter(adapter) { _, position ->
-            onCurrentActionCLicked(actions[position], currentEntity)
+            onCurrentActionClicked(actions[position], currentEntity)
         }
 
         val dialog = dialogBuilder.create()
@@ -325,11 +334,15 @@ open class EntityListFragment : Fragment(), BaseFragment {
         dialog.show()
     }
 
-    private fun onCurrentActionCLicked(action: Action, currentEntityModel: EntityModel?) {
+    private fun onCurrentActionClicked(action: Action, currentEntityModel: EntityModel?) {
         if (action.parameters.length() > 0) {
             BaseApp.genericNavigationResolver.navigateToActionForm(
                 binding,
-                destinationTable = tableName
+                destinationTable = tableName,
+                navBarTitle = action.getPreferredShortName(),
+                inverseName = inverseName,
+                parentItemId = parentItemId,
+                fromRelation = fromRelation
             )
             delegate.setSelectAction(action)
             delegate.setSelectedEntity(currentEntityModel)
@@ -343,7 +356,14 @@ open class EntityListFragment : Fragment(), BaseFragment {
             override fun onServerAccessible() {
                 entityListViewModel.sendAction(
                     actionName,
-                    ActionHelper.getActionContent(tableName, selectedActionId)
+                    ActionHelper.getActionContent(
+                        tableName = tableName,
+                        selectedActionId = selectedActionId,
+                        relationName = inverseName,
+                        parentPrimaryKey = parentItemId,
+                        parentTableName = parentTableName,
+                        parentRelationName = parentRelationName
+                    )
                 ) { actionResponse ->
                     actionResponse?.let {
                         actionResponse.dataSynchro?.let { dataSynchro ->
@@ -397,7 +417,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     if (action == null) {
                         showDialog(adapter.getSelectedItem(position), currentRecordActions)
                     } else {
-                        onCurrentActionCLicked(action, adapter.getSelectedItem(position))
+                        onCurrentActionClicked(action, adapter.getSelectedItem(position))
                     }
                 }
             }
@@ -450,13 +470,17 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasTableActions()) {
-            delegate.setupActionsMenu(menu, tableActions) { action ->
 
+            delegate.setupActionsMenu(menu, tableActions) { action ->
                 if (action.parameters.length() > 0) {
 
                     BaseApp.genericNavigationResolver.navigateToActionForm(
                         binding,
-                        destinationTable = tableName
+                        destinationTable = tableName,
+                        navBarTitle = action.getPreferredShortName(),
+                        inverseName = inverseName,
+                        parentItemId = parentItemId,
+                        fromRelation = fromRelation
                     )
 
                     delegate.setSelectAction(action)

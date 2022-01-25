@@ -44,7 +44,12 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
     // This property is only valid between onCreateView and onDestroyView.
     val binding get() = _binding!!
     var tableName: String = ""
+    private var inverseName: String = ""
+    private var parentItemId: String = "0"
+    private var parentRelationName: String = ""
+    private var parentTableName: String? = null
     private var actionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
+    private var fromRelation = false
 
     private lateinit var webView: WebView
 
@@ -58,6 +63,19 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
     ): View? {
         arguments?.getString("itemId")?.let { itemId = it }
         arguments?.getString("tableName")?.let { tableName = it }
+        arguments?.getString("destinationTable")?.let {
+            if (it.isNotEmpty()) {
+                tableName = it
+                fromRelation = true
+            }
+        }
+
+        if (fromRelation) {
+            parentTableName =
+                BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
+            parentRelationName =
+                BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
+        }
 
         // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
         entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
@@ -150,7 +168,11 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                 if (action.parameters.length() > 0) {
                     BaseApp.genericNavigationResolver.navigateToActionForm(
                         binding,
-                        destinationTable = tableName
+                        destinationTable = tableName,
+                        navBarTitle = action.getPreferredShortName(),
+                        inverseName = inverseName,
+                        parentItemId = parentItemId,
+                        fromRelation = fromRelation
                     )
                     delegate.setSelectAction(action)
                     delegate.setSelectedEntity(entityViewModel.entity.value)
@@ -159,7 +181,14 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                         override fun onServerAccessible() {
                             entityViewModel.sendAction(
                                 action.name,
-                                ActionHelper.getActionContent(tableName, itemId)
+                                ActionHelper.getActionContent(
+                                    tableName = tableName,
+                                    selectedActionId = itemId,
+                                    relationName = inverseName,
+                                    parentPrimaryKey = parentItemId,
+                                    parentTableName = parentTableName,
+                                    parentRelationName = parentRelationName
+                                )
                             ) {
                                 it?.dataSynchro?.let { shouldSyncData ->
                                     if (shouldSyncData) {

@@ -358,13 +358,18 @@ class NumberViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<Float>(it, defaultField).toString()
+                EntityHelper.readInstanceProperty<Float>(it, defaultField)
                     .also { value ->
-                        editText.text =
+                        val isInteger = (value - value.toInt()) == 0.0F
+                        val formattedValue = if (isInteger) {
+                            value.toInt()
+                        } else {
                             value
+                        }
+                        editText.text = formattedValue.toString()
                         onValueChanged(
                             parameterName,
-                            value,
+                            formattedValue,
                             null,
                             validate()
                         )
