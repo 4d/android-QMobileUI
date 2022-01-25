@@ -32,7 +32,6 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
@@ -191,7 +190,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     }
 
     private fun uploadImages(actionName: String, selectedActionId: String?) {
-        val bodies = imagesToUpload.map {
+        val bodies = imagesToUpload.mapValues {
             val fileUri = it.value as Uri
             val stream = activity?.contentResolver?.openInputStream(fileUri)
             val body = stream?.readBytes()?.let { it1 ->
@@ -201,7 +200,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                         0, it1.size
                     )
             }
-            return@map it.key to body
+            body
         }
 
         delegate.checkNetwork(object : NetworkChecker {
