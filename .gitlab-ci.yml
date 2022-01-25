@@ -7,10 +7,10 @@ before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
   - chmod +x ./gradlew
 
-#cache:
-#  paths:
-#    - .gradle/wrapper
-#    - .gradle/caches
+cache:
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
 
 .prepare_sdk: &prepare_sdk |
   export ANDROID_HOME=/Users/4d/builds/khqL5qp1/0/qmobile/android/android-sdk
@@ -25,7 +25,7 @@ lint:
   stage: lint
   script:
     - *prepare_sdk
-    - rm -fr build
+#    - rm -fr build
     - ./gradlew ktlintFormat --console=rich
     - ./gradlew detekt --console=rich
   artifacts:
@@ -41,7 +41,7 @@ build:
   stage: build
   script:
     - *prepare_sdk
-    - ./gradlew clean --console=rich
+#    - ./gradlew clean --console=rich
     - ./gradlew assemble --console=rich
     - ./gradlew artifactoryPublish --console=rich
   tags:
