@@ -46,6 +46,7 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
+import com.qmobile.qmobileui.action.ActionParametersFragment
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.network.NetworkChecker
@@ -207,7 +208,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
      * Performs data sync, requested by a table request
      */
     override fun requestDataSync(currentTableName: String) {
-
         val entityListViewModel =
             entityListViewModelList.find { it.getAssociatedTableName() == currentTableName }
 
@@ -219,7 +219,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                     requestAuthentication()
                 } else {
                     // AUTHENTICATED
-                    when (entityListViewModel?.dataSynchronized?.value) {
+               when (entityListViewModel?.dataSynchronized?.value) {
                         DataSyncStateEnum.UNSYNCHRONIZED -> dataSync()
                         DataSyncStateEnum.SYNCHRONIZED -> {
                             job?.cancel()
@@ -427,5 +427,17 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         val entityListViewModel =
             entityListViewModelList.find { it.getAssociatedTableName() == oneToManyRelation.className }
         entityListViewModel?.insertNewRelatedEntities(oneToManyRelation)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if ((resultCode == RESULT_OK) && (data != null)) {
+            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
+            val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
+
+            if (currentFragment is ActionParametersFragment) {
+                currentFragment.handleResult(requestCode, data)
+            }
+        }
     }
 }

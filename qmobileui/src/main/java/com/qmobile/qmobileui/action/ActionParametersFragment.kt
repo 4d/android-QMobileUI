@@ -7,6 +7,9 @@
 package com.qmobile.qmobileui.action
 
 import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -29,6 +32,14 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.network.NetworkChecker
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
+import java.io.IOException
+
+const val IMAGE_QUALITY = 90
+
 
 open class ActionParametersFragment : Fragment(), BaseFragment {
 
@@ -43,9 +54,10 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     override lateinit var delegate: FragmentCommunication
     private val paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
+    private val imagesToUpload = HashMap<String, Any>()
     private val validationMap = HashMap<String, Boolean>()
+    lateinit var adapter: ActionsParametersListAdapter
     private var fromRelation = false
-
     // Is set to true if all recyclerView items are seen at lean once
     private var areAllItemsSeen = false
 
@@ -75,7 +87,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             false
         ).apply {
             lifecycleOwner = viewLifecycleOwner
-            val adapter = ActionsParametersListAdapter(
+            adapter = ActionsParametersListAdapter(
                 requireContext(),
                 delegate.getSelectAction().parameters,
                 delegate.getSelectedEntity()
@@ -107,7 +119,6 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                 areAllItemsSeen = true
             }
         }
-
         return binding.root
     }
 
@@ -124,7 +135,12 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                     selectedActionId = delegate.getSelectedEntity()?.__KEY
                 }
             }
-            sendAction(delegate.getSelectAction().name, selectedActionId)
+
+            if (imagesToUpload.isNotEmpty()) {
+                uploadImages(delegate.getSelectAction().name, selectedActionId)
+            } else {
+                sendAction(delegate.getSelectAction().name, selectedActionId)
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -186,6 +202,80 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                     )
                 }
             })
+        }
+    }
+
+    private fun uploadImages(actionName: String, selectedActionId: String?) {
+        val bodies = imagesToUpload.mapValues {
+            val fileUri = it.value as Uri
+            val stream = activity?.contentResolver?.openInputStream(fileUri)
+            val body = stream?.readBytes()?.let { it1 ->
+                it1
+                    .toRequestBody(
+                        "application/octet".toMediaTypeOrNull(),
+                        0, it1.size
+                    )
+            }
+            body
+        }
+
+        delegate.checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                entityListViewModel.uploadImage(bodies, { parameterName, receivedId ->
+                    paramsToSubmit[parameterName] = receivedId
+                    metaDataToSubmit[parameterName] = "uploaded"
+                }) {
+                    sendAction(actionName, selectedActionId)
+                }
+            }
+
+            override fun onServerInaccessible() {
+                entityListViewModel.toastMessage.showMessage(
+                    context?.getString(R.string.action_send_server_not_accessible),
+                    tableName,
+                    MessageType.ERROR
+                )
+            }
+
+            override fun onNoInternet() {
+                entityListViewModel.toastMessage.showMessage(
+                    context?.getString(R.string.action_send_no_internet),
+                    tableName,
+                    MessageType.ERROR
+                )
+            }
+        })
+    }
+
+    fun handleResult(requestCode: Int, data: Intent) {
+        // the request code is te equivalent of position of item in adapter
+
+        // case of image picked from gallery
+        val uri = data.data
+        if (uri != null) {
+            adapter.getUpdatedImageParameterName(requestCode)?.let {
+                imagesToUpload[it] = uri
+            }
+            adapter.updateImageForPosition(requestCode, uri)
+        } else {
+            // case of image token from camera
+            val thumbnail = data.extras?.get("data") as Bitmap?
+            val bytes = ByteArrayOutputStream()
+            thumbnail?.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, bytes)
+            val destination = createImageFile(requireContext())
+            val fileOutputStream: FileOutputStream
+            try {
+                fileOutputStream = FileOutputStream(destination)
+                fileOutputStream.write(bytes.toByteArray())
+                fileOutputStream.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+
+            adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->
+                imagesToUpload[parameterName] = Uri.fromFile(destination)
+            }
+            data.extras?.get("data")?.let { adapter.updateImageForPosition(requestCode, it) }
         }
     }
 }
