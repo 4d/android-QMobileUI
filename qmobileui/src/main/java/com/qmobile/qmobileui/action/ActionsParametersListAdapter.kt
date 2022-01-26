@@ -1,6 +1,7 @@
 package com.qmobile.qmobileui.action
 
 import android.content.Context
+import android.net.Uri
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
@@ -49,5 +50,18 @@ class ActionsParametersListAdapter(
         val format = itemJsonObject.getSafeString("format") ?: "default"
         return ActionParameterEnum.values().find { it.type == type && it.format == format }?.ordinal
             ?: 0
+    }
+
+    fun updateImageForPosition(position: Int, data: Any) {
+        if (data is Uri) {
+            (list[position] as JSONObject).put("uri", data)
+        } else {
+            (list[position] as JSONObject).put("bitmap", data)
+        }
+        notifyItemChanged(position)
+    }
+
+    fun getUpdatedImageParameterName(position: Int): String? {
+        return (list[position] as JSONObject).getSafeString("name")
     }
 }
