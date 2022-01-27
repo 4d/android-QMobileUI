@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by Quentin Marciset on 13/2/2020.
+  ~ 4D SAS
+  ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/large_margin"
+    android:layout_marginVertical="@dimen/small_margin">
+
+    <TextView
+        android:id="@+id/label"
+        style="@style/Widget.MaterialComponents.TextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/small_margin"
+        android:alpha="0.6"
+        android:scrollbars="none"
+        android:singleLine="true"
+        android:textAlignment="viewStart"
+        android:textColor="?colorOnSurface"
+        app:layout_constraintBottom_toTopOf="@+id/error"
+        app:layout_constraintEnd_toStartOf="@+id/image_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Label" />
+
+    <TextView
+        android:id="@+id/error"
+        style="@style/Widget.MaterialComponents.TextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/small_margin"
+        android:scrollbars="none"
+        android:singleLine="true"
+        android:textAlignment="viewStart"
+        android:textColor="?colorError"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toStartOf="@+id/image_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/label"
+        tools:text="Label" />
+
+    <ImageView
+        android:id="@+id/image_view"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:contentDescription="TODO"
+        android:alpha="0.6"
+        android:elevation="4dp"
+        android:src="@drawable/image_plus"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
