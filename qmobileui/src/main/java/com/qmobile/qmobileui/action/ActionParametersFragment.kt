@@ -19,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -41,7 +42,7 @@ import java.io.IOException
 const val IMAGE_QUALITY = 90
 
 
-open class ActionParametersFragment : Fragment(), BaseFragment {
+class ActionParametersFragment : Fragment(), BaseFragment {
 
     private var _binding: ViewDataBinding? = null
     internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
@@ -87,17 +88,20 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             false
         ).apply {
             lifecycleOwner = viewLifecycleOwner
-            adapter = ActionsParametersListAdapter(
+             adapter = ActionsParametersListAdapter(
                 requireContext(),
                 delegate.getSelectAction().parameters,
-                delegate.getSelectedEntity()
-            ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
-                validationMap[name] = isValid
-                paramsToSubmit[name] = value ?: ""
-                metaData?.let {
-                    metaDataToSubmit[name] = metaData
-                }
-            }
+                delegate.getSelectedEntity(),
+                { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+                    validationMap[name] = isValid
+                    paramsToSubmit[name] = value ?: ""
+                    metaData?.let {
+                        metaDataToSubmit[name] = metaData
+                    }
+                },
+                 {
+                     BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
+                 })
             val layoutManager = LinearLayoutManager(requireContext())
             recyclerView.layoutManager = layoutManager
             recyclerView.adapter = adapter
@@ -120,6 +124,15 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             }
         }
         return binding.root
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setFragmentResultListener("scan_request") { _: String, bundle: Bundle ->
+            val value = bundle.getString("scanned")
+            val position = bundle.getInt("position")
+            value?.let { adapter.updateBarcodeForPosition(position, it) }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

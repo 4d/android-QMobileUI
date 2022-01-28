@@ -50,6 +50,8 @@ object Versions {
     const val swiperefreshlayout = "1.1.0"
     const val timber = "5.0.1"
     const val viewpager2 = "1.0.0"
+    const val vision = "20.1.3"
+    const val fragment = "1.4.0"
 }
 
 object Config {
@@ -152,6 +154,12 @@ object Libs {
     const val dynamic_toasts = "com.pranavpandey.android:dynamic-toasts:${Versions.dynamic_toasts}"
     const val leakcanary = "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanary}"
     const val timber = "com.jakewharton.timber:timber:${Versions.timber}"
+
+    // Vision
+    const val vision = "com.google.android.gms:play-services-vision:${Versions.vision}"
+
+    // Fragment
+    const val fragment ="androidx.fragment:fragment-ktx:${Versions.fragment}"
 
     // Testing - Unit
     const val androidx_core_testing = "androidx.arch.core:core-testing:${Versions.arch_core}"

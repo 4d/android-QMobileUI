@@ -12,6 +12,7 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.View
 import android.view.WindowManager
 import android.widget.ImageButton
 import android.widget.ListView
@@ -323,6 +324,22 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
     override fun getSelectedEntity(): EntityModel? {
         return entity
+    }
+
+    override fun setFullScreenMode(isFullScreen: Boolean) {
+        val bottomNav = this.findViewById<BottomNavigationView>(R.id.bottom_nav)
+        bottomNav.visibility = if (isFullScreen) {
+            View.GONE
+        } else {
+            View.VISIBLE
+        }
+        supportActionBar?.apply {
+            if (isFullScreen) {
+                hide()
+            } else {
+                show()
+            }
+        }
     }
 
     override fun handleNetworkState(networkState: NetworkStateEnum) {

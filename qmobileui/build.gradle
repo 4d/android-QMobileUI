@@ -64,6 +64,11 @@ dependencies {
     implementation Libs.retrofit_converter_gson
     implementation Libs.timber
 
+    //Vision
+    implementation Libs.vision
+
+    // Fragment
+    implementation Libs.fragment
     // Testing
     testImplementation Libs.json
     testImplementation Libs.junit
