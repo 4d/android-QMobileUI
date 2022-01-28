@@ -903,7 +903,7 @@ class ImageViewHolder(itemView: View) :
                 }
                 // Continue only if the File was successfully created
                 photoFile?.also {
-                    val photoURI: Uri = FileProvider.getUriForFile(
+                    FileProvider.getUriForFile(
                         context,
                         "com.4D.android.fileprovider",
                         it
@@ -1113,7 +1113,6 @@ class DateViewHolder(itemView: View, val format: String) :
     }
 }
 
-
 /**
  *  QR/Bar code HOLDER
  */
@@ -1168,4 +1167,3 @@ class BarCodeViewHolder(itemView: View) :
         }
     }
 }
-

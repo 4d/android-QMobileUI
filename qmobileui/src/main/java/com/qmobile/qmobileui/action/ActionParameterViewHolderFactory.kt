@@ -98,7 +98,7 @@ class ActionParameterViewHolderFactory private constructor() {
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_image, parent, false)
                     )
-                //Bar/QR code
+                // Bar/QR code
                 ActionParameterEnum.BARCODE ->
                     BarCodeViewHolder(
                         LayoutInflater.from(context)

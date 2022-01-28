@@ -39,8 +39,9 @@ class ActionsParametersListAdapter(
             { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 onValueChanged(name, value, metaData, isValid)
             }, {
-                goToScanner(it)
-            })
+            goToScanner(it)
+        }
+        )
     }
 
     override fun getItemViewType(position: Int): Int {

@@ -24,6 +24,9 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentBarCodeScannerBinding
 import java.io.IOException
 
+const val REQUEST_CODE_CAMERA_PERMISSION = 1001
+const val PREVIEW_SIZE_WIDTH = 1080
+const val PREVIEW_SIZE_HEIGHT = 1920
 
 class BarCodeScannerFragment : Fragment(), BaseFragment {
     private var _binding: ViewDataBinding? = null
@@ -31,7 +34,6 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
 
     // flag used to avoid this problem https://stackoverflow.com/questions/47121097/barcode-scanner-result-twice
     var alreadyScanned = false
-    private val requestCodeCameraPermission = 1001
     private lateinit var cameraSource: CameraSource
     private lateinit var barcodeDetector: BarcodeDetector
     private var scannedValue = ""
@@ -70,14 +72,13 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
         }
     }
 
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == requestCodeCameraPermission && grantResults.isNotEmpty()) {
+        if (requestCode == REQUEST_CODE_CAMERA_PERMISSION && grantResults.isNotEmpty()) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startScan()
             } else {
@@ -102,7 +103,7 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
         ActivityCompat.requestPermissions(
             requireActivity(),
             arrayOf(android.Manifest.permission.CAMERA),
-            requestCodeCameraPermission
+            REQUEST_CODE_CAMERA_PERMISSION
         )
     }
 
@@ -112,8 +113,8 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
                 .build()
 
         cameraSource = CameraSource.Builder(requireActivity(), barcodeDetector)
-            .setRequestedPreviewSize(1920, 1080)
-            .setAutoFocusEnabled(true) //you should add this feature
+            .setRequestedPreviewSize(PREVIEW_SIZE_HEIGHT, PREVIEW_SIZE_WIDTH)
+            .setAutoFocusEnabled(true) // you should add this feature
             .build()
 
         (binding as FragmentBarCodeScannerBinding).cameraSurfaceView.holder

@@ -41,7 +41,6 @@ import java.io.IOException
 
 const val IMAGE_QUALITY = 90
 
-
 class ActionParametersFragment : Fragment(), BaseFragment {
 
     private var _binding: ViewDataBinding? = null
@@ -88,7 +87,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
             false
         ).apply {
             lifecycleOwner = viewLifecycleOwner
-             adapter = ActionsParametersListAdapter(
+            adapter = ActionsParametersListAdapter(
                 requireContext(),
                 delegate.getSelectAction().parameters,
                 delegate.getSelectedEntity(),
@@ -99,9 +98,10 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                         metaDataToSubmit[name] = metaData
                     }
                 },
-                 {
-                     BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
-                 })
+                {
+                    BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
+                }
+            )
             val layoutManager = LinearLayoutManager(requireContext())
             recyclerView.layoutManager = layoutManager
             recyclerView.adapter = adapter
