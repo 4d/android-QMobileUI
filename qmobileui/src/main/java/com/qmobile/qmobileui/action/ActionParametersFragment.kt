@@ -34,12 +34,12 @@ import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
+import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.io.IOException
 
 const val IMAGE_QUALITY = 90
-
 
 open class ActionParametersFragment : Fragment(), BaseFragment {
 
@@ -269,7 +269,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                 fileOutputStream.write(bytes.toByteArray())
                 fileOutputStream.close()
             } catch (e: IOException) {
-                e.printStackTrace()
+                Timber.d(e.localizedMessage)
             }
 
             adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->

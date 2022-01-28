@@ -89,7 +89,10 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
         viewPager?.adapter = adapter
         viewPager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                arguments?.putString("key", adapter.getValue(position)?.__KEY)
+                adapter.getValue(position)?.let { item ->
+                    key = item.__KEY ?: ""
+                    arguments?.putString("key", item.__KEY)
+                }
                 handleActionPreviousEnability(position)
                 handleActionNextEnability(position)
             }

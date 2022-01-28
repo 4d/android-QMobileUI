@@ -219,7 +219,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                     requestAuthentication()
                 } else {
                     // AUTHENTICATED
-               when (entityListViewModel?.dataSynchronized?.value) {
+                    when (entityListViewModel?.dataSynchronized?.value) {
                         DataSyncStateEnum.UNSYNCHRONIZED -> dataSync()
                         DataSyncStateEnum.SYNCHRONIZED -> {
                             job?.cancel()

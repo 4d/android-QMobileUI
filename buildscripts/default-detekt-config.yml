@@ -235,9 +235,6 @@ exceptions:
       - 'NumberFormatException'
       - 'ParseException'
       - 'JSONException'
-      - 'JsonSyntaxException'
-      - 'IllegalArgumentException'
-      - 'StringIndexOutOfBoundsException'
     allowedExceptionNameRegex: '_|(ignore|expected).*'
   ThrowingExceptionFromFinally:
     active: true

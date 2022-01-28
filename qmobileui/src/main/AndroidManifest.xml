@@ -2,4 +2,21 @@
     package="com.qmobile.qmobileui">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Camera -->
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
+
+    <!-- Google Map access -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
 </manifest>
