@@ -32,6 +32,7 @@ import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.list.SpellOutHelper
+import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
@@ -862,7 +863,7 @@ class ImageViewHolder(itemView: View) :
                 imageButton.setImageBitmap(itemJsonObject.get("bitmap") as Bitmap)
                 itemJsonObject.remove("bitmap")
             }
-        } catch (e: Exception) {
+        } catch (e: JSONException) {
             Timber.e("ActionParameterViewHolder: ", e.localizedMessage)
         }
 
@@ -872,7 +873,7 @@ class ImageViewHolder(itemView: View) :
                 imageButton.setImageURI(uri)
                 itemJsonObject.remove("uri")
             }
-        } catch (e: Exception) {
+        } catch (e: JSONException) {
             Timber.e("ActionParameterViewHolder: ", e.localizedMessage)
         }
     }
@@ -898,7 +899,8 @@ class ImageViewHolder(itemView: View) :
                 // Create the File where the photo should go
                 val photoFile: File? = try {
                     createImageFile(itemView.context)
-                } catch (ex: IOException) {
+                } catch (e: IOException) {
+                    Timber.e("ImageViewHolder: ",e.localizedMessage)
                     null
                 }
                 // Continue only if the File was successfully created
