@@ -2,15 +2,14 @@ package com.qmobile.qmobileui.action
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.SurfaceHolder
+import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -24,13 +23,15 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentBarCodeScannerBinding
 import java.io.IOException
 
-const val REQUEST_CODE_CAMERA_PERMISSION = 1001
 const val PREVIEW_SIZE_WIDTH = 1080
 const val PREVIEW_SIZE_HEIGHT = 1920
 
 class BarCodeScannerFragment : Fragment(), BaseFragment {
     private var _binding: ViewDataBinding? = null
     val binding get() = _binding!!
+    val cameraSurfaceView: SurfaceView
+        get() = (binding as FragmentBarCodeScannerBinding).cameraSurfaceView
+
 
     // flag used to avoid this problem https://stackoverflow.com/questions/47121097/barcode-scanner-result-twice
     var alreadyScanned = false
@@ -58,34 +59,27 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         delegate.setFullScreenMode(true)
-        if (ContextCompat.checkSelfPermission(
-                requireContext(), android.Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            askForCameraPermission()
-        } else {
-            startScan()
-        }
+
+        val requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (isGranted) {
+                    startScan()
+                    cameraSurfaceView.visibility = View.VISIBLE
+                } else {
+                    Toast.makeText(requireActivity(), "Permission Denied", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+
         (binding as FragmentBarCodeScannerBinding).closeButton.setOnClickListener {
             activity?.supportFragmentManager?.findFragmentById(R.id.nav_host_container)
                 ?.findNavController()?.navigateUp()
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_CAMERA_PERMISSION && grantResults.isNotEmpty()) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startScan()
-            } else {
-                Toast.makeText(requireActivity(), "Permission Denied", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
 
     override fun onDetach() {
         super.onDetach()
@@ -99,14 +93,6 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
         }
     }
 
-    private fun askForCameraPermission() {
-        ActivityCompat.requestPermissions(
-            requireActivity(),
-            arrayOf(android.Manifest.permission.CAMERA),
-            REQUEST_CODE_CAMERA_PERMISSION
-        )
-    }
-
     private fun startScan() {
         barcodeDetector =
             BarcodeDetector.Builder(requireActivity()).setBarcodeFormats(Barcode.ALL_FORMATS)
@@ -117,7 +103,7 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
             .setAutoFocusEnabled(true) // you should add this feature
             .build()
 
-        (binding as FragmentBarCodeScannerBinding).cameraSurfaceView.holder
+        cameraSurfaceView.holder
             .addCallback(object : SurfaceHolder.Callback {
                 @SuppressLint("MissingPermission") // Permission already handled before calling this methode
                 override fun surfaceCreated(holder: SurfaceHolder) {
@@ -146,6 +132,8 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
                     cameraSource.stop()
                 }
             })
+
+        cameraSurfaceView.visibility = View.VISIBLE
 
         barcodeDetector.setProcessor(object : Detector.Processor<Barcode> {
             override fun release() {
