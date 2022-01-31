@@ -6,21 +6,30 @@
 
 package com.qmobile.qmobileui.action
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.media.ThumbnailUtils
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -32,16 +41,19 @@ import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.CenterLayoutManager
-import com.qmobile.qmobileui.utils.createTempImageFile
 import com.qmobile.qmobileui.utils.hideKeyboard
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-
-const val IMAGE_QUALITY = 90
+import java.lang.IllegalArgumentException
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.HashMap
 
 open class ActionParametersFragment : Fragment(), BaseFragment {
 
@@ -61,6 +73,8 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     private var fromRelation = false
 
     private var scrollPos = 0
+
+    private lateinit var currentPhotoPath: String
 
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -99,11 +113,12 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         ).apply {
             lifecycleOwner = viewLifecycleOwner
             adapter = ActionsParametersListAdapter(
-                requireContext(),
-                delegate.getSelectAction().parameters,
-                delegate.getSelectedEntity(),
-                activity?.supportFragmentManager,
-                { onHideKeyboardCallback() }
+                context = requireContext(),
+                parameters = delegate.getSelectAction().parameters,
+                currentEntity = delegate.getSelectedEntity(),
+                fragmentManager = activity?.supportFragmentManager,
+                hideKeyboardCallback = { onHideKeyboardCallback() },
+                intentChooserCallback = { position -> intentChooserCallback(position) }
             ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 validationMap[name] = isValid
                 paramsToSubmit[name] = value ?: ""
@@ -125,6 +140,69 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             hideKeyboard(it)
         }
     }
+
+    private fun intentChooserCallback(position: Int) {
+        val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        pickPhoto.type = "image/*"
+        val takePicture = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        takePicture.also { takePictureIntent ->
+            // Ensure that there's a camera activity to handle the intent
+            takePictureIntent.resolveActivity(requireContext().packageManager)?.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createTempImageFile(requireContext())
+                } catch (ex: IOException) {
+                    entityListViewModel.toastMessage.showMessage("Could not create temporary file", "", MessageType.ERROR )
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    try {
+                        val photoURI: Uri = FileProvider.getUriForFile(
+                            requireContext(),
+                            requireActivity().packageName + ".provider",
+                            it
+                        )
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    } catch (e: IllegalArgumentException) {
+                        Timber.e(e.localizedMessage)
+                        entityListViewModel.toastMessage.showMessage("Could not create temporary file", "", MessageType.ERROR )
+                    }
+                }
+            }
+        }
+        val chooser = Intent.createChooser(pickPhoto, "Some text here")
+        chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takePicture))
+//        requireActivity().startActivityForResult(chooser, position)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)== PackageManager.PERMISSION_DENIED){
+                val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+                requestPermissions(permissions, PERMISSION_CODE)
+            } else{
+                chooseImageGallery();
+            }
+        }else{
+            chooseImageGallery();
+        }
+
+
+    }
+
+    private fun createTempImageFile(context: Context): File {
+        // Create an image file
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "qmobile_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
+        }
+    }
+
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_actions_parameters, menu)
@@ -259,27 +337,19 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     }
 
     private fun uploadImages(actionName: String, selectedActionId: String?) {
-        val bodies = imagesToUpload.mapValues {
-            val fileUri = it.value as Uri
-            val stream = activity?.contentResolver?.openInputStream(fileUri)
-            val body = stream?.readBytes()?.let { it1 ->
-                it1
-                    .toRequestBody(
-                        "application/octet".toMediaTypeOrNull(),
-                        0, it1.size
-                    )
-            }
-            body
+        val bodies: Map<String, RequestBody?> = imagesToUpload.mapValues {
+            val stream = activity?.contentResolver?.openInputStream(it.value)
+            stream?.readBytes()?.toRequestBody(APP_OCTET.toMediaTypeOrNull())
         }
-
-
 
         delegate.checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
-                entityListViewModel.uploadImage(bodies, { parameterName, receivedId ->
-                    paramsToSubmit[parameterName] = receivedId
-                    metaDataToSubmit[parameterName] = "uploaded"
-                }) {
+                entityListViewModel.uploadImage(
+                    imagesToUpload = bodies,
+                    onImageUploaded = { parameterName, receivedId ->
+                        paramsToSubmit[parameterName] = receivedId
+                        metaDataToSubmit[parameterName] = "uploaded"
+                    }) {
                     sendAction(actionName, selectedActionId)
                 }
             }
@@ -304,33 +374,11 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
 
     fun handleResult(requestCode: Int, data: Intent) {
         // the request code is te equivalent of position of item in adapter
+        val uri: Uri = data.data ?: Uri.fromFile(File(currentPhotoPath))
 
-        // case of image picked from gallery
-        val uri = data.data
-        if (uri != null) {
-            adapter.getUpdatedImageParameterName(requestCode)?.let {
-                imagesToUpload[it] = uri
-            }
-            adapter.updateImageForPosition(requestCode, uri)
-        } else {
-            // case of image token from camera
-            val thumbnail = data.extras?.get("data") as Bitmap?
-            val bytes = ByteArrayOutputStream()
-            thumbnail?.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, bytes)
-            val destination = createTempImageFile(requireContext())
-            val fileOutputStream: FileOutputStream
-            try {
-                fileOutputStream = FileOutputStream(destination)
-                fileOutputStream.write(bytes.toByteArray())
-                fileOutputStream.close()
-            } catch (e: IOException) {
-                Timber.d(e.localizedMessage)
-            }
-
-            adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->
-                imagesToUpload[parameterName] = Uri.fromFile(destination)
-            }
-            data.extras?.get("data")?.let { adapter.updateImageForPosition(requestCode, it) }
+        adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->
+            imagesToUpload[parameterName] = uri
         }
+        adapter.updateImageForPosition(requestCode, uri)
     }
 }

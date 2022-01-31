@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
 import org.json.JSONArray
@@ -17,6 +18,7 @@ class ActionsParametersListAdapter(
     private val currentEntity: EntityModel?,
     private val fragmentManager: FragmentManager?,
     private val hideKeyboardCallback: () -> Unit,
+    private val intentChooserCallback: (position: Int) -> Unit,
     private val onValueChanged: (String, Any?, String?, Boolean) -> Unit
 ) :
     RecyclerView.Adapter<BaseViewHolder>() {
@@ -27,7 +29,8 @@ class ActionsParametersListAdapter(
             parent,
             context,
             fragmentManager,
-            hideKeyboardCallback
+            hideKeyboardCallback,
+            intentChooserCallback
         )
     }
 
@@ -52,16 +55,12 @@ class ActionsParametersListAdapter(
             ?: 0
     }
 
-    fun updateImageForPosition(position: Int, data: Any) {
-        if (data is Uri) {
-            (list[position] as JSONObject).put("uri", data)
-        } else {
-            (list[position] as JSONObject).put("bitmap", data)
-        }
+    fun updateImageForPosition(position: Int, data: Uri) {
+        parameters.getSafeObject(position)?.put("image_uri", data)
         notifyItemChanged(position)
     }
 
     fun getUpdatedImageParameterName(position: Int): String? {
-        return (list[position] as JSONObject).getSafeString("name")
+        return parameters.getSafeObject(position)?.getSafeString("name")
     }
 }

@@ -42,7 +42,7 @@ open class TextViewHolder(
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?, Boolean) -> Unit
+        onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
 
@@ -66,6 +66,7 @@ open class TextViewHolder(
         }
 
         input.setText(itemJsonObject.getSafeString("default") ?: "")
+        container.endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
 
         input.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {

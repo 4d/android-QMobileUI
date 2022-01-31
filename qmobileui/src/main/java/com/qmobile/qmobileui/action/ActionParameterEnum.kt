@@ -35,5 +35,5 @@ enum class ActionParameterEnum(val type: String, val format: String = "default")
     TIME_DURATION("time", "duration"),
 
     // Image
-    IMAGE("image");
+    IMAGE("image")
 }

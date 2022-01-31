@@ -21,7 +21,8 @@ class ActionParameterViewHolderFactory private constructor() {
             parent: ViewGroup,
             context: Context,
             fragmentManager: FragmentManager?,
-            hideKeyboardCallback: () -> Unit
+            hideKeyboardCallback: () -> Unit,
+            intentChooserCallback: (position: Int) -> Unit
         ): BaseViewHolder {
 
             return when (val itemType = ActionParameterEnum.values()[viewType]) {
@@ -99,7 +100,8 @@ class ActionParameterViewHolderFactory private constructor() {
                     ImageViewHolder(
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_image, parent, false),
-                        hideKeyboardCallback
+                        hideKeyboardCallback,
+                        intentChooserCallback
                     )
             }
         }

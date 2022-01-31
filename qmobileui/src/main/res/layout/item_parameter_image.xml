@@ -3,7 +3,6 @@
   ~ 4D SAS
   ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
   -->
-
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -49,12 +48,29 @@
         android:id="@+id/image_view"
         android:layout_width="74dp"
         android:layout_height="74dp"
-        android:contentDescription="TODO"
         android:alpha="0.6"
+        android:contentDescription="TODO"
         android:elevation="4dp"
         android:src="@drawable/image_plus"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/item_remove"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/item_remove"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:alpha="0.6"
+        android:contentDescription="Remove Image"
+        android:src="@drawable/close_circle_outline"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?colorOnSurface"
+        tools:background="@drawable/close_circle_outline" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

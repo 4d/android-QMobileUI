@@ -63,6 +63,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     private var onLaunch = true
     private var authenticationRequested = true
     private var shouldDelayOnForegroundEvent = AtomicBoolean(false)
+    private var onResultResume = AtomicBoolean(false)
     private var currentNavController: LiveData<NavController>? = null
     private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
@@ -189,7 +190,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             refreshAllApiClients()
             entityListViewModelList.resetIsToSync()
         }
-        dataSync()
+        if (!onResultResume.getAndSet(false))
+            dataSync()
     }
 
     override fun requestAuthentication() {
@@ -423,6 +425,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        onResultResume.set(true)
         if ((resultCode == RESULT_OK) && (data != null)) {
             val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
             val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)

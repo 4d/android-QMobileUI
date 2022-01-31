@@ -10,7 +10,8 @@ import android.content.Context
 import android.os.Environment
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 fun createTempImageFile(context: Context): File {
     // Create an image file

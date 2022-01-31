@@ -24,12 +24,12 @@ object Transformations {
     private const val ROUNDED_CORNERS_RADIUS = 128
     private const val ROUNDED_CORNERS_MARGIN = 0
 
-    fun getTransformation(transform: String?, @ColorInt borderColor: Int): Transformation<Bitmap>? {
+    fun getTransformation(transform: String?, @ColorInt borderColor: Int? = null): Transformation<Bitmap>? {
         return when (transform) {
             "CropCircle" -> CropCircleTransformation()
             "CropCircleWithBorder" -> CropCircleWithBorderTransformation(
                 CROP_CIRCLE_WITH_BORDER_SIZE,
-                borderColor
+                borderColor ?: 0
             )
             "Blur" -> BlurTransformation(BLUR_RADIUS, BLUR_SAMPLING)
             "RoundedCorners" -> RoundedCornersTransformation(

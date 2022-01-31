@@ -64,7 +64,8 @@ class ActionHelper private constructor() {
 
             map["context"] = actionContext
             parameters?.let { map.put("parameters", parameters) }
-            metaData?.let { map.put("metadata", ActionMetaData(metaData)) }
+//            metaData?.let { map.put("metadata", ActionMetaData(metaData)) }
+            metaData?.let { map.put("metadata", JSONObject().apply { it["parameters"] = metaData.toString() }) }
             return map
         }
 

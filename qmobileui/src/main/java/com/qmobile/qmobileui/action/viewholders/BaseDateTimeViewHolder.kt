@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.action.viewholders
 
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.textfield.TextInputEditText
@@ -29,7 +30,7 @@ abstract class BaseDateTimeViewHolder(
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?, Boolean) -> Unit
+        onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
 
@@ -46,6 +47,8 @@ abstract class BaseDateTimeViewHolder(
         else if (itemJsonObject.getSafeString("placeholder") != null)
             input.setText(itemJsonObject.getSafeString("placeholder"))
 
+        container.endIconMode = TextInputLayout.END_ICON_CUSTOM
+
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged) {
             input.setText(formatToDisplay(it.toString()))
         }
@@ -57,7 +60,6 @@ abstract class BaseDateTimeViewHolder(
                 showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
             return false
         }
-
         return true
     }
 
@@ -74,11 +76,7 @@ abstract class BaseDateTimeViewHolder(
         fragmentManager: FragmentManager?,
         dialogFragment: DialogFragment
     ) {
-        input.isLongClickable = false
-        input.setTextIsSelectable(false)
-        input.isFocusableInTouchMode = false
-        input.isClickable = true
-        input.setOnClickListener {
+        container.setEndIconOnClickListener {
             fragmentManager?.let {
                 val dialog = dialogFragment.dialog
                 if (dialog == null || !dialog.isShowing) {

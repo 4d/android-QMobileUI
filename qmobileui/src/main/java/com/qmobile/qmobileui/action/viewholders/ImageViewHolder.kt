@@ -6,52 +6,71 @@
 
 package com.qmobile.qmobileui.action.viewholders
 
-import android.app.Activity
-import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
-import android.provider.MediaStore
 import android.view.View
-import androidx.core.content.FileProvider
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import android.widget.ImageView
+import android.widget.TextView
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileui.utils.createTempImageFile
-import timber.log.Timber
-import java.io.File
-import java.io.IOException
+import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
+import com.qmobile.qmobileapi.utils.getSafeAny
+import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.glide.CustomRequestListener
 
-class ImageViewHolder(itemView: View, hideKeyboardCallback: () -> Unit) :
+class ImageViewHolder(
+    itemView: View,
+    hideKeyboardCallback: () -> Unit,
+    private val intentChooserCallback: (position: Int) -> Unit
+) :
     BaseViewHolder(itemView, hideKeyboardCallback) {
+
+    private val label: TextView = itemView.findViewById(R.id.label)
+    private val error: TextView = itemView.findViewById(R.id.error)
+    private var imageView: ImageView = itemView.findViewById(R.id.image_view)
+    private var removeItem: ImageView = itemView.findViewById(R.id.item_remove)
 
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?, Boolean) -> Unit
+        onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
-        imageButton.setOnClickListener {
-            // setup the alert builder
-            val builder = MaterialAlertDialogBuilder(itemView.context)
-            builder.setTitle("Choose a picture")
-            val options = arrayOf("Camera", "Gallery")
-            builder.setItems(options) { dialog, which ->
-                when (which) {
-                    0 -> {
-                        capturePhoto()
-                    }
-                    1 -> {
-                        pickImageFromGallery()
-                    }
-                }
+
+        itemJsonObject.getSafeString("label")?.let { parameterLabel ->
+            label.text = if (isMandatory()) {
+                "$parameterLabel *"
+            } else {
+                parameterLabel
             }
-            // create and show the alert dialog
-            val dialog = builder.create()
-            dialog.show()
+        }
+
+        imageView.setOnClickListener {
+            intentChooserCallback(bindingAdapterPosition)
+        }
+
+        removeItem.setOnClickListener {
+            ContextCompat.getDrawable(imageView.context, R.drawable.image_plus)?.let {
+                imageView.setImageDrawable(it)
+                removeItem.visibility = View.INVISIBLE
+                imageView.alpha = 0.6F
+            }
         }
         displaySelectedImageIfNeed()
+        onValueChanged(parameterName, null, null, validate(false))
     }
 
+
     override fun validate(displayError: Boolean): Boolean {
+
+        if (isMandatory() && !itemJsonObject.has("image_uri")) {
+            if (displayError)
+                showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+            return false
+        }
         return true
     }
 
@@ -59,62 +78,28 @@ class ImageViewHolder(itemView: View, hideKeyboardCallback: () -> Unit) :
         return -1
     }
 
-    private fun pickImageFromGallery() {
-        val context = itemView.context
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        (context as Activity).startActivityForResult(
-            intent,
-            bindingAdapterPosition // Send position as request code, so we can update image preview only for the selected item
-        )
-    }
-
-    private fun capturePhoto() {
-        val context = itemView.context
-
-        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-            // Ensure that there's a camera activity to handle the intent
-            takePictureIntent.resolveActivity(context.packageManager)?.also {
-                // Create the File where the photo should go
-                val photoFile: File? = try {
-                    createTempImageFile(itemView.context)
-                } catch (ex: IOException) {
-                    null
-                }
-                // Continue only if the File was successfully created
-                photoFile?.also {
-                    val photoURI: Uri = FileProvider.getUriForFile(
-                        context,
-                        "com.4D.android.fileprovider",
-                        it
-                    )
-                    (context as Activity).startActivityForResult(
-                        takePictureIntent,
-                        bindingAdapterPosition // Send position as request code, so we can update image preview only for the selected item
-                    )
-                }
-            }
-        }
-    }
-
     private fun displaySelectedImageIfNeed() {
-        try {
-            if (itemJsonObject.get("bitmap") != null) {
-                imageButton.setImageBitmap(itemJsonObject.get("bitmap") as Bitmap)
-                itemJsonObject.remove("bitmap")
-            }
-        } catch (e: Exception) {
-            Timber.e("ActionParameterViewHolder: ",e.localizedMessage)
-        }
+        error.visibility = View.INVISIBLE
+        itemJsonObject.getSafeAny("image_uri")?.let { anyUri ->
+            (anyUri as Uri?)?.let { uri ->
+                val factory =
+                    DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
+                val glideRequest = Glide.with(imageView.context.applicationContext)
+                    .load(uri)
+                    .transition(DrawableTransitionOptions.withCrossFade(factory))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .listener(CustomRequestListener())
+                    .error(R.drawable.ic_placeholder)
 
-        try {
-            if (itemJsonObject.get("uri") != null) {
-                val uri = itemJsonObject.get("uri") as Uri
-                imageButton.setImageURI(uri)
-                itemJsonObject.remove("uri")
+                glideRequest.into(imageView)
+                imageView.alpha = 1F
+                removeItem.visibility = View.VISIBLE
             }
-        } catch (e: Exception) {
-            Timber.e("ActionParameterViewHolder: ",e.localizedMessage)
         }
+    }
+
+    private fun showError(text: String) {
+        error.text = text
+        error.visibility = View.VISIBLE
     }
 }

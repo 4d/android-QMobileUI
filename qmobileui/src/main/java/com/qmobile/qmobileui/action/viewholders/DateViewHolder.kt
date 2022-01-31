@@ -7,9 +7,11 @@
 package com.qmobile.qmobileui.action.viewholders
 
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionParameterEnum
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import java.util.Calendar
@@ -35,9 +37,11 @@ class DateViewHolder(
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
-        onValueChanged: (String, Any, String?, Boolean) -> Unit
+        onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged)
+
+        container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.calendar_month)
 
         val datePicker =
             MaterialDatePicker.Builder.datePicker()
