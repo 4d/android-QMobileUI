@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.action.viewholders
 
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.textfield.TextInputEditText

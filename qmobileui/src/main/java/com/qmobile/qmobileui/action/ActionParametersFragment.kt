@@ -6,18 +6,12 @@
 
 package com.qmobile.qmobileui.action
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.media.ThumbnailUtils
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Size
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -46,13 +40,12 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
-import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import kotlin.collections.HashMap
 
 open class ActionParametersFragment : Fragment(), BaseFragment {
@@ -152,7 +145,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                 val photoFile: File? = try {
                     createTempImageFile(requireContext())
                 } catch (ex: IOException) {
-                    entityListViewModel.toastMessage.showMessage("Could not create temporary file", "", MessageType.ERROR )
+                    entityListViewModel.toastMessage.showMessage("Could not create temporary file", "", MessageType.ERROR)
                     null
                 }
                 // Continue only if the File was successfully created
@@ -166,27 +159,25 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                     } catch (e: IllegalArgumentException) {
                         Timber.e(e.localizedMessage)
-                        entityListViewModel.toastMessage.showMessage("Could not create temporary file", "", MessageType.ERROR )
+                        entityListViewModel.toastMessage.showMessage("Could not create temporary file", "", MessageType.ERROR)
                     }
                 }
             }
         }
         val chooser = Intent.createChooser(pickPhoto, "Some text here")
         chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takePicture))
-//        requireActivity().startActivityForResult(chooser, position)
+        requireActivity().startActivityForResult(chooser, position)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)== PackageManager.PERMISSION_DENIED){
-                val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-                requestPermissions(permissions, PERMISSION_CODE)
-            } else{
-                chooseImageGallery();
-            }
-        }else{
-            chooseImageGallery();
-        }
-
-
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+//                val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+//                requestPermissions(permissions, PERMISSION_CODE)
+//            } else {
+//                chooseImageGallery()
+//            }
+//        } else {
+//            chooseImageGallery()
+//        }
     }
 
     private fun createTempImageFile(context: Context): File {
@@ -202,7 +193,6 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             currentPhotoPath = absolutePath
         }
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_actions_parameters, menu)
@@ -349,7 +339,8 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                     onImageUploaded = { parameterName, receivedId ->
                         paramsToSubmit[parameterName] = receivedId
                         metaDataToSubmit[parameterName] = "uploaded"
-                    }) {
+                    }
+                ) {
                     sendAction(actionName, selectedActionId)
                 }
             }
