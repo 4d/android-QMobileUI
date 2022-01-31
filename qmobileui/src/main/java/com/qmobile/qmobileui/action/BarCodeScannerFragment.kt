@@ -29,7 +29,7 @@ const val PREVIEW_SIZE_HEIGHT = 1920
 class BarCodeScannerFragment : Fragment(), BaseFragment {
     private var _binding: ViewDataBinding? = null
     val binding get() = _binding!!
-    val cameraSurfaceView: SurfaceView
+    private val cameraSurfaceView: SurfaceView
         get() = (binding as FragmentBarCodeScannerBinding).cameraSurfaceView
 
 
