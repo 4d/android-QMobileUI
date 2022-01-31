@@ -36,6 +36,7 @@ import com.qmobile.qmobileui.utils.createTempImageFile
 import com.qmobile.qmobileui.utils.hideKeyboard
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
+import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.io.IOException
@@ -323,7 +324,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                 fileOutputStream.write(bytes.toByteArray())
                 fileOutputStream.close()
             } catch (e: IOException) {
-                e.printStackTrace()
+                Timber.d(e.localizedMessage)
             }
 
             adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->
