@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.action
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -17,6 +18,9 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
@@ -59,8 +63,11 @@ class ActionParametersFragment : Fragment(), BaseFragment {
     private val validationMap = HashMap<String, Boolean>()
     lateinit var adapter: ActionsParametersListAdapter
     private var fromRelation = false
+
     // Is set to true if all recyclerView items are seen at lean once
     private var areAllItemsSeen = false
+    private var goToCamera: (() -> Unit)? = null
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -101,6 +108,15 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                 },
                 {
                     BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
+                }, { intent: Intent, position: Int ->
+                    goToCamera = {
+                        (context as Activity).startActivityForResult(
+                            intent,
+                            // Send position as request code, so we can update image preview only for the selected item
+                            position
+                        )
+                    }
+                    requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
                 }
             )
             val layoutManager = LinearLayoutManager(requireContext())
@@ -164,6 +180,18 @@ class ActionParametersFragment : Fragment(), BaseFragment {
         if (context is FragmentCommunication) {
             delegate = context
         }
+
+        requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (isGranted) {
+                    goToCamera?.let { it() }
+                } else {
+                    Toast.makeText(requireActivity(), "Permission Denied", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
     }
 
     private fun isFormValid(): Boolean =
@@ -283,7 +311,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                 fileOutputStream.write(bytes.toByteArray())
                 fileOutputStream.close()
             } catch (e: IOException) {
-              Timber.e("ActionParametersFragment",e.localizedMessage)
+                Timber.e("ActionParametersFragment", e.localizedMessage)
             }
 
             adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->

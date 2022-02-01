@@ -32,7 +32,6 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
     private val cameraSurfaceView: SurfaceView
         get() = (binding as FragmentBarCodeScannerBinding).cameraSurfaceView
 
-
     // flag used to avoid this problem https://stackoverflow.com/questions/47121097/barcode-scanner-result-twice
     var alreadyScanned = false
     private lateinit var cameraSource: CameraSource
@@ -79,7 +78,6 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
                 ?.findNavController()?.navigateUp()
         }
     }
-
 
     override fun onDetach() {
         super.onDetach()

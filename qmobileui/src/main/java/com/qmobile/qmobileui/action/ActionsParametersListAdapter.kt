@@ -1,6 +1,7 @@
 package com.qmobile.qmobileui.action
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -14,7 +15,8 @@ class ActionsParametersListAdapter(
     val list: JSONArray,
     private val currentEntity: EntityModel?,
     val onValueChanged: (String, Any?, String?, Boolean) -> Unit,
-    val goToScanner: (Int) -> Unit
+    val goToScanner: (Int) -> Unit,
+    val goToCamera: (Intent, Int) -> Unit
 ) :
     RecyclerView.Adapter<ActionParameterViewHolder>() {
 
@@ -39,8 +41,10 @@ class ActionsParametersListAdapter(
             { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 onValueChanged(name, value, metaData, isValid)
             }, {
-            goToScanner(it)
-        }
+                goToScanner(it)
+            }, { intent: Intent, position: Int ->
+                goToCamera(intent, position)
+            }
         )
     }
 
