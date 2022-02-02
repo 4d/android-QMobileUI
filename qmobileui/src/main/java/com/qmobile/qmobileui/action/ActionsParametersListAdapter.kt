@@ -1,6 +1,7 @@
 package com.qmobile.qmobileui.action
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
@@ -18,7 +19,7 @@ class ActionsParametersListAdapter(
     private val currentEntity: EntityModel?,
     private val fragmentManager: FragmentManager?,
     private val hideKeyboardCallback: () -> Unit,
-    private val intentChooserCallback: (position: Int) -> Unit,
+    private val startActivityCallback: (intent: Intent, position: Int, photoFilePath: String?) -> Unit,
     private val onValueChanged: (String, Any?, String?, Boolean) -> Unit
 ) :
     RecyclerView.Adapter<BaseViewHolder>() {
@@ -30,7 +31,7 @@ class ActionsParametersListAdapter(
             context,
             fragmentManager,
             hideKeyboardCallback,
-            intentChooserCallback
+            startActivityCallback
         )
     }
 

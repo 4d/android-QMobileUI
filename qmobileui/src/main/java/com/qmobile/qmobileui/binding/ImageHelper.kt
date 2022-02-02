@@ -13,10 +13,18 @@ import android.graphics.drawable.InsetDrawable
 import android.net.Uri
 import android.os.Build
 import android.util.TypedValue
+import android.view.View
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.glide.CustomRequestListener
 import timber.log.Timber
 import java.io.File
 
@@ -27,6 +35,19 @@ object ImageHelper {
     const val drawableSpace = 8
     const val luminanceThreshold = 0.5
     const val ICON_MARGIN = 8
+
+    private val factory =
+        DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
+
+    fun getGlideRequest(view: View, data: Any): RequestBuilder<Drawable> =
+        Glide.with(view.context.applicationContext)
+            .load(
+                data
+            )
+            .transition(DrawableTransitionOptions.withCrossFade(factory))
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .listener(CustomRequestListener())
+            .error(R.drawable.ic_error_outline)
 
     fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Uri? {
         BaseApp.runtimeDataHolder.embeddedFiles.find {

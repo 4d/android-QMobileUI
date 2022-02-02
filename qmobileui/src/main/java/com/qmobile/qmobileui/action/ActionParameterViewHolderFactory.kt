@@ -1,6 +1,7 @@
 package com.qmobile.qmobileui.action
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
@@ -22,7 +23,7 @@ class ActionParameterViewHolderFactory private constructor() {
             context: Context,
             fragmentManager: FragmentManager?,
             hideKeyboardCallback: () -> Unit,
-            intentChooserCallback: (position: Int) -> Unit
+            startActivityCallback: (intent: Intent, position: Int, photoFilePath: String?) -> Unit
         ): BaseViewHolder {
 
             return when (val itemType = ActionParameterEnum.values()[viewType]) {
@@ -101,7 +102,7 @@ class ActionParameterViewHolderFactory private constructor() {
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_image, parent, false),
                         hideKeyboardCallback,
-                        intentChooserCallback
+                        startActivityCallback
                     )
             }
         }

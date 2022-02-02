@@ -6,25 +6,38 @@
 
 package com.qmobile.qmobileui.action.viewholders
 
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
+import androidx.core.content.FileProvider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeAny
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.glide.CustomRequestListener
+import com.qmobile.qmobileui.binding.ImageHelper
+import com.qmobile.qmobileui.binding.Transformations
+import com.qmobile.qmobileui.binding.getColorFromAttr
+import com.qmobile.qmobileui.utils.ToastHelper
+import timber.log.Timber
+import java.io.File
+import java.io.IOException
+import java.lang.IllegalArgumentException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ImageViewHolder(
     itemView: View,
     hideKeyboardCallback: () -> Unit,
-    private val intentChooserCallback: (position: Int) -> Unit
+    private val startActivityCallback: (intent: Intent, position: Int, photoFilePath: String?) -> Unit
 ) :
     BaseViewHolder(itemView, hideKeyboardCallback) {
 
@@ -49,7 +62,15 @@ class ImageViewHolder(
         }
 
         imageView.setOnClickListener {
-            intentChooserCallback(bindingAdapterPosition)
+            MaterialAlertDialogBuilder(itemView.context)
+                .setTitle("Add an image")
+                .setItems(arrayOf("Take photo", "Choose from Gallery")) { _, which ->
+                    when (which) {
+                        0 -> intentChooser(MediaStore.ACTION_IMAGE_CAPTURE)
+                        1 -> intentChooser(Intent.ACTION_PICK)
+                    }
+                }
+                .show()
         }
 
         removeItem.setOnClickListener {
@@ -59,7 +80,7 @@ class ImageViewHolder(
                 imageView.alpha = 0.6F
             }
         }
-        displaySelectedImageIfNeed()
+        displaySelectedImageIfAny()
         onValueChanged(parameterName, null, null, validate(false))
     }
 
@@ -77,18 +98,18 @@ class ImageViewHolder(
         return -1
     }
 
-    private fun displaySelectedImageIfNeed() {
+    private fun displaySelectedImageIfAny() {
         error.visibility = View.INVISIBLE
         itemJsonObject.getSafeAny("image_uri")?.let { anyUri ->
             (anyUri as Uri?)?.let { uri ->
-                val factory =
-                    DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
-                val glideRequest = Glide.with(imageView.context.applicationContext)
-                    .load(uri)
-                    .transition(DrawableTransitionOptions.withCrossFade(factory))
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .listener(CustomRequestListener())
-                    .error(R.drawable.ic_placeholder)
+                val glideRequest = ImageHelper.getGlideRequest(imageView, uri)
+
+                Transformations.getTransformation(
+                    "CropCircleWithBorder",
+                    imageView.context.getColorFromAttr(android.R.attr.colorPrimary)
+                )?.let { transformation ->
+                    glideRequest.transform(transformation)
+                }
 
                 glideRequest.into(imageView)
                 imageView.alpha = 1F
@@ -100,5 +121,70 @@ class ImageViewHolder(
     private fun showError(text: String) {
         error.text = text
         error.visibility = View.VISIBLE
+    }
+
+    private fun intentChooser(actionType: String) {
+        imageView.context.also { context ->
+            when (actionType) {
+                Intent.ACTION_PICK -> {
+                    val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    pickPhoto.type = "image/*"
+                    startActivityCallback(pickPhoto, bindingAdapterPosition, null)
+
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                        if (imageView.context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+//                            val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+//                            this.position = position
+//                            context.requestPermissions(permissions, 1001)
+//                        } else {
+//                            startActivityCallback(pickPhoto, bindingAdapterPosition)
+//                        }
+//                    } else {
+//                        startActivityCallback(pickPhoto, bindingAdapterPosition)
+//                    }
+                }
+                MediaStore.ACTION_IMAGE_CAPTURE -> {
+                    val takePicture = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    takePicture.also { takePictureIntent ->
+                        // Ensure that there's a camera activity to handle the intent
+                        takePictureIntent.resolveActivity(context.packageManager)?.also {
+                            // Create the File where the photo should go
+                            val photoFile: File? = try {
+                                createTempImageFile(context)
+                            } catch (ex: IOException) {
+                                ToastHelper.show(context, "Could not create temporary file", MessageType.ERROR)
+                                null
+                            }
+                            // Continue only if the File was successfully created
+                            photoFile?.also {
+                                try {
+                                    val photoURI: Uri = FileProvider.getUriForFile(
+                                        context,
+                                        context.packageName + ".provider",
+                                        it
+                                    )
+                                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                                    startActivityCallback(takePictureIntent, bindingAdapterPosition, it.absolutePath)
+                                } catch (e: IllegalArgumentException) {
+                                    Timber.e(e.localizedMessage)
+                                    ToastHelper.show(context, "Could not create temporary file", MessageType.ERROR)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun createTempImageFile(context: Context): File {
+        // Create an image file
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "qmobile_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        )
     }
 }

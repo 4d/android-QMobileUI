@@ -2,25 +2,26 @@
     package="com.qmobile.qmobileui">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
 
     <queries>
 
         <!-- Browser -->
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="http" />
-        </intent>
+<!--        <intent>-->
+<!--            <action android:name="android.intent.action.VIEW" />-->
+<!--            <data android:scheme="http" />-->
+<!--        </intent>-->
 
         <!-- Camera -->
         <intent>
             <action android:name="android.media.action.IMAGE_CAPTURE" />
         </intent>
 
-        <!-- Gallery -->
-        <intent>
-            <action android:name="android.intent.action.GET_CONTENT" />
-        </intent>
+<!--        &lt;!&ndash; Gallery &ndash;&gt;-->
+<!--        <intent>-->
+<!--            <action android:name="android.intent.action.GET_CONTENT" />-->
+<!--        </intent>-->
 
         <!-- Google Map access -->
         <intent>

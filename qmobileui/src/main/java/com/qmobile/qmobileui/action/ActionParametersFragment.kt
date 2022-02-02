@@ -6,9 +6,12 @@
 
 package com.qmobile.qmobileui.action
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -111,7 +114,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
                 currentEntity = delegate.getSelectedEntity(),
                 fragmentManager = activity?.supportFragmentManager,
                 hideKeyboardCallback = { onHideKeyboardCallback() },
-                intentChooserCallback = { position -> intentChooserCallback(position) }
+                startActivityCallback = { intent, position, photoFilePath -> startActivityCallback(intent, position, photoFilePath) }
             ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 validationMap[name] = isValid
                 paramsToSubmit[name] = value ?: ""
@@ -134,64 +137,9 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         }
     }
 
-    private fun intentChooserCallback(position: Int) {
-        val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        pickPhoto.type = "image/*"
-        val takePicture = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        takePicture.also { takePictureIntent ->
-            // Ensure that there's a camera activity to handle the intent
-            takePictureIntent.resolveActivity(requireContext().packageManager)?.also {
-                // Create the File where the photo should go
-                val photoFile: File? = try {
-                    createTempImageFile(requireContext())
-                } catch (ex: IOException) {
-                    entityListViewModel.toastMessage.showMessage("Could not create temporary file", "", MessageType.ERROR)
-                    null
-                }
-                // Continue only if the File was successfully created
-                photoFile?.also {
-                    try {
-                        val photoURI: Uri = FileProvider.getUriForFile(
-                            requireContext(),
-                            requireActivity().packageName + ".provider",
-                            it
-                        )
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                    } catch (e: IllegalArgumentException) {
-                        Timber.e(e.localizedMessage)
-                        entityListViewModel.toastMessage.showMessage("Could not create temporary file", "", MessageType.ERROR)
-                    }
-                }
-            }
-        }
-        val chooser = Intent.createChooser(pickPhoto, "Some text here")
-        chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takePicture))
-        requireActivity().startActivityForResult(chooser, position)
-
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-//                val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-//                requestPermissions(permissions, PERMISSION_CODE)
-//            } else {
-//                chooseImageGallery()
-//            }
-//        } else {
-//            chooseImageGallery()
-//        }
-    }
-
-    private fun createTempImageFile(context: Context): File {
-        // Create an image file
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        return File.createTempFile(
-            "qmobile_${timeStamp}_", /* prefix */
-            ".jpg", /* suffix */
-            storageDir /* directory */
-        ).apply {
-            // Save a file: path for use with ACTION_VIEW intents
-            currentPhotoPath = absolutePath
-        }
+    private fun startActivityCallback(intent: Intent, position: Int, photoFilePath: String?) {
+        photoFilePath?.let { currentPhotoPath = it }
+        activity?.startActivityForResult(intent, position)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -364,7 +312,9 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     }
 
     fun handleResult(requestCode: Int, data: Intent) {
-        // the request code is te equivalent of position of item in adapter
+        // The request code is the position of item in adapter.
+        // If image is from gallery, it's stored in data.data,
+        // Otherwise recover currentPhotoPath from created image from Camera app
         val uri: Uri = data.data ?: Uri.fromFile(File(currentPhotoPath))
 
         adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->
