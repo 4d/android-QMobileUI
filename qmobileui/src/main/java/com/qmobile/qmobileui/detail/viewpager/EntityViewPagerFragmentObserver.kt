@@ -13,8 +13,7 @@ import com.qmobile.qmobileui.activity.BaseObserver
 
 class EntityViewPagerFragmentObserver(
     private val fragment: EntityViewPagerFragment,
-    private val entityListViewModel: EntityListViewModel<EntityModel>,
-    private val key: String
+    private val entityListViewModel: EntityListViewModel<EntityModel>
 ) : BaseObserver {
 
     override fun initObservers() {
@@ -25,7 +24,7 @@ class EntityViewPagerFragmentObserver(
     private fun observeEntityList() {
         fragment.viewLifecycleOwner.collectWhenStarted(entityListViewModel.entityListPagedListSharedFlow) {
             fragment.adapter.submitList(it)
-            val index = it.indexOfFirst { entityModel -> entityModel.__KEY == key }
+            val index = it.indexOfFirst { entityModel -> entityModel.__KEY == fragment.key }
             if (index > -1) {
                 fragment.viewPager?.setCurrentItem(index, false)
             }
