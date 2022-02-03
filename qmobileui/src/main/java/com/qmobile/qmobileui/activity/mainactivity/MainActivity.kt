@@ -449,11 +449,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     }
 
     private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()
-
-    private fun getCurrentRequestPermissionCode(): Int = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
-
+    
     fun askPermission(permission: String, rationale: String, callback: (isGranted: Boolean) -> Unit) {
-        val requestPermissionCode = getCurrentRequestPermissionCode()
+        val requestPermissionCode = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
         requestPermissionMap[requestPermissionCode] = callback
 
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
