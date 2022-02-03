@@ -74,7 +74,6 @@ class ActionParametersFragment : Fragment(), BaseFragment {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("currentItemId")?.let { parentItemId = it }
@@ -89,55 +88,57 @@ class ActionParametersFragment : Fragment(), BaseFragment {
         }
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-        _binding = FragmentActionParametersBinding.inflate(
-            inflater,
-            container,
-            false
-        ).apply {
-            lifecycleOwner = viewLifecycleOwner
-            adapter = ActionsParametersListAdapter(
-                requireContext(),
-                delegate.getSelectAction().parameters,
-                delegate.getSelectedEntity(),
-                { name: String, value: Any?, metaData: String?, isValid: Boolean ->
-                    validationMap[name] = isValid
-                    paramsToSubmit[name] = value ?: ""
-                    metaData?.let {
-                        metaDataToSubmit[name] = metaData
+        if (_binding == null) {
+            _binding = FragmentActionParametersBinding.inflate(
+                inflater,
+                container,
+                false
+            ).apply {
+                lifecycleOwner = viewLifecycleOwner
+                adapter = ActionsParametersListAdapter(
+                    requireContext(),
+                    delegate.getSelectAction().parameters,
+                    delegate.getSelectedEntity(),
+                    { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+                        validationMap[name] = isValid
+                        paramsToSubmit[name] = value ?: ""
+                        metaData?.let {
+                            metaDataToSubmit[name] = metaData
+                        }
+                    },
+                    {
+                        BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
+                    }, { intent: Intent, position: Int ->
+                        goToCamera = {
+                            (context as Activity).startActivityForResult(
+                                intent,
+                                // Send position as request code, so we can update image preview only for the selected item
+                                position
+                            )
+                        }
+                        requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
                     }
-                },
-                {
-                    BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
-                }, { intent: Intent, position: Int ->
-                    goToCamera = {
-                        (context as Activity).startActivityForResult(
-                            intent,
-                            // Send position as request code, so we can update image preview only for the selected item
-                            position
-                        )
-                    }
-                    requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-                }
-            )
-            val layoutManager = LinearLayoutManager(requireContext())
-            recyclerView.layoutManager = layoutManager
-            recyclerView.adapter = adapter
+                )
+                val layoutManager = LinearLayoutManager(requireContext())
+                recyclerView.layoutManager = layoutManager
+                recyclerView.adapter = adapter
 
-            val dividerItemDecoration = DividerItemDecoration(
-                recyclerView.context,
-                layoutManager.orientation
-            )
-            recyclerView.addItemDecoration(dividerItemDecoration)
-            recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-                        areAllItemsSeen = true
+                val dividerItemDecoration = DividerItemDecoration(
+                    recyclerView.context,
+                    layoutManager.orientation
+                )
+                recyclerView.addItemDecoration(dividerItemDecoration)
+                recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                        if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+                            areAllItemsSeen = true
+                        }
+                        super.onScrolled(recyclerView, dx, dy)
                     }
-                    super.onScrolled(recyclerView, dx, dy)
+                })
+                if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+                    areAllItemsSeen = true
                 }
-            })
-            if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-                areAllItemsSeen = true
             }
         }
         return binding.root

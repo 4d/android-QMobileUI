@@ -71,5 +71,6 @@ class ActionsParametersListAdapter(
 
     fun updateBarcodeForPosition(position: Int, value: String) {
         (list[position] as JSONObject).put("scanned", value)
+        notifyItemChanged(position)
     }
 }
