@@ -91,14 +91,14 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
             override fun onPageSelected(position: Int) {
                 adapter.getValue(position)?.let { item ->
                     key = item.__KEY ?: ""
-                    arguments?.putString("key", item.__KEY)
+                    arguments?.putString("key", key)
                 }
                 handleActionPreviousEnability(position)
                 handleActionNextEnability(position)
             }
         })
 
-        EntityViewPagerFragmentObserver(this, entityListViewModel, key).initObservers()
+        EntityViewPagerFragmentObserver(this, entityListViewModel).initObservers()
         setSearchQuery()
     }
 

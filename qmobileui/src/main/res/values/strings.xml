@@ -84,4 +84,9 @@
     <string name="action_parameter_invalid_email_error">"Field value should be a valid email!"</string>
     <string name="action_parameter_invalid_url_error">"Field value must be an URL!"</string>
 
+    <!-- Permissions -->
+    <string name="permission_dialog_title">Permission required</string>
+    <string name="permission_dialog_positive">OK</string>
+    <string name="permission_dialog_negative">No, thank you</string>
+
 </resources>

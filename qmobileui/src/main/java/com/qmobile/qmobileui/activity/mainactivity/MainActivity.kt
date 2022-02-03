@@ -8,12 +8,15 @@ package com.qmobile.qmobileui.activity.mainactivity
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.view.menu.MenuBuilder
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -24,6 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
@@ -49,6 +53,7 @@ import com.qmobile.qmobileui.action.ActionParametersFragment
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.network.NetworkChecker
+import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.setupWithNavController
 import kotlinx.coroutines.Job
@@ -57,7 +62,9 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
-class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver {
+const val BASE_PERMISSION_REQUEST_CODE = 1000
+
+class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver, PermissionChecker {
 
     private var loginStatusText = ""
     private var onLaunch = true
@@ -433,6 +440,47 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             if (currentFragment is ActionParametersFragment) {
                 currentFragment.handleResult(requestCode, data)
             }
+        }
+    }
+
+    private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()
+
+    private fun getCurrentRequestPermissionCode(): Int = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
+
+    fun askPermission(permission: String, rationale: String, callback: (isGranted: Boolean) -> Unit) {
+        val requestPermissionCode = getCurrentRequestPermissionCode()
+        requestPermissionMap[requestPermissionCode] = callback
+
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(getString(R.string.permission_dialog_title))
+                    .setMessage(rationale)
+                    .setPositiveButton(getString(R.string.permission_dialog_positive)) { _, _ ->
+                        ActivityCompat.requestPermissions(this, arrayOf(permission), requestPermissionCode)
+                    }
+                    .setNegativeButton(getString(R.string.permission_dialog_negative)) { dialog, _ -> dialog.cancel() }
+                    .show()
+            } else {
+                ActivityCompat.requestPermissions(this, arrayOf(permission), requestPermissionCode)
+            }
+        } else {
+            callback(true)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when {
+            requestPermissionMap.containsKey(requestCode) -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    requestPermissionMap[requestCode]?.invoke(true)
+                } else {
+                    requestPermissionMap[requestCode]?.invoke(false)
+                }
+                return
+            }
+            else -> {}
         }
     }
 }

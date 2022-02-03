@@ -8,7 +8,7 @@
     <external-files-path
         name="ext_files_pictures"
         path="Pictures" />
-    <external-files-path
-        name="ext_files_download"
-        path="Download" />
+    <external-path
+        name="ext_download"
+        path="Download/"/>
 </paths>
