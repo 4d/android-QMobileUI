@@ -64,17 +64,26 @@ dependencies {
     implementation Libs.retrofit_converter_gson
     implementation Libs.timber
 
-    //Vision
-    implementation Libs.vision
-
     // Fragment
     implementation Libs.fragment
+
     // Testing
     testImplementation Libs.json
     testImplementation Libs.junit
     testImplementation Libs.mockito
     testImplementation Libs.mockk
+
+    // Camera
+    implementation Libs.camerax_core
+    implementation Libs.camerax_camera2
+    implementation Libs.camerax_lifecycle
+    implementation Libs.camerax_view
+    implementation Libs.camerax_extensions
+
+    //Barcode scan
+    implementation Libs.MLKit_scan
 }
+/*
 
 def libraryGroupId = 'com.qmobile.qmobileui'
 def libraryArtifactId = 'qmobileui'

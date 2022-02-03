@@ -41,10 +41,10 @@ class ActionsParametersListAdapter(
             { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 onValueChanged(name, value, metaData, isValid)
             }, {
-                goToScanner(it)
-            }, { intent: Intent, position: Int ->
-                goToCamera(intent, position)
-            }
+            goToScanner(it)
+        }, { intent: Intent, position: Int ->
+            goToCamera(intent, position)
+        }
         )
     }
 

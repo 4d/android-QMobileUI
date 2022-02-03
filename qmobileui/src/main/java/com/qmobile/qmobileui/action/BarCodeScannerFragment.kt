@@ -30,6 +30,7 @@ import com.qmobile.qmobileui.databinding.FragmentBarCodeScannerBinding
 import timber.log.Timber
 import java.util.concurrent.Executors
 
+@Suppress( "MagicNumber")
 @ExperimentalGetImage
 class BarCodeScannerFragment : Fragment(), BaseFragment {
     private var _binding: ViewDataBinding? = null
@@ -185,7 +186,6 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
                                     )
                                     activity?.supportFragmentManager?.findFragmentById(R.id.nav_host_container)
                                         ?.findNavController()?.navigateUp()
-
                                 }
                             }
                             timer.start()

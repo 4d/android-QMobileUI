@@ -2,7 +2,11 @@ package com.qmobile.qmobileui.action
 
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.RectF
 import android.media.Image
 import android.util.AttributeSet
 import android.view.View
@@ -32,7 +36,6 @@ class BarcodeOverlay @JvmOverloads constructor(
                     val rect = translateRect(boundingBox)
 
                     canvas.drawRect(rect, mRectPaint)
-
                 }
             }
         }

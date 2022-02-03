@@ -95,54 +95,60 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                 false
             ).apply {
                 lifecycleOwner = viewLifecycleOwner
-                adapter = ActionsParametersListAdapter(
-                    requireContext(),
-                    delegate.getSelectAction().parameters,
-                    delegate.getSelectedEntity(),
-                    { name: String, value: Any?, metaData: String?, isValid: Boolean ->
-                        validationMap[name] = isValid
-                        paramsToSubmit[name] = value ?: ""
-                        metaData?.let {
-                            metaDataToSubmit[name] = metaData
-                        }
-                    },
-                    {
-                        BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
-                    }, { intent: Intent, position: Int ->
-                        goToCamera = {
-                            (context as Activity).startActivityForResult(
-                                intent,
-                                // Send position as request code, so we can update image preview only for the selected item
-                                position
-                            )
-                        }
-                        requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-                    }
-                )
-                val layoutManager = LinearLayoutManager(requireContext())
-                recyclerView.layoutManager = layoutManager
-                recyclerView.adapter = adapter
-
-                val dividerItemDecoration = DividerItemDecoration(
-                    recyclerView.context,
-                    layoutManager.orientation
-                )
-                recyclerView.addItemDecoration(dividerItemDecoration)
-                recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                        if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-                            areAllItemsSeen = true
-                        }
-                        super.onScrolled(recyclerView, dx, dy)
-                    }
-                })
-                if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-                    areAllItemsSeen = true
-                }
+                setupRecycleView(recyclerView)
             }
         }
         return binding.root
     }
+
+    private fun setupRecycleView(recyclerView: RecyclerView) {
+        adapter = ActionsParametersListAdapter(
+            requireContext(),
+            delegate.getSelectAction().parameters,
+            delegate.getSelectedEntity(),
+            { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+                validationMap[name] = isValid
+                paramsToSubmit[name] = value ?: ""
+                metaData?.let {
+                    metaDataToSubmit[name] = metaData
+                }
+            },
+            {
+                BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
+            }, { intent: Intent, position: Int ->
+                goToCamera = {
+                    (context as Activity).startActivityForResult(
+                        intent,
+                        // Send position as request code, so we can update image preview only for the selected item
+                        position
+                    )
+                }
+                requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+            }
+        )
+        val layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = adapter
+
+        val dividerItemDecoration = DividerItemDecoration(
+            recyclerView.context,
+            layoutManager.orientation
+        )
+        recyclerView.addItemDecoration(dividerItemDecoration)
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+                    areAllItemsSeen = true
+                }
+                super.onScrolled(recyclerView, dx, dy)
+            }
+        })
+        if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+            areAllItemsSeen = true
+        }
+    }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
