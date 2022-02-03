@@ -31,8 +31,9 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.network.RemoteUrlChange
-import com.qmobile.qmobileui.ui.ViewUtils
 import com.qmobile.qmobileui.ui.clearViewInParent
+import com.qmobile.qmobileui.ui.getShakeAnimation
+import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.utils.ToastHelper
 
@@ -106,7 +107,6 @@ abstract class BaseActivity : AppCompatActivity() {
             this,
             R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
         )
-        val shakeAnimation = ViewUtils.getShakeAnimation(this)
 
         remoteUrlEditDialog.clearViewInParent()
         remoteUrlEditLayout.editText?.setText(remoteUrl)
@@ -119,14 +119,14 @@ abstract class BaseActivity : AppCompatActivity() {
             .setNegativeButton(getString(R.string.remote_url_dialog_cancel), null)
             .create().apply {
                 setOnShowListener {
-                    getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                    getButton(AlertDialog.BUTTON_POSITIVE).setOnSingleClickListener {
                         val newRemoteUrl = remoteUrlEditLayout.editText?.text.toString()
                         if (newRemoteUrl.isRemoteUrlValid()) {
                             remoteUrlChange.onValidRemoteUrlChange(newRemoteUrl)
                             checkNetwork(remoteUrlChange)
                             dismiss()
                         } else {
-                            remoteUrlEditEditText.startAnimation(shakeAnimation)
+                            remoteUrlEditEditText.startAnimation(getShakeAnimation(this@BaseActivity))
                             remoteUrlEditLayout.error =
                                 resources.getString(R.string.remote_url_invalid)
                         }
