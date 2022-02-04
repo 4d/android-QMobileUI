@@ -45,10 +45,12 @@ import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
+import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
+import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.ActionParametersFragment
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
@@ -59,12 +61,13 @@ import com.qmobile.qmobileui.utils.setupWithNavController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import okhttp3.RequestBody
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 const val BASE_PERMISSION_REQUEST_CODE = 1000
 
-class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver, PermissionChecker {
+class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver, PermissionChecker, ActionActivity {
 
     private var loginStatusText = ""
     private var onLaunch = true
@@ -79,7 +82,10 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     // FragmentCommunication
     override lateinit var apiService: ApiService
     private lateinit var selectedAction: Action
-    var entity: EntityModel? = null
+    var currentEntity: EntityModel? = null
+
+    private var serverNotAccessibleString = ""
+    private var noInternetString = ""
 
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
@@ -87,6 +93,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        serverNotAccessibleString = getString(R.string.server_not_accessible)
+        noInternetString = getString(R.string.no_internet)
 
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -249,21 +258,21 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             }
 
             override fun onServerInaccessible() {
-                connectivityViewModel.toastMessage.showMessage(
-                    getString(R.string.action_send_server_not_accessible),
-                    currentTableName,
-                    MessageType.ERROR
-                )
+                onServerInaccessible(currentTableName)
             }
 
             override fun onNoInternet() {
-                connectivityViewModel.toastMessage.showMessage(
-                    getString(R.string.action_send_no_internet),
-                    currentTableName,
-                    MessageType.ERROR
-                )
+                onNoInternet(currentTableName)
             }
         })
+    }
+
+    private fun onServerInaccessible(tableName: String) {
+        connectivityViewModel.toastMessage.showMessage(serverNotAccessibleString, tableName, MessageType.ERROR)
+    }
+
+    private fun onNoInternet(tableName: String) {
+        connectivityViewModel.toastMessage.showMessage(noInternetString, tableName, MessageType.ERROR)
     }
 
     override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
@@ -291,7 +300,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     override fun setupActionsMenu(
         menu: Menu,
         actions: List<Action>,
-        onMenuItemClick: (Action) -> Unit
+        actionNavigable: ActionNavigable,
+        isEntityAction: Boolean
     ) {
         (menu as? MenuBuilder)?.setOptionalIconsVisible(true)
 
@@ -302,7 +312,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
             menu.add(action.getPreferredName())
                 .setOnMenuItemClickListener {
-                    onMenuItemClick(action)
+                    onActionClick(action, actionNavigable, isEntityAction)
                     true
                 }
                 .setIcon(drawable)
@@ -310,20 +320,91 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         }
     }
 
-    override fun setSelectAction(action: Action) {
-        selectedAction = action
+    override fun onActionClick(action: Action, actionNavigable: ActionNavigable, isEntityAction: Boolean) {
+        if (action.parameters.length() > 0) {
+            selectedAction = action
+            if (!isEntityAction)
+                currentEntity = null
+            actionNavigable.navigationToActionForm(action)
+        } else {
+            sendAction(
+                actionName = action.name,
+                actionContent = actionNavigable.getActionContent(),
+                tableName = actionNavigable.tableName
+            ) {
+                // Nothing to do
+            }
+        }
     }
 
-    override fun getSelectAction(): Action {
+    override fun sendAction(
+        actionName: String,
+        actionContent: MutableMap<String, Any>,
+        tableName: String,
+        onActionSent: () -> Unit
+    ) {
+        checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                entityListViewModelList[0].sendAction(actionName, actionContent) { actionResponse ->
+                    actionResponse?.let {
+                        actionResponse.dataSynchro?.let { dataSynchro ->
+                            if (dataSynchro) {
+                                requestDataSync(tableName)
+                            }
+                        }
+                        onActionSent()
+                    }
+                }
+            }
+
+            override fun onServerInaccessible() {
+                onServerInaccessible(tableName)
+            }
+
+            override fun onNoInternet() {
+                onNoInternet(tableName)
+            }
+        })
+    }
+
+    override fun uploadImage(
+        bodies: Map<String, RequestBody?>,
+        tableName: String,
+        onImageUploaded: (parameterName: String, receivedId: String) -> Unit,
+        onAllUploadFinished: () -> Unit
+    ) {
+        checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                entityListViewModelList[0].uploadImage(
+                    imagesToUpload = bodies,
+                    onImageUploaded = { parameterName, receivedId ->
+                        onImageUploaded(parameterName, receivedId)
+                    }
+                ) {
+                    onAllUploadFinished()
+                }
+            }
+
+            override fun onServerInaccessible() {
+                onServerInaccessible(tableName)
+            }
+
+            override fun onNoInternet() {
+                onNoInternet(tableName)
+            }
+        })
+    }
+
+    override fun getSelectedAction(): Action {
         return selectedAction
     }
 
-    override fun setSelectedEntity(entityModel: EntityModel?) {
-        entity = entityModel
+    override fun getSelectedEntity(): EntityModel? {
+        return currentEntity
     }
 
-    override fun getSelectedEntity(): EntityModel? {
-        return entity
+    override fun setSelectedEntity(entity: EntityModel?) {
+        currentEntity = entity
     }
 
     override fun handleNetworkState(networkState: NetworkStateEnum) {
@@ -342,8 +423,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                     tryAutoLogin()
                 }
             }
-            else -> {
-            }
+            else -> {}
         }
     }
 
@@ -404,11 +484,10 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         )
         // Whenever the selected controller changes, setup the action bar.
         controller.observe(
-            this,
-            { navController ->
-                setupActionBarWithNavController(navController)
-            }
-        )
+            this
+        ) { navController ->
+            setupActionBarWithNavController(navController)
+        }
         currentNavController = controller
     }
 
@@ -445,10 +524,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
     private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()
 
-    private fun getCurrentRequestPermissionCode(): Int = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
-
     fun askPermission(permission: String, rationale: String, callback: (isGranted: Boolean) -> Unit) {
-        val requestPermissionCode = getCurrentRequestPermissionCode()
+        val requestPermissionCode = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
         requestPermissionMap[requestPermissionCode] = callback
 
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {

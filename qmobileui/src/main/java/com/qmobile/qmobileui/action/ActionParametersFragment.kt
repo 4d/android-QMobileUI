@@ -6,71 +6,65 @@
 
 package com.qmobile.qmobileui.action
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
-import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.CenterLayoutManager
 import com.qmobile.qmobileui.utils.hideKeyboard
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import timber.log.Timber
 import java.io.File
-import java.io.IOException
-import java.lang.IllegalArgumentException
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import kotlin.collections.HashMap
 
-open class ActionParametersFragment : Fragment(), BaseFragment {
+open class ActionParametersFragment : Fragment(), BaseFragment, ActionProvider {
 
+    // views
+    private lateinit var adapter: ActionsParametersListAdapter
     private var _binding: FragmentActionParametersBinding? = null
-    internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
     val binding get() = _binding!!
-    lateinit var tableName: String
+
+    // fragment parameters
+    override var tableName: String = ""
     private var inverseName: String = ""
     private var parentItemId: String = "0"
     private var parentRelationName: String = ""
     private var parentTableName: String? = null
+    private var fromRelation = false
+
+    internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
+    override lateinit var actionActivity: ActionActivity
     override lateinit var delegate: FragmentCommunication
+
     private val paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
     private val validationMap = mutableMapOf<String, Boolean>()
-    private lateinit var adapter: ActionsParametersListAdapter
-    private var fromRelation = false
-
+    private val imagesToUpload = HashMap<String, Uri>()
     private var scrollPos = 0
-
     private lateinit var currentPhotoPath: String
+    private lateinit var action: Action
+    private var selectedEntity: EntityModel? = null
 
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -80,7 +74,6 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             }
         }
     }
-    private val imagesToUpload = HashMap<String, Uri>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -110,25 +103,35 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             lifecycleOwner = viewLifecycleOwner
             adapter = ActionsParametersListAdapter(
                 context = requireContext(),
-                parameters = delegate.getSelectAction().parameters,
-                currentEntity = delegate.getSelectedEntity(),
+                parameters = action.parameters,
+                currentEntity = selectedEntity,
                 fragmentManager = activity?.supportFragmentManager,
                 hideKeyboardCallback = { onHideKeyboardCallback() },
-                startActivityCallback = { intent, position, photoFilePath -> startActivityCallback(intent, position, photoFilePath) }
-            ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
-                validationMap[name] = isValid
-                paramsToSubmit[name] = value ?: ""
-                metaData?.let {
-                    metaDataToSubmit[name] = metaData
+                startActivityCallback = { intent, position, photoFilePath ->
+                    startActivityCallback(intent, position, photoFilePath)
+                },
+                onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+                    onValueChanged(name, value, metaData, isValid)
                 }
-            }
+            )
             val smoothScroller = CenterLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
             recyclerView.layoutManager = smoothScroller
             recyclerView.adapter = adapter
             // Important line : prevent recycled views to get their content reset
-            recyclerView.setItemViewCacheSize(delegate.getSelectAction().parameters.length())
+            recyclerView.setItemViewCacheSize(action.parameters.length())
         }
         return binding.root
+    }
+
+    private fun onValueChanged(name: String, value: Any?, metaData: String?, isValid: Boolean) {
+        validationMap[name] = isValid
+        paramsToSubmit[name] = value ?: ""
+        metaData?.let {
+            metaDataToSubmit[name] = metaData
+        }
+        if (value == null) {
+            imagesToUpload.remove(name)
+        }
     }
 
     private fun onHideKeyboardCallback() {
@@ -149,17 +152,14 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.validate) {
-            var selectedActionId: String? = null
-            delegate.getSelectAction().preset?.let { preset ->
-                if (preset == "edit") {
-                    selectedActionId = delegate.getSelectedEntity()?.__KEY
+            if (isFormValid()) {
+                if (imagesToUpload.isEmpty()) {
+                    sendAction()
+                } else {
+                    uploadImages {
+                        sendAction()
+                    }
                 }
-            }
-
-            if (imagesToUpload.isNotEmpty()) {
-                uploadImages(delegate.getSelectAction().name, selectedActionId)
-            } else {
-                sendAction(delegate.getSelectAction().name, selectedActionId)
             }
         }
         return super.onOptionsItemSelected(item)
@@ -167,6 +167,11 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
+        if (context is ActionActivity) {
+            actionActivity = context
+            action = actionActivity.getSelectedAction()
+            selectedEntity = actionActivity.getSelectedEntity()
+        }
         if (context is FragmentCommunication) {
             delegate = context
         }
@@ -227,88 +232,39 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         )
     }
 
-    private fun sendAction(actionName: String, selectedActionId: String?) {
-        if (isFormValid()) {
-            delegate.checkNetwork(object : NetworkChecker {
-                override fun onServerAccessible() {
-                    entityListViewModel.sendAction(
-                        actionName,
-                        ActionHelper.getActionContent(
-                            tableName,
-                            selectedActionId,
-                            paramsToSubmit,
-                            metaDataToSubmit,
-                            relationName = inverseName,
-                            parentPrimaryKey = parentItemId,
-                            parentTableName = parentTableName,
-                            parentRelationName = parentRelationName
-                        )
-                    ) { actionResponse ->
-                        actionResponse?.let {
-                            actionResponse.dataSynchro?.let { dataSynchro ->
-                                if (dataSynchro) {
-                                    delegate.requestDataSync(tableName)
-                                }
-                            }
-                            activity?.onBackPressed()
-                        }
-                    }
-                }
+    private fun sendAction() {
 
-                override fun onServerInaccessible() {
-                    entityListViewModel.toastMessage.showMessage(
-                        context?.getString(R.string.action_send_server_not_accessible),
-                        tableName,
-                        MessageType.ERROR
-                    )
-                }
+        val actionId = if (action.preset == "edit") {
+            selectedEntity?.__KEY
+        } else {
+            null
+        }
 
-                override fun onNoInternet() {
-                    entityListViewModel.toastMessage.showMessage(
-                        context?.getString(R.string.action_send_no_internet),
-                        tableName,
-                        MessageType.ERROR
-                    )
-                }
-            })
+        actionActivity.sendAction(
+            actionName = action.name,
+            actionContent = getActionContent(actionId),
+            tableName = tableName
+        ) {
+            activity?.onBackPressed()
         }
     }
 
-    private fun uploadImages(actionName: String, selectedActionId: String?) {
+    private fun uploadImages(proceed: () -> Unit) {
         val bodies: Map<String, RequestBody?> = imagesToUpload.mapValues {
             val stream = activity?.contentResolver?.openInputStream(it.value)
             stream?.readBytes()?.toRequestBody(APP_OCTET.toMediaTypeOrNull())
         }
 
-        delegate.checkNetwork(object : NetworkChecker {
-            override fun onServerAccessible() {
-                entityListViewModel.uploadImage(
-                    imagesToUpload = bodies,
-                    onImageUploaded = { parameterName, receivedId ->
-                        paramsToSubmit[parameterName] = receivedId
-                        metaDataToSubmit[parameterName] = "uploaded"
-                    }
-                ) {
-                    sendAction(actionName, selectedActionId)
-                }
+        actionActivity.uploadImage(
+            bodies = bodies,
+            tableName = tableName,
+            onImageUploaded = { parameterName, receivedId ->
+                paramsToSubmit[parameterName] = receivedId
+                metaDataToSubmit[parameterName] = "uploaded"
             }
-
-            override fun onServerInaccessible() {
-                entityListViewModel.toastMessage.showMessage(
-                    context?.getString(R.string.action_send_server_not_accessible),
-                    tableName,
-                    MessageType.ERROR
-                )
-            }
-
-            override fun onNoInternet() {
-                entityListViewModel.toastMessage.showMessage(
-                    context?.getString(R.string.action_send_no_internet),
-                    tableName,
-                    MessageType.ERROR
-                )
-            }
-        })
+        ) {
+            proceed()
+        }
     }
 
     fun handleResult(requestCode: Int, data: Intent) {
@@ -321,5 +277,18 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
             imagesToUpload[parameterName] = uri
         }
         adapter.updateImageForPosition(requestCode, uri)
+    }
+
+    override fun getActionContent(actionId: String?): MutableMap<String, Any> {
+        return ActionHelper.getActionContent(
+            tableName = tableName,
+            selectedActionId = actionId,
+            parameters = paramsToSubmit,
+            metaData = metaDataToSubmit,
+            relationName = inverseName,
+            parentPrimaryKey = parentItemId,
+            parentTableName = parentTableName,
+            parentRelationName = parentRelationName
+        )
     }
 }

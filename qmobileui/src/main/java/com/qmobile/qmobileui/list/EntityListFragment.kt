@@ -16,12 +16,9 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ListAdapter
-import android.widget.TextView
 import androidx.appcompat.widget.SearchView
-import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
@@ -31,58 +28,62 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
+import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.list.viewholder.SwipeHelper
-import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
 
-open class EntityListFragment : Fragment(), BaseFragment {
+open class EntityListFragment : Fragment(), BaseFragment, ActionNavigable {
 
     companion object {
         private const val CURRENT_QUERY_KEY = "currentQuery_key"
         private const val MAX_ACTIONS_VISIBLE = 2
     }
 
+    // views
+    private var _binding: FragmentListBinding? = null
+    val binding get() = _binding!!
     private lateinit var searchView: SearchView
     private lateinit var searchPlate: EditText
+    lateinit var adapter: EntityListAdapter
+    private lateinit var currentRecordActionsListAdapter: ListAdapter
+
+    private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
+    override lateinit var delegate: FragmentCommunication
+    override lateinit var actionActivity: ActionActivity
     private var searchableFields = BaseApp.runtimeDataHolder.searchField
     private var tableActionsJsonObject = BaseApp.runtimeDataHolder.tableActions
     private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
     private lateinit var formQueryBuilder: FormQueryBuilder
-    private var currentQuery = ""
-    private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
-    lateinit var adapter: EntityListAdapter
-    private var _binding: FragmentListBinding? = null
-    private lateinit var currentRecordActionsDialog: MaterialAlertDialogBuilder
-    private lateinit var currentRecordActionsDialogAdapter: ListAdapter
 
-    // This property is only valid between onCreateView and onDestroyView.
-    val binding get() = _binding!!
-    private var tableName: String = ""
+    // fragment parameters
+    override var tableName: String = ""
     private var inverseName: String = ""
     private var parentItemId: String = "0"
     private var fromRelation = false
     private var parentRelationName: String = ""
     private var parentTableName: String? = null
 
+    private var currentQuery = ""
     private val tableActions = mutableListOf<Action>()
     private var currentRecordActions = mutableListOf<Action>()
-
-    // BaseFragment
-    override lateinit var delegate: FragmentCommunication
+    private var hasSearch = false
+    private var hasTableActions = false
+    private var hasCurrentRecordActions = false
+    private var isSwipable = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -111,7 +112,12 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
         formQueryBuilder = FormQueryBuilder(tableName)
 
-        if (hasSearch() || hasTableActions())
+        hasSearch = searchableFields.has(tableName)
+        hasTableActions = tableActionsJsonObject.has(tableName)
+        hasCurrentRecordActions = currentRecordActionsJsonObject.has(tableName)
+        isSwipable = BaseApp.genericTableFragmentHelper.isSwipeAllowed(tableName)
+
+        if (hasSearch || hasTableActions)
             this.setHasOptionsMenu(true)
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
@@ -123,14 +129,13 @@ open class EntityListFragment : Fragment(), BaseFragment {
         return binding.root
     }
 
-    private fun hasSearch() = searchableFields.has(tableName)
-    private fun hasTableActions() = tableActionsJsonObject.has(tableName)
-    private fun hasCurrentRecordActions() = currentRecordActionsJsonObject.has(tableName)
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is FragmentCommunication) {
             delegate = context
+        }
+        if (context is ActionActivity) {
+            actionActivity = context
         }
         // Access resources elements
     }
@@ -164,8 +169,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
      */
     private fun initRecyclerView() {
         adapter = EntityListAdapter(
-            tableName, viewLifecycleOwner,
-            { dataBinding, key ->
+            tableName = tableName, lifecycleOwner = viewLifecycleOwner,
+            onItemClick = { dataBinding, key ->
                 BaseApp.genericNavigationResolver.navigateFromListToViewPager(
                     viewDataBinding = dataBinding,
                     key = key,
@@ -175,14 +180,12 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     inverseName = inverseName
                 )
             },
-            { currentEntity ->
-
-                if ((hasCurrentRecordActions()) &&
-                    !BaseApp.genericTableFragmentHelper.isSwipeAllowed(
-                            tableName
-                        )
-                ) {
-                    showDialog(currentEntity, currentRecordActions)
+            onItemLongClick = { currentEntity ->
+                if (hasCurrentRecordActions && !isSwipable) {
+                    showDialog { action ->
+                        actionActivity.setSelectedEntity(currentEntity)
+                        actionActivity.onActionClick(action, this@EntityListFragment, true)
+                    }
                 }
             }
         )
@@ -220,7 +223,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
      */
     private fun initOnRefreshListener() {
         binding.fragmentListSwipeToRefresh.setOnRefreshListener {
-            forceSyncData()
+            delegate.requestDataSync(tableName)
             binding.fragmentListRecyclerView.adapter = adapter
             binding.fragmentListSwipeToRefresh.isRefreshing = false
         }
@@ -229,10 +232,10 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private fun initActions() {
         tableActions.clear()
         currentRecordActions.clear()
-        if (hasTableActions()) {
+        if (hasTableActions) {
             ActionHelper.fillActionList(tableActionsJsonObject, tableName, tableActions)
         }
-        if (hasCurrentRecordActions()) {
+        if (hasCurrentRecordActions) {
             ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
         }
     }
@@ -242,21 +245,21 @@ open class EntityListFragment : Fragment(), BaseFragment {
      */
     private fun initCellSwipe() {
 
-        if (hasCurrentRecordActions() && BaseApp.genericTableFragmentHelper.isSwipeAllowed(
-                tableName
-            )
-        ) {
+        if (hasCurrentRecordActions && isSwipable) {
+            currentRecordActionsListAdapter = ActionHelper.getActionArrayAdapter(requireContext(), currentRecordActions)
+
             val itemTouchHelper =
                 ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
                     override fun instantiateUnderlayButton(position: Int): List<ItemActionButton> {
                         val buttons = mutableListOf<ItemActionButton>()
                         for (i in 0 until (currentRecordActions.size)) {
-                            if ((i + 1) > MAX_ACTIONS_VISIBLE) {
-                                buttons.add(createButton(position, null, i))
-                                break
+                            val action = if ((i + 1) > MAX_ACTIONS_VISIBLE) null else currentRecordActions[i]
+                            val button = createButton(position, action, i) { clickedAction, entity ->
+                                actionActivity.setSelectedEntity(entity)
+                                actionActivity.onActionClick(clickedAction, this@EntityListFragment, true)
                             }
-                            val action = currentRecordActions[i]
-                            buttons.add(createButton(position, action, i))
+                            buttons.add(button)
+                            if (action == null) break
                         }
                         return buttons
                     }
@@ -265,144 +268,37 @@ open class EntityListFragment : Fragment(), BaseFragment {
         }
     }
 
-    private fun setupCurrentRecordActionsDialog(actions: MutableList<Action>) {
-
-        val withIcons = actions.firstOrNull { it.getIconDrawablePath() != null } != null
-
-        currentRecordActionsDialogAdapter = object : ArrayAdapter<Action>(
-            requireContext(),
-            android.R.layout.select_dialog_item,
-            android.R.id.text1,
-            actions
-        ) {
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val itemView = super.getView(position, convertView, parent)
-                val textView = itemView.findViewById<View>(android.R.id.text1) as TextView
-                val action = actions[position]
-
-                if (withIcons) {
-                    val drawable = ActionHelper.getActionIconDrawable(context, action)
-                    textView.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
-                    TextViewCompat.setCompoundDrawableTintList(textView, textView.textColors)
-                    // Add margin between image and text (support various screen densities)
-                    textView.compoundDrawablePadding =
-                        ActionHelper.getActionDrawablePadding(context)
-                }
-
-                textView.text = action.getPreferredName()
-                return itemView
-            }
-        }
-
-        currentRecordActionsDialog = MaterialAlertDialogBuilder(
-            requireContext(),
-            R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
-        )
-    }
-
-    private fun showDialog(currentEntity: EntityModel?, actions: MutableList<Action>) {
-
-        currentRecordActionsDialog.setAdapter(currentRecordActionsDialogAdapter) { _, position ->
-            onCurrentActionClicked(actions[position], currentEntity)
-        }
-        currentRecordActionsDialog.create().show()
-    }
-
-    private fun onCurrentActionClicked(action: Action, currentEntityModel: EntityModel?) {
-        if (action.parameters.length() > 0) {
-            BaseApp.genericNavigationResolver.navigateToActionForm(
-                binding,
-                destinationTable = tableName,
-                navBarTitle = action.getPreferredShortName(),
-                inverseName = inverseName,
-                parentItemId = parentItemId,
-                fromRelation = fromRelation
-            )
-            delegate.setSelectAction(action)
-            delegate.setSelectedEntity(currentEntityModel)
-        } else {
-            sendCurrentRecordAction(action.name, currentEntityModel?.__KEY)
-        }
-    }
-
-    private fun sendAction(actionName: String, selectedActionId: String?) {
-        delegate.checkNetwork(object : NetworkChecker {
-            override fun onServerAccessible() {
-                entityListViewModel.sendAction(
-                    actionName,
-                    ActionHelper.getActionContent(
-                        tableName = tableName,
-                        selectedActionId = selectedActionId,
-                        relationName = inverseName,
-                        parentPrimaryKey = parentItemId,
-                        parentTableName = parentTableName,
-                        parentRelationName = parentRelationName
-                    )
-                ) { actionResponse ->
-                    actionResponse?.let {
-                        actionResponse.dataSynchro?.let { dataSynchro ->
-                            syncDataIfNeeded(dataSynchro)
-                        }
-                    }
-                }
-            }
-
-            override fun onServerInaccessible() {
-                entityListViewModel.toastMessage.showMessage(
-                    context?.getString(R.string.action_send_server_not_accessible),
-                    tableName,
-                    MessageType.ERROR
-                )
-            }
-
-            override fun onNoInternet() {
-                entityListViewModel.toastMessage.showMessage(
-                    context?.getString(R.string.action_send_no_internet),
-                    tableName,
-                    MessageType.ERROR
-                )
-            }
-        })
-    }
-
-    private fun sendCurrentRecordAction(actionName: String, selectedActionId: String?) {
-        sendAction(actionName, selectedActionId)
-    }
-
-    private fun syncDataIfNeeded(shouldSyncData: Boolean) {
-        if (shouldSyncData) {
-            forceSyncData()
-        }
-    }
+    private fun showDialog(onClick: (action: Action) -> Unit) =
+        MaterialAlertDialogBuilder(requireContext())
+            .setAdapter(currentRecordActionsListAdapter) { _, position ->
+                onClick(currentRecordActions[position])
+            }.show()
 
     private fun createButton(
         position: Int,
         action: Action?,
-        horizontalIndex: Int
+        horizontalIndex: Int,
+        onActionClick: (action: Action, entity: EntityModel) -> Unit
     ): SwipeHelper.ItemActionButton {
-
         return SwipeHelper.ItemActionButton(
             requireContext(),
             action,
             horizontalIndex,
             object : SwipeHelper.UnderlayButtonClickListener {
                 override fun onClick() {
-                    // the case of "..." button
-                    if (action == null) {
-                        showDialog(adapter.getSelectedItem(position), currentRecordActions)
-                    } else {
-                        onCurrentActionClicked(action, adapter.getSelectedItem(position))
+                    adapter.getSelectedItem(position)?.let { entity ->
+                        if (action == null) { // the case of "..." button
+                            showDialog { clickedAction ->
+
+                                onActionClick(clickedAction, entity)
+                            }
+                        } else {
+                            onActionClick(action, entity)
+                        }
                     }
                 }
             }
         )
-    }
-
-    /**
-     * Forces data sync, when user pulls to refresh
-     */
-    private fun forceSyncData() {
-        delegate.requestDataSync(tableName)
     }
 
     private val searchListener: SearchView.OnQueryTextListener =
@@ -421,7 +317,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
         }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
-        if (hasSearch()) {
+        if (hasSearch) {
             searchView.setOnQueryTextListener(searchListener)
 
             if (currentQuery.isEmpty()) {
@@ -443,30 +339,13 @@ open class EntityListFragment : Fragment(), BaseFragment {
     }
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
-        if (hasTableActions()) {
-
-            delegate.setupActionsMenu(menu, tableActions) { action ->
-                if (action.parameters.length() > 0) {
-
-                    BaseApp.genericNavigationResolver.navigateToActionForm(
-                        binding,
-                        destinationTable = tableName,
-                        navBarTitle = action.getPreferredShortName(),
-                        inverseName = inverseName,
-                        parentItemId = parentItemId,
-                        fromRelation = fromRelation
-                    )
-
-                    delegate.setSelectAction(action)
-                } else {
-                    sendAction(action.name, null)
-                }
-            }
+        if (hasTableActions) {
+            actionActivity.setupActionsMenu(menu, tableActions, this, false)
         }
     }
 
     private fun setupSearchMenuIfNeeded(menu: Menu, inflater: MenuInflater) {
-        if (hasSearch()) {
+        if (hasSearch) {
             inflater.inflate(R.menu.menu_search, menu)
             searchView = menu.findItem(R.id.search).actionView as SearchView
             searchPlate =
@@ -516,5 +395,27 @@ open class EntityListFragment : Fragment(), BaseFragment {
             formQueryBuilder.getQuery(currentQuery)
         }
         entityListViewModel.setSearchQuery(formQuery)
+    }
+
+    override fun getActionContent(actionId: String?): MutableMap<String, Any> {
+        return ActionHelper.getActionContent(
+            tableName = tableName,
+            selectedActionId = actionId,
+            relationName = inverseName,
+            parentPrimaryKey = parentItemId,
+            parentTableName = parentTableName,
+            parentRelationName = parentRelationName
+        )
+    }
+
+    override fun navigationToActionForm(action: Action) {
+        BaseApp.genericNavigationResolver.navigateToActionForm(
+            binding,
+            destinationTable = tableName,
+            navBarTitle = action.getPreferredShortName(),
+            inverseName = inverseName,
+            parentItemId = parentItemId,
+            fromRelation = fromRelation
+        )
     }
 }

@@ -21,7 +21,7 @@ class EntityListAdapter internal constructor(
     private val tableName: String,
     private val lifecycleOwner: LifecycleOwner,
     private val onItemClick: (ViewDataBinding, String) -> Unit,
-    private val actionDialogClickedCallBack: (EntityModel?) -> Unit
+    private val onItemLongClick: (EntityModel) -> Unit
 ) :
     PagingDataAdapter<EntityModel, BaseViewHolder>(DIFF_CALLBACK) {
 
@@ -50,7 +50,7 @@ class EntityListAdapter internal constructor(
                 false
             )
         dataBinding.lifecycleOwner = this@EntityListAdapter.lifecycleOwner
-        return BaseViewHolder(dataBinding, tableName, onItemClick, actionDialogClickedCallBack)
+        return BaseViewHolder(dataBinding, tableName, onItemClick, onItemLongClick)
     }
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {

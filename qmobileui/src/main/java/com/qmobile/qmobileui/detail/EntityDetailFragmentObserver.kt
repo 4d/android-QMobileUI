@@ -29,33 +29,34 @@ class EntityDetailFragmentObserver(
     // Observe entity list
     private fun observeEntity() {
         entityViewModel.entity.observe(
-            fragment.viewLifecycleOwner,
-            { entity ->
-                Timber.d("Observed entity from Room, json = ${BaseApp.mapper.parseToString(entity)}")
-                entity?.let {
+            fragment.viewLifecycleOwner
+        ) { entity ->
+            Timber.d("Observed entity from Room, json = ${BaseApp.mapper.parseToString(entity)}")
+            entity?.let {
 
-                    setupObserver(entity)
+                fragment.actionActivity.setSelectedEntity(it)
 
-                    entity.__KEY?.let { parentItemId ->
-                        BaseApp.runtimeDataHolder.oneToManyRelations[fragment.tableName]?.forEach { relationName ->
-                            BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForDetail(
-                                viewDataBinding = fragment.binding,
-                                relationName = relationName,
-                                parentItemId = parentItemId,
-                                entity = entity
-                            )
-                        }
-                        BaseApp.runtimeDataHolder.manyToOneRelations[fragment.tableName]?.forEach { relationName ->
-                            BaseApp.genericNavigationResolver.setupManyToOneRelationButtonOnClickActionForDetail(
-                                viewDataBinding = fragment.binding,
-                                relationName = relationName,
-                                entity = entity
-                            )
-                        }
+                setupObserver(entity)
+
+                entity.__KEY?.let { parentItemId ->
+                    BaseApp.runtimeDataHolder.oneToManyRelations[fragment.tableName]?.forEach { relationName ->
+                        BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForDetail(
+                            viewDataBinding = fragment.binding,
+                            relationName = relationName,
+                            parentItemId = parentItemId,
+                            entity = entity
+                        )
+                    }
+                    BaseApp.runtimeDataHolder.manyToOneRelations[fragment.tableName]?.forEach { relationName ->
+                        BaseApp.genericNavigationResolver.setupManyToOneRelationButtonOnClickActionForDetail(
+                            viewDataBinding = fragment.binding,
+                            relationName = relationName,
+                            entity = entity
+                        )
                     }
                 }
             }
-        )
+        }
     }
 
     private fun setupObserver(entity: EntityModel) {
@@ -76,18 +77,17 @@ class EntityDetailFragmentObserver(
     private fun observeRelations(relations: Map<String, LiveData<RoomRelation>>, entity: EntityModel? = null) {
         for ((relationName, liveDataRelatedEntity) in relations) {
             liveDataRelatedEntity.observe(
-                requireNotNull(fragment.viewLifecycleOwner),
-                { roomRelation ->
-                    roomRelation?.let {
-                        entityViewModel.setRelationToLayout(relationName, roomRelation)
-                        entity?.let {
-                            roomRelation.toOne?.let {
-                                refreshOneToManyNavForNavbarTitle(entity, it)
-                            }
+                requireNotNull(fragment.viewLifecycleOwner)
+            ) { roomRelation ->
+                roomRelation?.let {
+                    entityViewModel.setRelationToLayout(relationName, roomRelation)
+                    entity?.let {
+                        roomRelation.toOne?.let {
+                            refreshOneToManyNavForNavbarTitle(entity, it)
                         }
                     }
                 }
-            )
+            }
         }
     }
 

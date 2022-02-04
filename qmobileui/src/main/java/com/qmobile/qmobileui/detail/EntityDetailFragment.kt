@@ -20,39 +20,41 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
+import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
-import com.qmobile.qmobileui.network.NetworkChecker
+import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.ui.checkIfChildIsWebView
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.webview.MyWebViewClient
 
-open class EntityDetailFragment : Fragment(), BaseFragment {
+open class EntityDetailFragment : Fragment(), BaseFragment, ActionNavigable {
 
-    private var itemId: String = "0"
-    private lateinit var entityViewModel: EntityViewModel<EntityModel>
+    // views
     private var _binding: ViewDataBinding? = null
-
-    // This property is only valid between onCreateView and onDestroyView.
     val binding get() = _binding!!
-    var tableName: String = ""
+
+    private lateinit var entityViewModel: EntityViewModel<EntityModel>
+    override lateinit var delegate: FragmentCommunication
+    override lateinit var actionActivity: ActionActivity
+    private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
+
+    // fragment parameters
+    override var tableName: String = ""
+    private var itemId: String = "0"
     private var inverseName: String = ""
     private var parentItemId: String = "0"
     private var parentRelationName: String = ""
     private var parentTableName: String? = null
-    private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
     private var fromRelation = false
 
     private lateinit var webView: WebView
-
-    // BaseFragment
-    override lateinit var delegate: FragmentCommunication
+    private var hasActions = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -74,6 +76,8 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
             parentRelationName =
                 BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
         }
+
+        hasActions = currentRecordActionsJsonObject.has(tableName)
 
         // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
         entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
@@ -97,7 +101,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
             webView = foundWebView
             webView.webViewClient = MyWebViewClient()
         }
-        setHasOptionsMenu(::webView.isInitialized || hasActions())
+        setHasOptionsMenu(::webView.isInitialized || hasActions)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -136,12 +140,13 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
         }
     }
 
-    private fun hasActions() = currentRecordActionsJsonObject.has(tableName)
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is FragmentCommunication) {
             delegate = context
+        }
+        if (context is ActionActivity) {
+            actionActivity = context
         }
         // Access resources elements
     }
@@ -152,66 +157,33 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
     }
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
-        if (hasActions()) {
+        if (hasActions) {
             val currentRecordActions = mutableListOf<Action>()
             ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
-
-            delegate.setupActionsMenu(menu, currentRecordActions) { action ->
-                if (action.parameters.length() > 0) {
-                    BaseApp.genericNavigationResolver.navigateToActionForm(
-                        binding,
-                        destinationTable = tableName,
-                        navBarTitle = action.getPreferredShortName(),
-                        inverseName = inverseName,
-                        parentItemId = parentItemId,
-                        fromRelation = fromRelation
-                    )
-                    delegate.setSelectAction(action)
-                    delegate.setSelectedEntity(entityViewModel.entity.value)
-                } else {
-                    delegate.checkNetwork(object : NetworkChecker {
-                        override fun onServerAccessible() {
-                            entityViewModel.sendAction(
-                                action.name,
-                                ActionHelper.getActionContent(
-                                    tableName = tableName,
-                                    selectedActionId = itemId,
-                                    relationName = inverseName,
-                                    parentPrimaryKey = parentItemId,
-                                    parentTableName = parentTableName,
-                                    parentRelationName = parentRelationName
-                                )
-                            ) {
-                                it?.dataSynchro?.let { shouldSyncData ->
-                                    if (shouldSyncData) {
-                                        forceSyncData()
-                                    }
-                                }
-                            }
-                        }
-
-                        override fun onServerInaccessible() {
-                            entityViewModel.toastMessage.showMessage(
-                                context?.getString(R.string.action_send_server_not_accessible),
-                                tableName,
-                                MessageType.ERROR
-                            )
-                        }
-
-                        override fun onNoInternet() {
-                            entityViewModel.toastMessage.showMessage(
-                                context?.getString(R.string.action_send_no_internet),
-                                tableName,
-                                MessageType.ERROR
-                            )
-                        }
-                    })
-                }
-            }
+            // actionActivity.setSelectedEntity() is called in observeEntity()
+            actionActivity.setupActionsMenu(menu, currentRecordActions, this, true)
         }
     }
 
-    private fun forceSyncData() {
-        delegate.requestDataSync(tableName)
+    override fun getActionContent(actionId: String?): MutableMap<String, Any> {
+        return ActionHelper.getActionContent(
+            tableName = tableName,
+            selectedActionId = itemId,
+            relationName = inverseName,
+            parentPrimaryKey = parentItemId,
+            parentTableName = parentTableName,
+            parentRelationName = parentRelationName
+        )
+    }
+
+    override fun navigationToActionForm(action: Action) {
+        BaseApp.genericNavigationResolver.navigateToActionForm(
+            binding,
+            destinationTable = tableName,
+            navBarTitle = action.getPreferredShortName(),
+            inverseName = inverseName,
+            parentItemId = parentItemId,
+            fromRelation = fromRelation
+        )
     }
 }

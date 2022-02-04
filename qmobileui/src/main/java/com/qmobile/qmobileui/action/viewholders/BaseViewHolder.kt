@@ -23,7 +23,7 @@ abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: 
 
     open fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: EntityModel?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
         itemJsonObject = item as JSONObject

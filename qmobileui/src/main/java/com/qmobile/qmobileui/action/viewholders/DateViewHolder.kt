@@ -36,10 +36,10 @@ class DateViewHolder(
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: EntityModel?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged)
+        super.bind(item, currentEntity, onValueChanged)
 
         container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.calendar_month)
 

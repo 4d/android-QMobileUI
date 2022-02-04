@@ -35,12 +35,11 @@ class BaseActivityObserver(
     // Observe network status
     private fun observeNetworkState() {
         connectivityViewModel.networkStateMonitor.observe(
-            activity,
-            { networkState ->
-                Timber.i("[NetworkState : $networkState]")
-                activity.handleNetworkState(networkState)
-            }
-        )
+            activity
+        ) { networkState ->
+            Timber.i("[NetworkState : $networkState]")
+            activity.handleNetworkState(networkState)
+        }
     }
 
     private fun observeConnectivityToastMessage() {

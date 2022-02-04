@@ -2,7 +2,12 @@ package com.qmobile.qmobileui.action
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.widget.TextViewCompat
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeString
@@ -64,8 +69,7 @@ class ActionHelper private constructor() {
 
             map["context"] = actionContext
             parameters?.let { map.put("parameters", parameters) }
-//            metaData?.let { map.put("metadata", ActionMetaData(metaData)) }
-            metaData?.let { map.put("metadata", JSONObject().apply { it["parameters"] = metaData.toString() }) }
+            metaData?.let { map.put("metadata", ActionMetaData(metaData)) }
             return map
         }
 
@@ -104,7 +108,7 @@ class ActionHelper private constructor() {
             return drawable.adjustActionDrawableMargins(context)
         }
 
-        fun getActionDrawablePadding(context: Context): Int =
+        private fun getActionDrawablePadding(context: Context): Int =
             (ImageHelper.ICON_MARGIN * context.resources.displayMetrics.density).toInt()
 
         fun fillActionList(json: JSONObject, tableName: String, actionList: MutableList<Action>) {
@@ -113,6 +117,33 @@ class ActionHelper private constructor() {
                     currentRecordActionsArray.getJSONObject(i)?.let {
                         actionList.add(createActionFromJsonObject(it))
                     }
+                }
+            }
+        }
+
+        fun getActionArrayAdapter(context: Context, actionList: List<Action>): ArrayAdapter<Action> {
+
+            val withIcons = actionList.firstOrNull { it.getIconDrawablePath() != null } != null
+
+            return object :
+                ArrayAdapter<Action>(context, android.R.layout.select_dialog_item, android.R.id.text1, actionList) {
+                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+
+                    val itemView = super.getView(position, convertView, parent)
+                    val textView = itemView.findViewById<View>(android.R.id.text1) as TextView
+                    val action = actionList[position]
+
+                    if (withIcons) {
+                        val drawable = getActionIconDrawable(context, action)
+                        textView.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
+                        TextViewCompat.setCompoundDrawableTintList(textView, textView.textColors)
+                        // Add margin between image and text (support various screen densities)
+                        textView.compoundDrawablePadding =
+                            getActionDrawablePadding(context)
+                    }
+
+                    textView.text = action.getPreferredName()
+                    return itemView
                 }
             }
         }

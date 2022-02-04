@@ -14,7 +14,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.ui.ViewUtils
+import com.qmobile.qmobileui.ui.getShakeAnimation
 
 abstract class BaseDateTimeViewHolder(
     itemView: View,
@@ -24,14 +24,14 @@ abstract class BaseDateTimeViewHolder(
     internal val input: TextInputEditText = itemView.findViewById(R.id.input)
     internal val container: TextInputLayout = itemView.findViewById(R.id.container)
 
-    private val shakeAnimation = ViewUtils.getShakeAnimation(itemView.context)
+    private val shakeAnimation = getShakeAnimation(itemView.context)
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: EntityModel?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged)
+        super.bind(item, currentEntity, onValueChanged)
 
         itemJsonObject.getSafeString("label")?.let { parameterLabel ->
             container.hint = if (isMandatory()) {
@@ -48,7 +48,7 @@ abstract class BaseDateTimeViewHolder(
 
         container.endIconMode = TextInputLayout.END_ICON_CUSTOM
 
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged) {
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged) {
             input.setText(formatToDisplay(it.toString()))
         }
     }

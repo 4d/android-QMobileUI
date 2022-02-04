@@ -21,10 +21,10 @@ class BooleanViewHolder(itemView: View, hideKeyboardCallback: () -> Unit) :
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: EntityModel?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged)
+        super.bind(item, currentEntity, onValueChanged)
 
         itemJsonObject.getSafeString("label")?.let { parameterLabel ->
             label.text = if (isMandatory()) {
@@ -37,7 +37,7 @@ class BooleanViewHolder(itemView: View, hideKeyboardCallback: () -> Unit) :
         compoundButton.setOnCheckedChangeListener { _, b ->
             onValueChanged(parameterName, b, null, true)
         }
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged) {
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged) {
             if (it is Boolean)
                 compoundButton.isChecked = it
         }

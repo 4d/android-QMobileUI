@@ -20,7 +20,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionParameterEnum
 import com.qmobile.qmobileui.action.addSuffix
 import com.qmobile.qmobileui.formatters.SpellOutFormat
-import com.qmobile.qmobileui.ui.ViewUtils
+import com.qmobile.qmobileui.ui.getShakeAnimation
 
 open class TextViewHolder(
     itemView: View,
@@ -36,15 +36,15 @@ open class TextViewHolder(
 
     val input: TextInputEditText = itemView.findViewById(R.id.input)
     private val container: TextInputLayout = itemView.findViewById(R.id.container)
-    private val shakeAnimation = ViewUtils.getShakeAnimation(itemView.context)
+    private val shakeAnimation = getShakeAnimation(itemView.context)
     var numberValueForSpellOut: String = ""
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: EntityModel?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged)
+        super.bind(item, currentEntity, onValueChanged)
 
         if (format == ActionParameterEnum.TEXT_AREA.format) {
             input.maxLines = maxLines
@@ -96,7 +96,7 @@ open class TextViewHolder(
                 hideKeyboardCallback()
             }
         }
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged) {
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged) {
             input.setText(it.toString())
         }
 

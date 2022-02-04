@@ -33,7 +33,8 @@ fun bindImageFromUrl(
     val imageFromAssetUri: Uri? = ImageHelper.tryImageFromAssets(tableName, key, fieldName)
 
     val glideRequest = ImageHelper.getGlideRequest(
-        view, imageFromAssetUri
+        view,
+        imageFromAssetUri
             ?: if (!imageUrl.isNullOrEmpty()) imageUrl else R.drawable.ic_placeholder
     )
 

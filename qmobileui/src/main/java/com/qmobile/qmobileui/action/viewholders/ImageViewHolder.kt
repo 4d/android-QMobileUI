@@ -46,12 +46,16 @@ class ImageViewHolder(
     private var imageView: ImageView = itemView.findViewById(R.id.image_view)
     private var removeItem: ImageView = itemView.findViewById(R.id.item_remove)
 
+    companion object {
+        const val DEFAULT_PLACEHOLDER_ICON_ALPHA = 0.6F
+    }
+
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: EntityModel?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged)
+        super.bind(item, currentEntity, onValueChanged)
 
         itemJsonObject.getSafeString("label")?.let { parameterLabel ->
             label.text = if (isMandatory()) {
@@ -77,11 +81,11 @@ class ImageViewHolder(
             ContextCompat.getDrawable(imageView.context, R.drawable.image_plus)?.let {
                 imageView.setImageDrawable(it)
                 removeItem.visibility = View.INVISIBLE
-                imageView.alpha = 0.6F
+                imageView.alpha = DEFAULT_PLACEHOLDER_ICON_ALPHA
             }
         }
         displaySelectedImageIfAny()
-        onValueChanged(parameterName, null, null, validate(false))
+        onValueChanged(parameterName, itemJsonObject.getSafeAny("image_uri"), null, validate(false))
     }
 
     override fun validate(displayError: Boolean): Boolean {
@@ -130,18 +134,6 @@ class ImageViewHolder(
                     val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
                     pickPhoto.type = "image/*"
                     startActivityCallback(pickPhoto, bindingAdapterPosition, null)
-
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                        if (imageView.context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-//                            val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-//                            this.position = position
-//                            context.requestPermissions(permissions, 1001)
-//                        } else {
-//                            startActivityCallback(pickPhoto, bindingAdapterPosition)
-//                        }
-//                    } else {
-//                        startActivityCallback(pickPhoto, bindingAdapterPosition)
-//                    }
                 }
                 MediaStore.ACTION_IMAGE_CAPTURE -> {
                     val takePicture = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -152,6 +144,7 @@ class ImageViewHolder(
                             val photoFile: File? = try {
                                 createTempImageFile(context)
                             } catch (ex: IOException) {
+                                Timber.e(ex.localizedMessage)
                                 ToastHelper.show(context, "Could not create temporary file", MessageType.ERROR)
                                 null
                             }
