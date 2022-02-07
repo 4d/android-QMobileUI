@@ -35,9 +35,10 @@ class TimeViewHolder(
     override fun bind(
         item: Any,
         currentEntity: EntityModel?,
+        preset: String?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntity, onValueChanged)
+        super.bind(item, currentEntity, preset, onValueChanged)
 
         container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.calendar_clock)
 

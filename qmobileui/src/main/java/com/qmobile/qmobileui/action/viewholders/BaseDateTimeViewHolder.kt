@@ -29,9 +29,10 @@ abstract class BaseDateTimeViewHolder(
     override fun bind(
         item: Any,
         currentEntity: EntityModel?,
+        preset: String?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntity, onValueChanged)
+        super.bind(item, currentEntity, preset, onValueChanged)
 
         itemJsonObject.getSafeString("label")?.let { parameterLabel ->
             container.hint = if (isMandatory()) {
@@ -48,7 +49,7 @@ abstract class BaseDateTimeViewHolder(
 
         container.endIconMode = TextInputLayout.END_ICON_CUSTOM
 
-        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged) {
+        getDefaultFieldValue(currentEntity, itemJsonObject) {
             input.setText(formatToDisplay(it.toString()))
         }
     }

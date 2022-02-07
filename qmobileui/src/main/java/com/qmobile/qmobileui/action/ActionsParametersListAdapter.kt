@@ -10,12 +10,11 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
-import org.json.JSONArray
 import org.json.JSONObject
 
 class ActionsParametersListAdapter(
     private val context: Context,
-    private val parameters: JSONArray,
+    private val action: Action,
     private val currentEntity: EntityModel?,
     private val fragmentManager: FragmentManager?,
     private val hideKeyboardCallback: () -> Unit,
@@ -36,20 +35,21 @@ class ActionsParametersListAdapter(
     }
 
     override fun getItemCount(): Int {
-        return parameters.length()
+        return action.parameters.length()
     }
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         holder.bind(
-            parameters[position],
-            currentEntity
+            action.parameters[position],
+            currentEntity,
+            action.preset
         ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
             onValueChanged(name, value, metaData, isValid)
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-        val itemJsonObject = parameters[position] as JSONObject
+        val itemJsonObject = action.parameters[position] as JSONObject
         val type = itemJsonObject.getSafeString("type")
         val format = itemJsonObject.getSafeString("format") ?: "default"
         return ActionParameterEnum.values().find { it.type == type && it.format == format }?.ordinal
@@ -57,11 +57,11 @@ class ActionsParametersListAdapter(
     }
 
     fun updateImageForPosition(position: Int, data: Uri) {
-        parameters.getSafeObject(position)?.put("image_uri", data)
+        action.parameters.getSafeObject(position)?.put("image_uri", data)
         notifyItemChanged(position)
     }
 
     fun getUpdatedImageParameterName(position: Int): String? {
-        return parameters.getSafeObject(position)?.getSafeString("name")
+        return action.parameters.getSafeObject(position)?.getSafeString("name")
     }
 }

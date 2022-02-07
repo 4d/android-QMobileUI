@@ -103,7 +103,7 @@ open class ActionParametersFragment : Fragment(), BaseFragment, ActionProvider {
             lifecycleOwner = viewLifecycleOwner
             adapter = ActionsParametersListAdapter(
                 context = requireContext(),
-                parameters = action.parameters,
+                action = action,
                 currentEntity = selectedEntity,
                 fragmentManager = activity?.supportFragmentManager,
                 hideKeyboardCallback = { onHideKeyboardCallback() },

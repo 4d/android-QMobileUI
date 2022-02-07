@@ -42,9 +42,10 @@ open class TextViewHolder(
     override fun bind(
         item: Any,
         currentEntity: EntityModel?,
+        preset: String?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntity, onValueChanged)
+        super.bind(item, currentEntity, preset, onValueChanged)
 
         if (format == ActionParameterEnum.TEXT_AREA.format) {
             input.maxLines = maxLines
@@ -96,7 +97,7 @@ open class TextViewHolder(
                 hideKeyboardCallback()
             }
         }
-        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged) {
+        getDefaultFieldValue(currentEntity, itemJsonObject) {
             input.setText(it.toString())
         }
 

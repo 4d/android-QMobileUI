@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.model.entity.Photo
 import com.qmobile.qmobileapi.utils.getSafeAny
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.toast.MessageType
@@ -46,6 +47,8 @@ class ImageViewHolder(
     private var imageView: ImageView = itemView.findViewById(R.id.image_view)
     private var removeItem: ImageView = itemView.findViewById(R.id.item_remove)
 
+    private var currentUri: String? = null
+
     companion object {
         const val DEFAULT_PLACEHOLDER_ICON_ALPHA = 0.6F
     }
@@ -53,9 +56,10 @@ class ImageViewHolder(
     override fun bind(
         item: Any,
         currentEntity: EntityModel?,
+        preset: String?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntity, onValueChanged)
+        super.bind(item, currentEntity, preset, onValueChanged)
 
         itemJsonObject.getSafeString("label")?.let { parameterLabel ->
             label.text = if (isMandatory()) {
@@ -67,8 +71,13 @@ class ImageViewHolder(
 
         imageView.setOnClickListener {
             MaterialAlertDialogBuilder(itemView.context)
-                .setTitle("Add an image")
-                .setItems(arrayOf("Take photo", "Choose from Gallery")) { _, which ->
+                .setTitle(itemView.context.getString(R.string.action_parameter_image_dialog_title))
+                .setItems(
+                    arrayOf(
+                        itemView.context.getString(R.string.action_parameter_image_dialog_photo),
+                        itemView.context.getString(R.string.action_parameter_image_dialog_gallery)
+                    )
+                ) { _, which ->
                     when (which) {
                         0 -> intentChooser(MediaStore.ACTION_IMAGE_CAPTURE)
                         1 -> intentChooser(Intent.ACTION_PICK)
@@ -82,15 +91,27 @@ class ImageViewHolder(
                 imageView.setImageDrawable(it)
                 removeItem.visibility = View.INVISIBLE
                 imageView.alpha = DEFAULT_PLACEHOLDER_ICON_ALPHA
+                currentUri = null
+                onValueChanged(parameterName, null, null, validate(false))
             }
         }
-        displaySelectedImageIfAny()
-        onValueChanged(parameterName, itemJsonObject.getSafeAny("image_uri"), null, validate(false))
+
+        newImageChosen()?.let { uri ->
+            displayImage(uri)
+        } ?: kotlin.run {
+            getDefaultFieldValue(currentEntity, itemJsonObject) { defaultPhoto ->
+                (defaultPhoto as Photo?)?.__deferred?.uri?.let {
+                    displayImage(it)
+                }
+            }
+        }
+
+        onValueChanged(parameterName, currentUri, null, validate(false))
     }
 
     override fun validate(displayError: Boolean): Boolean {
 
-        if (isMandatory() && !itemJsonObject.has("image_uri")) {
+        if (isMandatory() && currentUri != null) {
             if (displayError)
                 showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
             return false
@@ -102,24 +123,25 @@ class ImageViewHolder(
         return -1
     }
 
-    private fun displaySelectedImageIfAny() {
+    private fun newImageChosen(): Uri? =
+        itemJsonObject.getSafeAny("image_uri") as Uri?
+
+    private fun displayImage(data: Any) {
+        currentUri = data.toString()
         error.visibility = View.INVISIBLE
-        itemJsonObject.getSafeAny("image_uri")?.let { anyUri ->
-            (anyUri as Uri?)?.let { uri ->
-                val glideRequest = ImageHelper.getGlideRequest(imageView, uri)
 
-                Transformations.getTransformation(
-                    "CropCircleWithBorder",
-                    imageView.context.getColorFromAttr(android.R.attr.colorPrimary)
-                )?.let { transformation ->
-                    glideRequest.transform(transformation)
-                }
+        val glideRequest = ImageHelper.getGlideRequest(imageView, data)
 
-                glideRequest.into(imageView)
-                imageView.alpha = 1F
-                removeItem.visibility = View.VISIBLE
-            }
+        Transformations.getTransformation(
+            "CropCircleWithBorder",
+            imageView.context.getColorFromAttr(android.R.attr.colorPrimary)
+        )?.let { transformation ->
+            glideRequest.transform(transformation)
         }
+
+        glideRequest.into(imageView)
+        imageView.alpha = 1F
+        removeItem.visibility = View.VISIBLE
     }
 
     private fun showError(text: String) {
@@ -131,7 +153,8 @@ class ImageViewHolder(
         imageView.context.also { context ->
             when (actionType) {
                 Intent.ACTION_PICK -> {
-                    val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    val pickPhoto =
+                        Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
                     pickPhoto.type = "image/*"
                     startActivityCallback(pickPhoto, bindingAdapterPosition, null)
                 }
@@ -145,7 +168,11 @@ class ImageViewHolder(
                                 createTempImageFile(context)
                             } catch (ex: IOException) {
                                 Timber.e(ex.localizedMessage)
-                                ToastHelper.show(context, "Could not create temporary file", MessageType.ERROR)
+                                ToastHelper.show(
+                                    context,
+                                    "Could not create temporary file",
+                                    MessageType.ERROR
+                                )
                                 null
                             }
                             // Continue only if the File was successfully created
@@ -157,10 +184,18 @@ class ImageViewHolder(
                                         it
                                     )
                                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                                    startActivityCallback(takePictureIntent, bindingAdapterPosition, it.absolutePath)
+                                    startActivityCallback(
+                                        takePictureIntent,
+                                        bindingAdapterPosition,
+                                        it.absolutePath
+                                    )
                                 } catch (e: IllegalArgumentException) {
                                     Timber.e(e.localizedMessage)
-                                    ToastHelper.show(context, "Could not create temporary file", MessageType.ERROR)
+                                    ToastHelper.show(
+                                        context,
+                                        "Could not create temporary file",
+                                        MessageType.ERROR
+                                    )
                                 }
                             }
                         }
@@ -172,7 +207,8 @@ class ImageViewHolder(
 
     private fun createTempImageFile(context: Context): File {
         // Create an image file
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val timeStamp: String =
+            SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
             "qmobile_${timeStamp}_", /* prefix */

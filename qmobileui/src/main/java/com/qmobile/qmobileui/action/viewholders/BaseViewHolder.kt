@@ -20,14 +20,17 @@ abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: 
 
     lateinit var parameterName: String
     lateinit var itemJsonObject: JSONObject
+    private var isEditPreset = false
 
     open fun bind(
         item: Any,
         currentEntity: EntityModel?,
+        preset: String?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
         itemJsonObject = item as JSONObject
         parameterName = itemJsonObject.getSafeString("name") ?: ""
+        isEditPreset = preset == "edit"
 
         if (isMandatory()) {
             onValueChanged(parameterName, "", null, validate(false))
@@ -42,15 +45,18 @@ abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: 
 
     abstract fun getInputType(format: String): Int
 
-    open fun setDefaultFieldIfNeeded(
+    open fun getDefaultFieldValue(
         currentEntity: EntityModel?,
         itemJsonObject: JSONObject,
-        onValueChanged: (String, Any, String?, isValid: Boolean) -> Unit,
         valueCallback: (Any) -> Unit
     ) {
-        currentEntity?.let {
-            itemJsonObject.getSafeString("defaultField")?.let { defaultField ->
-                EntityHelper.readInstanceProperty(it, defaultField).also { value ->
+        currentEntity?.let { entity ->
+            val fieldName = if (isEditPreset)
+                itemJsonObject.getSafeString("name")
+            else
+                itemJsonObject.getSafeString("defaultField")
+            fieldName?.let {
+                EntityHelper.readInstanceProperty(entity, it)?.also { value ->
                     valueCallback(value)
                 }
             }
