@@ -93,19 +93,18 @@ class BaseViewHolder(
     private fun observeManyToOneRelations(relations: Map<String, LiveData<RoomRelation>>, entity: EntityModel) {
         for ((relationName, liveDataRelatedEntity) in relations) {
             liveDataRelatedEntity.observe(
-                requireNotNull(dataBinding.lifecycleOwner),
-                { roomRelation ->
-                    roomRelation?.toOne?.let { relatedEntity ->
-                        BaseApp.genericTableFragmentHelper.setRelationBinding(
-                            dataBinding,
-                            relationName,
-                            relatedEntity
-                        )
-                        dataBinding.executePendingBindings()
-                        refreshOneToManyNavForNavbarTitle(entity, relatedEntity)
-                    }
+                requireNotNull(dataBinding.lifecycleOwner)
+            ) { roomRelation ->
+                roomRelation?.toOne?.let { relatedEntity ->
+                    BaseApp.genericTableFragmentHelper.setRelationBinding(
+                        dataBinding,
+                        relationName,
+                        relatedEntity
+                    )
+                    dataBinding.executePendingBindings()
+                    refreshOneToManyNavForNavbarTitle(entity, relatedEntity)
                 }
-            )
+            }
         }
     }
 
@@ -128,18 +127,17 @@ class BaseViewHolder(
     private fun observeOneToManyRelations(relations: Map<String, LiveData<RoomRelation>>) {
         for ((relationName, liveDataRelatedEntities) in relations) {
             liveDataRelatedEntities.observe(
-                requireNotNull(dataBinding.lifecycleOwner),
-                { roomRelation ->
-                    roomRelation?.toMany?.let { toMany ->
-                        BaseApp.genericTableFragmentHelper.setRelationBinding(
-                            dataBinding,
-                            relationName,
-                            toMany
-                        )
-                        dataBinding.executePendingBindings()
-                    }
+                requireNotNull(dataBinding.lifecycleOwner)
+            ) { roomRelation ->
+                roomRelation?.toMany?.let { toMany ->
+                    BaseApp.genericTableFragmentHelper.setRelationBinding(
+                        dataBinding,
+                        relationName,
+                        toMany
+                    )
+                    dataBinding.executePendingBindings()
                 }
-            )
+            }
         }
     }
 }

@@ -410,11 +410,10 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         )
         // Whenever the selected controller changes, setup the action bar.
         controller.observe(
-            this,
-            { navController ->
-                setupActionBarWithNavController(navController)
-            }
-        )
+            this
+        ) { navController ->
+            setupActionBarWithNavController(navController)
+        }
         currentNavController = controller
     }
 
@@ -449,7 +448,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     }
 
     private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()
-    
+
     fun askPermission(permission: String, rationale: String, callback: (isGranted: Boolean) -> Unit) {
         val requestPermissionCode = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
         requestPermissionMap[requestPermissionCode] = callback

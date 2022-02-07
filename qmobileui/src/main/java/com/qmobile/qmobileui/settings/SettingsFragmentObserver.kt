@@ -22,13 +22,12 @@ class SettingsFragmentObserver(
     // Observe network status
     private fun observeNetworkStatus() {
         connectivityViewModel.networkStateMonitor.observe(
-            fragment.viewLifecycleOwner,
-            { networkState ->
-                if (fragment.firstTime || !fragment.firstTime && networkState == NetworkStateEnum.CONNECTED) {
-                    fragment.firstTime = false
-                    fragment.delegate.checkNetwork(fragment)
-                }
+            fragment.viewLifecycleOwner
+        ) { networkState ->
+            if (fragment.firstTime || !fragment.firstTime && networkState == NetworkStateEnum.CONNECTED) {
+                fragment.firstTime = false
+                fragment.delegate.checkNetwork(fragment)
             }
-        )
+        }
     }
 }
