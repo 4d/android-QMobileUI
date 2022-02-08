@@ -18,7 +18,7 @@ interface ActionActivity {
         menu: Menu,
         actions: List<Action>,
         actionNavigable: ActionNavigable,
-        isEntityAction: Boolean // entity is required for an entity action, even in list form
+        isEntityAction: Boolean
     )
 
     fun onActionClick(action: Action, actionNavigable: ActionNavigable, isEntityAction: Boolean)
@@ -41,5 +41,5 @@ interface ActionActivity {
 
     fun getSelectedEntity(): EntityModel?
 
-    fun setSelectedEntity(entity: EntityModel?)
+    fun setCurrentEntityModel(entityModel: EntityModel?)
 }

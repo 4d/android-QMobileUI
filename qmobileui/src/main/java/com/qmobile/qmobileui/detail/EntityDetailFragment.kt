@@ -38,22 +38,16 @@ open class EntityDetailFragment : Fragment(), BaseFragment, ActionNavigable {
     // views
     private var _binding: ViewDataBinding? = null
     val binding get() = _binding!!
-
+    private lateinit var webView: WebView
     private lateinit var entityViewModel: EntityViewModel<EntityModel>
+
+    // fragment parameters
+    override var tableName = ""
+    private var itemId = ""
+
     override lateinit var delegate: FragmentCommunication
     override lateinit var actionActivity: ActionActivity
     private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
-
-    // fragment parameters
-    override var tableName: String = ""
-    private var itemId: String = "0"
-    private var inverseName: String = ""
-    private var parentItemId: String = "0"
-    private var parentRelationName: String = ""
-    private var parentTableName: String? = null
-    private var fromRelation = false
-
-    private lateinit var webView: WebView
     private var hasActions = false
 
     override fun onCreateView(
@@ -63,24 +57,11 @@ open class EntityDetailFragment : Fragment(), BaseFragment, ActionNavigable {
     ): View? {
         arguments?.getString("itemId")?.let { itemId = it }
         arguments?.getString("tableName")?.let { tableName = it }
-        arguments?.getString("destinationTable")?.let {
-            if (it.isNotEmpty()) {
-                tableName = it
-                fromRelation = true
-            }
-        }
-
-        if (fromRelation) {
-            parentTableName =
-                BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
-            parentRelationName =
-                BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
-        }
-
-        hasActions = currentRecordActionsJsonObject.has(tableName)
 
         // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
         entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
+
+        hasActions = currentRecordActionsJsonObject.has(tableName)
 
         _binding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
@@ -111,6 +92,15 @@ open class EntityDetailFragment : Fragment(), BaseFragment, ActionNavigable {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
+    private fun setupActionsMenuIfNeeded(menu: Menu) {
+        if (hasActions) {
+            val currentRecordActions = mutableListOf<Action>()
+            ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
+            // actionActivity.setCurrentEntityModel() is called in EntityViewPagerFragment#onPageSelected()
+            actionActivity.setupActionsMenu(menu, currentRecordActions, this, true)
+        }
+    }
+
     private fun setupWebViewMenuIfNeeded(menu: Menu) {
         menu.findItem(R.id.action_web_view_share).apply {
             isVisible = ::webView.isInitialized
@@ -121,7 +111,6 @@ open class EntityDetailFragment : Fragment(), BaseFragment, ActionNavigable {
                         putExtra(Intent.EXTRA_TEXT, "This is my text to send.")
                         type = "text/plain"
                     }
-
 //                    val shareIntent = Intent.createChooser(sendIntent, "Share using")
                     startActivity(sendIntent)
 
@@ -148,6 +137,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment, ActionNavigable {
         if (context is ActionActivity) {
             actionActivity = context
         }
+
         // Access resources elements
     }
 
@@ -156,34 +146,28 @@ open class EntityDetailFragment : Fragment(), BaseFragment, ActionNavigable {
         EntityDetailFragmentObserver(this, entityViewModel).initObservers()
     }
 
-    private fun setupActionsMenuIfNeeded(menu: Menu) {
-        if (hasActions) {
-            val currentRecordActions = mutableListOf<Action>()
-            ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
-            // actionActivity.setSelectedEntity() is called in observeEntity()
-            actionActivity.setupActionsMenu(menu, currentRecordActions, this, true)
-        }
-    }
-
-    override fun getActionContent(actionId: String?): MutableMap<String, Any> {
+    override fun getActionContent(itemId: String?): MutableMap<String, Any> {
+        // Event if we are in a N-1 relation, we don't need to provide parent information in the request
         return ActionHelper.getActionContent(
             tableName = tableName,
-            selectedActionId = itemId,
-            relationName = inverseName,
-            parentPrimaryKey = parentItemId,
-            parentTableName = parentTableName,
-            parentRelationName = parentRelationName
+            itemId = itemId ?: "",
+            relationName = "",
+            parentItemId = "",
+            parentTableName = "",
+            parentRelationName = ""
         )
     }
 
-    override fun navigationToActionForm(action: Action) {
+    override fun navigationToActionForm(action: Action, itemId: String?) {
+        // Event if we are in a N-1 relation, we don't need to provide parent information in the request
         BaseApp.genericNavigationResolver.navigateToActionForm(
-            binding,
-            destinationTable = tableName,
-            navBarTitle = action.getPreferredShortName(),
-            inverseName = inverseName,
-            parentItemId = parentItemId,
-            fromRelation = fromRelation
+            viewDataBinding = binding,
+            tableName = tableName,
+            itemId = itemId ?: "",
+            destinationTable = "",
+            parentItemId = "",
+            inverseName = "",
+            navbarTitle = action.getPreferredShortName()
         )
     }
 }

@@ -325,16 +325,28 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             selectedAction = action
             if (!isEntityAction)
                 currentEntity = null
-            actionNavigable.navigationToActionForm(action)
+            actionNavigable.navigationToActionForm(action, currentEntity?.__KEY)
         } else {
             sendAction(
                 actionName = action.name,
-                actionContent = actionNavigable.getActionContent(),
+                actionContent = actionNavigable.getActionContent(currentEntity?.__KEY),
                 tableName = actionNavigable.tableName
             ) {
                 // Nothing to do
             }
         }
+    }
+
+    override fun getSelectedAction(): Action {
+        return selectedAction
+    }
+
+    override fun getSelectedEntity(): EntityModel? {
+        return currentEntity
+    }
+
+    override fun setCurrentEntityModel(entityModel: EntityModel?) {
+        currentEntity = entityModel
     }
 
     override fun sendAction(
@@ -393,18 +405,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                 onNoInternet(tableName)
             }
         })
-    }
-
-    override fun getSelectedAction(): Action {
-        return selectedAction
-    }
-
-    override fun getSelectedEntity(): EntityModel? {
-        return currentEntity
-    }
-
-    override fun setSelectedEntity(entity: EntityModel?) {
-        currentEntity = entity
     }
 
     override fun handleNetworkState(networkState: NetworkStateEnum) {

@@ -22,11 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
-import com.qmobile.qmobileui.BaseFragment
-import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
@@ -38,24 +34,23 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import kotlin.collections.HashMap
 
-open class ActionParametersFragment : Fragment(), BaseFragment, ActionProvider {
+open class ActionParametersFragment : Fragment(), ActionProvider {
 
     // views
     private lateinit var adapter: ActionsParametersListAdapter
     private var _binding: FragmentActionParametersBinding? = null
-    val binding get() = _binding!!
+    private val binding get() = _binding!!
 
     // fragment parameters
-    override var tableName: String = ""
-    private var inverseName: String = ""
-    private var parentItemId: String = "0"
-    private var parentRelationName: String = ""
-    private var parentTableName: String? = null
+    override var tableName = ""
+    private var itemId = ""
+    private var inverseName = ""
+    private var parentItemId = ""
+    private var parentRelationName = ""
+    private var parentTableName = ""
     private var fromRelation = false
 
-    internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
     override lateinit var actionActivity: ActionActivity
-    override lateinit var delegate: FragmentCommunication
 
     private val paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
@@ -83,18 +78,21 @@ open class ActionParametersFragment : Fragment(), BaseFragment, ActionProvider {
 
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
-        arguments?.getString("currentItemId")?.let { parentItemId = it }
-        arguments?.getBoolean("fromRelation")?.let { fromRelation = it }
+        arguments?.getString("itemId")?.let { itemId = it }
+        arguments?.getString("destinationTable")?.let {
+            if (it.isNotEmpty()) {
+                tableName = it
+                fromRelation = true
+            }
+        }
+        arguments?.getString("parentItemId")?.let { parentItemId = it }
         arguments?.getString("inverseName")?.let { inverseName = it }
 
         if (fromRelation) {
-            parentTableName =
-                BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
-            parentRelationName =
-                BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
+            parentTableName = BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
+            parentRelationName = BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
         }
 
-        entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
         _binding = FragmentActionParametersBinding.inflate(
             inflater,
             container,
@@ -172,9 +170,6 @@ open class ActionParametersFragment : Fragment(), BaseFragment, ActionProvider {
             action = actionActivity.getSelectedAction()
             selectedEntity = actionActivity.getSelectedEntity()
         }
-        if (context is FragmentCommunication) {
-            delegate = context
-        }
     }
 
     @Suppress("ReturnCount")
@@ -234,15 +229,9 @@ open class ActionParametersFragment : Fragment(), BaseFragment, ActionProvider {
 
     private fun sendAction() {
 
-        val actionId = if (action.preset == "edit") {
-            selectedEntity?.__KEY
-        } else {
-            null
-        }
-
         actionActivity.sendAction(
             actionName = action.name,
-            actionContent = getActionContent(actionId),
+            actionContent = getActionContent(selectedEntity?.__KEY),
             tableName = tableName
         ) {
             activity?.onBackPressed()
@@ -279,14 +268,14 @@ open class ActionParametersFragment : Fragment(), BaseFragment, ActionProvider {
         adapter.updateImageForPosition(requestCode, uri)
     }
 
-    override fun getActionContent(actionId: String?): MutableMap<String, Any> {
+    override fun getActionContent(itemId: String?): MutableMap<String, Any> {
         return ActionHelper.getActionContent(
             tableName = tableName,
-            selectedActionId = actionId,
+            itemId = itemId ?: "",
             parameters = paramsToSubmit,
             metaData = metaDataToSubmit,
             relationName = inverseName,
-            parentPrimaryKey = parentItemId,
+            parentItemId = parentItemId,
             parentTableName = parentTableName,
             parentRelationName = parentRelationName
         )

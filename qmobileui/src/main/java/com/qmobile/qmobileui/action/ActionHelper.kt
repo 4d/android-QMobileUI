@@ -23,13 +23,13 @@ class ActionHelper private constructor() {
     companion object {
         fun getActionContent(
             tableName: String,
-            selectedActionId: String?,
+            itemId: String,
             parameters: HashMap<String, Any>? = null,
             metaData: HashMap<String, String>? = null,
-            relationName: String? = null,
-            parentPrimaryKey: String? = null,
-            parentTableName: String? = null,
-            parentRelationName: String? = null
+            relationName: String,
+            parentItemId: String,
+            parentTableName: String,
+            parentRelationName: String
         ): MutableMap<String, Any> {
             val map: MutableMap<String, Any> = mutableMapOf()
             val actionContext = mutableMapOf<String, Any>(
@@ -39,32 +39,30 @@ class ActionHelper private constructor() {
 
             // entity
             val entity = HashMap<String, Any>()
-            if (selectedActionId != null) {
-                entity["primaryKey"] = selectedActionId
-            }
-            if (!relationName.isNullOrEmpty()) {
+
+            if (itemId.isNotEmpty())
+                entity["primaryKey"] = itemId
+
+            if (relationName.isNotEmpty())
                 entity["relationName"] = relationName
-            }
-            if (entity.isNotEmpty()) {
+
+            if (entity.isNotEmpty())
                 actionContext["entity"] = entity
-            }
 
             // parent
-            if ((parentPrimaryKey != null) && (parentPrimaryKey != "0")) {
+            if (parentItemId.isNotEmpty()) {
                 val parent = HashMap<String, Any>()
 
-                parent["primaryKey"] = parentPrimaryKey
-                if (!parentRelationName.isNullOrEmpty()) {
+                parent["primaryKey"] = parentItemId
+
+                if (parentRelationName.isNotEmpty())
                     parent["relationName"] = parentRelationName
-                }
 
-                if (!parentTableName.isNullOrEmpty()) {
+                if (parentTableName.isNotEmpty())
                     parent["dataClass"] = parentTableName
-                }
 
-                if (parent.isNotEmpty()) {
+                if (parent.isNotEmpty())
                     actionContext["parent"] = parent
-                }
             }
 
             map["context"] = actionContext

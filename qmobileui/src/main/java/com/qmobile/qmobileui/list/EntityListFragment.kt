@@ -58,10 +58,10 @@ open class EntityListFragment : Fragment(), BaseFragment, ActionNavigable {
     val binding get() = _binding!!
     private lateinit var searchView: SearchView
     private lateinit var searchPlate: EditText
-    lateinit var adapter: EntityListAdapter
+    internal lateinit var adapter: EntityListAdapter
     private lateinit var currentRecordActionsListAdapter: ListAdapter
-
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
+
     override lateinit var delegate: FragmentCommunication
     override lateinit var actionActivity: ActionActivity
     private var searchableFields = BaseApp.runtimeDataHolder.searchField
@@ -70,12 +70,12 @@ open class EntityListFragment : Fragment(), BaseFragment, ActionNavigable {
     private lateinit var formQueryBuilder: FormQueryBuilder
 
     // fragment parameters
-    override var tableName: String = ""
-    private var inverseName: String = ""
-    private var parentItemId: String = "0"
+    override var tableName = ""
+    private var inverseName = ""
+    private var parentItemId = ""
+    private var parentRelationName = ""
+    private var parentTableName = ""
     private var fromRelation = false
-    private var parentRelationName: String = ""
-    private var parentTableName: String? = null
 
     private var currentQuery = ""
     private val tableActions = mutableListOf<Action>()
@@ -101,13 +101,11 @@ open class EntityListFragment : Fragment(), BaseFragment, ActionNavigable {
                 fromRelation = true
             }
         }
-        arguments?.getString("currentItemId")?.let { parentItemId = it }
+        arguments?.getString("parentItemId")?.let { parentItemId = it }
         arguments?.getString("inverseName")?.let { inverseName = it }
         if (fromRelation) {
-            parentTableName =
-                BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
-            parentRelationName =
-                BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
+            parentTableName = BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
+            parentRelationName = BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
         }
 
         formQueryBuilder = FormQueryBuilder(tableName)
@@ -176,14 +174,14 @@ open class EntityListFragment : Fragment(), BaseFragment, ActionNavigable {
                     key = key,
                     query = currentQuery,
                     destinationTable = if (fromRelation) tableName else "",
-                    currentItemId = parentItemId,
+                    parentItemId = parentItemId,
                     inverseName = inverseName
                 )
             },
             onItemLongClick = { currentEntity ->
                 if (hasCurrentRecordActions && !isSwipable) {
                     showDialog { action ->
-                        actionActivity.setSelectedEntity(currentEntity)
+                        actionActivity.setCurrentEntityModel(currentEntity)
                         actionActivity.onActionClick(action, this@EntityListFragment, true)
                     }
                 }
@@ -255,7 +253,7 @@ open class EntityListFragment : Fragment(), BaseFragment, ActionNavigable {
                         for (i in 0 until (currentRecordActions.size)) {
                             val action = if ((i + 1) > MAX_ACTIONS_VISIBLE) null else currentRecordActions[i]
                             val button = createButton(position, action, i) { clickedAction, entity ->
-                                actionActivity.setSelectedEntity(entity)
+                                actionActivity.setCurrentEntityModel(entity)
                                 actionActivity.onActionClick(clickedAction, this@EntityListFragment, true)
                             }
                             buttons.add(button)
@@ -397,25 +395,26 @@ open class EntityListFragment : Fragment(), BaseFragment, ActionNavigable {
         entityListViewModel.setSearchQuery(formQuery)
     }
 
-    override fun getActionContent(actionId: String?): MutableMap<String, Any> {
+    override fun getActionContent(itemId: String?): MutableMap<String, Any> {
         return ActionHelper.getActionContent(
             tableName = tableName,
-            selectedActionId = actionId,
+            itemId = itemId ?: "",
             relationName = inverseName,
-            parentPrimaryKey = parentItemId,
+            parentItemId = parentItemId,
             parentTableName = parentTableName,
             parentRelationName = parentRelationName
         )
     }
 
-    override fun navigationToActionForm(action: Action) {
+    override fun navigationToActionForm(action: Action, itemId: String?) {
         BaseApp.genericNavigationResolver.navigateToActionForm(
-            binding,
-            destinationTable = tableName,
-            navBarTitle = action.getPreferredShortName(),
-            inverseName = inverseName,
+            viewDataBinding = binding,
+            tableName = tableName,
+            itemId = itemId ?: "",
+            destinationTable = if (fromRelation) tableName else "",
             parentItemId = parentItemId,
-            fromRelation = fromRelation
+            inverseName = inverseName,
+            navbarTitle = action.getPreferredShortName()
         )
     }
 }

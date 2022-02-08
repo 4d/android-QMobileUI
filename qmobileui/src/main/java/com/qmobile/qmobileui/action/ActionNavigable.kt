@@ -8,5 +8,5 @@ package com.qmobile.qmobileui.action
 
 interface ActionNavigable : ActionProvider {
 
-    fun navigationToActionForm(action: Action)
+    fun navigationToActionForm(action: Action, itemId: String?)
 }

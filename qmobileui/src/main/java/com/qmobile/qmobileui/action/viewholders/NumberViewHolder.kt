@@ -45,6 +45,10 @@ class NumberViewHolder(
             return false
         }
 
+        if (input.text.toString().trim().isEmpty()) {
+            return true
+        }
+
         if (stringValue.isNotEmpty() && stringValue.toDoubleOrNull() == null) {
             if (displayError)
                 showError("Field value must be a number")

@@ -147,6 +147,10 @@ open class TextViewHolder(
             return false
         }
 
+        if (input.text.toString().trim().isEmpty()) {
+            return true
+        }
+
         if (format == ActionParameterEnum.TEXT_EMAIL.format && !input.text.toString()
             .isEmailValid()
         ) {

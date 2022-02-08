@@ -34,16 +34,14 @@ class EntityDetailFragmentObserver(
             Timber.d("Observed entity from Room, json = ${BaseApp.mapper.parseToString(entity)}")
             entity?.let {
 
-                fragment.actionActivity.setSelectedEntity(it)
-
                 setupObserver(entity)
 
-                entity.__KEY?.let { parentItemId ->
+                entity.__KEY?.let { itemId ->
                     BaseApp.runtimeDataHolder.oneToManyRelations[fragment.tableName]?.forEach { relationName ->
                         BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForDetail(
                             viewDataBinding = fragment.binding,
                             relationName = relationName,
-                            parentItemId = parentItemId,
+                            itemId = itemId,
                             entity = entity
                         )
                     }
@@ -92,13 +90,13 @@ class EntityDetailFragmentObserver(
     }
 
     private fun refreshOneToManyNavForNavbarTitle(entity: EntityModel, anyRelatedEntity: RoomData) {
-        entity.__KEY?.let { parentItemId ->
+        entity.__KEY?.let { itemId ->
             BaseApp.runtimeDataHolder.oneToManyRelations[fragment.tableName]?.forEach { relationName ->
                 if (relationName.contains(".")) {
                     BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForDetail(
                         viewDataBinding = fragment.binding,
                         relationName = relationName,
-                        parentItemId = parentItemId,
+                        itemId = itemId,
                         entity = entity,
                         anyRelatedEntity = anyRelatedEntity
                     )

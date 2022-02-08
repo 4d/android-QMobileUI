@@ -13,5 +13,5 @@ interface ActionProvider {
     val tableName: String
     val actionActivity: ActionActivity
 
-    fun getActionContent(actionId: String? = null): MutableMap<String, Any>
+    fun getActionContent(itemId: String?): MutableMap<String, Any>
 }

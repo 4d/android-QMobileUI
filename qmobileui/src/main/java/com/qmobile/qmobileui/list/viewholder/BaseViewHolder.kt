@@ -53,12 +53,12 @@ class BaseViewHolder(
     }
 
     private fun setupRelationNavigation(entity: EntityModel) {
-        entity.__KEY?.let { parentItemId ->
+        entity.__KEY?.let { itemId ->
             BaseApp.runtimeDataHolder.oneToManyRelations[tableName]?.forEach { relationName ->
                 BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForCell(
                     viewDataBinding = dataBinding,
                     relationName = relationName,
-                    parentItemId = parentItemId,
+                    itemId = itemId,
                     entity = entity
                 )
             }
@@ -109,13 +109,13 @@ class BaseViewHolder(
     }
 
     private fun refreshOneToManyNavForNavbarTitle(entity: EntityModel, anyRelatedEntity: RoomData) {
-        entity.__KEY?.let { parentItemId ->
+        entity.__KEY?.let { itemId ->
             BaseApp.runtimeDataHolder.oneToManyRelations[tableName]?.forEach { relationName ->
                 if (relationName.contains(".")) {
                     BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForCell(
                         viewDataBinding = dataBinding,
                         relationName = relationName,
-                        parentItemId = parentItemId,
+                        itemId = itemId,
                         entity = entity,
                         anyRelatedEntity = anyRelatedEntity
                     )

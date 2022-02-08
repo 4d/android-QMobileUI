@@ -19,6 +19,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -27,25 +28,25 @@ import com.qmobile.qmobileui.utils.FormQueryBuilder
 
 class EntityViewPagerFragment : Fragment(), BaseFragment {
 
-    var key: String = ""
-    var tableName: String = ""
-    private var currentQuery = ""
-    var viewPager: ViewPager2? = null
-    private lateinit var formQueryBuilder: FormQueryBuilder
-    lateinit var adapter: ViewPagerAdapter
-//    lateinit var adapter: ViewPagerAdapter2
-    private var fromRelation = false
-    private var inverseName: String = ""
-    private var parentItemId: String = "0"
-
+    // views
+    internal var viewPager: ViewPager2? = null
+    internal lateinit var adapter: ViewPagerAdapter
+    //    lateinit var adapter: ViewPagerAdapter2
     private lateinit var actionPrevious: MenuItem
     private lateinit var actionNext: MenuItem
+    private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
 
-    // BaseFragment
+    // fragment parameters
+    internal var key = ""
+    private var tableName = ""
+    private var currentQuery = ""
+    private var inverseName = ""
+    private var parentItemId = ""
+    private var fromRelation = false
+
+    private lateinit var formQueryBuilder: FormQueryBuilder
+    private lateinit var actionActivity: ActionActivity
     override lateinit var delegate: FragmentCommunication
-
-    // ViewModel
-    lateinit var entityListViewModel: EntityListViewModel<EntityModel>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,7 +64,7 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
                 fromRelation = true
             }
         }
-        arguments?.getString("currentItemId")?.let { parentItemId = it }
+        arguments?.getString("parentItemId")?.let { parentItemId = it }
         arguments?.getString("inverseName")?.let { inverseName = it }
 
         formQueryBuilder = FormQueryBuilder(tableName)
@@ -79,6 +80,9 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
         if (context is FragmentCommunication) {
             delegate = context
         }
+        if (context is ActionActivity) {
+            actionActivity = context
+        }
         // Access resources elements
     }
 
@@ -90,6 +94,7 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
         viewPager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 adapter.getValue(position)?.let { item ->
+                    actionActivity.setCurrentEntityModel(item)
                     key = item.__KEY ?: ""
                     arguments?.putString("key", key)
                 }
