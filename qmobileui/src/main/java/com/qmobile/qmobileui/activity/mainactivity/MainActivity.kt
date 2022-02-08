@@ -77,6 +77,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
     private var job: Job? = null
+    private var fromCameraOrGallery = false
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
@@ -190,6 +191,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     }
 
     private fun applyOnForegroundEvent() {
+        if (fromCameraOrGallery) {
+            fromCameraOrGallery = false
+            return
+        }
+
         Timber.d("applyOnForegroundEvent")
         if (onLaunch) {
             Timber.d("applyOnForegroundEvent on Launch")
@@ -442,6 +448,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
 
             if (currentFragment is ActionParametersFragment) {
+                fromCameraOrGallery = true
                 currentFragment.handleResult(requestCode, data)
             }
         }
