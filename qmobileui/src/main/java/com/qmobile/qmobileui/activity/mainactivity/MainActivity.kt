@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -46,12 +47,12 @@ import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobileui.ActionActivity
+import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.action.ActionNavigable
-import com.qmobile.qmobileui.action.ActionParametersFragment
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.network.NetworkChecker
@@ -67,14 +68,20 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 const val BASE_PERMISSION_REQUEST_CODE = 1000
 
-class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver, PermissionChecker, ActionActivity {
+class MainActivity :
+    BaseActivity(),
+    FragmentCommunication,
+    ActivitySettingsInterface,
+    LifecycleEventObserver,
+    PermissionChecker,
+    ActionActivity {
 
     private var loginStatusText = ""
     private var onLaunch = true
     private var authenticationRequested = true
     private var shouldDelayOnForegroundEvent = AtomicBoolean(false)
-    private var onResultResume = AtomicBoolean(false)
     private var currentNavController: LiveData<NavController>? = null
+    private lateinit var bottomNav: BottomNavigationView
     private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
     private var job: Job? = null
@@ -205,9 +212,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             // going on previous remoteUrl
             refreshAllApiClients()
             entityListViewModelList.resetIsToSync()
-        }
-        if (!onResultResume.getAndSet(false))
             dataSync()
+        }
     }
 
     override fun requestAuthentication() {
@@ -467,7 +473,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
      * Called on first creation and when restoring state.
      */
     private fun setupBottomNavigationBar() {
-        val bottomNav = this.findViewById<BottomNavigationView>(R.id.bottom_nav)
+        bottomNav = this.findViewById(R.id.bottom_nav)
         bottomNav.menu.clear() // clear old inflated items.
         BaseApp.bottomNavigationMenu?.let {
             bottomNav.inflateMenu(it)
@@ -509,21 +515,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         entityListViewModel?.insertNewRelatedEntities(oneToManyRelation)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        onResultResume.set(true)
-        if ((resultCode == RESULT_OK) && (data != null)) {
-            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
-            val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
-
-            if (currentFragment is ActionParametersFragment) {
-                currentFragment.handleResult(requestCode, data)
-            }
-        }
-    }
-
     private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()
 
+    /**
+     * This method is accessible from BindingAdapters for Custom formatters
+     */
     fun askPermission(permission: String, rationale: String, callback: (isGranted: Boolean) -> Unit) {
         val requestPermissionCode = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
         requestPermissionMap[requestPermissionCode] = callback
@@ -559,5 +555,20 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             }
             else -> {}
         }
+    }
+
+    override fun setFullScreenMode(isFullScreen: Boolean) {
+        bottomNav.visibility = if (isFullScreen) {
+            supportActionBar?.hide()
+            View.GONE
+        } else {
+            supportActionBar?.show()
+            View.VISIBLE
+        }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        setFullScreenMode(false)
     }
 }

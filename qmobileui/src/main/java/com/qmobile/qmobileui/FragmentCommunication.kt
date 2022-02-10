@@ -6,14 +6,9 @@
 
 package com.qmobile.qmobileui
 
-import android.net.ConnectivityManager
-import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiService
-import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
-import com.qmobile.qmobileui.network.NetworkChecker
-import com.qmobile.qmobileui.network.RemoteUrlChange
 import kotlinx.coroutines.flow.SharedFlow
 
 /**
@@ -21,23 +16,11 @@ import kotlinx.coroutines.flow.SharedFlow
  */
 interface FragmentCommunication {
 
-    val apiService: ApiService
+    val apiService: ApiService // list, viewpager, detail
 
-    val loginApiService: LoginApiService
+    fun requestDataSync(currentTableName: String) // list
 
-    val accessibilityApiService: AccessibilityApiService
+    fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>) // detail
 
-    val connectivityManager: ConnectivityManager
-
-    fun refreshAllApiClients()
-
-    fun requestDataSync(currentTableName: String)
-
-    fun requestAuthentication()
-
-    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChange: RemoteUrlChange)
-
-    fun checkNetwork(networkChecker: NetworkChecker)
-
-    fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>)
+    fun setFullScreenMode(isFullScreen: Boolean) // actions
 }

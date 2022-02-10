@@ -26,4 +26,9 @@
     <dimen name="medium_plus_margin">16dp</dimen>
     <dimen name="medium_margin">12dp</dimen>
     <dimen name="small_margin">8dp</dimen>
+
+    <!-- Barcode -->
+    <dimen name="top_action_bar_padding_horizontal">8dp</dimen>
+    <dimen name="top_action_bar_height">64dp</dimen>
+    <dimen name="top_action_button_padding">12dp</dimen>
 </resources>

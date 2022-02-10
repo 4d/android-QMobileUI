@@ -12,10 +12,12 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.InsetDrawable
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.util.TypedValue
 import android.view.View
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
+import androidx.core.content.FileProvider
 import androidx.core.graphics.ColorUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
@@ -23,10 +25,16 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
+import com.qmobile.qmobileui.utils.ToastHelper
 import timber.log.Timber
 import java.io.File
+import java.io.IOException
+import java.lang.IllegalArgumentException
+import java.text.SimpleDateFormat
+import java.util.Date
 
 object ImageHelper {
 
@@ -47,9 +55,13 @@ object ImageHelper {
             .transition(DrawableTransitionOptions.withCrossFade(factory))
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .listener(CustomRequestListener())
-            .error(R.drawable.ic_error_outline)
+            .error(R.drawable.alert_circle_outline)
 
-    fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Uri? {
+    fun getImage(imageUrl: String?, tableName: String?, key: String?, fieldName: String?): Any =
+        tryImageFromAssets(tableName, key, fieldName)
+            ?: if (!imageUrl.isNullOrEmpty()) imageUrl else R.drawable.image_off
+
+    private fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Uri? {
         BaseApp.runtimeDataHolder.embeddedFiles.find {
             it.contains(tableName + File.separator + "$tableName($key)_${fieldName}_")
         }?.let { path ->
@@ -77,6 +89,31 @@ object ImageHelper {
                 }
             }
         }
+    }
+
+    fun getTempImageFile(context: Context, callback: (uri: Uri, photoFilePath: String) -> Unit) {
+        val photoFile: File? = try {
+            createTempImageFile(context)
+        } catch (ex: IOException) {
+            Timber.e(ex.localizedMessage)
+            ToastHelper.show(context, "Could not create temporary file", MessageType.ERROR)
+            null
+        }
+        photoFile?.let {
+            try {
+                val photoURI: Uri = FileProvider.getUriForFile(context, context.packageName + ".provider", it)
+                callback(photoURI, it.absolutePath)
+            } catch (e: IllegalArgumentException) {
+                Timber.e(e.localizedMessage)
+                ToastHelper.show(context, "Could not create temporary file", MessageType.ERROR)
+            }
+        }
+    }
+
+    private fun createTempImageFile(context: Context): File {
+        val timeStamp = SimpleDateFormat.getTimeInstance().format(Date())
+        val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
 }
 

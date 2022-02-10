@@ -1,7 +1,6 @@
 package com.qmobile.qmobileui.action
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
@@ -18,7 +17,7 @@ class ActionsParametersListAdapter(
     private val currentEntity: EntityModel?,
     private val fragmentManager: FragmentManager?,
     private val hideKeyboardCallback: () -> Unit,
-    private val startActivityCallback: (intent: Intent, position: Int, photoFilePath: String?) -> Unit,
+    private val actionTypesCallback: (actionTypes: ActionTypes, position: Int) -> Unit,
     private val onValueChanged: (String, Any?, String?, Boolean) -> Unit
 ) :
     RecyclerView.Adapter<BaseViewHolder>() {
@@ -30,7 +29,7 @@ class ActionsParametersListAdapter(
             context,
             fragmentManager,
             hideKeyboardCallback,
-            startActivityCallback
+            actionTypesCallback
         )
     }
 
@@ -61,7 +60,8 @@ class ActionsParametersListAdapter(
         notifyItemChanged(position)
     }
 
-    fun getUpdatedImageParameterName(position: Int): String? {
-        return action.parameters.getSafeObject(position)?.getSafeString("name")
+    fun updateBarcodeForPosition(position: Int, value: String) {
+        action.parameters.getSafeObject(position)?.put("barcode_value", value)
+        notifyItemChanged(position)
     }
 }

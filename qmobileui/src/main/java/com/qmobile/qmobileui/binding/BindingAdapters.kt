@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.binding
 
-import android.net.Uri
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -30,13 +29,8 @@ fun bindImageFromUrl(
     tableName: String?,
     transform: String? = null
 ) {
-    val imageFromAssetUri: Uri? = ImageHelper.tryImageFromAssets(tableName, key, fieldName)
-
-    val glideRequest = ImageHelper.getGlideRequest(
-        view,
-        imageFromAssetUri
-            ?: if (!imageUrl.isNullOrEmpty()) imageUrl else R.drawable.ic_placeholder
-    )
+    val image: Any = ImageHelper.getImage(imageUrl, tableName, key, fieldName)
+    val glideRequest = ImageHelper.getGlideRequest(view, image)
 
     Transformations.getTransformation(
         transform,

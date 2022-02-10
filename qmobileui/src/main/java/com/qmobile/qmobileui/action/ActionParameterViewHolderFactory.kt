@@ -1,11 +1,11 @@
 package com.qmobile.qmobileui.action
 
 import android.content.Context
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.viewholders.BarcodeViewHolder
 import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
 import com.qmobile.qmobileui.action.viewholders.BooleanViewHolder
 import com.qmobile.qmobileui.action.viewholders.DateViewHolder
@@ -23,7 +23,7 @@ class ActionParameterViewHolderFactory private constructor() {
             context: Context,
             fragmentManager: FragmentManager?,
             hideKeyboardCallback: () -> Unit,
-            startActivityCallback: (intent: Intent, position: Int, photoFilePath: String?) -> Unit
+            actionTypesCallback: (actionTypes: ActionTypes, position: Int) -> Unit
         ): BaseViewHolder {
 
             return when (val itemType = ActionParameterEnum.values()[viewType]) {
@@ -42,21 +42,6 @@ class ActionParameterViewHolderFactory private constructor() {
                         itemType.format,
                         hideKeyboardCallback
                     )
-
-                // Boolean
-                ActionParameterEnum.BOOLEAN_DEFAULT ->
-                    BooleanViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_boolean_switch, parent, false),
-                        hideKeyboardCallback
-                    )
-                ActionParameterEnum.BOOLEAN_CHECK ->
-                    BooleanViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_boolean_check_mark, parent, false),
-                        hideKeyboardCallback
-                    )
-
                 // Number
                 ActionParameterEnum.NUMBER_DEFAULT1,
                 ActionParameterEnum.NUMBER_DEFAULT2,
@@ -70,7 +55,6 @@ class ActionParameterViewHolderFactory private constructor() {
                         itemType.format,
                         hideKeyboardCallback
                     )
-
                 // Date
                 ActionParameterEnum.DATE_DEFAULT1,
                 ActionParameterEnum.DATE_DEFAULT2,
@@ -84,7 +68,6 @@ class ActionParameterViewHolderFactory private constructor() {
                         fragmentManager,
                         hideKeyboardCallback
                     )
-
                 // Time
                 ActionParameterEnum.TIME_DEFAULT,
                 ActionParameterEnum.TIME_DURATION ->
@@ -95,14 +78,34 @@ class ActionParameterViewHolderFactory private constructor() {
                         fragmentManager,
                         hideKeyboardCallback
                     )
-
+                // Boolean
+                ActionParameterEnum.BOOLEAN_DEFAULT ->
+                    BooleanViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_boolean_switch, parent, false),
+                        hideKeyboardCallback
+                    )
+                ActionParameterEnum.BOOLEAN_CHECK ->
+                    BooleanViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_boolean_check_mark, parent, false),
+                        hideKeyboardCallback
+                    )
                 // Image
                 ActionParameterEnum.IMAGE ->
                     ImageViewHolder(
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_image, parent, false),
                         hideKeyboardCallback,
-                        startActivityCallback
+                        actionTypesCallback
+                    )
+                // Barcode
+                ActionParameterEnum.BARCODE ->
+                    BarcodeViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_text, parent, false),
+                        hideKeyboardCallback,
+                        actionTypesCallback
                     )
             }
         }

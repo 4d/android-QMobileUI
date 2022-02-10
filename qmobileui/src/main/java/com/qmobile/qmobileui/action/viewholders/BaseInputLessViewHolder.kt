@@ -7,8 +7,6 @@
 package com.qmobile.qmobileui.action.viewholders
 
 import android.view.View
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.FragmentManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.qmobile.qmobileapi.model.entity.EntityModel
@@ -16,7 +14,7 @@ import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.ui.getShakeAnimation
 
-abstract class BaseDateTimeViewHolder(
+abstract class BaseInputLessViewHolder(
     itemView: View,
     hideKeyboardCallback: () -> Unit
 ) : BaseViewHolder(itemView, hideKeyboardCallback) {
@@ -72,17 +70,9 @@ abstract class BaseDateTimeViewHolder(
         return -1
     }
 
-    internal fun configureInputLayout(
-        fragmentManager: FragmentManager?,
-        dialogFragment: DialogFragment
-    ) {
+    internal fun onEndIconClick(endIconClick: () -> Unit) {
         container.setEndIconOnClickListener {
-            fragmentManager?.let {
-                val dialog = dialogFragment.dialog
-                if (dialog == null || !dialog.isShowing) {
-                    dialogFragment.show(it, dialogFragment.toString())
-                }
-            }
+            endIconClick()
         }
     }
 

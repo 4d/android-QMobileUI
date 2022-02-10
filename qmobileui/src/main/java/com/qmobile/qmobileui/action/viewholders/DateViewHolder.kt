@@ -21,7 +21,7 @@ class DateViewHolder(
     format: String,
     private val fragmentManager: FragmentManager?,
     hideKeyboardCallback: () -> Unit
-) : BaseDateTimeViewHolder(itemView, hideKeyboardCallback) {
+) : BaseInputLessViewHolder(itemView, hideKeyboardCallback) {
 
     private var dateFormat: String = when (format) {
         ActionParameterEnum.DATE_DEFAULT2.format,
@@ -65,7 +65,14 @@ class DateViewHolder(
             validate(false)
         )
 
-        configureInputLayout(fragmentManager, datePicker)
+        onEndIconClick {
+            fragmentManager?.let {
+                val dialog = datePicker.dialog
+                if (dialog == null || !dialog.isShowing) {
+                    datePicker.show(it, datePicker.toString())
+                }
+            }
+        }
     }
 
     private fun getDateToSubmit(): String =

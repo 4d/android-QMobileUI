@@ -22,7 +22,7 @@ class TimeViewHolder(
     format: String,
     private val fragmentManager: FragmentManager?,
     hideKeyboardCallback: () -> Unit
-) : BaseDateTimeViewHolder(itemView, hideKeyboardCallback) {
+) : BaseInputLessViewHolder(itemView, hideKeyboardCallback) {
 
     companion object {
         private const val dayFactor = 60 * 60 * 24
@@ -82,7 +82,14 @@ class TimeViewHolder(
             validate(false)
         )
 
-        configureInputLayout(fragmentManager, picker)
+        onEndIconClick {
+            fragmentManager?.let {
+                val dialog = picker.dialog
+                if (dialog == null || !dialog.isShowing) {
+                    picker.show(it, picker.toString())
+                }
+            }
+        }
     }
 
     private fun convertToSeconds(hour: Int, minute: Int): Int =

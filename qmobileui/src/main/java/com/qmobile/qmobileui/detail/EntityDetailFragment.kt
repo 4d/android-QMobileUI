@@ -150,11 +150,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment, ActionNavigable {
         // Event if we are in a N-1 relation, we don't need to provide parent information in the request
         return ActionHelper.getActionContent(
             tableName = tableName,
-            itemId = itemId ?: "",
-            relationName = "",
-            parentItemId = "",
-            parentTableName = "",
-            parentRelationName = ""
+            itemId = itemId ?: ""
         )
     }
 

@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.action
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,15 +15,21 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.APP_OCTET
+import com.qmobile.qmobileapi.utils.getSafeObject
+import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.ActionActivity
+import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
+import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.ui.CenterLayoutManager
 import com.qmobile.qmobileui.utils.hideKeyboard
@@ -34,7 +39,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import kotlin.collections.HashMap
 
-open class ActionParametersFragment : Fragment(), ActionProvider {
+class ActionParametersFragment : Fragment(), ActionProvider {
 
     // views
     private lateinit var adapter: ActionsParametersListAdapter
@@ -51,6 +56,7 @@ open class ActionParametersFragment : Fragment(), ActionProvider {
     private var fromRelation = false
 
     override lateinit var actionActivity: ActionActivity
+    private lateinit var delegate: FragmentCommunication
 
     private val paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
@@ -60,6 +66,11 @@ open class ActionParametersFragment : Fragment(), ActionProvider {
     private lateinit var currentPhotoPath: String
     private lateinit var action: Action
     private var selectedEntity: EntityModel? = null
+    private var actionPosition = -1
+
+    companion object {
+        const val BARCODE_FRAGMENT_REQUEST_KEY = "scan_request"
+    }
 
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -70,11 +81,22 @@ open class ActionParametersFragment : Fragment(), ActionProvider {
         }
     }
 
+    private val getImageFromGallery = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            onImageChosen(uri)
+        }
+    }
+
+    private val getCameraImage = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success)
+            onImageChosen(Uri.fromFile(File(currentPhotoPath)))
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
@@ -93,6 +115,12 @@ open class ActionParametersFragment : Fragment(), ActionProvider {
             parentRelationName = BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
         }
 
+        setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
+            bundle.getString("barcode_value")?.let {
+                adapter.updateBarcodeForPosition(actionPosition, it)
+            }
+        }
+
         _binding = FragmentActionParametersBinding.inflate(
             inflater,
             container,
@@ -105,8 +133,8 @@ open class ActionParametersFragment : Fragment(), ActionProvider {
                 currentEntity = selectedEntity,
                 fragmentManager = activity?.supportFragmentManager,
                 hideKeyboardCallback = { onHideKeyboardCallback() },
-                startActivityCallback = { intent, position, photoFilePath ->
-                    startActivityCallback(intent, position, photoFilePath)
+                actionTypesCallback = { actionType, position ->
+                    actionTypesCallback(actionType, position)
                 },
                 onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                     onValueChanged(name, value, metaData, isValid)
@@ -138,11 +166,6 @@ open class ActionParametersFragment : Fragment(), ActionProvider {
         }
     }
 
-    private fun startActivityCallback(intent: Intent, position: Int, photoFilePath: String?) {
-        photoFilePath?.let { currentPhotoPath = it }
-        activity?.startActivityForResult(intent, position)
-    }
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_actions_parameters, menu)
         super.onCreateOptionsMenu(menu, inflater)
@@ -169,6 +192,9 @@ open class ActionParametersFragment : Fragment(), ActionProvider {
             actionActivity = context
             action = actionActivity.getSelectedAction()
             selectedEntity = actionActivity.getSelectedEntity()
+        }
+        if (context is FragmentCommunication) {
+            delegate = context
         }
     }
 
@@ -256,18 +282,6 @@ open class ActionParametersFragment : Fragment(), ActionProvider {
         }
     }
 
-    fun handleResult(requestCode: Int, data: Intent) {
-        // The request code is the position of item in adapter.
-        // If image is from gallery, it's stored in data.data,
-        // Otherwise recover currentPhotoPath from created image from Camera app
-        val uri: Uri = data.data ?: Uri.fromFile(File(currentPhotoPath))
-
-        adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->
-            imagesToUpload[parameterName] = uri
-        }
-        adapter.updateImageForPosition(requestCode, uri)
-    }
-
     override fun getActionContent(itemId: String?): MutableMap<String, Any> {
         return ActionHelper.getActionContent(
             tableName = tableName,
@@ -279,5 +293,37 @@ open class ActionParametersFragment : Fragment(), ActionProvider {
             parentTableName = parentTableName,
             parentRelationName = parentRelationName
         )
+    }
+
+    private fun onImageChosen(uri: Uri) {
+        action.parameters.getSafeObject(actionPosition)?.getSafeString("name")?.let { parameterName ->
+            imagesToUpload[parameterName] = uri
+        }
+        adapter.updateImageForPosition(actionPosition, uri)
+    }
+
+    private fun actionTypesCallback(actionType: ActionTypes, position: Int) {
+        actionPosition = position
+        when (actionType) {
+            ActionTypes.PICK_PHOTO_GALLERY -> pickPhotoFromGallery()
+            ActionTypes.TAKE_PICTURE_CAMERA -> takePhotoFromCamera()
+            ActionTypes.SCAN -> scan()
+        }
+    }
+
+    private fun pickPhotoFromGallery() {
+        getImageFromGallery.launch("image/*")
+    }
+
+    private fun takePhotoFromCamera() {
+        ImageHelper.getTempImageFile(requireContext()) { uri, photoFilePath ->
+            currentPhotoPath = photoFilePath
+            getCameraImage.launch(uri)
+        }
+    }
+
+    private fun scan() {
+        delegate.setFullScreenMode(true)
+        BaseApp.genericNavigationResolver.navigateToActionScanner(binding)
     }
 }

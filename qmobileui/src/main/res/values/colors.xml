@@ -5,8 +5,6 @@
   -->
 
 <resources>
-    <color name="error_dark">#FFCF6679</color>
-    <color name="error_light">#FFB00020</color>
     <color name="relation_link">#007AFF</color>
 
     <color name="grey_light_1">#E9E9EB</color>
@@ -16,4 +14,6 @@
     <color name="grey_dark_2">#1C1C1E</color>
     <color name="grey_dark_3">#2A2A2C</color>
     <color name="grey_dark_4">#2C2C2E</color>
+
+    <color name="barcode_rect">#4CAF50</color>
 </resources>

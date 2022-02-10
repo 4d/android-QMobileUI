@@ -23,20 +23,19 @@ class ActionHelper private constructor() {
     companion object {
         fun getActionContent(
             tableName: String,
-            itemId: String,
+            itemId: String = "",
             parameters: HashMap<String, Any>? = null,
             metaData: HashMap<String, String>? = null,
-            relationName: String,
-            parentItemId: String,
-            parentTableName: String,
-            parentRelationName: String
+            relationName: String = "",
+            parentItemId: String = "",
+            parentTableName: String = "",
+            parentRelationName: String = ""
         ): MutableMap<String, Any> {
-            val map: MutableMap<String, Any> = mutableMapOf()
+
             val actionContext = mutableMapOf<String, Any>(
                 "dataClass" to
                     BaseApp.genericTableHelper.originalTableName(tableName)
             )
-
             // entity
             val entity = HashMap<String, Any>()
 
@@ -65,6 +64,7 @@ class ActionHelper private constructor() {
                     actionContext["parent"] = parent
             }
 
+            val map: MutableMap<String, Any> = mutableMapOf()
             map["context"] = actionContext
             parameters?.let { map.put("parameters", parameters) }
             metaData?.let { map.put("metadata", ActionMetaData(metaData)) }

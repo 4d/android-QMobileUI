@@ -21,8 +21,7 @@ import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
-import com.qmobile.qmobileui.BaseFragment
-import com.qmobile.qmobileui.FragmentCommunication
+import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.network.RemoteUrlChange
 import com.qmobile.qmobileui.utils.ToastHelper
@@ -30,7 +29,6 @@ import timber.log.Timber
 
 class SettingsFragment :
     PreferenceFragmentCompat(),
-    BaseFragment,
     Preference.OnPreferenceClickListener,
     RemoteUrlChange {
 
@@ -48,8 +46,7 @@ class SettingsFragment :
     private lateinit var remoteUrl: String
     private lateinit var logoutDialogBuilder: MaterialAlertDialogBuilder
 
-    // BaseFragment
-    override lateinit var delegate: FragmentCommunication
+    internal lateinit var activitySettingsInterface: ActivitySettingsInterface
 
     // UI strings
     private lateinit var noInternetString: String
@@ -66,8 +63,8 @@ class SettingsFragment :
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is FragmentCommunication) {
-            delegate = context
+        if (context is ActivitySettingsInterface) {
+            activitySettingsInterface = context
         }
         // Access resources elements
         remoteUrlPrefKey = resources.getString(R.string.pref_remote_url_key)
@@ -94,11 +91,11 @@ class SettingsFragment :
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        loginViewModel = getLoginViewModel(activity, delegate.loginApiService)
+        loginViewModel = getLoginViewModel(activity, activitySettingsInterface.loginApiService)
         connectivityViewModel = getConnectivityViewModel(
             activity,
-            delegate.connectivityManager,
-            delegate.accessibilityApiService
+            activitySettingsInterface.connectivityManager,
+            activitySettingsInterface.accessibilityApiService
         )
         initLayout()
         SettingsFragmentObserver(this, connectivityViewModel).initObservers()
@@ -122,7 +119,7 @@ class SettingsFragment :
             return when (preference.key) {
 
                 remoteUrlPrefKey -> {
-                    delegate.showRemoteUrlEditDialog(remoteUrl, this)
+                    activitySettingsInterface.showRemoteUrlEditDialog(remoteUrl, this)
                     true
                 }
                 logoutPrefKey -> {
@@ -180,7 +177,7 @@ class SettingsFragment :
     private fun isReady(): Boolean {
         if (loginViewModel.authenticationState.value == AuthenticationStateEnum.INVALID_AUTHENTICATION) {
             // For example server was not responding when trying to auto-login
-            delegate.requestAuthentication()
+            activitySettingsInterface.requestAuthentication()
             return false
         }
         return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
@@ -208,6 +205,6 @@ class SettingsFragment :
     override fun onValidRemoteUrlChange(newRemoteUrl: String) {
         BaseApp.sharedPreferencesHolder.remoteUrl = newRemoteUrl
         remoteUrl = newRemoteUrl
-        this@SettingsFragment.delegate.refreshAllApiClients()
+        this@SettingsFragment.activitySettingsInterface.refreshAllApiClients()
     }
 }

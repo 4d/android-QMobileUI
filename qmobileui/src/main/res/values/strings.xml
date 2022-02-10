@@ -90,4 +90,7 @@
     <string name="permission_dialog_positive">OK</string>
     <string name="permission_dialog_negative">No, thank you</string>
 
+    <!-- Barcode -->
+    <string name="barcode_camera_back_content_description">Back</string>
+
 </resources>
