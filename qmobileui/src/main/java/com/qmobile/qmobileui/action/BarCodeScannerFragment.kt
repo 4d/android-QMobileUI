@@ -104,15 +104,7 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
             ones listed here, and you may not need to offer support for all of these. You should only
             specify the ones you need */
             val options = BarcodeScannerOptions.Builder().setBarcodeFormats(
-                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_CODE_128,
-                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_CODE_39,
-                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_CODE_93,
-                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_8,
-                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_13,
-                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_QR_CODE,
-                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_UPC_A,
-                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_UPC_E,
-                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_PDF417
+                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ALL_FORMATS
             ).build()
 
             val scanner = BarcodeScanning.getClient(options)
