@@ -3,7 +3,8 @@ package com.qmobile.qmobileui.action
 import android.Manifest
 import android.content.Context
 import android.os.Bundle
-import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -159,28 +160,22 @@ class BarCodeScannerFragment : Fragment(), BaseFragment {
                             (binding as FragmentBarCodeScannerBinding).progress.visibility =
                                 View.VISIBLE
 
-                            val timer = object : CountDownTimer(1000, 1000) {
-                                override fun onTick(millisUntilFinished: Long) {
-                                }
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                (binding as FragmentBarCodeScannerBinding).progress.visibility =
+                                    View.GONE
 
-                                override fun onFinish() {
-                                    (binding as FragmentBarCodeScannerBinding).progress.visibility =
-                                        View.GONE
-
-                                    val result = Bundle().apply {
-                                        putString("scanned", value)
-                                        arguments?.getInt("position")
-                                            ?.let { putInt("position", it) }
-                                    }
-                                    fragmentManager?.setFragmentResult(
-                                        "scan_request",
-                                        result
-                                    )
-                                    activity?.supportFragmentManager?.findFragmentById(R.id.nav_host_container)
-                                        ?.findNavController()?.navigateUp()
+                                val result = Bundle().apply {
+                                    putString("scanned", value)
+                                    arguments?.getInt("position")
+                                        ?.let { putInt("position", it) }
                                 }
-                            }
-                            timer.start()
+                                fragmentManager?.setFragmentResult(
+                                    "scan_request",
+                                    result
+                                )
+                                activity?.supportFragmentManager?.findFragmentById(R.id.nav_host_container)
+                                    ?.findNavController()?.navigateUp()
+                            }, 1000)
                         }
                     }
                 }
