@@ -9,9 +9,11 @@ package com.qmobile.qmobileui.detail
 import androidx.lifecycle.LiveData
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.parseToString
-import com.qmobile.qmobiledatastore.data.RoomData
 import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.relation.Relation
+import com.qmobile.qmobiledatasync.relation.RelationHelper
+import com.qmobile.qmobiledatasync.relation.RelationTypeEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import timber.log.Timber
@@ -35,71 +37,31 @@ class EntityDetailFragmentObserver(
             entity?.let {
 
                 setupObserver(entity)
-
-                entity.__KEY?.let { itemId ->
-                    BaseApp.runtimeDataHolder.oneToManyRelations[fragment.tableName]?.forEach { relationName ->
-                        BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForDetail(
-                            viewDataBinding = fragment.binding,
-                            relationName = relationName,
-                            itemId = itemId,
-                            entity = entity
-                        )
-                    }
-                    BaseApp.runtimeDataHolder.manyToOneRelations[fragment.tableName]?.forEach { relationName ->
-                        BaseApp.genericNavigationResolver.setupManyToOneRelationButtonOnClickActionForDetail(
-                            viewDataBinding = fragment.binding,
-                            relationName = relationName,
-                            entity = entity
-                        )
-                    }
-                }
+                RelationHelper.setupRelationNavigation(fragment.tableName, fragment.binding, entity)
             }
         }
     }
 
     private fun setupObserver(entity: EntityModel) {
-        BaseApp.genericRelationHelper.getManyToOneRelationsInfo(fragment.tableName, entity)
-            .let { relationMap ->
-                if (relationMap.isNotEmpty()) {
-                    observeRelations(relationMap, entity)
-                }
-            }
-        BaseApp.genericRelationHelper.getOneToManyRelationsInfo(fragment.tableName, entity)
-            .let { relationMap ->
-                if (relationMap.isNotEmpty()) {
-                    observeRelations(relationMap)
-                }
-            }
-    }
-
-    private fun observeRelations(relations: Map<String, LiveData<RoomRelation>>, entity: EntityModel? = null) {
-        for ((relationName, liveDataRelatedEntity) in relations) {
-            liveDataRelatedEntity.observe(
-                requireNotNull(fragment.viewLifecycleOwner)
-            ) { roomRelation ->
-                roomRelation?.let {
-                    entityViewModel.setRelationToLayout(relationName, roomRelation)
-                    entity?.let {
-                        roomRelation.toOne?.let {
-                            refreshOneToManyNavForNavbarTitle(entity, it)
-                        }
-                    }
-                }
+        RelationHelper.getRelationsLiveData(fragment.tableName, entity).let { relationMap ->
+            if (relationMap.isNotEmpty()) {
+                observeRelations(relationMap, entity)
             }
         }
     }
 
-    private fun refreshOneToManyNavForNavbarTitle(entity: EntityModel, anyRelatedEntity: RoomData) {
-        entity.__KEY?.let { itemId ->
-            BaseApp.runtimeDataHolder.oneToManyRelations[fragment.tableName]?.forEach { relationName ->
-                if (relationName.contains(".")) {
-                    BaseApp.genericNavigationResolver.setupOneToManyRelationButtonOnClickActionForDetail(
-                        viewDataBinding = fragment.binding,
-                        relationName = relationName,
-                        itemId = itemId,
-                        entity = entity,
-                        anyRelatedEntity = anyRelatedEntity
-                    )
+    private fun observeRelations(relations: Map<Relation, LiveData<RoomRelation>>, entity: EntityModel) {
+        for ((relation, liveDataRelatedEntity) in relations) {
+            liveDataRelatedEntity.observe(requireNotNull(fragment.viewLifecycleOwner)) { roomRelation ->
+                roomRelation?.let {
+                    entityViewModel.setRelationToLayout(relation.name, roomRelation)
+                    if (relation.type == RelationTypeEnum.MANY_TO_ONE) {
+                        roomRelation.toOne?.let {
+                            RelationHelper.refreshOneToManyNavForNavbarTitle(
+                                fragment.tableName, fragment.binding, entity, it
+                            )
+                        }
+                    }
                 }
             }
         }

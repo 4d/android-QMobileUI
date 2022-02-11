@@ -10,6 +10,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.relation.RelationHelper
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -58,8 +59,8 @@ class FormQueryBuilder(
 
                 val relation = field.split(".")[0] // manager
                 val relatedField = field.split(".")[1] // FirstName
-                val relatedTableName =
-                    BaseApp.genericRelationHelper.getRelatedTableName(tableName, relation)
+
+                val relatedTableName = RelationHelper.getDest(tableName, relation) ?: ""
 
                 stringBuffer.append(
                     "EXISTS ( SELECT * FROM $relatedTableName as T2 WHERE " +

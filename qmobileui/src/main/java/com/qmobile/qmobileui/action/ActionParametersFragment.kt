@@ -24,6 +24,7 @@ import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
@@ -109,8 +110,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         arguments?.getString("inverseName")?.let { inverseName = it }
 
         if (fromRelation) {
-            parentTableName = BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
-            parentRelationName = BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
+            RelationHelper.getDest(tableName, inverseName)?.let { parentTableName = it }
+            RelationHelper.getInverse(tableName, inverseName)?.let { parentRelationName = it }
         }
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->

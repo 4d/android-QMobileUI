@@ -9,8 +9,8 @@ package com.qmobile.qmobileui
 import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.utils.FieldMapping
-import com.qmobile.qmobiledatasync.utils.GenericRelationHelper
 import com.qmobile.qmobiledatasync.utils.RuntimeDataHolder
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import io.mockk.every
@@ -67,11 +67,10 @@ class SqlBuilderTest {
         }
 
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
-        val mockGenericRelationHelper = Mockito.mock(GenericRelationHelper::class.java)
+        val mockRelationHelper = Mockito.mock(RelationHelper::class.java)
         mockRuntimeDataHolder.customFormatters = mapOf()
         BaseApp.runtimeDataHolder = mockRuntimeDataHolder
-        BaseApp.genericRelationHelper = mockGenericRelationHelper
-        Mockito.`when`(mockGenericRelationHelper.getRelatedTableName("Table_3", "relation4"))
+        Mockito.`when`(mockRelationHelper.getDest("Table_3", "relation4"))
             .thenReturn("RELATED_TABLE")
 
         val formQueryBuilder = FormQueryBuilder(tableName = "Table_3", searchField = searchFields)
@@ -129,13 +128,12 @@ class SqlBuilderTest {
         }
 
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
-        val mockGenericRelationHelper = Mockito.mock(GenericRelationHelper::class.java)
+        val mockRelationHelper = Mockito.mock(RelationHelper::class.java)
         val customFormattersJsonObj = JSONObject(customFormattersJson)
         mockRuntimeDataHolder.customFormatters =
             FieldMapping.buildCustomFormatterBinding(customFormattersJsonObj)
         BaseApp.runtimeDataHolder = mockRuntimeDataHolder
-        BaseApp.genericRelationHelper = mockGenericRelationHelper
-        Mockito.`when`(mockGenericRelationHelper.getRelatedTableName("Table_4", "relationField"))
+        Mockito.`when`(mockRelationHelper.getDest("Table_4", "relationField"))
             .thenReturn("RELATED_TABLE")
 
         val formQueryBuilder = FormQueryBuilder(tableName = "Table_4", searchField = searchFields)
@@ -155,14 +153,13 @@ class SqlBuilderTest {
             sdkVersion = "12.5",
             logLevel = Log.DEBUG,
             dumpedTables = listOf(),
+            relations = listOf(),
             queries = mapOf(),
             tableProperties = mapOf(),
             customFormatters = mapOf(),
             embeddedFiles = mutableListOf(),
             tableActions = JSONObject(),
-            currentRecordActions = JSONObject(),
-            manyToOneRelations = mapOf(),
-            oneToManyRelations = mapOf()
+            currentRecordActions = JSONObject()
         )
         Assert.assertEquals(searchFieldsJson, BaseApp.runtimeDataHolder.searchField)
     }

@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
@@ -101,8 +102,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         arguments?.getString("parentItemId")?.let { parentItemId = it }
         arguments?.getString("inverseName")?.let { inverseName = it }
         if (fromRelation) {
-            parentTableName = BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
-            parentRelationName = BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
+            RelationHelper.getDest(tableName, inverseName)?.let { parentTableName = it }
+            RelationHelper.getInverse(tableName, inverseName)?.let { parentRelationName = it }
         }
 
         formQueryBuilder = FormQueryBuilder(tableName)
