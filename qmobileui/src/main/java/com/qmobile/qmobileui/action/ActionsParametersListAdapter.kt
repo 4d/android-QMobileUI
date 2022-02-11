@@ -16,7 +16,8 @@ class ActionsParametersListAdapter(
     private val currentEntity: EntityModel?,
     val onValueChanged: (String, Any?, String?, Boolean) -> Unit,
     val goToScanner: (Int) -> Unit,
-    val goToCamera: (Intent, Int) -> Unit
+    val goToCamera: (Intent, Int) -> Unit,
+    val onSigned: (String, Uri?) -> Unit
 ) :
     RecyclerView.Adapter<ActionParameterViewHolder>() {
 
@@ -44,7 +45,9 @@ class ActionsParametersListAdapter(
             goToScanner(it)
         }, { intent: Intent, position: Int ->
             goToCamera(intent, position)
-        }
+            }, { parameterName: String, uri: Uri? ->
+                onSigned(parameterName, uri)
+            }
         )
     }
 

@@ -8,6 +8,8 @@ import android.app.DatePickerDialog.OnDateSetListener
 import android.app.TimePickerDialog
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.net.Uri
 import android.provider.MediaStore
 import android.text.Editable
@@ -24,21 +26,25 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
+import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityHelper
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.model.entity.Photo
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.binding.bindImageFromUrl
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.list.SpellOutHelper
-import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.OutputStream
 import java.text.DecimalFormat
 
 abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -52,7 +58,8 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
         itemJsonObject = item as JSONObject
         parameterName = itemJsonObject.getSafeString("name") ?: ""
@@ -127,9 +134,10 @@ class TextViewHolder(itemView: View, val format: String) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, null, null)
+        super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
         editText.inputType = when (format) {
             ActionParameterEnum.TEXT_DEFAULT.format -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
             ActionParameterEnum.TEXT_ZIP.format,
@@ -218,9 +226,10 @@ class TextAreaViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, null, null)
+        super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
         editText.hint = itemJsonObject.getSafeString("placeholder")
         itemJsonObject.getSafeString("default")?.let {
             editText.text = it
@@ -281,9 +290,10 @@ class NumberViewHolder(itemView: View, val format: String) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, null, null)
+        super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
         editText.hint = itemJsonObject.getSafeString("placeholder")
 
         itemJsonObject.getSafeString("default")?.let {
@@ -400,9 +410,10 @@ class SpellOutViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, null, null)
+        super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
         itemJsonObject.getSafeString("default")?.let {
             editText.text = it
         }
@@ -516,9 +527,10 @@ class ScientificViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, null, null)
+        super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
         itemJsonObject.getSafeString("default")?.let {
             editText.text = it
         }
@@ -634,9 +646,10 @@ class PercentageViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, null, null)
+        super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
 
         editText.hint = itemJsonObject.getSafeString("placeholder")
         itemJsonObject.getSafeString("default")?.let {
@@ -756,9 +769,10 @@ class BooleanSwitchViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, null, null)
+        super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
         switch.setOnCheckedChangeListener { _, checked ->
             onValueChanged(parameterName, checked, null, true)
         }
@@ -797,9 +811,10 @@ class BooleanCheckMarkViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, null, null)
+        super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
         checkBox.setOnCheckedChangeListener { _, b ->
             onValueChanged(parameterName, b, null, true)
         }
@@ -844,9 +859,10 @@ class ImageViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, null, goToCamera)
+        super.bind(item, currentEntityJsonObject, onValueChanged, null, goToCamera, null)
         imageButton.setOnClickListener {
             // setup the alert builder
             val builder = MaterialAlertDialogBuilder(itemView.context)
@@ -957,10 +973,10 @@ class TimeViewHolder(itemView: View, val format: String) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
-
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, null, null)
+        super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
 
         var selectedHour = SELECTED_HOUR
         val selectedMinute = SELECTED_MINUTE
@@ -1062,9 +1078,10 @@ class DateViewHolder(itemView: View, val format: String) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, null, null)
+        super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
         itemJsonObject.getSafeString("placeholder")?.let {
             selectedDate.hint = it
         }
@@ -1142,9 +1159,10 @@ class BarCodeViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, goToScanner, goToCamera)
+        super.bind(item, currentEntityJsonObject, onValueChanged, goToScanner, goToCamera, null)
         imageButton.setOnClickListener {
             goToScanner?.let { it1 -> it1(bindingAdapterPosition) }
         }
@@ -1181,5 +1199,131 @@ class BarCodeViewHolder(itemView: View) :
             itemJsonObject.remove("scanned")
             onValueChanged(parameterName, it, null, validate())
         }
+    }
+}
+
+/**
+ *  Signature HOLDER
+ */
+
+const val MIN_ALPHA = 0.9F
+const val MAX_ALPHA = 1F
+const val BITMAP_QUALITY = 80
+const val ORIGIN_POSITION = 0F
+
+class SignatureViewHolder(itemView: View) :
+    ActionParameterViewHolder(itemView) {
+    private var signaturePad: SignaturePad? = itemView.findViewById(R.id.signature_pad)
+    private var closeButton: View? = itemView.findViewById(R.id.close_button)
+    private var defaultPreview: ImageView = itemView.findViewById(R.id.preview)
+    var isEmpty = true
+
+    override fun bind(
+        item: Any,
+        currentEntityJsonObject: EntityModel?,
+        onValueChanged: (String, Any, String?, Boolean) -> Unit,
+        goToScanner: ((Int) -> Unit)?,
+        goToCamera: ((Intent, Int) -> Unit)?,
+        onSigned: ((String, Uri?) -> Unit)?
+    ) {
+        super.bind(item, currentEntityJsonObject, onValueChanged, goToScanner, goToCamera, null)
+        signaturePad?.let {
+            it.setOnSignedListener(object : SignaturePad.OnSignedListener {
+                override fun onStartSigning() {
+                    setPreviewVisibility(false)
+                }
+
+                override fun onSigned() {
+                    val signatureURi = getSignatureUri(it.signatureBitmap)
+                    signatureURi?.let { uri -> onSigned?.let { it2 -> it2(parameterName, uri) } }
+                    isEmpty = false
+                    onValueChanged(parameterName, "", null, validate())
+                }
+
+                override fun onClear() {
+                    // When user signed and then cleared signature pad we should remove last signature from imagesToUpload
+                    onSigned?.let { it1 -> it1(parameterName, null) }
+                    isEmpty = true
+                    onValueChanged(parameterName, "", null, validate())
+                }
+            })
+        }
+
+        closeButton?.setOnClickListener {
+            signaturePad?.clear()
+        }
+        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+    }
+
+    override fun validate(): Boolean {
+        if (isMandatory() && isEmpty && signaturePad?.alpha == MAX_ALPHA) {
+            showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+            return false
+        }
+        dismissErrorIfNeeded()
+        return true
+    }
+
+    override fun setDefaultFieldIfNeeded(
+        currentEntity: EntityModel?,
+        itemJsonObject: JSONObject,
+        onValueChanged: (String, Any, String?, Boolean) -> Unit
+    ) {
+        currentEntity?.let {
+            val defaultField = itemJsonObject.getSafeString("defaultField")
+            if (defaultField != null) {
+                EntityHelper.readInstanceProperty<Photo>(it, defaultField).also { value ->
+                    if (value != null) {
+                        bindImageFromUrl(
+                            defaultPreview,
+                            value.__deferred?.uri,
+                            null,
+                            null,
+                            null,
+                            null
+                        )
+                        setPreviewVisibility(true)
+                        onValueChanged(parameterName, "", null, validate())
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setPreviewVisibility(isVisible: Boolean) {
+        if (isVisible) {
+            defaultPreview.visibility = View.VISIBLE
+            signaturePad?.alpha = MIN_ALPHA
+        } else {
+            defaultPreview.visibility = View.GONE
+            signaturePad?.alpha = MAX_ALPHA
+        }
+    }
+
+    private fun getSignatureUri(signature: Bitmap): Uri? {
+        try {
+            val photo: File? = try {
+                createImageFile(itemView.context)
+            } catch (e: IOException) {
+                Timber.e("SignatureViewHolder: ", e.localizedMessage)
+                null
+            }
+            saveBitmapToJPG(signature, photo)
+            return Uri.fromFile(photo)
+
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return null
+    }
+
+    private fun saveBitmapToJPG(bitmap: Bitmap, photo: File?) {
+        val newBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(newBitmap)
+        canvas.drawColor(Color.WHITE)
+        canvas.drawBitmap(bitmap, ORIGIN_POSITION, ORIGIN_POSITION, null)
+        val stream: OutputStream = FileOutputStream(photo)
+        newBitmap.compress(Bitmap.CompressFormat.JPEG, BITMAP_QUALITY, stream)
+        stream.close()
     }
 }

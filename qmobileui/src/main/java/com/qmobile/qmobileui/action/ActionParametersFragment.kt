@@ -124,6 +124,13 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                     )
                 }
                 requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+            }, { parameterName: String, uri: Uri? ->
+                if (uri != null) {
+                    imagesToUpload[parameterName] = uri
+                } else {
+                    // When user signed and then cleared signature pad we should remove last signature from imagesToUpload
+                    imagesToUpload.remove(parameterName)
+                }
             }
         )
         val layoutManager = LinearLayoutManager(requireContext())
@@ -147,7 +154,6 @@ class ActionParametersFragment : Fragment(), BaseFragment {
             areAllItemsSeen = true
         }
     }
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {

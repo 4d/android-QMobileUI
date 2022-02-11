@@ -55,6 +55,7 @@ object Versions {
     const val camerax_view = "1.1.0-beta01"
     const val camerax_extension = "1.1.0-beta01"
     const val mlkit = "17.0.2"
+    const val signature_pad ="1.3.1"
 }
 
 object Config {
@@ -167,6 +168,8 @@ object Libs {
 
     //Barcode scan
     const val MLKit_scan = "com.google.mlkit:barcode-scanning:${Versions.mlkit}"
+    //Signature pad
+    const val signature_pad = "com.github.gcacace:signature-pad:${Versions.signature_pad}"
 
 
     // Fragment

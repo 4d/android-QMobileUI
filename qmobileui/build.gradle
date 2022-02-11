@@ -82,6 +82,7 @@ dependencies {
 
     //Barcode scan
     implementation Libs.MLKit_scan
+    implementation Libs.signature_pad
 }
 
 
