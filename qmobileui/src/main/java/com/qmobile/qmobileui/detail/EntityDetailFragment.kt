@@ -17,14 +17,12 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import androidx.fragment.app.Fragment
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
-import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
@@ -33,7 +31,7 @@ import com.qmobile.qmobileui.ui.checkIfChildIsWebView
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.webview.MyWebViewClient
 
-open class EntityDetailFragment : Fragment(), BaseFragment, ActionNavigable {
+open class EntityDetailFragment : BaseFragment(), ActionNavigable {
 
     // views
     private var _binding: ViewDataBinding? = null
@@ -45,7 +43,6 @@ open class EntityDetailFragment : Fragment(), BaseFragment, ActionNavigable {
     override var tableName = ""
     private var itemId = ""
 
-    override lateinit var delegate: FragmentCommunication
     override lateinit var actionActivity: ActionActivity
     private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
     private var hasActions = false
@@ -78,6 +75,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment, ActionNavigable {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        EntityDetailFragmentObserver(this, entityViewModel).initObservers()
         view.checkIfChildIsWebView()?.let { foundWebView ->
             webView = foundWebView
             webView.webViewClient = MyWebViewClient()
@@ -131,19 +129,11 @@ open class EntityDetailFragment : Fragment(), BaseFragment, ActionNavigable {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is FragmentCommunication) {
-            delegate = context
-        }
         if (context is ActionActivity) {
             actionActivity = context
         }
 
         // Access resources elements
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        EntityDetailFragmentObserver(this, entityViewModel).initObservers()
     }
 
     override fun getActionContent(itemId: String?): MutableMap<String, Any> {

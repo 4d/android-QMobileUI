@@ -95,7 +95,7 @@ object ImageHelper {
         val photoFile: File? = try {
             createTempImageFile(context)
         } catch (ex: IOException) {
-            Timber.e(ex.localizedMessage)
+            Timber.e(ex.message.orEmpty())
             ToastHelper.show(context, "Could not create temporary file", MessageType.ERROR)
             null
         }
@@ -104,7 +104,7 @@ object ImageHelper {
                 val photoURI: Uri = FileProvider.getUriForFile(context, context.packageName + ".provider", it)
                 callback(photoURI, it.absolutePath)
             } catch (e: IllegalArgumentException) {
-                Timber.e(e.localizedMessage)
+                Timber.e(e.message.orEmpty())
                 ToastHelper.show(context, "Could not create temporary file", MessageType.ERROR)
             }
         }

@@ -19,7 +19,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ListAdapter
 import androidx.appcompat.widget.SearchView
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -32,7 +31,6 @@ import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
-import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
@@ -46,7 +44,7 @@ import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
 
-open class EntityListFragment : Fragment(), BaseFragment, ActionNavigable {
+open class EntityListFragment : BaseFragment(), ActionNavigable {
 
     companion object {
         private const val CURRENT_QUERY_KEY = "currentQuery_key"
@@ -62,7 +60,6 @@ open class EntityListFragment : Fragment(), BaseFragment, ActionNavigable {
     private lateinit var currentRecordActionsListAdapter: ListAdapter
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
 
-    override lateinit var delegate: FragmentCommunication
     override lateinit var actionActivity: ActionActivity
     private var searchableFields = BaseApp.runtimeDataHolder.searchField
     private var tableActionsJsonObject = BaseApp.runtimeDataHolder.tableActions
@@ -129,9 +126,6 @@ open class EntityListFragment : Fragment(), BaseFragment, ActionNavigable {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is FragmentCommunication) {
-            delegate = context
-        }
         if (context is ActionActivity) {
             actionActivity = context
         }
@@ -143,8 +137,8 @@ open class EntityListFragment : Fragment(), BaseFragment, ActionNavigable {
         savedInstanceState?.getString(CURRENT_QUERY_KEY, "")?.let { currentQuery = it }
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         initActions()
         initCellSwipe()
         initRecyclerView()
@@ -153,7 +147,7 @@ open class EntityListFragment : Fragment(), BaseFragment, ActionNavigable {
         hideKeyboard(activity)
         setSearchQuery()
         BaseApp.genericTableFragmentHelper.getCustomEntityListFragment(tableName, binding)
-            ?.onActivityCreated(savedInstanceState)
+            ?.onViewCreated(view, savedInstanceState)
     }
 
     override fun onDestroyView() {

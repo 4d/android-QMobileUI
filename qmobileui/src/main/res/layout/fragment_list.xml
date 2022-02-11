@@ -30,15 +30,17 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.5" />
 
-        <ProgressBar
-            style="?android:attr/progressBarStyle"
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/list_margin_medium"
+            android:indeterminate="true"
             android:visibility="@{safeUnbox(viewModel.dataLoading) ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toTopOf="@+id/fragment_list_guideline"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            tools:visibility="visible" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/fragment_list_swipe_to_refresh"

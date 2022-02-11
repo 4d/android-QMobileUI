@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.action.barcode
 
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,14 +19,12 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.qmobile.qmobileui.BaseFragment
-import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.action.ActionParametersFragment.Companion.BARCODE_FRAGMENT_REQUEST_KEY
 import com.qmobile.qmobileui.databinding.FragmentBarcodeBinding
 import timber.log.Timber
@@ -36,17 +33,16 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 @ExperimentalGetImage
-class BarcodeScannerFragment : Fragment(), BaseFragment {
+class BarcodeScannerFragment : BaseFragment() {
 
     private var _binding: FragmentBarcodeBinding? = null
     val binding get() = _binding!!
 
     private lateinit var cameraExecutor: ExecutorService
-    override lateinit var delegate: FragmentCommunication
     private val alreadyScanned = AtomicBoolean(false)
 
     companion object {
-        const val PROGRESS_DELAY: Long = 5000
+        const val PROGRESS_DELAY: Long = 1000
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -62,13 +58,6 @@ class BarcodeScannerFragment : Fragment(), BaseFragment {
             activity?.onBackPressed()
         }
         return binding.root
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is FragmentCommunication) {
-            delegate = context
-        }
     }
 
     override fun onDetach() {
@@ -109,9 +98,9 @@ class BarcodeScannerFragment : Fragment(), BaseFragment {
             try {
                 cameraProvider.bindToLifecycle(this, cameraSelector, previewUseCase, analysisUseCase)
             } catch (illegalStateException: IllegalStateException) {
-                Timber.e(illegalStateException.localizedMessage)
+                Timber.e(illegalStateException.message.orEmpty())
             } catch (illegalArgumentException: IllegalArgumentException) {
-                Timber.e(illegalArgumentException.localizedMessage)
+                Timber.e(illegalArgumentException.message.orEmpty())
             }
         }, ContextCompat.getMainExecutor(requireContext()))
     }

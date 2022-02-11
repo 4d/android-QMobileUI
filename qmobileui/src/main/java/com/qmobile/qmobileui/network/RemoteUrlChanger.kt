@@ -6,6 +6,6 @@
 
 package com.qmobile.qmobileui.network
 
-interface RemoteUrlChange : NetworkChecker {
+interface RemoteUrlChanger : NetworkChecker {
     fun onValidRemoteUrlChange(newRemoteUrl: String)
 }

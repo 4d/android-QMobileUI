@@ -14,19 +14,17 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
-import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.ColorHelper
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 
-class EntityViewPagerFragment : Fragment(), BaseFragment {
+class EntityViewPagerFragment : BaseFragment() {
 
     // views
     internal var viewPager: ViewPager2? = null
@@ -46,7 +44,6 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
 
     private lateinit var formQueryBuilder: FormQueryBuilder
     private lateinit var actionActivity: ActionActivity
-    override lateinit var delegate: FragmentCommunication
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -77,17 +74,14 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is FragmentCommunication) {
-            delegate = context
-        }
         if (context is ActionActivity) {
             actionActivity = context
         }
         // Access resources elements
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         adapter = ViewPagerAdapter(this, tableName)
 //        adapter = ViewPagerAdapter2(tableName, this.viewLifecycleOwner)
         viewPager?.adapter = adapter

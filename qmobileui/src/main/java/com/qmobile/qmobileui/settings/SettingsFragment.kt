@@ -23,14 +23,14 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.network.RemoteUrlChange
+import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.utils.ToastHelper
 import timber.log.Timber
 
 class SettingsFragment :
     PreferenceFragmentCompat(),
     Preference.OnPreferenceClickListener,
-    RemoteUrlChange {
+    RemoteUrlChanger {
 
     var firstTime = true
     private var logoutDialogTitle = ""

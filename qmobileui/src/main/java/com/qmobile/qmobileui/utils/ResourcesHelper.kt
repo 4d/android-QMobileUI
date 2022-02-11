@@ -59,7 +59,7 @@ object ResourcesHelper {
                 .lowercase()
                 .replace("[^a-z0-9]+".toRegex(), "_")
         } catch (e: StringIndexOutOfBoundsException) {
-            e.message?.let { Timber.e("Could not get iconPath : $it") }
+            Timber.e("Could not get iconPath : ${e.message}")
             null
         }
     }

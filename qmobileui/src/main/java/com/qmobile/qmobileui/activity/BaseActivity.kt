@@ -30,7 +30,7 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.network.NetworkChecker
-import com.qmobile.qmobileui.network.RemoteUrlChange
+import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.clearViewInParent
 import com.qmobile.qmobileui.ui.getShakeAnimation
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
@@ -98,7 +98,7 @@ abstract class BaseActivity : AppCompatActivity() {
         }
     }
 
-    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChange: RemoteUrlChange) {
+    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChanger: RemoteUrlChanger) {
         val remoteUrlEditDialog = LayoutInflater.from(this)
             .inflate(R.layout.remote_url_edit_dialog, findViewById(android.R.id.content), false)
         val remoteUrlEditLayout = remoteUrlEditDialog.findViewById<TextInputLayout>(R.id.remote_url_edit_layout)
@@ -122,8 +122,8 @@ abstract class BaseActivity : AppCompatActivity() {
                     getButton(AlertDialog.BUTTON_POSITIVE).setOnSingleClickListener {
                         val newRemoteUrl = remoteUrlEditLayout.editText?.text.toString()
                         if (newRemoteUrl.isUrlValid()) {
-                            remoteUrlChange.onValidRemoteUrlChange(newRemoteUrl)
-                            checkNetwork(remoteUrlChange)
+                            remoteUrlChanger.onValidRemoteUrlChange(newRemoteUrl)
+                            checkNetwork(remoteUrlChanger)
                             dismiss()
                         } else {
                             remoteUrlEditEditText.startAnimation(getShakeAnimation(this@BaseActivity))

@@ -10,7 +10,7 @@ import android.net.ConnectivityManager
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobileui.network.NetworkChecker
-import com.qmobile.qmobileui.network.RemoteUrlChange
+import com.qmobile.qmobileui.network.RemoteUrlChanger
 
 interface ActivitySettingsInterface {
 
@@ -24,7 +24,7 @@ interface ActivitySettingsInterface {
 
     fun requestAuthentication()
 
-    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChange: RemoteUrlChange)
+    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChanger: RemoteUrlChanger)
 
     fun checkNetwork(networkChecker: NetworkChecker)
 }

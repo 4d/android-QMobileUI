@@ -16,7 +16,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,7 +25,7 @@ import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.ActionActivity
-import com.qmobile.qmobileui.FragmentCommunication
+import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
 import com.qmobile.qmobileui.binding.ImageHelper
@@ -39,7 +38,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import kotlin.collections.HashMap
 
-class ActionParametersFragment : Fragment(), ActionProvider {
+class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     // views
     private lateinit var adapter: ActionsParametersListAdapter
@@ -56,7 +55,6 @@ class ActionParametersFragment : Fragment(), ActionProvider {
     private var fromRelation = false
 
     override lateinit var actionActivity: ActionActivity
-    private lateinit var delegate: FragmentCommunication
 
     private val paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
@@ -192,9 +190,6 @@ class ActionParametersFragment : Fragment(), ActionProvider {
             actionActivity = context
             action = actionActivity.getSelectedAction()
             selectedEntity = actionActivity.getSelectedEntity()
-        }
-        if (context is FragmentCommunication) {
-            delegate = context
         }
     }
 

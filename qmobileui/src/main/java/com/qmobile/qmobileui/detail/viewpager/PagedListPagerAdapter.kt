@@ -36,7 +36,7 @@ abstract class PagedListPagerAdapter<T : Any>(fragment: Fragment) :
         return try {
             pagedList?.get(position)
         } catch (e: IndexOutOfBoundsException) {
-            Timber.d(e.localizedMessage)
+            Timber.d(e.message.orEmpty())
             null
         }
     }
