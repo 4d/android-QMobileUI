@@ -9,6 +9,7 @@ package com.qmobile.qmobileui.ui
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
@@ -19,11 +20,28 @@ import android.webkit.WebView
 import androidx.core.view.children
 import com.qmobile.qmobileui.R
 
-object ViewUtils {
+object UIConstants {
     const val longClickDuration = 1500L
+    const val clickDebounceTime = 600L
+}
 
-    fun getShakeAnimation(context: Context): Animation =
-        AnimationUtils.loadAnimation(context, R.anim.shake)
+fun getShakeAnimation(context: Context): Animation = AnimationUtils.loadAnimation(context, R.anim.shake)
+
+class OnSingleClickListener(private val debounceTime: Long, private val block: () -> Unit) : View.OnClickListener {
+
+    private var lastClickTime = 0L
+
+    override fun onClick(view: View) {
+        if (SystemClock.elapsedRealtime() - lastClickTime < debounceTime) {
+            return
+        }
+        lastClickTime = SystemClock.elapsedRealtime()
+        block()
+    }
+}
+
+fun View.setOnSingleClickListener(debounceTime: Long = UIConstants.clickDebounceTime, block: () -> Unit) {
+    setOnClickListener(OnSingleClickListener(debounceTime, block))
 }
 
 fun View.setOnVeryLongClickListener(listener: () -> Unit) {
@@ -38,7 +56,7 @@ fun View.setOnVeryLongClickListener(listener: () -> Unit) {
                         performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                         listener.invoke()
                     },
-                    ViewUtils.longClickDuration
+                    UIConstants.longClickDuration
                 )
             } else if (event?.action == MotionEvent.ACTION_UP) {
                 handler.removeCallbacksAndMessages(null)

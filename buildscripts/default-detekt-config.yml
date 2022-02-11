@@ -1,5 +1,5 @@
 build:
-  maxIssues: 0
+  maxIssues: 50
   excludeCorrectable: false
   weights:
     # complexity: 2
@@ -93,8 +93,8 @@ complexity:
   ComplexMethod:
     active: true
     threshold: 15
-    ignoreSingleWhenExpression: false
-    ignoreSimpleWhenEntries: false
+    ignoreSingleWhenExpression: true
+    ignoreSimpleWhenEntries: true
     ignoreNestingFunctions: false
     nestingFunctions:
       - 'also'
@@ -235,9 +235,6 @@ exceptions:
       - 'NumberFormatException'
       - 'ParseException'
       - 'JSONException'
-      - 'JsonSyntaxException'
-      - 'IllegalArgumentException'
-      - 'StringIndexOutOfBoundsException'
     allowedExceptionNameRegex: '_|(ignore|expected).*'
   ThrowingExceptionFromFinally:
     active: true

@@ -318,7 +318,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                 fileOutputStream.write(bytes.toByteArray())
                 fileOutputStream.close()
             } catch (e: IOException) {
-                Timber.e("ActionParametersFragment", e.localizedMessage)
+                Timber.d(e.localizedMessage)
             }
 
             adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->

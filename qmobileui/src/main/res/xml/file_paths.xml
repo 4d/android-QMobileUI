@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by qmarciset on 14/12/2021.
+  ~ 4D SAS
+  ~ Copyright (c) 2021 qmarciset. All rights reserved.
+  -->
+
+<paths>
+    <external-files-path
+        name="ext_files_pictures"
+        path="Pictures" />
+    <external-path
+        name="ext_download"
+        path="Download/"/>
+</paths>

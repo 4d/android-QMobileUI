@@ -41,6 +41,7 @@ import com.qmobile.qmobileui.binding.bindImageFromDrawable
 import com.qmobile.qmobileui.databinding.ActivityLoginBinding
 import com.qmobile.qmobileui.network.RemoteUrlChange
 import com.qmobile.qmobileui.ui.clearViewInParent
+import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.ui.setOnVeryLongClickListener
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.hideKeyboard
@@ -120,7 +121,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
         }
 
         // Login button
-        binding.loginButtonAuth.setOnClickListener {
+        binding.loginButtonAuth.setOnSingleClickListener {
             if (connectivityViewModel.isConnected()) {
                 binding.loginButtonAuth.isEnabled = false
                 loginViewModel.login(email = binding.loginEmailInput.text.toString()) { }
@@ -186,7 +187,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
             .setNegativeButton(getString(R.string.remote_url_dialog_done), null)
             .create().apply {
                 setOnShowListener {
-                    getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                    getButton(AlertDialog.BUTTON_POSITIVE).setOnSingleClickListener {
                         showRemoteUrlEditDialog(remoteUrl, this@LoginActivity)
                     }
                 }

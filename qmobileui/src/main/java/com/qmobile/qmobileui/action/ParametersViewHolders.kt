@@ -1,3 +1,5 @@
+@file:Suppress("TooGenericExceptionCaught", "SwallowedException", "UnusedPrivateMember")
+
 package com.qmobile.qmobileui.action
 
 import android.app.Activity
@@ -873,7 +875,7 @@ class ImageViewHolder(itemView: View) :
                 imageButton.setImageBitmap(itemJsonObject.get("bitmap") as Bitmap)
                 itemJsonObject.remove("bitmap")
             }
-        } catch (e: JSONException) {
+        } catch (e: Exception) {
             Timber.e("ActionParameterViewHolder: ", e.localizedMessage)
         }
 
@@ -883,7 +885,7 @@ class ImageViewHolder(itemView: View) :
                 imageButton.setImageURI(uri)
                 itemJsonObject.remove("uri")
             }
-        } catch (e: JSONException) {
+        } catch (e: Exception) {
             Timber.e("ActionParameterViewHolder: ", e.localizedMessage)
         }
     }
@@ -917,7 +919,7 @@ class ImageViewHolder(itemView: View) :
                 photoFile?.also {
                     FileProvider.getUriForFile(
                         context,
-                        "com.4D.android.fileprovider",
+                        context.packageName + ".provider",
                         it
                     )
 
