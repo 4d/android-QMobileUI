@@ -1310,7 +1310,6 @@ class SignatureViewHolder(itemView: View) :
             }
             saveBitmapToJPG(signature, photo)
             return Uri.fromFile(photo)
-
         } catch (e: IOException) {
             e.printStackTrace()
         }

@@ -31,7 +31,7 @@ import com.qmobile.qmobileui.databinding.FragmentBarCodeScannerBinding
 import timber.log.Timber
 import java.util.concurrent.Executors
 
-@Suppress( "MagicNumber")
+@Suppress("MagicNumber")
 @ExperimentalGetImage
 class BarCodeScannerFragment : Fragment(), BaseFragment {
     private var _binding: ViewDataBinding? = null

@@ -116,22 +116,22 @@ class ActionParametersFragment : Fragment(), BaseFragment {
             {
                 BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
             }, { intent: Intent, position: Int ->
-                goToCamera = {
-                    (context as Activity).startActivityForResult(
-                        intent,
-                        // Send position as request code, so we can update image preview only for the selected item
-                        position
-                    )
-                }
-                requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-            }, { parameterName: String, uri: Uri? ->
-                if (uri != null) {
-                    imagesToUpload[parameterName] = uri
-                } else {
-                    // When user signed and then cleared signature pad we should remove last signature from imagesToUpload
-                    imagesToUpload.remove(parameterName)
-                }
+            goToCamera = {
+                (context as Activity).startActivityForResult(
+                    intent,
+                    // Send position as request code, so we can update image preview only for the selected item
+                    position
+                )
             }
+            requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+        }, { parameterName: String, uri: Uri? ->
+            if (uri != null) {
+                imagesToUpload[parameterName] = uri
+            } else {
+                // When user signed and then cleared signature pad we should remove last signature from imagesToUpload
+                imagesToUpload.remove(parameterName)
+            }
+        }
         )
         val layoutManager = LinearLayoutManager(requireContext())
         recyclerView.layoutManager = layoutManager
@@ -154,7 +154,6 @@ class ActionParametersFragment : Fragment(), BaseFragment {
             areAllItemsSeen = true
         }
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
