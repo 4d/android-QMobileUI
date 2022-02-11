@@ -1,6 +1,7 @@
 package com.qmobile.qmobileui.action
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -13,7 +14,9 @@ class ActionsParametersListAdapter(
     context: Context,
     val list: JSONArray,
     private val currentEntity: EntityModel?,
-    val onValueChanged: (String, Any?, String?, Boolean) -> Unit
+    val onValueChanged: (String, Any?, String?, Boolean) -> Unit,
+    val goToScanner: (Int) -> Unit,
+    val goToCamera: (Intent, Int) -> Unit
 ) :
     RecyclerView.Adapter<ActionParameterViewHolder>() {
 
@@ -34,10 +37,15 @@ class ActionsParametersListAdapter(
     override fun onBindViewHolder(holder: ActionParameterViewHolder, position: Int) {
         holder.bind(
             list[position],
-            currentEntity
-        ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
-            onValueChanged(name, value, metaData, isValid)
+            currentEntity,
+            { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+                onValueChanged(name, value, metaData, isValid)
+            }, {
+            goToScanner(it)
+        }, { intent: Intent, position: Int ->
+            goToCamera(intent, position)
         }
+        )
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -59,5 +67,10 @@ class ActionsParametersListAdapter(
 
     fun getUpdatedImageParameterName(position: Int): String? {
         return (list[position] as JSONObject).getSafeString("name")
+    }
+
+    fun updateBarcodeForPosition(position: Int, value: String) {
+        (list[position] as JSONObject).put("scanned", value)
+        notifyItemChanged(position)
     }
 }

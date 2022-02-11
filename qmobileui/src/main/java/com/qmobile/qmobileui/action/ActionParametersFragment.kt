@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.action
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -17,8 +18,12 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -41,7 +46,7 @@ import java.io.IOException
 
 const val IMAGE_QUALITY = 90
 
-open class ActionParametersFragment : Fragment(), BaseFragment {
+class ActionParametersFragment : Fragment(), BaseFragment {
 
     private var _binding: ViewDataBinding? = null
     internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
@@ -58,15 +63,17 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
     private val validationMap = HashMap<String, Boolean>()
     lateinit var adapter: ActionsParametersListAdapter
     private var fromRelation = false
+
     // Is set to true if all recyclerView items are seen at lean once
     private var areAllItemsSeen = false
+    private var goToCamera: (() -> Unit)? = null
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("currentItemId")?.let { parentItemId = it }
@@ -81,45 +88,75 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         }
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-        _binding = FragmentActionParametersBinding.inflate(
-            inflater,
-            container,
-            false
-        ).apply {
-            lifecycleOwner = viewLifecycleOwner
-            adapter = ActionsParametersListAdapter(
-                requireContext(),
-                delegate.getSelectAction().parameters,
-                delegate.getSelectedEntity()
-            ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+        if (_binding == null) {
+            _binding = FragmentActionParametersBinding.inflate(
+                inflater,
+                container,
+                false
+            ).apply {
+                lifecycleOwner = viewLifecycleOwner
+                setupRecycleView(recyclerView)
+            }
+        }
+        return binding.root
+    }
+
+    private fun setupRecycleView(recyclerView: RecyclerView) {
+        adapter = ActionsParametersListAdapter(
+            requireContext(),
+            delegate.getSelectAction().parameters,
+            delegate.getSelectedEntity(),
+            { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 validationMap[name] = isValid
                 paramsToSubmit[name] = value ?: ""
                 metaData?.let {
                     metaDataToSubmit[name] = metaData
                 }
-            }
-            val layoutManager = LinearLayoutManager(requireContext())
-            recyclerView.layoutManager = layoutManager
-            recyclerView.adapter = adapter
-
-            val dividerItemDecoration = DividerItemDecoration(
-                recyclerView.context,
-                layoutManager.orientation
-            )
-            recyclerView.addItemDecoration(dividerItemDecoration)
-            recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-                        areAllItemsSeen = true
-                    }
-                    super.onScrolled(recyclerView, dx, dy)
+            },
+            {
+                BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
+            }, { intent: Intent, position: Int ->
+                goToCamera = {
+                    (context as Activity).startActivityForResult(
+                        intent,
+                        // Send position as request code, so we can update image preview only for the selected item
+                        position
+                    )
                 }
-            })
-            if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-                areAllItemsSeen = true
+                requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
             }
+        )
+        val layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = adapter
+
+        val dividerItemDecoration = DividerItemDecoration(
+            recyclerView.context,
+            layoutManager.orientation
+        )
+        recyclerView.addItemDecoration(dividerItemDecoration)
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+                    areAllItemsSeen = true
+                }
+                super.onScrolled(recyclerView, dx, dy)
+            }
+        })
+        if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+            areAllItemsSeen = true
         }
-        return binding.root
+    }
+
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setFragmentResultListener("scan_request") { _: String, bundle: Bundle ->
+            val value = bundle.getString("scanned")
+            val position = bundle.getInt("position")
+            value?.let { adapter.updateBarcodeForPosition(position, it) }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -150,6 +187,18 @@ open class ActionParametersFragment : Fragment(), BaseFragment {
         if (context is FragmentCommunication) {
             delegate = context
         }
+
+        requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (isGranted) {
+                    goToCamera?.let { it() }
+                } else {
+                    Toast.makeText(requireActivity(), "Permission Denied", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
     }
 
     private fun isFormValid(): Boolean =

@@ -50,6 +50,11 @@ object Versions {
     const val swiperefreshlayout = "1.1.0"
     const val timber = "5.0.1"
     const val viewpager2 = "1.0.0"
+    const val fragment = "1.4.0"
+    const val camerax = "1.0.2"
+    const val camerax_view = "1.1.0-beta01"
+    const val camerax_extension = "1.1.0-beta01"
+    const val mlkit = "17.0.2"
 }
 
 object Config {
@@ -152,6 +157,20 @@ object Libs {
     const val dynamic_toasts = "com.pranavpandey.android:dynamic-toasts:${Versions.dynamic_toasts}"
     const val leakcanary = "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanary}"
     const val timber = "com.jakewharton.timber:timber:${Versions.timber}"
+
+    // Camera
+    const val camerax_core = "androidx.camera:camera-core:${Versions.camerax}"
+    const val camerax_camera2 = "androidx.camera:camera-camera2:${Versions.camerax}"
+    const val camerax_lifecycle = "androidx.camera:camera-lifecycle:${Versions.camerax}"
+    const val camerax_view = "androidx.camera:camera-view:${Versions.camerax_view}"
+    const val camerax_extensions = "androidx.camera:camera-extensions:${Versions.camerax_extension}"
+
+    //Barcode scan
+    const val MLKit_scan = "com.google.mlkit:barcode-scanning:${Versions.mlkit}"
+
+
+    // Fragment
+    const val fragment ="androidx.fragment:fragment-ktx:${Versions.fragment}"
 
     // Testing - Unit
     const val androidx_core_testing = "androidx.arch.core:core-testing:${Versions.arch_core}"

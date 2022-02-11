@@ -54,4 +54,6 @@ interface FragmentCommunication {
     fun setSelectedEntity(entityModel: EntityModel?)
 
     fun getSelectedEntity(): EntityModel?
+
+    fun setFullScreenMode(isFullScreen: Boolean)
 }
