@@ -104,6 +104,11 @@ class ActionParameterViewHolderFactory private constructor() {
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_barcode, parent, false)
                     )
+                ActionParameterEnum.SIGNATURE ->
+                    SignatureViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_signature, parent, false)
+                    )
             }
         }
     }

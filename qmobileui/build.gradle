@@ -24,7 +24,6 @@ dependencies {
 
     // Common
     implementation Libs.androidx_constraintlayout
-    implementation Libs.androidx_fragment_ktx
     implementation Libs.androidx_preference_ktx
     implementation Libs.kotlin_stdlib
     implementation Libs.swiperefreshlayout
@@ -59,23 +58,31 @@ dependencies {
     // Rx
     implementation Libs.rxjava
 
-    // CameraX
-    implementation Libs.androidx_camera2
-    implementation Libs.androidx_camera_lifecycle
-    implementation Libs.androidx_camera_view
-    implementation Libs.barcode_scanning
-
     // Utils
     implementation Libs.dynamic_toasts
     implementation Libs.material
     implementation Libs.retrofit_converter_gson
     implementation Libs.timber
 
+    // Fragment
+    implementation Libs.fragment
+
     // Testing
     testImplementation Libs.json
     testImplementation Libs.junit
     testImplementation Libs.mockito
     testImplementation Libs.mockk
+
+    // Camera
+    implementation Libs.camerax_core
+    implementation Libs.camerax_camera2
+    implementation Libs.camerax_lifecycle
+    implementation Libs.camerax_view
+    implementation Libs.camerax_extensions
+
+    //Barcode scan
+    implementation Libs.MLKit_scan
+    implementation Libs.signature_pad
 }
 
 
