@@ -9,7 +9,8 @@ package com.qmobile.qmobileui
 import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.relation.RelationHelper
+import com.qmobile.qmobiledatasync.relation.Relation
+import com.qmobile.qmobiledatasync.relation.RelationTypeEnum
 import com.qmobile.qmobiledatasync.utils.FieldMapping
 import com.qmobile.qmobiledatasync.utils.RuntimeDataHolder
 import com.qmobile.qmobileui.utils.FormQueryBuilder
@@ -67,11 +68,11 @@ class SqlBuilderTest {
         }
 
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
-        val mockRelationHelper = Mockito.mock(RelationHelper::class.java)
         mockRuntimeDataHolder.customFormatters = mapOf()
+        mockRuntimeDataHolder.relations = listOf(
+            Relation("Table_3", "RELATED_TABLE", "relation4", "inverse", RelationTypeEnum.MANY_TO_ONE)
+        )
         BaseApp.runtimeDataHolder = mockRuntimeDataHolder
-        Mockito.`when`(mockRelationHelper.getDest("Table_3", "relation4"))
-            .thenReturn("RELATED_TABLE")
 
         val formQueryBuilder = FormQueryBuilder(tableName = "Table_3", searchField = searchFields)
         val actualQueryResult = formQueryBuilder.getQuery("abc").sql
@@ -128,13 +129,13 @@ class SqlBuilderTest {
         }
 
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
-        val mockRelationHelper = Mockito.mock(RelationHelper::class.java)
         val customFormattersJsonObj = JSONObject(customFormattersJson)
         mockRuntimeDataHolder.customFormatters =
             FieldMapping.buildCustomFormatterBinding(customFormattersJsonObj)
+        mockRuntimeDataHolder.relations = listOf(
+            Relation("Table_4", "RELATED_TABLE", "relationField", "inverse", RelationTypeEnum.MANY_TO_ONE)
+        )
         BaseApp.runtimeDataHolder = mockRuntimeDataHolder
-        Mockito.`when`(mockRelationHelper.getDest("Table_4", "relationField"))
-            .thenReturn("RELATED_TABLE")
 
         val formQueryBuilder = FormQueryBuilder(tableName = "Table_4", searchField = searchFields)
         val actualQueryResult = formQueryBuilder.getQuery("UX").sql

@@ -36,8 +36,6 @@ import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.network.NetworkStateEnum
-import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
-import com.qmobile.qmobiledatasync.relation.OneToManyRelation
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.sync.resetIsToSync
 import com.qmobile.qmobiledatasync.toast.Event
@@ -495,24 +493,6 @@ class MainActivity :
             setupActionBarWithNavController(navController)
         }
         currentNavController = controller
-    }
-
-    /**
-     * Commands the appropriate EntityListViewModel to add the related entity in its dao
-     */
-    fun dispatchNewRelatedEntity(manyToOneRelation: ManyToOneRelation) {
-        val entityListViewModel =
-            entityListViewModelList.find { it.getAssociatedTableName() == manyToOneRelation.className }
-        entityListViewModel?.insertNewRelatedEntity(manyToOneRelation)
-    }
-
-    /**
-     * Commands the appropriate EntityListViewModel to add the related entities in its dao
-     */
-    fun dispatchNewRelatedEntities(oneToManyRelation: OneToManyRelation) {
-        val entityListViewModel =
-            entityListViewModelList.find { it.getAssociatedTableName() == oneToManyRelation.className }
-        entityListViewModel?.insertNewRelatedEntities(oneToManyRelation)
     }
 
     private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()

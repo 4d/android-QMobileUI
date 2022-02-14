@@ -28,8 +28,7 @@ class MainActivityObserver(
         activity.initObservers()
         entityListViewModelList.forEach { entityListViewModel ->
             observeDataSynchronized(entityListViewModel)
-            observeNewRelatedEntity(entityListViewModel)
-            observeNewRelatedEntities(entityListViewModel)
+            observeJSONRelation(entityListViewModel)
             observeEntityListToastMessage(entityListViewModel)
         }
     }
@@ -68,17 +67,11 @@ class MainActivityObserver(
         }
     }
 
-    // Observe when there is a new related entity to be inserted in a dao
-    private fun observeNewRelatedEntity(entityListViewModel: EntityListViewModel<EntityModel>) {
-        activity.collectWhenStarted(entityListViewModel.newRelatedEntity) { manyToOneRelation ->
-            activity.dispatchNewRelatedEntity(manyToOneRelation)
-        }
-    }
-
-    // Observe when there is a related entities to be inserted in a dao
-    private fun observeNewRelatedEntities(entityListViewModel: EntityListViewModel<EntityModel>) {
-        activity.collectWhenStarted(entityListViewModel.newRelatedEntities) { oneToManyRelation ->
-            activity.dispatchNewRelatedEntities(oneToManyRelation)
+    // Observe when there is a new relation to be inserted in a dao
+    private fun observeJSONRelation(entityListViewModel: EntityListViewModel<EntityModel>) {
+        activity.collectWhenStarted(entityListViewModel.jsonRelation) { jsonRelation ->
+            entityListViewModelList.find { it.getAssociatedTableName() == jsonRelation.getDestinationTable() }
+                ?.insertRelation(jsonRelation)
         }
     }
 
