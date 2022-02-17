@@ -11,6 +11,9 @@ import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.RelationHelper
+import com.qmobile.qmobiledatasync.utils.containsIgnoreCase
+import com.qmobile.qmobiledatasync.utils.fieldAdjustment
+import com.qmobile.qmobiledatasync.utils.tableNameAdjustment
 import org.json.JSONArray
 import org.json.JSONObject
 
