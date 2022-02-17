@@ -97,6 +97,7 @@ open class TextViewHolder(
                 hideKeyboardCallback()
             }
         }
+
         getDefaultFieldValue(currentEntity, itemJsonObject) {
             input.setText(it.toString())
         }
@@ -152,7 +153,7 @@ open class TextViewHolder(
         }
 
         if (format == ActionParameterEnum.TEXT_EMAIL.format && !input.text.toString()
-            .isEmailValid()
+                .isEmailValid()
         ) {
             if (displayError)
                 showError(itemView.context.resources.getString(R.string.action_parameter_invalid_email_error))

@@ -8,11 +8,13 @@ package com.qmobile.qmobileui.action.viewholders
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.textfield.TextInputEditText
 import com.qmobile.qmobileapi.model.entity.EntityHelper
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileapi.utils.getStringList
+import com.qmobile.qmobileui.R
 import org.json.JSONObject
 
 abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: () -> Unit) :
@@ -38,6 +40,13 @@ abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: 
 
         itemView.setOnClickListener {
             hideKeyboardCallback()
+        }
+
+        // Adding another OnFocusChangeListener as we can lose the focus with 'actionNext' not finding the next
+        // focusable EditText as the view might be recycled. In this case, it's the view that get the focus.
+        itemView.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+            if (hasFocus)
+                itemView.findViewById<TextInputEditText>(R.id.input)?.requestFocus()
         }
     }
 
