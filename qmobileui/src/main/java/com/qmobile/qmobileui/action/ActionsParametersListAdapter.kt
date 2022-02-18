@@ -44,7 +44,7 @@ class ActionsParametersListAdapter(
             }, {
             goToScanner(it)
         }, { intent: Intent, position: Int, destinationPath ->
-            goToCamera(intent, position,destinationPath)
+            goToCamera(intent, position, destinationPath)
         }, { parameterName: String, uri: Uri? ->
             onSigned(parameterName, uri)
         }

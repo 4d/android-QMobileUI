@@ -62,7 +62,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
     private var areAllItemsSeen = false
     private var goToCamera: (() -> Unit)? = null
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
-    var currentDestinationPath : String? = null
+    var currentDestinationPath: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,

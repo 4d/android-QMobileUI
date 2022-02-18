@@ -290,7 +290,7 @@ class NumberViewHolder(itemView: View, val format: String) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int , String) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -410,7 +410,7 @@ class SpellOutViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int , String) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -527,7 +527,7 @@ class ScientificViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int , String) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -646,7 +646,7 @@ class PercentageViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int , String) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -769,7 +769,7 @@ class BooleanSwitchViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int , String) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -811,7 +811,7 @@ class BooleanCheckMarkViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int , String) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -859,7 +859,7 @@ class ImageViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int , String) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, goToCamera, null)
@@ -924,12 +924,12 @@ class ImageViewHolder(itemView: View) :
                 }
                 // Continue only if the File was successfully created
                 photoFile?.also {
-                   val uri = FileProvider.getUriForFile(
+                    val uri = FileProvider.getUriForFile(
                         context,
                         context.packageName + ".provider",
                         it
                     )
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
                     goToCamera?.let { it1 -> it1(takePictureIntent, bindingAdapterPosition, photoFile.absolutePath) }
                 }
             }
@@ -964,7 +964,7 @@ class TimeViewHolder(itemView: View, val format: String) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int , String) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -1069,7 +1069,7 @@ class DateViewHolder(itemView: View, val format: String) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int , String) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -1150,7 +1150,7 @@ class BarCodeViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int , String) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, goToScanner, goToCamera, null)
@@ -1214,7 +1214,7 @@ class SignatureViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int , String) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, goToScanner, goToCamera, null)
@@ -1232,7 +1232,8 @@ class SignatureViewHolder(itemView: View) :
                 }
 
                 override fun onClear() {
-                    // When user signed and then cleared signature pad we should remove last signature from imagesToUpload
+                    // When user signed and then cleared signature pad
+                    // we should remove last signature from imagesToUpload
                     onSigned?.let { it1 -> it1(parameterName, null) }
                     isEmpty = true
                     onValueChanged(parameterName, "", null, validate())
@@ -1302,7 +1303,7 @@ class SignatureViewHolder(itemView: View) :
             saveBitmapToJPG(signature, photo)
             return Uri.fromFile(photo)
         } catch (e: IOException) {
-            e.printStackTrace()
+            Timber.e("SignatureViewHolder IOException : ", e.localizedMessage)
         }
         return null
     }
