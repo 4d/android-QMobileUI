@@ -58,7 +58,7 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         itemJsonObject = item as JSONObject
@@ -134,7 +134,7 @@ class TextViewHolder(itemView: View, val format: String) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -226,7 +226,7 @@ class TextAreaViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int, String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -290,7 +290,7 @@ class NumberViewHolder(itemView: View, val format: String) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int , String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -410,7 +410,7 @@ class SpellOutViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int , String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -527,7 +527,7 @@ class ScientificViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int , String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -646,7 +646,7 @@ class PercentageViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int , String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -769,7 +769,7 @@ class BooleanSwitchViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int , String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -811,7 +811,7 @@ class BooleanCheckMarkViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int , String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -859,7 +859,7 @@ class ImageViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int , String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, goToCamera, null)
@@ -887,15 +887,6 @@ class ImageViewHolder(itemView: View) :
 
     private fun displaySelectedImageIfNeed() {
         try {
-            if (itemJsonObject.get("bitmap") != null) {
-                imageButton.setImageBitmap(itemJsonObject.get("bitmap") as Bitmap)
-                itemJsonObject.remove("bitmap")
-            }
-        } catch (e: Exception) {
-            Timber.e("ActionParameterViewHolder: ", e.localizedMessage)
-        }
-
-        try {
             if (itemJsonObject.get("uri") != null) {
                 val uri = itemJsonObject.get("uri") as Uri
                 imageButton.setImageURI(uri)
@@ -918,10 +909,10 @@ class ImageViewHolder(itemView: View) :
         // nothing to do
     }
 
-    private fun capturePhoto(goToCamera: ((Intent, Int) -> Unit)?) {
+    private fun capturePhoto(goToCamera: ((Intent, Int, String) -> Unit)?) {
         val context = itemView.context
-
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+
             // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(context.packageManager)?.also {
                 // Create the File where the photo should go
@@ -933,13 +924,13 @@ class ImageViewHolder(itemView: View) :
                 }
                 // Continue only if the File was successfully created
                 photoFile?.also {
-                    FileProvider.getUriForFile(
+                   val uri = FileProvider.getUriForFile(
                         context,
                         context.packageName + ".provider",
                         it
                     )
-
-                    goToCamera?.let { it1 -> it1(takePictureIntent, bindingAdapterPosition) }
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                    goToCamera?.let { it1 -> it1(takePictureIntent, bindingAdapterPosition, photoFile.absolutePath) }
                 }
             }
         }
@@ -973,7 +964,7 @@ class TimeViewHolder(itemView: View, val format: String) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int , String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -1078,7 +1069,7 @@ class DateViewHolder(itemView: View, val format: String) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int , String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
@@ -1159,7 +1150,7 @@ class BarCodeViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int , String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, goToScanner, goToCamera, null)
@@ -1223,7 +1214,7 @@ class SignatureViewHolder(itemView: View) :
         currentEntityJsonObject: EntityModel?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
-        goToCamera: ((Intent, Int) -> Unit)?,
+        goToCamera: ((Intent, Int , String) -> Unit)?,
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, goToScanner, goToCamera, null)

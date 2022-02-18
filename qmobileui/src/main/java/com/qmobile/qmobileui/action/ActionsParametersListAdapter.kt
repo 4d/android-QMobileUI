@@ -16,7 +16,7 @@ class ActionsParametersListAdapter(
     private val currentEntity: EntityModel?,
     val onValueChanged: (String, Any?, String?, Boolean) -> Unit,
     val goToScanner: (Int) -> Unit,
-    val goToCamera: (Intent, Int) -> Unit,
+    val goToCamera: (Intent, Int, String) -> Unit,
     val onSigned: (String, Uri?) -> Unit
 ) :
     RecyclerView.Adapter<ActionParameterViewHolder>() {
@@ -43,8 +43,8 @@ class ActionsParametersListAdapter(
                 onValueChanged(name, value, metaData, isValid)
             }, {
             goToScanner(it)
-        }, { intent: Intent, position: Int ->
-            goToCamera(intent, position)
+        }, { intent: Intent, position: Int, destinationPath ->
+            goToCamera(intent, position,destinationPath)
         }, { parameterName: String, uri: Uri? ->
             onSigned(parameterName, uri)
         }
@@ -62,8 +62,6 @@ class ActionsParametersListAdapter(
     fun updateImageForPosition(position: Int, data: Any) {
         if (data is Uri) {
             (list[position] as JSONObject).put("uri", data)
-        } else {
-            (list[position] as JSONObject).put("bitmap", data)
         }
         notifyItemChanged(position)
     }
