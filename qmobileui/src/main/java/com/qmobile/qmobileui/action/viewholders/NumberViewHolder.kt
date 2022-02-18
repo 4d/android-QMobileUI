@@ -41,7 +41,7 @@ class NumberViewHolder(
 
         if (isMandatory() && stringValue.trim().isEmpty()) {
             if (displayError)
-                showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+                showError(itemView.context.getString(R.string.action_parameter_mandatory_error))
             return false
         }
 
@@ -51,7 +51,7 @@ class NumberViewHolder(
 
         if (stringValue.isNotEmpty() && stringValue.toDoubleOrNull() == null) {
             if (displayError)
-                showError("Field value must be a number")
+                showError(itemView.context.getString(R.string.action_parameter_number_error))
             return false
         }
 
@@ -83,23 +83,13 @@ class NumberViewHolder(
     private fun isInRange(doubleValue: Double, displayError: Boolean): Boolean {
         if (doubleValue < getMin()) {
             if (displayError)
-                showError(
-                    itemView.resources.getString(
-                        R.string.action_parameter_min_value_error,
-                        getMin().toString()
-                    )
-                )
+                showError(itemView.context.getString(R.string.action_parameter_min_value_error, getMin().toString()))
             return false
         }
 
         if (doubleValue > getMax()) {
             if (displayError)
-                showError(
-                    itemView.resources.getString(
-                        R.string.action_parameter_max_value_error,
-                        getMax().toString()
-                    )
-                )
+                showError(itemView.context.getString(R.string.action_parameter_max_value_error, getMax().toString()))
             return false
         }
         return true

@@ -91,11 +91,7 @@ class ActionHelper private constructor() {
             var drawable: Drawable? = null
             val iconDrawablePath = action.getIconDrawablePath()
             iconDrawablePath?.let { icon ->
-                val resId = context.resources.getIdentifier(
-                    icon,
-                    "drawable",
-                    context.packageName
-                )
+                val resId = context.resources.getIdentifier(icon, "drawable", context.packageName)
                 if (resId != 0)
                     drawable = ContextCompat.getDrawable(context, resId)
             }

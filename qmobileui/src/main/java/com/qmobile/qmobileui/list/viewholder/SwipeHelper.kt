@@ -176,12 +176,7 @@ abstract class SwipeHelper(
             var iconResId = 0
             val iconDrawablePath = action?.getIconDrawablePath()
             if (iconDrawablePath != null && iconDrawablePath.isNotEmpty()) {
-                iconResId =
-                    context.resources.getIdentifier(
-                        iconDrawablePath,
-                        "drawable",
-                        context.packageName
-                    )
+                iconResId = context.resources.getIdentifier(iconDrawablePath, "drawable", context.packageName)
             }
             val iconWith = rect.width() * (ICON_WIDTH_FACTOR)
             val iconHeight = iconWith

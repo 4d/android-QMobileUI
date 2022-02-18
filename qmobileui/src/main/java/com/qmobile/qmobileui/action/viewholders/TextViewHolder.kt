@@ -144,7 +144,7 @@ open class TextViewHolder(
 
         if (isMandatory() && input.text.toString().trim().isEmpty()) {
             if (displayError)
-                showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+                showError(itemView.context.getString(R.string.action_parameter_mandatory_error))
             return false
         }
 
@@ -153,16 +153,16 @@ open class TextViewHolder(
         }
 
         if (format == ActionParameterEnum.TEXT_EMAIL.format && !input.text.toString()
-                .isEmailValid()
+            .isEmailValid()
         ) {
             if (displayError)
-                showError(itemView.context.resources.getString(R.string.action_parameter_invalid_email_error))
+                showError(itemView.context.getString(R.string.action_parameter_invalid_email_error))
             return false
         }
 
         if (format == ActionParameterEnum.TEXT_URL.format && !input.text.toString().isUrlValid()) {
             if (displayError)
-                showError(itemView.context.resources.getString(R.string.action_parameter_invalid_url_error))
+                showError(itemView.context.getString(R.string.action_parameter_invalid_url_error))
             return false
         }
         return true

@@ -112,11 +112,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         bindImageFromDrawable(binding.loginLogo, BaseApp.loginLogoDrawable)
 
         if (loggedOut) {
-            ToastHelper.show(
-                this,
-                resources.getString(R.string.login_logged_out),
-                MessageType.SUCCESS
-            )
+            ToastHelper.show(this, getString(R.string.login_logged_out), MessageType.SUCCESS)
         }
 
         // Login button
@@ -125,11 +121,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
                 binding.loginButtonAuth.isEnabled = false
                 loginViewModel.login(email = binding.loginEmailInput.text.toString()) { }
             } else {
-                ToastHelper.show(
-                    this,
-                    resources.getString(R.string.no_internet),
-                    MessageType.WARNING
-                )
+                ToastHelper.show(this, getString(R.string.no_internet), MessageType.WARNING)
             }
         }
 
@@ -143,8 +135,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
                     binding.loginEmailContainer.error = null
                 } else {
                     binding.loginEmailInput.startAnimation(shakeAnimation)
-                    binding.loginEmailContainer.error =
-                        resources.getString(R.string.login_invalid_email)
+                    binding.loginEmailContainer.error = getString(R.string.login_invalid_email)
                     loginViewModel.setEmailValidState(false)
                 }
             } else {
@@ -197,9 +188,9 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         serverAccessibleDrawable = ContextCompat.getDrawable(this, R.drawable.network_ok_circle)
         serverNotAccessibleDrawable =
             ContextCompat.getDrawable(this, R.drawable.network_nok_circle)
-        noInternetString = resources.getString(R.string.no_internet)
-        serverAccessibleString = resources.getString(R.string.server_accessible)
-        serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
+        noInternetString = getString(R.string.no_internet)
+        serverAccessibleString = getString(R.string.server_accessible)
+        serverNotAccessibleString = getString(R.string.server_not_accessible)
 
         remoteUrlDisplayDialog = LayoutInflater.from(this)
             .inflate(R.layout.login_remote_url_display_dialog, findViewById(android.R.id.content), false)
@@ -207,8 +198,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         remoteUrlMessage = remoteUrlDisplayDialog.findViewById(R.id.remote_url_message)
 
         serverNotAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
-        remoteUrlMessage.text =
-            getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
+        remoteUrlMessage.text = getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
     }
 
     /**
@@ -264,20 +254,17 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
     }
 
     override fun onServerAccessible() {
-        remoteUrlMessage.text =
-            getString(R.string.remote_url_placeholder, remoteUrl, serverAccessibleString)
+        remoteUrlMessage.text = getString(R.string.remote_url_placeholder, remoteUrl, serverAccessibleString)
         serverAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
     }
 
     override fun onServerInaccessible() {
-        remoteUrlMessage.text =
-            getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
+        remoteUrlMessage.text = getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
         serverNotAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
     }
 
     override fun onNoInternet() {
-        remoteUrlMessage.text =
-            getString(R.string.remote_url_placeholder, remoteUrl, noInternetString)
+        remoteUrlMessage.text = getString(R.string.remote_url_placeholder, remoteUrl, noInternetString)
         serverNotAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
     }
 

@@ -459,11 +459,7 @@ class MainActivity :
         } else {
             authenticationRequested = true
             Timber.d("No Internet connection, authenticationRequested")
-            ToastHelper.show(
-                this,
-                resources.getString(R.string.no_internet_auto_login),
-                MessageType.WARNING
-            )
+            ToastHelper.show(this, getString(R.string.no_internet_auto_login), MessageType.WARNING)
         }
     }
 

@@ -33,8 +33,7 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.lang.IllegalArgumentException
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.Calendar
 
 object ImageHelper {
 
@@ -111,7 +110,7 @@ object ImageHelper {
     }
 
     private fun createTempImageFile(context: Context): File {
-        val timeStamp = SimpleDateFormat.getTimeInstance().format(Date())
+        val timeStamp = Calendar.getInstance().timeInMillis
         val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }

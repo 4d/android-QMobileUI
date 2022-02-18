@@ -127,8 +127,7 @@ abstract class BaseActivity : AppCompatActivity() {
                             dismiss()
                         } else {
                             remoteUrlEditEditText.startAnimation(getShakeAnimation(this@BaseActivity))
-                            remoteUrlEditLayout.error =
-                                resources.getString(R.string.remote_url_invalid)
+                            remoteUrlEditLayout.error = getString(R.string.remote_url_invalid)
                         }
                     }
                 }

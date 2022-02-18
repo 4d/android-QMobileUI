@@ -45,11 +45,7 @@ class MainActivityDataSync(private val activity: MainActivity) {
                 } // else : Nothing to do, errors already provided in isServerConnectionOk
             }
         } else {
-            ToastHelper.show(
-                activity,
-                activity.resources.getString(R.string.no_internet),
-                MessageType.WARNING
-            )
+            ToastHelper.show(activity, activity.getString(R.string.no_internet), MessageType.WARNING)
         }
     }
 

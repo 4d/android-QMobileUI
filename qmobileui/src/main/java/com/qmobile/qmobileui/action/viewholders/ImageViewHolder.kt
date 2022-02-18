@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.action.viewholders
 
+import android.Manifest
 import android.net.Uri
 import android.view.View
 import android.widget.ImageView
@@ -21,6 +22,7 @@ import com.qmobile.qmobileui.action.ActionTypes
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.Transformations
 import com.qmobile.qmobileui.binding.getColorFromAttr
+import com.qmobile.qmobileui.utils.PermissionChecker
 
 class ImageViewHolder(
     itemView: View,
@@ -66,7 +68,7 @@ class ImageViewHolder(
                     )
                 ) { _, which ->
                     when (which) {
-                        0 -> actionTypesCallback(ActionTypes.TAKE_PICTURE_CAMERA, bindingAdapterPosition)
+                        0 -> askCameraPermissionAndProceed()
                         1 -> actionTypesCallback(ActionTypes.PICK_PHOTO_GALLERY, bindingAdapterPosition)
                     }
                 }
@@ -96,11 +98,23 @@ class ImageViewHolder(
         onValueChanged(parameterName, currentUri, null, validate(false))
     }
 
+    private fun askCameraPermissionAndProceed() {
+        (itemView.context as PermissionChecker?)?.askPermission(
+            context = itemView.context,
+            permission = Manifest.permission.CAMERA,
+            rationale = itemView.context.getString(R.string.permission_rationale_camera)
+        ) { isGranted ->
+            if (isGranted) {
+                actionTypesCallback(ActionTypes.TAKE_PICTURE_CAMERA, bindingAdapterPosition)
+            }
+        }
+    }
+
     override fun validate(displayError: Boolean): Boolean {
 
         if (isMandatory() && currentUri != null) {
             if (displayError)
-                showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
+                showError(itemView.context.getString(R.string.action_parameter_mandatory_error))
             return false
         }
         return true

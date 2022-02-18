@@ -158,11 +158,7 @@ class SettingsFragment :
         } else {
             if (!connectivityViewModel.isConnected()) {
                 activity?.let {
-                    ToastHelper.show(
-                        it,
-                        it.resources.getString(R.string.no_internet),
-                        MessageType.WARNING
-                    )
+                    ToastHelper.show(it, it.getString(R.string.no_internet), MessageType.WARNING)
                 }
                 Timber.d("No Internet connection")
             } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
