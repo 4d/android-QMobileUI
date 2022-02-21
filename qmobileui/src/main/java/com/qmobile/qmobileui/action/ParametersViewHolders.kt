@@ -853,6 +853,7 @@ class BooleanCheckMarkViewHolder(itemView: View) :
 class ImageViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var imageButton: ImageView = itemView.findViewById(R.id.image_button)
+    var container: View = itemView.findViewById(R.id.container)
 
     override fun bind(
         item: Any,
@@ -863,7 +864,7 @@ class ImageViewHolder(itemView: View) :
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, goToCamera, null)
-        imageButton.setOnClickListener {
+        container.setOnClickListener {
             // setup the alert builder
             val builder = MaterialAlertDialogBuilder(itemView.context)
             builder.setTitle("Choose a picture")
@@ -1169,8 +1170,9 @@ class DateViewHolder(itemView: View, val format: String) :
 
 class BarCodeViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
-    var imageButton: ImageView = itemView.findViewById(R.id.image_button)
     var scannedValueTextView: TextView = itemView.findViewById(R.id.scanned_value_text_view)
+    var container: View = itemView.findViewById(R.id.container)
+
 
     override fun bind(
         item: Any,
@@ -1181,7 +1183,7 @@ class BarCodeViewHolder(itemView: View) :
         onSigned: ((String, Uri?) -> Unit)?
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, goToScanner, goToCamera, null)
-        imageButton.setOnClickListener {
+        container.setOnClickListener {
             goToScanner?.let { it1 -> it1(bindingAdapterPosition) }
         }
         showScannedValueIfNeeded(onValueChanged)
