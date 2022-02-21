@@ -882,6 +882,7 @@ class ImageViewHolder(itemView: View) :
             val dialog = builder.create()
             dialog.show()
         }
+        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
         displaySelectedImageIfNeed()
     }
 
@@ -915,7 +916,24 @@ class ImageViewHolder(itemView: View) :
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
-        // nothing to do
+        currentEntity?.let {
+            val defaultField = itemJsonObject.getSafeString("defaultField")
+            if (defaultField != null) {
+                EntityHelper.readInstanceProperty<Photo>(it, defaultField).also { value ->
+                    if (value != null) {
+                        bindImageFromUrl(
+                            imageButton,
+                            value.__deferred?.uri,
+                            null,
+                            null,
+                            null,
+                            null
+                        )
+                        onValueChanged(parameterName, "", null, validate())
+                    }
+                }
+            }
+        }
     }
 
     private fun capturePhoto(goToCamera: ((Intent, Int) -> Unit)?) {
