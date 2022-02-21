@@ -11,6 +11,7 @@ import com.qmobile.qmobileui.action.viewholders.BooleanViewHolder
 import com.qmobile.qmobileui.action.viewholders.DateViewHolder
 import com.qmobile.qmobileui.action.viewholders.ImageViewHolder
 import com.qmobile.qmobileui.action.viewholders.NumberViewHolder
+import com.qmobile.qmobileui.action.viewholders.SignatureViewHolder
 import com.qmobile.qmobileui.action.viewholders.TextViewHolder
 import com.qmobile.qmobileui.action.viewholders.TimeViewHolder
 
@@ -94,6 +95,14 @@ class ActionParameterViewHolderFactory private constructor() {
                 // Image
                 ActionParameterEnum.IMAGE ->
                     ImageViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_image, parent, false),
+                        hideKeyboardCallback,
+                        actionTypesCallback
+                    )
+                // Signature
+                ActionParameterEnum.SIGNATURE ->
+                    SignatureViewHolder(
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_image, parent, false),
                         hideKeyboardCallback,

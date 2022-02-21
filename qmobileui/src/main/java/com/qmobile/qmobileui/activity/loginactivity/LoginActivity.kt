@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.activity.loginactivity
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
@@ -53,7 +52,6 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
     private var remoteUrl = ""
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
-    private lateinit var remoteUrlDisplayDialogBuilder: MaterialAlertDialogBuilder
     private lateinit var shakeAnimation: Animation
 
     // UI strings
@@ -156,11 +154,6 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         this.remoteUrl = BaseApp.sharedPreferencesHolder.remoteUrl
         initRemoteUrlDisplayDialog()
 
-        remoteUrlDisplayDialogBuilder = MaterialAlertDialogBuilder(
-            this,
-            R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
-        )
-
         binding.loginLogo.setOnVeryLongClickListener {
             checkNetwork(this)
             showRemoteUrlDisplayDialog()
@@ -170,18 +163,14 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
     private fun showRemoteUrlDisplayDialog() {
         remoteUrlDisplayDialog.clearViewInParent()
 
-        remoteUrlDisplayDialogBuilder
+        MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
             .setView(remoteUrlDisplayDialog)
             .setTitle(getString(R.string.pref_remote_url_title))
-            .setPositiveButton(getString(R.string.remote_url_dialog_edit), null)
+            .setPositiveButton(getString(R.string.remote_url_dialog_edit)) { _, _ ->
+                showRemoteUrlEditDialog(remoteUrl, this@LoginActivity)
+            }
             .setNegativeButton(getString(R.string.remote_url_dialog_done), null)
-            .create().apply {
-                setOnShowListener {
-                    getButton(AlertDialog.BUTTON_POSITIVE).setOnSingleClickListener {
-                        showRemoteUrlEditDialog(remoteUrl, this@LoginActivity)
-                    }
-                }
-            }.show()
+            .show()
     }
 
     private fun initRemoteUrlDisplayDialog() {

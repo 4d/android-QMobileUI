@@ -63,8 +63,6 @@ abstract class BaseActivity : AppCompatActivity() {
     lateinit var accessibilityApiService: AccessibilityApiService
     lateinit var loginApiService: LoginApiService
 
-    private lateinit var remoteUrlEditDialogBuilder: MaterialAlertDialogBuilder
-
     abstract fun handleAuthenticationState(authenticationState: AuthenticationStateEnum)
     abstract fun handleNetworkState(networkState: NetworkStateEnum)
 
@@ -103,16 +101,12 @@ abstract class BaseActivity : AppCompatActivity() {
             .inflate(R.layout.remote_url_edit_dialog, findViewById(android.R.id.content), false)
         val remoteUrlEditLayout = remoteUrlEditDialog.findViewById<TextInputLayout>(R.id.remote_url_edit_layout)
         val remoteUrlEditEditText = remoteUrlEditDialog.findViewById<TextInputEditText>(R.id.remote_url_edit_edittext)
-        remoteUrlEditDialogBuilder = MaterialAlertDialogBuilder(
-            this,
-            R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
-        )
 
         remoteUrlEditDialog.clearViewInParent()
         remoteUrlEditLayout.editText?.setText(remoteUrl)
         remoteUrlEditLayout.error = null
 
-        remoteUrlEditDialogBuilder
+        MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
             .setView(remoteUrlEditDialog)
             .setTitle(getString(R.string.pref_remote_url_title))
             .setPositiveButton(getString(R.string.remote_url_dialog_positive), null)

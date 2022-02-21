@@ -7,5 +7,5 @@
 package com.qmobile.qmobileui.action
 
 enum class ActionTypes {
-    TAKE_PICTURE_CAMERA, PICK_PHOTO_GALLERY, SCAN
+    TAKE_PICTURE_CAMERA, PICK_PHOTO_GALLERY, SCAN, SIGN
 }

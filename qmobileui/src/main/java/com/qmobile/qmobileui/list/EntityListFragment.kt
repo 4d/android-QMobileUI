@@ -261,11 +261,14 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         }
     }
 
-    private fun showDialog(onClick: (action: Action) -> Unit) =
-        MaterialAlertDialogBuilder(requireContext())
+    private fun showDialog(onClick: (action: Action) -> Unit) {
+        MaterialAlertDialogBuilder(requireContext(), R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
+            .setTitle(requireContext().getString(R.string.action_list_title))
             .setAdapter(currentRecordActionsListAdapter) { _, position ->
                 onClick(currentRecordActions[position])
-            }.show()
+            }
+            .show()
+    }
 
     private fun createButton(
         position: Int,

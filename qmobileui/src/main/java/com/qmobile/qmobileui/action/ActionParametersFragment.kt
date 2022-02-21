@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.action
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -19,6 +20,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.gcacace.signaturepad.views.SignaturePad
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobileapi.utils.getSafeObject
@@ -30,13 +33,16 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
 import com.qmobile.qmobileui.binding.ImageHelper
+import com.qmobile.qmobileui.binding.writeBitmap
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.ui.CenterLayoutManager
 import com.qmobile.qmobileui.utils.hideKeyboard
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import timber.log.Timber
 import java.io.File
+import java.lang.IllegalArgumentException
 
 class ActionParametersFragment : BaseFragment(), ActionProvider {
 
@@ -44,6 +50,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private lateinit var adapter: ActionsParametersListAdapter
     private var _binding: FragmentActionParametersBinding? = null
     private val binding get() = _binding!!
+    private lateinit var signatureDialog: View
 
     // fragment parameters
     override var tableName = ""
@@ -303,6 +310,40 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             ActionTypes.PICK_PHOTO_GALLERY -> pickPhotoFromGallery()
             ActionTypes.TAKE_PICTURE_CAMERA -> takePhotoFromCamera()
             ActionTypes.SCAN -> scan()
+            ActionTypes.SIGN -> showSignDialog()
+        }
+    }
+
+    private fun showSignDialog() {
+        requireActivity().apply {
+            signatureDialog = LayoutInflater.from(this)
+                .inflate(R.layout.action_parameter_signature_dialog, findViewById(android.R.id.content), false)
+
+            MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
+                .setView(signatureDialog)
+                .setTitle(getString(R.string.signature_dialog_title))
+                .setPositiveButton(getString(R.string.signature_dialog_positive)) { _, _ ->
+                    onSigned()
+                }
+                .setNegativeButton(getString(R.string.signature_dialog_cancel), null)
+                .show()
+        }
+    }
+
+    private fun onSigned() {
+        ImageHelper.getTempImageFile(requireContext(), Bitmap.CompressFormat.PNG) { _, signatureFilePath ->
+            File(signatureFilePath).apply {
+                val bitmap = try {
+                    signatureDialog.findViewById<SignaturePad>(R.id.signature_pad)?.transparentSignatureBitmap
+                } catch (e: IllegalArgumentException) {
+                    Timber.d("Could not get the signature bitmap (${e.message})")
+                    null
+                }
+                bitmap?.let {
+                    this.writeBitmap(it)
+                    onImageChosen(Uri.fromFile(this))
+                }
+            }
         }
     }
 
@@ -311,7 +352,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     }
 
     private fun takePhotoFromCamera() {
-        ImageHelper.getTempImageFile(requireContext()) { uri, photoFilePath ->
+        ImageHelper.getTempImageFile(requireContext(), Bitmap.CompressFormat.JPEG) { uri, photoFilePath ->
             currentPhotoPath = photoFilePath
             getCameraImage.launch(uri)
         }

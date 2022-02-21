@@ -44,7 +44,6 @@ class SettingsFragment :
     private lateinit var remoteUrlPrefKey: String
     private lateinit var logoutPrefKey: String
     private lateinit var remoteUrl: String
-    private lateinit var logoutDialogBuilder: MaterialAlertDialogBuilder
 
     internal lateinit var activitySettingsInterface: ActivitySettingsInterface
 
@@ -76,11 +75,6 @@ class SettingsFragment :
         noInternetString = resources.getString(R.string.no_internet)
         serverAccessibleString = resources.getString(R.string.server_accessible)
         serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
-
-        logoutDialogBuilder = MaterialAlertDialogBuilder(
-            context,
-            R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
-        )
 
         logoutDialogTitle = resources.getString(R.string.logout_dialog_title)
         logoutDialogMessage = resources.getString(R.string.logout_dialog_message)
@@ -139,7 +133,7 @@ class SettingsFragment :
      * Displays a dialog to confirm logout
      */
     private fun showLogoutDialog() {
-        logoutDialogBuilder
+        MaterialAlertDialogBuilder(requireContext(), R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
             .setTitle(logoutDialogTitle)
             .setMessage(logoutDialogMessage)
             .setNegativeButton(logoutDialogNegative, null)

@@ -73,6 +73,7 @@
     <!-- Actions -->
     <string name="validate_action">Validate</string>
 
+    <string name="action_list_title">Actions</string>
     <string name="action_item_image_content_description">Action item image</string>
     <string name="action_remove_item_image_content_description">Remove item image</string>
 
@@ -95,5 +96,10 @@
 
     <!-- Barcode -->
     <string name="barcode_camera_back_content_description">Back</string>
+
+    <!-- Signature -->
+    <string name="signature_dialog_title">Sign here</string>
+    <string name="signature_dialog_positive">Done</string>
+    <string name="signature_dialog_cancel">Cancel</string>
 
 </resources>

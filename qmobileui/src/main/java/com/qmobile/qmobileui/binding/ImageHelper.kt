@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.binding
 
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.InsetDrawable
 import android.net.Uri
@@ -42,15 +43,14 @@ object ImageHelper {
     const val drawableSpace = 8
     const val luminanceThreshold = 0.5
     const val ICON_MARGIN = 8
+    const val DEFAULT_BITMAP_QUALITY = 85
 
     private val factory =
         DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
 
     fun getGlideRequest(view: View, data: Any): RequestBuilder<Drawable> =
         Glide.with(view.context.applicationContext)
-            .load(
-                data
-            )
+            .load(data)
             .transition(DrawableTransitionOptions.withCrossFade(factory))
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .listener(CustomRequestListener())
@@ -90,9 +90,13 @@ object ImageHelper {
         }
     }
 
-    fun getTempImageFile(context: Context, callback: (uri: Uri, photoFilePath: String) -> Unit) {
+    fun getTempImageFile(
+        context: Context,
+        format: Bitmap.CompressFormat,
+        callback: (uri: Uri, photoFilePath: String) -> Unit
+    ) {
         val photoFile: File? = try {
-            createTempImageFile(context)
+            createTempImageFile(context, format)
         } catch (ex: IOException) {
             Timber.e(ex.message.orEmpty())
             ToastHelper.show(context, "Could not create temporary file", MessageType.ERROR)
@@ -109,10 +113,13 @@ object ImageHelper {
         }
     }
 
-    private fun createTempImageFile(context: Context): File {
+    private fun createTempImageFile(context: Context, format: Bitmap.CompressFormat): File {
         val timeStamp = Calendar.getInstance().timeInMillis
         val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+        return when (format) {
+            Bitmap.CompressFormat.PNG -> File.createTempFile("PNG_${timeStamp}_", ".png", storageDir)
+            else -> File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+        }
     }
 }
 
@@ -133,3 +140,14 @@ val Int.dp: Int
     get() = (this / Resources.getSystem().displayMetrics.density).toInt()
 val Int.px: Int
     get() = (this * Resources.getSystem().displayMetrics.density).toInt()
+
+fun File.writeBitmap(
+    bitmap: Bitmap,
+    format: Bitmap.CompressFormat = Bitmap.CompressFormat.PNG,
+    quality: Int = ImageHelper.DEFAULT_BITMAP_QUALITY
+) {
+    outputStream().use { out ->
+        bitmap.compress(format, quality, out)
+        out.flush()
+    }
+}

@@ -46,12 +46,11 @@
 
     <ImageView
         android:id="@+id/image_view"
-        android:layout_width="128dp"
-        android:layout_height="128dp"
+        android:layout_width="@dimen/image_action_size"
+        android:layout_height="@dimen/image_action_size"
         android:alpha="0.6"
         android:contentDescription="@string/action_item_image_content_description"
         android:elevation="4dp"
-        android:src="@drawable/image_plus"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/item_remove"
         app:layout_constraintTop_toTopOf="parent" />
@@ -61,7 +60,6 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:alpha="0.6"
         android:contentDescription="@string/action_remove_item_image_content_description"
@@ -69,7 +67,6 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="?colorOnSurface"
-        tools:background="@drawable/close_circle_outline" />
+        app:tint="?colorOnSurface" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

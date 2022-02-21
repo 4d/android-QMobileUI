@@ -36,6 +36,7 @@ enum class ActionParameterEnum(val type: String, val format: String = "default")
 
     // Image
     IMAGE("image"),
+    SIGNATURE("image", "signature"),
 
     // Barcode
     BARCODE("string", "barcode")

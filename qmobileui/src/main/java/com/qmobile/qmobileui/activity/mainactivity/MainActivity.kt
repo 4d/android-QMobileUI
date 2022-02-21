@@ -502,7 +502,7 @@ class MainActivity :
 
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-                MaterialAlertDialogBuilder(this)
+                MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
                     .setTitle(getString(R.string.permission_dialog_title))
                     .setMessage(rationale)
                     .setPositiveButton(getString(R.string.permission_dialog_positive)) { _, _ ->
