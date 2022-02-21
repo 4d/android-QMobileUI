@@ -246,6 +246,7 @@ class MainActivity :
                                 entityListViewModel.getEntities { shouldSyncData ->
                                     if (shouldSyncData) {
                                         Timber.d("GlobalStamp changed, synchronization is required")
+                                        Timber.i("Starting a dataSync procedure")
                                         dataSync(currentTableName)
                                     } else {
                                         Timber.d("GlobalStamp unchanged, no synchronization is required")
