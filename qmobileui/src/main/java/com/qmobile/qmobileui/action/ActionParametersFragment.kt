@@ -9,7 +9,6 @@ package com.qmobile.qmobileui.action
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -39,12 +38,7 @@ import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
-import timber.log.Timber
-import java.io.ByteArrayOutputStream
-import java.io.FileOutputStream
-import java.io.IOException
-
-const val IMAGE_QUALITY = 90
+import java.io.File
 
 class ActionParametersFragment : Fragment(), BaseFragment {
 
@@ -68,6 +62,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
     private var areAllItemsSeen = false
     private var goToCamera: (() -> Unit)? = null
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    var currentDestinationPath: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -115,12 +110,14 @@ class ActionParametersFragment : Fragment(), BaseFragment {
             },
             {
                 BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
-            }, { intent: Intent, position: Int ->
+            }, { intent: Intent, position: Int, destinationPath: String ->
             goToCamera = {
+                currentDestinationPath = destinationPath
                 (context as Activity).startActivityForResult(
                     intent,
                     // Send position as request code, so we can update image preview only for the selected item
-                    position
+                    position,
+
                 )
             }
             requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
@@ -303,7 +300,6 @@ class ActionParametersFragment : Fragment(), BaseFragment {
 
     fun handleResult(requestCode: Int, data: Intent) {
         // the request code is te equivalent of position of item in adapter
-
         // case of image picked from gallery
         val uri = data.data
         if (uri != null) {
@@ -312,24 +308,15 @@ class ActionParametersFragment : Fragment(), BaseFragment {
             }
             adapter.updateImageForPosition(requestCode, uri)
         } else {
-            // case of image token from camera
-            val thumbnail = data.extras?.get("data") as Bitmap?
-            val bytes = ByteArrayOutputStream()
-            thumbnail?.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, bytes)
-            val destination = createImageFile(requireContext())
-            val fileOutputStream: FileOutputStream
-            try {
-                fileOutputStream = FileOutputStream(destination)
-                fileOutputStream.write(bytes.toByteArray())
-                fileOutputStream.close()
-            } catch (e: IOException) {
-                Timber.d(e.localizedMessage)
-            }
+            // case of camera capture
 
-            adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->
-                imagesToUpload[parameterName] = Uri.fromFile(destination)
+            currentDestinationPath?.let {
+                val uri = Uri.fromFile(File(it))
+                adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->
+                    imagesToUpload[parameterName] = uri
+                }
+                adapter.updateImageForPosition(requestCode, uri)
             }
-            data.extras?.get("data")?.let { adapter.updateImageForPosition(requestCode, it) }
         }
     }
 }
