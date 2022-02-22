@@ -12,7 +12,7 @@
         android:layout_marginStart="7dp"
         android:layout_marginTop="7dp"
         android:text="TextView:"
-        android:textColor="#000" />
+        />
 
     <EditText
         android:id="@+id/editText"
@@ -20,13 +20,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="7dp"
-        android:background="#FFFFFF"
         android:gravity="left|center_vertical"
         android:minHeight="@dimen/param_item_min_height"
         android:paddingLeft="@dimen/param_edit_text_padding_left"
         android:paddingEnd="7dp"
         android:textColor="#000"
         tools:text="02/12/22" />
+
+
 
     <TextView
         android:id="@+id/error_label"

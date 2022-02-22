@@ -11,20 +11,18 @@
         android:layout_gravity="left"
         android:layout_marginStart="7dp"
         android:layout_marginTop="7dp"
-        android:text="TextView:"
-        android:textColor="#000" />
+        android:text="TextView:"/>
 
     <TextView
         android:id="@+id/selectedTime"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="7dp"
-        android:background="#FFFFFF"
+        android:theme="@style/parameter_item_theme"
         android:gravity="left|center_vertical"
         android:minHeight="@dimen/param_item_min_height"
         android:paddingLeft="@dimen/param_edit_text_padding_left"
         android:paddingEnd="7dp"
-        android:textColor="#000"
         tools:text="--:--" />
 
     <TextView

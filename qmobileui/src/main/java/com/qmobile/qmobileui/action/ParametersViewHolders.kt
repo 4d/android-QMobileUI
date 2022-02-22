@@ -172,6 +172,7 @@ class TextViewHolder(itemView: View, val format: String) :
             }
         })
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        editText.handleDarkMode()
     }
 
     override fun setDefaultFieldIfNeeded(
@@ -248,6 +249,7 @@ class TextAreaViewHolder(itemView: View) :
             }
         })
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        editText.handleDarkMode()
     }
 
     override fun validate(): Boolean {
@@ -332,6 +334,7 @@ class NumberViewHolder(itemView: View, val format: String) :
             }
         })
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        editText.handleDarkMode()
     }
 
     override fun validate(): Boolean {
@@ -456,6 +459,7 @@ class SpellOutViewHolder(itemView: View) :
                 }
             }
         }
+        editText.handleDarkMode()
     }
 
     override fun validate(): Boolean {
@@ -576,6 +580,8 @@ class ScientificViewHolder(itemView: View) :
             }
         }
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        editText.handleDarkMode()
+
     }
 
     override fun validate(): Boolean {
@@ -694,6 +700,7 @@ class PercentageViewHolder(itemView: View) :
         })
 
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        editText.handleDarkMode()
     }
 
     override fun validate(): Boolean {
@@ -1163,7 +1170,6 @@ class BarCodeViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var scannedValueTextView: TextView = itemView.findViewById(R.id.scanned_value_text_view)
     var container: View = itemView.findViewById(R.id.container)
-
 
     override fun bind(
         item: Any,
