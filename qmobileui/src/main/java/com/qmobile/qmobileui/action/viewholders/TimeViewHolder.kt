@@ -20,9 +20,8 @@ import com.qmobile.qmobileui.action.ActionParameterEnum
 class TimeViewHolder(
     itemView: View,
     format: String,
-    private val fragmentManager: FragmentManager?,
-    hideKeyboardCallback: () -> Unit
-) : BaseInputLessViewHolder(itemView, hideKeyboardCallback) {
+    private val fragmentManager: FragmentManager?
+) : BaseInputLessViewHolder(itemView) {
 
     companion object {
         private const val dayFactor = 60 * 60 * 24
@@ -36,9 +35,10 @@ class TimeViewHolder(
         item: Any,
         currentEntity: EntityModel?,
         preset: String?,
+        isLastParameter: Boolean,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntity, preset, onValueChanged)
+        super.bind(item, currentEntity, preset, isLastParameter, onValueChanged)
 
         container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.calendar_clock)
 

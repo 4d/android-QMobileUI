@@ -14,11 +14,7 @@ import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionParameterEnum
 
-class NumberViewHolder(
-    itemView: View,
-    private val format: String,
-    hideKeyboardCallback: () -> Unit
-) : TextViewHolder(itemView, format, hideKeyboardCallback) {
+class NumberViewHolder(itemView: View, private val format: String) : TextViewHolder(itemView, format) {
 
     override fun getInputType(format: String): Int {
         return when (format) {

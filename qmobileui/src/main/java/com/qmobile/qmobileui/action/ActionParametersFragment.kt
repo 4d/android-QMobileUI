@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobileapi.utils.getSafeObject
@@ -138,6 +139,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
                 currentEntity = selectedEntity,
                 fragmentManager = activity?.supportFragmentManager,
                 hideKeyboardCallback = { onHideKeyboardCallback() },
+                focusNextCallback = { position -> onFocusNextCallback(position) },
                 actionTypesCallback = { actionType, position ->
                     actionTypesCallback(actionType, position)
                 },
@@ -150,6 +152,10 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             recyclerView.adapter = adapter
             // Important line : prevent recycled views to get their content reset
             recyclerView.setItemViewCacheSize(action.parameters.length())
+            // Add this empty view to remove keyboard when click is perform below recyclerView items
+            emptyView.setOnClickListener {
+                onHideKeyboardCallback()
+            }
         }
         return binding.root
     }
@@ -169,6 +175,16 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         activity?.let {
             hideKeyboard(it)
         }
+    }
+
+    private fun onFocusNextCallback(position: Int) {
+        binding.recyclerView.findViewHolderForLayoutPosition(position + 1)
+            ?.itemView?.findViewById<TextInputEditText>(R.id.input)
+            ?.requestFocus()
+            ?: kotlin.run {
+                Timber.d("Can't find input to focus at position ${position + 1}, scrolling now")
+                scrollTo(position + 1, false)
+            }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -206,7 +222,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         // first: check if visible items are valid
         val firstNotValidItemPosition = validationMap.values.indexOfFirst { !it }
         if (firstNotValidItemPosition > -1) {
-            scrollTo(firstNotValidItemPosition)
+            scrollTo(firstNotValidItemPosition, true)
             triggerError(firstNotValidItemPosition)
             return false
         }
@@ -218,7 +234,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             val pos =
                 (binding.recyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
             if (pos < nbItems - 1) {
-                scrollTo(pos + 1)
+                scrollTo(pos + 1, true)
             }
             return false
         }
@@ -228,7 +244,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         validationMap.values.forEachIndexed { index, isValid ->
             if (!isValid) {
                 if (formIsValid) { // scroll to first not valid
-                    scrollTo(index)
+                    scrollTo(index, true)
                 }
                 formIsValid = false
                 triggerError(index)
@@ -241,8 +257,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         return true
     }
 
-    private fun scrollTo(position: Int) {
-        onHideKeyboardCallback()
+    private fun scrollTo(position: Int, shouldHideKeyboard: Boolean) {
+        if (shouldHideKeyboard) onHideKeyboardCallback()
         scrollPos = position
         binding.recyclerView.removeOnScrollListener(onScrollListener)
         binding.recyclerView.addOnScrollListener(onScrollListener)

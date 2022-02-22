@@ -14,10 +14,7 @@ import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.ui.getShakeAnimation
 
-abstract class BaseInputLessViewHolder(
-    itemView: View,
-    hideKeyboardCallback: () -> Unit
-) : BaseViewHolder(itemView, hideKeyboardCallback) {
+abstract class BaseInputLessViewHolder(itemView: View) : BaseViewHolder(itemView) {
 
     internal val input: TextInputEditText = itemView.findViewById(R.id.input)
     internal val container: TextInputLayout = itemView.findViewById(R.id.container)
@@ -28,9 +25,10 @@ abstract class BaseInputLessViewHolder(
         item: Any,
         currentEntity: EntityModel?,
         preset: String?,
+        isLastParameter: Boolean,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntity, preset, onValueChanged)
+        super.bind(item, currentEntity, preset, isLastParameter, onValueChanged)
 
         itemJsonObject.getSafeString("label")?.let { parameterLabel ->
             container.hint = if (isMandatory()) {

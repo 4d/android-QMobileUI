@@ -12,9 +12,8 @@ import com.qmobile.qmobileui.action.ActionTypes
 
 class SignatureViewHolder(
     itemView: View,
-    hideKeyboardCallback: () -> Unit,
     private val actionTypesCallback: (actionTypes: ActionTypes, position: Int) -> Unit
-) : BaseImageViewHolder(itemView, hideKeyboardCallback) {
+) : BaseImageViewHolder(itemView) {
 
     override fun getPlaceholderRes(): Int = R.drawable.file_sign
 

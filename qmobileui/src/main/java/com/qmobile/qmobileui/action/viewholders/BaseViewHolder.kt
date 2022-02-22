@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.action.viewholders
 
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
 import com.qmobile.qmobileapi.model.entity.EntityHelper
@@ -17,8 +18,7 @@ import com.qmobile.qmobileapi.utils.getStringList
 import com.qmobile.qmobileui.R
 import org.json.JSONObject
 
-abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: () -> Unit) :
-    RecyclerView.ViewHolder(itemView) {
+abstract class BaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     lateinit var parameterName: String
     lateinit var itemJsonObject: JSONObject
@@ -28,6 +28,7 @@ abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: 
         item: Any,
         currentEntity: EntityModel?,
         preset: String?,
+        isLastParameter: Boolean,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
         itemJsonObject = item as JSONObject
@@ -38,16 +39,8 @@ abstract class BaseViewHolder(itemView: View, private val hideKeyboardCallback: 
             onValueChanged(parameterName, "", null, validate(false))
         }
 
-        itemView.setOnClickListener {
-            hideKeyboardCallback()
-        }
-
-        // Adding another OnFocusChangeListener as we can lose the focus with 'actionNext' not finding the next
-        // focusable EditText as the view might be recycled. In this case, it's the view that get the focus.
-        itemView.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            if (hasFocus)
-                itemView.findViewById<TextInputEditText>(R.id.input)?.requestFocus()
-        }
+        itemView.findViewById<TextInputEditText>(R.id.input)?.imeOptions =
+            if (isLastParameter) EditorInfo.IME_ACTION_DONE else EditorInfo.IME_ACTION_NEXT
     }
 
     abstract fun validate(displayError: Boolean): Boolean

@@ -13,8 +13,7 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
 
-class BooleanViewHolder(itemView: View, hideKeyboardCallback: () -> Unit) :
-    BaseViewHolder(itemView, hideKeyboardCallback) {
+class BooleanViewHolder(itemView: View) : BaseViewHolder(itemView) {
 
     private var compoundButton: CompoundButton = itemView.findViewById(R.id.compoundButton)
     private val label: TextView = itemView.findViewById(R.id.label)
@@ -23,9 +22,10 @@ class BooleanViewHolder(itemView: View, hideKeyboardCallback: () -> Unit) :
         item: Any,
         currentEntity: EntityModel?,
         preset: String?,
+        isLastParameter: Boolean,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntity, preset, onValueChanged)
+        super.bind(item, currentEntity, preset, isLastParameter, onValueChanged)
 
         itemJsonObject.getSafeString("label")?.let { parameterLabel ->
             label.text = if (isMandatory()) {

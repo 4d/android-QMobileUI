@@ -15,10 +15,8 @@ import com.qmobile.qmobileui.utils.PermissionChecker
 
 class ImageViewHolder(
     itemView: View,
-    hideKeyboardCallback: () -> Unit,
     private val actionTypesCallback: (actionTypes: ActionTypes, position: Int) -> Unit
-) :
-    BaseImageViewHolder(itemView, hideKeyboardCallback) {
+) : BaseImageViewHolder(itemView) {
 
     override fun getPlaceholderRes(): Int = R.drawable.image_plus
 

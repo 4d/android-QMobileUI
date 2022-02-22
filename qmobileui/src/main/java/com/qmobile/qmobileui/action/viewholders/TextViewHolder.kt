@@ -22,12 +22,7 @@ import com.qmobile.qmobileui.action.addSuffix
 import com.qmobile.qmobileui.formatters.SpellOutFormat
 import com.qmobile.qmobileui.ui.getShakeAnimation
 
-open class TextViewHolder(
-    itemView: View,
-    private val format: String,
-    private val hideKeyboardCallback: () -> Unit
-) :
-    BaseViewHolder(itemView, hideKeyboardCallback) {
+open class TextViewHolder(itemView: View, private val format: String) : BaseViewHolder(itemView) {
 
     companion object {
         private const val maxLines = 15
@@ -43,9 +38,10 @@ open class TextViewHolder(
         item: Any,
         currentEntity: EntityModel?,
         preset: String?,
+        isLastParameter: Boolean,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntity, preset, onValueChanged)
+        super.bind(item, currentEntity, preset, isLastParameter, onValueChanged)
 
         if (format == ActionParameterEnum.TEXT_AREA.format) {
             input.maxLines = maxLines
@@ -94,7 +90,6 @@ open class TextViewHolder(
                 formatValue()
                 if (validate(true))
                     container.error = null
-                hideKeyboardCallback()
             }
         }
 

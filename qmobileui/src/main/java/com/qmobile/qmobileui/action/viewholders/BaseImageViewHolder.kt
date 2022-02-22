@@ -20,11 +20,7 @@ import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.Transformations
 import com.qmobile.qmobileui.binding.getColorFromAttr
 
-abstract class BaseImageViewHolder(
-    itemView: View,
-    hideKeyboardCallback: () -> Unit
-) :
-    BaseViewHolder(itemView, hideKeyboardCallback) {
+abstract class BaseImageViewHolder(itemView: View) : BaseViewHolder(itemView) {
 
     private val label: TextView = itemView.findViewById(R.id.label)
     private val error: TextView = itemView.findViewById(R.id.error)
@@ -41,9 +37,10 @@ abstract class BaseImageViewHolder(
         item: Any,
         currentEntity: EntityModel?,
         preset: String?,
+        isLastParameter: Boolean,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntity, preset, onValueChanged)
+        super.bind(item, currentEntity, preset, isLastParameter, onValueChanged)
 
         itemJsonObject.getSafeString("label")?.let { parameterLabel ->
             label.text = if (isMandatory()) {

@@ -19,9 +19,8 @@ import java.util.Calendar
 class DateViewHolder(
     itemView: View,
     format: String,
-    private val fragmentManager: FragmentManager?,
-    hideKeyboardCallback: () -> Unit
-) : BaseInputLessViewHolder(itemView, hideKeyboardCallback) {
+    private val fragmentManager: FragmentManager?
+) : BaseInputLessViewHolder(itemView) {
 
     private var dateFormat: String = when (format) {
         ActionParameterEnum.DATE_DEFAULT2.format,
@@ -38,9 +37,10 @@ class DateViewHolder(
         item: Any,
         currentEntity: EntityModel?,
         preset: String?,
+        isLastParameter: Boolean,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntity, preset, onValueChanged)
+        super.bind(item, currentEntity, preset, isLastParameter, onValueChanged)
 
         container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.calendar_month)
 
