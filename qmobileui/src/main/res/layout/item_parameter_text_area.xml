@@ -20,8 +20,6 @@
         android:layout_gravity="left"
         android:layout_marginTop="7dp"
         android:imeOptions="flagNavigateNext"
-        android:background="#FFFFFF"
-
         android:inputType="textMultiLine"
         android:maxLines="15"
         android:minLines="3"

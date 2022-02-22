@@ -1168,7 +1168,6 @@ class BarCodeViewHolder(itemView: View) :
     var scannedValueTextView: TextView = itemView.findViewById(R.id.scanned_value_text_view)
     var container: View = itemView.findViewById(R.id.container)
 
-
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
