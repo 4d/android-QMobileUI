@@ -40,7 +40,7 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="barcode_item_theme">
+    <style name="parameter_item_theme">
         <item name="android:background">@color/grey_dark_4</item>
 
     </style>

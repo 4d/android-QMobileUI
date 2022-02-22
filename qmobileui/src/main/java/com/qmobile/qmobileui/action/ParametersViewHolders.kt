@@ -580,6 +580,8 @@ class ScientificViewHolder(itemView: View) :
             }
         }
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        editText.handleDarkMode(itemView.context)
+
     }
 
     override fun validate(): Boolean {
@@ -698,6 +700,7 @@ class PercentageViewHolder(itemView: View) :
         })
 
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        editText.handleDarkMode(itemView.context)
     }
 
     override fun validate(): Boolean {

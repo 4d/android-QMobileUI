@@ -24,7 +24,6 @@
         android:minHeight="@dimen/param_item_min_height"
         android:paddingLeft="@dimen/param_edit_text_padding_left"
         android:paddingEnd="7dp"
-        android:textColor="#000"
         tools:text="totot" />
 
     <TextView

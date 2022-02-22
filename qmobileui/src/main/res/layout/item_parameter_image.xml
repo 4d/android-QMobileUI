@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="7dp"
-        android:background="#FFFFFF"
+        android:theme="@style/parameter_item_theme"
         android:gravity="right|center_vertical"
         android:minHeight="@dimen/param_item_min_height"
         android:orientation="horizontal"
