@@ -172,6 +172,7 @@ class TextViewHolder(itemView: View, val format: String) :
             }
         })
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        editText.handleDarkMode(itemView.context)
     }
 
     override fun setDefaultFieldIfNeeded(
@@ -248,6 +249,7 @@ class TextAreaViewHolder(itemView: View) :
             }
         })
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        editText.handleDarkMode(itemView.context)
     }
 
     override fun validate(): Boolean {
@@ -332,6 +334,7 @@ class NumberViewHolder(itemView: View, val format: String) :
             }
         })
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        editText.handleDarkMode(itemView.context)
     }
 
     override fun validate(): Boolean {
@@ -456,6 +459,7 @@ class SpellOutViewHolder(itemView: View) :
                 }
             }
         }
+        editText.handleDarkMode(itemView.context)
     }
 
     override fun validate(): Boolean {

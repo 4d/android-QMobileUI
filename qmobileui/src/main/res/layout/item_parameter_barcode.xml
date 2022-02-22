@@ -12,17 +12,17 @@
         android:layout_marginStart="7dp"
         android:layout_marginTop="7dp"
         android:text="TextView:"
-        android:textColor="#000" />
+       />
 
     <LinearLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="7dp"
-        android:background="#FFFFFF"
         android:gravity="right|center_vertical"
         android:minHeight="@dimen/param_item_min_height"
         android:orientation="horizontal"
+        android:theme="@style/barcode_item_theme"
         android:paddingLeft="@dimen/param_edit_text_padding_left"
         android:paddingEnd="7dp">
 
@@ -32,7 +32,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="7dp"
             android:layout_weight="1"
-            android:background="#FFFFFF"
             android:gravity="left|center_vertical"
             android:minHeight="@dimen/param_item_min_height"
             android:paddingLeft="@dimen/param_edit_text_padding_left"
