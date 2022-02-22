@@ -172,7 +172,7 @@ class TextViewHolder(itemView: View, val format: String) :
             }
         })
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
-        editText.handleDarkMode(itemView.context)
+        editText.handleDarkMode()
     }
 
     override fun setDefaultFieldIfNeeded(
@@ -249,7 +249,7 @@ class TextAreaViewHolder(itemView: View) :
             }
         })
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
-        editText.handleDarkMode(itemView.context)
+        editText.handleDarkMode()
     }
 
     override fun validate(): Boolean {
@@ -334,7 +334,7 @@ class NumberViewHolder(itemView: View, val format: String) :
             }
         })
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
-        editText.handleDarkMode(itemView.context)
+        editText.handleDarkMode()
     }
 
     override fun validate(): Boolean {
@@ -459,7 +459,7 @@ class SpellOutViewHolder(itemView: View) :
                 }
             }
         }
-        editText.handleDarkMode(itemView.context)
+        editText.handleDarkMode()
     }
 
     override fun validate(): Boolean {
@@ -580,7 +580,7 @@ class ScientificViewHolder(itemView: View) :
             }
         }
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
-        editText.handleDarkMode(itemView.context)
+        editText.handleDarkMode()
 
     }
 
@@ -700,7 +700,7 @@ class PercentageViewHolder(itemView: View) :
         })
 
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
-        editText.handleDarkMode(itemView.context)
+        editText.handleDarkMode()
     }
 
     override fun validate(): Boolean {
