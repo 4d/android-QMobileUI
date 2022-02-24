@@ -66,7 +66,7 @@ class FormQueryBuilder(
                 val relatedTableName = RelationHelper.getDest(tableName, relation) ?: ""
 
                 stringBuffer.append(
-                    "EXISTS ( SELECT * FROM $relatedTableName as T2 WHERE " +
+                    "EXISTS ( SELECT * FROM $relatedTableName AS T2 WHERE " +
                         "T1.__${relation}Key = T2.__KEY AND "
                 )
                 val appendFromFormat = appendFromFormat(field, pattern, "T2.$relatedField")

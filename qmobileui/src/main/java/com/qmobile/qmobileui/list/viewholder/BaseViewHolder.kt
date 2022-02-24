@@ -11,7 +11,6 @@ import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomData
-import com.qmobile.qmobiledatastore.data.RoomRelation
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
@@ -63,13 +62,13 @@ class BaseViewHolder(
         }
     }
 
-    private fun observeRelations(relations: Map<Relation, LiveData<RoomRelation>>, entity: EntityModel) {
+    private fun observeRelations(relations: Map<Relation, LiveData<List<RoomData>>>, entity: EntityModel) {
         for ((relation, liveDataRelatedEntity) in relations) {
             liveDataRelatedEntity.observe(requireNotNull(dataBinding.lifecycleOwner)) { roomRelation ->
                 if (relation.type == RelationTypeEnum.MANY_TO_ONE)
-                    handleManyToOne(roomRelation?.toOne, relation.name, entity)
+                    handleManyToOne(roomRelation?.firstOrNull(), relation.name, entity)
                 else
-                    handleOneToMany(roomRelation?.toMany, relation.name)
+                    handleOneToMany(roomRelation, relation.name)
             }
         }
     }

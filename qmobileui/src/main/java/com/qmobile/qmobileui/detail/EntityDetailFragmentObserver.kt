@@ -9,7 +9,7 @@ package com.qmobile.qmobileui.detail
 import androidx.lifecycle.LiveData
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.parseToString
-import com.qmobile.qmobiledatastore.data.RoomRelation
+import com.qmobile.qmobiledatastore.data.RoomData
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
@@ -50,13 +50,13 @@ class EntityDetailFragmentObserver(
         }
     }
 
-    private fun observeRelations(relations: Map<Relation, LiveData<RoomRelation>>, entity: EntityModel) {
+    private fun observeRelations(relations: Map<Relation, LiveData<List<RoomData>>>, entity: EntityModel) {
         for ((relation, liveDataRelatedEntity) in relations) {
             liveDataRelatedEntity.observe(requireNotNull(fragment.viewLifecycleOwner)) { roomRelation ->
                 roomRelation?.let {
                     entityViewModel.setRelationToLayout(relation.name, roomRelation)
                     if (relation.type == RelationTypeEnum.MANY_TO_ONE) {
-                        roomRelation.toOne?.let {
+                        roomRelation.firstOrNull()?.let {
                             RelationHelper.refreshOneToManyNavForNavbarTitle(
                                 fragment.tableName, fragment.binding, entity, it
                             )
