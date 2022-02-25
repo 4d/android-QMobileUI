@@ -10,11 +10,11 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
-import com.qmobile.qmobileapi.model.entity.EntityHelper
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileapi.utils.getStringList
+import com.qmobile.qmobiledatasync.utils.ReflectionUtils
 import com.qmobile.qmobileui.R
 import org.json.JSONObject
 
@@ -58,7 +58,7 @@ abstract class BaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView
             else
                 itemJsonObject.getSafeString("defaultField")
             fieldName?.let {
-                EntityHelper.readInstanceProperty(entity, it)?.also { value ->
+                ReflectionUtils.readInstanceProperty(entity, it)?.also { value ->
                     valueCallback(value)
                 }
             }

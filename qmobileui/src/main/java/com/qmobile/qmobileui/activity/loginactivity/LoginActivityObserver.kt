@@ -8,7 +8,6 @@ package com.qmobile.qmobileui.activity.loginactivity
 
 import android.view.View
 import androidx.lifecycle.Lifecycle
-import com.qmobile.qmobiledatasync.utils.collectWhenStarted
 import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
@@ -26,7 +25,7 @@ class LoginActivityObserver(
 
     // Observe if email is valid
     private fun observeEmailValid() {
-        loginViewModel.emailValid.launchAndCollectIn(activity, Lifecycle.State.STARTED){ emailValid ->
+        loginViewModel.emailValid.launchAndCollectIn(activity, Lifecycle.State.STARTED) { emailValid ->
             activity.binding.loginButtonAuth.isEnabled = emailValid
         }
 //        activity.collectWhenStarted(loginViewModel.emailValid) { emailValid ->

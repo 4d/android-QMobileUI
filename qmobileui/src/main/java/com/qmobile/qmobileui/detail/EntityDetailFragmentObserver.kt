@@ -43,7 +43,7 @@ class EntityDetailFragmentObserver(
     }
 
     private fun setupObserver(entity: EntityModel) {
-        RelationHelper.getRelationsLiveData(fragment.tableName, entity).let { relationMap ->
+        RelationHelper.getRelationsLiveDataMap(fragment.tableName, entity).let { relationMap ->
             if (relationMap.isNotEmpty()) {
                 observeRelations(relationMap, entity)
             }

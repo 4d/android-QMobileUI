@@ -11,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
-import com.qmobile.qmobiledatasync.utils.collectWhenStarted
 import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
@@ -36,7 +35,7 @@ class EntityListFragmentObserver(
         entityListViewModel.dataSynchronized.launchAndCollectIn(fragment, Lifecycle.State.STARTED) { dataSyncState ->
             Timber.d(
                 "[DataSyncState : $dataSyncState, " +
-                        "Table : ${entityListViewModel.getAssociatedTableName()}] "
+                    "Table : ${entityListViewModel.getAssociatedTableName()}] "
             )
         }
 //        fragment.collectWhenStarted(entityListViewModel.dataSynchronized) { dataSyncState ->

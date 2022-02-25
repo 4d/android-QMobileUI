@@ -27,11 +27,11 @@ class FormQueryBuilder(
     fun getQuery(pattern: String? = null): SimpleSQLiteQuery {
         if (pattern.isNullOrEmpty())
             return SimpleSQLiteQuery(baseQuery)
-        val stringBuffer = StringBuffer("$baseQuery AS T1 WHERE ")
+        val stringBuilder = StringBuilder("$baseQuery AS T1 WHERE ")
         searchField.getSafeArray(tableName)?.let { columnsToFilter ->
-            appendPredicate(stringBuffer, columnsToFilter, pattern)
+            appendPredicate(stringBuilder, columnsToFilter, pattern)
         }
-        return SimpleSQLiteQuery(stringBuffer.toString().removeSuffix("OR "))
+        return SimpleSQLiteQuery(stringBuilder.toString().removeSuffix("OR "))
     }
 
     fun getRelationQuery(
@@ -42,15 +42,15 @@ class FormQueryBuilder(
         val baseRelationQuery = "$baseQuery AS T1 WHERE T1.__${inverseName}Key = $parentItemId"
         if (pattern.isNullOrEmpty())
             return SimpleSQLiteQuery(baseRelationQuery)
-        val stringBuffer = StringBuffer("$baseRelationQuery AND ( ")
+        val stringBuilder = StringBuilder("$baseRelationQuery AND ( ")
         searchField.getSafeArray(tableName)?.let { columnsToFilter ->
-            appendPredicate(stringBuffer, columnsToFilter, pattern)
+            appendPredicate(stringBuilder, columnsToFilter, pattern)
         }
-        return SimpleSQLiteQuery(stringBuffer.toString().removeSuffix("OR ").plus(")"))
+        return SimpleSQLiteQuery(stringBuilder.toString().removeSuffix("OR ").plus(")"))
     }
 
     private fun appendPredicate(
-        stringBuffer: StringBuffer,
+        stringBuilder: StringBuilder,
         columnsToFilter: JSONArray,
         pattern: String
     ) {
@@ -65,23 +65,23 @@ class FormQueryBuilder(
 
                 val relatedTableName = RelationHelper.getDest(tableName, relation) ?: ""
 
-                stringBuffer.append(
+                stringBuilder.append(
                     "EXISTS ( SELECT * FROM $relatedTableName AS T2 WHERE " +
                         "T1.__${relation}Key = T2.__KEY AND "
                 )
                 val appendFromFormat = appendFromFormat(field, pattern, "T2.$relatedField")
                 if (appendFromFormat.isEmpty()) {
-                    stringBuffer.append("T2.$relatedField LIKE '%$pattern%' OR ")
+                    stringBuilder.append("T2.$relatedField LIKE '%$pattern%' OR ")
                 } else {
-                    stringBuffer.append("( T2.$relatedField LIKE '%$pattern%' OR $appendFromFormat")
-                    stringBuffer.removeSuffix("OR ")
-                    stringBuffer.append(") ")
+                    stringBuilder.append("( T2.$relatedField LIKE '%$pattern%' OR $appendFromFormat")
+                    stringBuilder.removeSuffix("OR ")
+                    stringBuilder.append(") ")
                 }
-                stringBuffer.removeSuffix("OR ")
-                stringBuffer.append(") OR ")
+                stringBuilder.removeSuffix("OR ")
+                stringBuilder.append(") OR ")
             } else {
-                stringBuffer.append("`$field` LIKE \'%$pattern%\' OR ")
-                stringBuffer.append(appendFromFormat(field, pattern))
+                stringBuilder.append("`$field` LIKE \'%$pattern%\' OR ")
+                stringBuilder.append(appendFromFormat(field, pattern))
             }
         }
     }
@@ -146,14 +146,5 @@ class FormQueryBuilder(
             }
         }
         return appendice
-    }
-
-    private fun StringBuffer.removeSuffix(suffix: String) {
-        if (this.toString().endsWith(suffix))
-            this.replace(
-                this.toString().length - (suffix.length + 1),
-                this.toString().length - 1,
-                ""
-            )
     }
 }

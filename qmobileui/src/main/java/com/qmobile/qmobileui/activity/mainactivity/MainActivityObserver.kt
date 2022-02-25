@@ -12,7 +12,6 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
-import com.qmobile.qmobiledatasync.utils.collectWhenStarted
 import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
@@ -37,7 +36,7 @@ class MainActivityObserver(
 
     // Observe any toast message from Entity Detail
     fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>) {
-        message.launchAndCollectIn(activity, Lifecycle.State.STARTED)  { event ->
+        message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
             activity.handleEvent(event)
         }
 //        activity.collectWhenStarted(message) { event ->
@@ -53,8 +52,8 @@ class MainActivityObserver(
         entityListViewModel.dataSynchronized.launchAndCollectIn(activity, Lifecycle.State.STARTED) { dataSyncState ->
             Timber.d(
                 "[DataSyncState : $dataSyncState, " +
-                        "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-                        "Instance : $entityListViewModel]"
+                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+                    "Instance : $entityListViewModel]"
             )
             when (dataSyncState) {
                 DataSyncStateEnum.SYNCHRONIZING, DataSyncStateEnum.RESYNC -> {
@@ -95,7 +94,7 @@ class MainActivityObserver(
 
     // Observe when there is a new relation to be inserted in a dao
     private fun observeJSONRelation(entityListViewModel: EntityListViewModel<EntityModel>) {
-        entityListViewModel.jsonRelation.launchAndCollectIn(activity, Lifecycle.State.STARTED)  { jsonRelation ->
+        entityListViewModel.jsonRelation.launchAndCollectIn(activity, Lifecycle.State.STARTED) { jsonRelation ->
             entityListViewModelList.find { it.getAssociatedTableName() == jsonRelation.getDestinationTable() }
                 ?.insertRelation(jsonRelation)
         }
@@ -107,7 +106,7 @@ class MainActivityObserver(
 
     // Observe any toast message from EntityList
     private fun observeEntityListToastMessage(entityListViewModel: EntityListViewModel<EntityModel>) {
-        entityListViewModel.toastMessage.message.launchAndCollectIn(activity, Lifecycle.State.STARTED)  {event ->
+        entityListViewModel.toastMessage.message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
             activity.handleEvent(event)
         }
 //        activity.collectWhenStarted(entityListViewModel.toastMessage.message) { event ->

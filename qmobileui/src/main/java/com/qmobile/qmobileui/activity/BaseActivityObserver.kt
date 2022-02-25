@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.activity
 
 import androidx.lifecycle.Lifecycle
-import com.qmobile.qmobiledatasync.utils.collectWhenStarted
 import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
@@ -28,7 +27,10 @@ class BaseActivityObserver(
 
     // Observe authentication state
     private fun observeAuthenticationState() {
-        loginViewModel.authenticationState.launchAndCollectIn(activity, Lifecycle.State.STARTED) { authenticationState ->
+        loginViewModel.authenticationState.launchAndCollectIn(
+            activity,
+            Lifecycle.State.STARTED
+        ) { authenticationState ->
             Timber.i("[AuthenticationState : $authenticationState]")
             activity.handleAuthenticationState(authenticationState)
         }

@@ -55,7 +55,7 @@ class BaseViewHolder(
     }
 
     private fun setupObserver(entity: EntityModel) {
-        RelationHelper.getRelationsLiveData(tableName, entity).let { relationMap ->
+        RelationHelper.getRelationsLiveDataMap(tableName, entity).let { relationMap ->
             if (relationMap.isNotEmpty()) {
                 observeRelations(relationMap, entity)
             }
