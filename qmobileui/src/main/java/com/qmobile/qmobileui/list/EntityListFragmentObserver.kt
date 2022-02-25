@@ -10,7 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
+import com.qmobile.qmobiledatasync.utils.ScheduleRefresh
 import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
@@ -48,8 +48,8 @@ class EntityListFragmentObserver(
 
     private fun observeScheduleRefresh() {
         entityListViewModel.scheduleRefresh.launchAndCollectIn(fragment, Lifecycle.State.STARTED) { scheduleRefresh ->
-            if (scheduleRefresh == ScheduleRefreshEnum.PERFORM) {
-                entityListViewModel.setScheduleRefreshState(ScheduleRefreshEnum.NO)
+            if (scheduleRefresh == ScheduleRefresh.PERFORM) {
+                entityListViewModel.setScheduleRefreshState(ScheduleRefresh.NO)
                 val layoutManager = fragment.binding.fragmentListRecyclerView.layoutManager as LinearLayoutManager
                 val firstVisible = layoutManager.findFirstVisibleItemPosition()
                 val childCount = fragment.binding.fragmentListRecyclerView.childCount

@@ -10,12 +10,12 @@ import android.Manifest
 import android.view.View
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.ActionTypes
+import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.utils.PermissionChecker
 
 class ImageViewHolder(
     itemView: View,
-    private val actionTypesCallback: (actionTypes: ActionTypes, position: Int) -> Unit
+    private val actionTypesCallback: (actionTypes: Action.Type, position: Int) -> Unit
 ) : BaseImageViewHolder(itemView) {
 
     override fun getPlaceholderRes(): Int = R.drawable.image_plus
@@ -31,7 +31,7 @@ class ImageViewHolder(
             ) { _, which ->
                 when (which) {
                     0 -> askCameraPermissionAndProceed()
-                    1 -> actionTypesCallback(ActionTypes.PICK_PHOTO_GALLERY, bindingAdapterPosition)
+                    1 -> actionTypesCallback(Action.Type.PICK_PHOTO_GALLERY, bindingAdapterPosition)
                 }
             }
             .show()
@@ -44,7 +44,7 @@ class ImageViewHolder(
             rationale = itemView.context.getString(R.string.permission_rationale_camera)
         ) { isGranted ->
             if (isGranted) {
-                actionTypesCallback(ActionTypes.TAKE_PICTURE_CAMERA, bindingAdapterPosition)
+                actionTypesCallback(Action.Type.TAKE_PICTURE_CAMERA, bindingAdapterPosition)
             }
         }
     }

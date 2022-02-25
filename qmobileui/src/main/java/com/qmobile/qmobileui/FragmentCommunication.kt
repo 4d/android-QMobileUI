@@ -8,7 +8,7 @@ package com.qmobile.qmobileui
 
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobiledatasync.toast.Event
-import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
+import com.qmobile.qmobiledatasync.toast.ToastMessage
 import kotlinx.coroutines.flow.SharedFlow
 
 /**
@@ -20,7 +20,7 @@ interface FragmentCommunication {
 
     fun requestDataSync(currentTableName: String) // list
 
-    fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>) // detail
+    fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessage.Holder>>) // detail
 
     fun setFullScreenMode(isFullScreen: Boolean) // actions
 }

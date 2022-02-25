@@ -117,8 +117,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         arguments?.getString("inverseName")?.let { inverseName = it }
 
         if (fromRelation) {
-            RelationHelper.getDest(tableName, inverseName)?.let { parentTableName = it }
-            RelationHelper.getInverse(tableName, inverseName)?.let { parentRelationName = it }
+            RelationHelper.getRelation(tableName, inverseName)?.dest?.let { parentTableName = it }
+            RelationHelper.getRelation(tableName, inverseName)?.dest?.let { parentRelationName = it }
         }
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
@@ -320,13 +320,13 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         adapter.updateImageForPosition(actionPosition, uri)
     }
 
-    private fun actionTypesCallback(actionType: ActionTypes, position: Int) {
+    private fun actionTypesCallback(actionType: Action.Type, position: Int) {
         actionPosition = position
         when (actionType) {
-            ActionTypes.PICK_PHOTO_GALLERY -> pickPhotoFromGallery()
-            ActionTypes.TAKE_PICTURE_CAMERA -> takePhotoFromCamera()
-            ActionTypes.SCAN -> scan()
-            ActionTypes.SIGN -> showSignDialog()
+            Action.Type.PICK_PHOTO_GALLERY -> pickPhotoFromGallery()
+            Action.Type.TAKE_PICTURE_CAMERA -> takePhotoFromCamera()
+            Action.Type.SCAN -> scan()
+            Action.Type.SIGN -> showSignDialog()
         }
     }
 

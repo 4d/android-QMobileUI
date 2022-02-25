@@ -14,9 +14,9 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.toast.MessageType
+import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
@@ -152,10 +152,10 @@ class SettingsFragment :
         } else {
             if (!connectivityViewModel.isConnected()) {
                 activity?.let {
-                    ToastHelper.show(it, it.getString(R.string.no_internet), MessageType.WARNING)
+                    ToastHelper.show(it, it.getString(R.string.no_internet), ToastMessage.Type.WARNING)
                 }
                 Timber.d("No Internet connection")
-            } else if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
+            } else if (loginViewModel.authenticationState.value != AuthenticationState.AUTHENTICATED) {
                 Timber.d("Not authenticated yet")
             }
         }
@@ -165,12 +165,12 @@ class SettingsFragment :
      * Checks if environment is ready to perform an action
      */
     private fun isReady(): Boolean {
-        if (loginViewModel.authenticationState.value == AuthenticationStateEnum.INVALID_AUTHENTICATION) {
+        if (loginViewModel.authenticationState.value == AuthenticationState.INVALID_AUTHENTICATION) {
             // For example server was not responding when trying to auto-login
             activitySettingsInterface.requestAuthentication()
             return false
         }
-        return loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED &&
+        return loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
             connectivityViewModel.isConnected()
     }
 

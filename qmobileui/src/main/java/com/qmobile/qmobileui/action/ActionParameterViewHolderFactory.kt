@@ -23,7 +23,7 @@ class ActionParameterViewHolderFactory private constructor() {
             parent: ViewGroup,
             context: Context,
             fragmentManager: FragmentManager?,
-            actionTypesCallback: (actionTypes: ActionTypes, position: Int) -> Unit
+            actionTypesCallback: (actionTypes: Action.Type, position: Int) -> Unit
         ): BaseViewHolder {
 
             return when (val itemType = ActionParameterEnum.values()[viewType]) {

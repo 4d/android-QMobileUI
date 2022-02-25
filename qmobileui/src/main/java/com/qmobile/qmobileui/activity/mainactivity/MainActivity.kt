@@ -29,19 +29,18 @@ import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.network.NetworkStateEnum
-import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
+import com.qmobile.qmobiledatasync.network.NetworkState
+import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.sync.resetIsToSync
 import com.qmobile.qmobiledatasync.toast.Event
-import com.qmobile.qmobiledatasync.toast.MessageType
-import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
-import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
+import com.qmobile.qmobiledatasync.toast.ToastMessage
+import com.qmobile.qmobiledatasync.utils.ScheduleRefresh
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobileui.ActionActivity
@@ -189,7 +188,7 @@ class MainActivity :
                 shouldDelayOnForegroundEvent.set(false)
             }
             Lifecycle.Event.ON_START -> {
-                if (loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED) {
+                if (loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED) {
                     Timber.d("[${Lifecycle.Event.ON_START}]")
                     applyOnForegroundEvent()
                 } else {
@@ -232,15 +231,15 @@ class MainActivity :
 
         checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
-                if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
+                if (loginViewModel.authenticationState.value != AuthenticationState.AUTHENTICATED) {
                     // This is to schedule a notifyDataSetChanged() because of cached images (only on first dataSync)
-                    entityListViewModel?.setScheduleRefreshState(ScheduleRefreshEnum.SCHEDULE)
+                    entityListViewModel?.setScheduleRefreshState(ScheduleRefresh.SCHEDULE)
                     requestAuthentication()
                 } else {
                     // AUTHENTICATED
                     when (entityListViewModel?.dataSynchronized?.value) {
-                        DataSyncStateEnum.UNSYNCHRONIZED -> dataSync()
-                        DataSyncStateEnum.SYNCHRONIZED -> {
+                        DataSync.State.UNSYNCHRONIZED -> dataSync()
+                        DataSync.State.SYNCHRONIZED -> {
                             job?.cancel()
                             job = lifecycleScope.launch {
                                 entityListViewModel.getEntities { shouldSyncData ->
@@ -254,8 +253,8 @@ class MainActivity :
                                 }
                             }
                         }
-                        DataSyncStateEnum.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
-                        DataSyncStateEnum.RESYNC ->
+                        DataSync.State.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
+                        DataSync.State.RESYNC ->
                             Timber.d("Resynchronization table, because globalStamp changed while performing a dataSync")
                         else -> {}
                     }
@@ -273,25 +272,25 @@ class MainActivity :
     }
 
     private fun onServerInaccessible(tableName: String) {
-        connectivityViewModel.toastMessage.showMessage(serverNotAccessibleString, tableName, MessageType.ERROR)
+        connectivityViewModel.toastMessage.showMessage(serverNotAccessibleString, tableName, ToastMessage.Type.ERROR)
     }
 
     private fun onNoInternet(tableName: String) {
-        connectivityViewModel.toastMessage.showMessage(noInternetString, tableName, MessageType.ERROR)
+        connectivityViewModel.toastMessage.showMessage(noInternetString, tableName, ToastMessage.Type.ERROR)
     }
 
-    override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
+    override fun handleAuthenticationState(authenticationState: AuthenticationState) {
         when (authenticationState) {
-            AuthenticationStateEnum.AUTHENTICATED -> {
+            AuthenticationState.AUTHENTICATED -> {
                 if (loginStatusText.isNotEmpty()) {
-                    ToastHelper.show(this, loginStatusText, MessageType.SUCCESS)
+                    ToastHelper.show(this, loginStatusText, ToastMessage.Type.SUCCESS)
                     loginStatusText = ""
                 }
                 if (shouldDelayOnForegroundEvent.getAndSet(false)) {
                     applyOnForegroundEvent()
                 }
             }
-            AuthenticationStateEnum.LOGOUT -> {
+            AuthenticationState.LOGOUT -> {
                 // Logout performed
                 if (!BaseApp.runtimeDataHolder.guestLogin)
                     startLoginActivity()
@@ -412,12 +411,12 @@ class MainActivity :
         })
     }
 
-    override fun handleNetworkState(networkState: NetworkStateEnum) {
+    override fun handleNetworkState(networkState: NetworkState) {
         when (networkState) {
-            NetworkStateEnum.CONNECTED -> {
+            NetworkState.CONNECTED -> {
                 // Setting the authenticationState to its initial value
                 if (BaseApp.sharedPreferencesHolder.sessionToken.isNotEmpty())
-                    loginViewModel.setAuthenticationState(AuthenticationStateEnum.AUTHENTICATED)
+                    loginViewModel.setAuthenticationState(AuthenticationState.AUTHENTICATED)
 
                 // If guest and not yet logged in, auto login
                 if (BaseApp.sharedPreferencesHolder.sessionToken.isEmpty() &&
@@ -433,7 +432,7 @@ class MainActivity :
     }
 
     // Observe any toast message from Entity Detail
-    override fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>) {
+    override fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessage.Holder>>) {
         mainActivityObserver.observeEntityToastMessage(message)
     }
 
@@ -460,7 +459,7 @@ class MainActivity :
         } else {
             authenticationRequested = true
             Timber.d("No Internet connection, authenticationRequested")
-            ToastHelper.show(this, getString(R.string.no_internet_auto_login), MessageType.WARNING)
+            ToastHelper.show(this, getString(R.string.no_internet_auto_login), ToastMessage.Type.WARNING)
         }
     }
 

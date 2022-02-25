@@ -26,12 +26,12 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.auth.isEmailValid
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.network.NetworkStateEnum
-import com.qmobile.qmobiledatasync.toast.MessageType
+import com.qmobile.qmobiledatasync.network.NetworkState
+import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
@@ -110,7 +110,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         bindImageFromDrawable(binding.loginLogo, BaseApp.loginLogoDrawable)
 
         if (loggedOut) {
-            ToastHelper.show(this, getString(R.string.login_logged_out), MessageType.SUCCESS)
+            ToastHelper.show(this, getString(R.string.login_logged_out), ToastMessage.Type.SUCCESS)
         }
 
         // Login button
@@ -119,7 +119,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
                 binding.loginButtonAuth.isEnabled = false
                 loginViewModel.login(email = binding.loginEmailInput.text.toString()) { }
             } else {
-                ToastHelper.show(this, getString(R.string.no_internet), MessageType.WARNING)
+                ToastHelper.show(this, getString(R.string.no_internet), ToastMessage.Type.WARNING)
             }
         }
 
@@ -222,12 +222,12 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
     }
 
     // Observe authentication state
-    override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
+    override fun handleAuthenticationState(authenticationState: AuthenticationState) {
         when (authenticationState) {
-            AuthenticationStateEnum.AUTHENTICATED -> {
+            AuthenticationState.AUTHENTICATED -> {
                 startMainActivity(false, loginViewModel.statusMessage)
             }
-            AuthenticationStateEnum.INVALID_AUTHENTICATION -> {
+            AuthenticationState.INVALID_AUTHENTICATION -> {
                 binding.loginButtonAuth.isEnabled = true
             }
             else -> {
@@ -237,7 +237,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         }
     }
 
-    override fun handleNetworkState(networkState: NetworkStateEnum) {
+    override fun handleNetworkState(networkState: NetworkState) {
         // Checking network for remote Url dialog
         checkNetwork(this)
     }

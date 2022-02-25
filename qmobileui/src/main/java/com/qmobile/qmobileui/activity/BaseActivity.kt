@@ -15,15 +15,15 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.auth.isUrlValid
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.network.NetworkStateEnum
+import com.qmobile.qmobiledatasync.network.NetworkState
 import com.qmobile.qmobiledatasync.toast.Event
-import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
+import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
@@ -50,8 +50,8 @@ abstract class BaseActivity : AppCompatActivity() {
         const val LOGIN_STATUS_TEXT = "loginStatusText"
     }
 
-    fun handleEvent(event: Event<ToastMessageHolder>) {
-        event.getContentIfNotHandled()?.let { toastMessageHolder: ToastMessageHolder ->
+    fun handleEvent(event: Event<ToastMessage.Holder>) {
+        event.getContentIfNotHandled()?.let { toastMessageHolder: ToastMessage.Holder ->
             val message = ResourcesHelper.fetchResourceString(this.baseContext, toastMessageHolder.message)
             ToastHelper.show(this, message, toastMessageHolder.type)
         }
@@ -63,8 +63,8 @@ abstract class BaseActivity : AppCompatActivity() {
     lateinit var accessibilityApiService: AccessibilityApiService
     lateinit var loginApiService: LoginApiService
 
-    abstract fun handleAuthenticationState(authenticationState: AuthenticationStateEnum)
-    abstract fun handleNetworkState(networkState: NetworkStateEnum)
+    abstract fun handleAuthenticationState(authenticationState: AuthenticationState)
+    abstract fun handleNetworkState(networkState: NetworkState)
 
     fun initViewModels() {
         loginViewModel = getLoginViewModel(this, loginApiService)

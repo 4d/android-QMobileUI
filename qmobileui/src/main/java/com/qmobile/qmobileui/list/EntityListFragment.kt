@@ -102,8 +102,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         arguments?.getString("parentItemId")?.let { parentItemId = it }
         arguments?.getString("inverseName")?.let { inverseName = it }
         if (fromRelation) {
-            RelationHelper.getDest(tableName, inverseName)?.let { parentTableName = it }
-            RelationHelper.getInverse(tableName, inverseName)?.let { parentRelationName = it }
+            RelationHelper.getRelation(tableName, inverseName)?.dest?.let { parentTableName = it }
+            RelationHelper.getRelation(tableName, inverseName)?.inverse?.let { parentRelationName = it }
         }
 
         formQueryBuilder = FormQueryBuilder(tableName)

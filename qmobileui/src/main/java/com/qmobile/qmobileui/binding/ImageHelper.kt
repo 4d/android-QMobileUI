@@ -26,7 +26,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.toast.MessageType
+import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
 import com.qmobile.qmobileui.utils.ToastHelper
@@ -99,7 +99,7 @@ object ImageHelper {
             createTempImageFile(context, format)
         } catch (ex: IOException) {
             Timber.e(ex.message.orEmpty())
-            ToastHelper.show(context, "Could not create temporary file", MessageType.ERROR)
+            ToastHelper.show(context, "Could not create temporary file", ToastMessage.Type.ERROR)
             null
         }
         photoFile?.let {
@@ -108,7 +108,7 @@ object ImageHelper {
                 callback(photoURI, it.absolutePath)
             } catch (e: IllegalArgumentException) {
                 Timber.e(e.message.orEmpty())
-                ToastHelper.show(context, "Could not create temporary file", MessageType.ERROR)
+                ToastHelper.show(context, "Could not create temporary file", ToastMessage.Type.ERROR)
             }
         }
     }

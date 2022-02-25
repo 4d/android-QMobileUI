@@ -13,7 +13,6 @@ import com.qmobile.qmobiledatastore.data.RoomData
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
-import com.qmobile.qmobiledatasync.relation.RelationTypeEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import timber.log.Timber
@@ -55,7 +54,7 @@ class EntityDetailFragmentObserver(
             liveDataRelatedEntity.observe(requireNotNull(fragment.viewLifecycleOwner)) { roomRelation ->
                 roomRelation?.let {
                     entityViewModel.setRelationToLayout(relation.name, roomRelation)
-                    if (relation.type == RelationTypeEnum.MANY_TO_ONE) {
+                    if (relation.type == Relation.Type.MANY_TO_ONE) {
                         roomRelation.firstOrNull()?.let {
                             RelationHelper.refreshOneToManyNavForNavbarTitle(
                                 fragment.tableName, fragment.binding, entity, it

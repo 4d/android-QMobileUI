@@ -12,12 +12,12 @@ import androidx.core.content.ContextCompat
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.ActionTypes
+import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.utils.PermissionChecker
 
 class BarcodeViewHolder(
     itemView: View,
-    private val actionTypesCallback: (actionTypes: ActionTypes, position: Int) -> Unit
+    private val actionTypesCallback: (actionTypes: Action.Type, position: Int) -> Unit
 ) : BaseInputLessViewHolder(itemView) {
 
     override fun bind(
@@ -44,7 +44,7 @@ class BarcodeViewHolder(
                 rationale = itemView.context.getString(R.string.permission_rationale_barcode)
             ) { isGranted ->
                 if (isGranted) {
-                    actionTypesCallback(ActionTypes.SCAN, bindingAdapterPosition)
+                    actionTypesCallback(Action.Type.SCAN, bindingAdapterPosition)
                 }
             }
         }

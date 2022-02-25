@@ -14,7 +14,6 @@ import com.qmobile.qmobiledatastore.data.RoomData
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
-import com.qmobile.qmobiledatasync.relation.RelationTypeEnum
 import com.qmobile.qmobileui.BR
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 
@@ -65,7 +64,7 @@ class BaseViewHolder(
     private fun observeRelations(relations: Map<Relation, LiveData<List<RoomData>>>, entity: EntityModel) {
         for ((relation, liveDataRelatedEntity) in relations) {
             liveDataRelatedEntity.observe(requireNotNull(dataBinding.lifecycleOwner)) { roomRelation ->
-                if (relation.type == RelationTypeEnum.MANY_TO_ONE)
+                if (relation.type == Relation.Type.MANY_TO_ONE)
                     handleManyToOne(roomRelation?.firstOrNull(), relation.name, entity)
                 else
                     handleOneToMany(roomRelation, relation.name)

@@ -63,7 +63,7 @@ class FormQueryBuilder(
                 val relation = field.split(".")[0] // manager
                 val relatedField = field.split(".")[1] // FirstName
 
-                val relatedTableName = RelationHelper.getDest(tableName, relation) ?: ""
+                val relatedTableName = RelationHelper.getRelation(tableName, relation)?.dest ?: ""
 
                 stringBuilder.append(
                     "EXISTS ( SELECT * FROM $relatedTableName AS T2 WHERE " +

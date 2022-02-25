@@ -9,17 +9,17 @@ package com.qmobile.qmobileui.utils
 import android.content.Context
 import android.widget.Toast
 import com.pranavpandey.android.dynamic.toasts.DynamicToast
-import com.qmobile.qmobiledatasync.toast.MessageType
+import com.qmobile.qmobiledatasync.toast.ToastMessage
 
 object ToastHelper {
 
-    fun show(context: Context, message: String, type: MessageType = MessageType.NEUTRAL) {
+    fun show(context: Context, message: String, type: ToastMessage.Type = ToastMessage.Type.NEUTRAL) {
         if (message.isNotEmpty()) {
             when (type) {
-                MessageType.NEUTRAL -> showNeutral(context, message)
-                MessageType.SUCCESS -> showSuccess(context, message)
-                MessageType.WARNING -> showWarning(context, message)
-                MessageType.ERROR -> showError(context, message)
+                ToastMessage.Type.NEUTRAL -> showNeutral(context, message)
+                ToastMessage.Type.SUCCESS -> showSuccess(context, message)
+                ToastMessage.Type.WARNING -> showWarning(context, message)
+                ToastMessage.Type.ERROR -> showError(context, message)
             }
         }
     }

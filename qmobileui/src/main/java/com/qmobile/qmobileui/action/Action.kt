@@ -41,4 +41,8 @@ class Action(
         else
             name
     }
+
+    enum class Type {
+        TAKE_PICTURE_CAMERA, PICK_PHOTO_GALLERY, SCAN, SIGN
+    }
 }

@@ -10,7 +10,6 @@ import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
-import com.qmobile.qmobiledatasync.relation.RelationTypeEnum
 import com.qmobile.qmobiledatasync.utils.FieldMapping
 import com.qmobile.qmobiledatasync.utils.RuntimeDataHolder
 import com.qmobile.qmobileui.utils.FormQueryBuilder
@@ -70,7 +69,7 @@ class SqlBuilderTest {
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
         mockRuntimeDataHolder.customFormatters = mapOf()
         mockRuntimeDataHolder.relations = listOf(
-            Relation("Table_3", "RELATED_TABLE", "relation4", "inverse", RelationTypeEnum.MANY_TO_ONE)
+            Relation("Table_3", "RELATED_TABLE", "relation4", "inverse", Relation.Type.MANY_TO_ONE)
         )
         BaseApp.runtimeDataHolder = mockRuntimeDataHolder
 
@@ -133,7 +132,7 @@ class SqlBuilderTest {
         mockRuntimeDataHolder.customFormatters =
             FieldMapping.buildCustomFormatterBinding(customFormattersJsonObj)
         mockRuntimeDataHolder.relations = listOf(
-            Relation("Table_4", "RELATED_TABLE", "relationField", "inverse", RelationTypeEnum.MANY_TO_ONE)
+            Relation("Table_4", "RELATED_TABLE", "relationField", "inverse", Relation.Type.MANY_TO_ONE)
         )
         BaseApp.runtimeDataHolder = mockRuntimeDataHolder
 

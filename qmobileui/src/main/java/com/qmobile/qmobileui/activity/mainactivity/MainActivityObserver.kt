@@ -9,9 +9,9 @@ package com.qmobile.qmobileui.activity.mainactivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
+import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.toast.Event
-import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
+import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
@@ -35,7 +35,7 @@ class MainActivityObserver(
     }
 
     // Observe any toast message from Entity Detail
-    fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>) {
+    fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessage.Holder>>) {
         message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
             activity.handleEvent(event)
         }
@@ -56,7 +56,7 @@ class MainActivityObserver(
                     "Instance : $entityListViewModel]"
             )
             when (dataSyncState) {
-                DataSyncStateEnum.SYNCHRONIZING, DataSyncStateEnum.RESYNC -> {
+                DataSync.State.SYNCHRONIZING, DataSync.State.RESYNC -> {
                     if (entityListViewModel.isToSync.getAndSet(false)) {
                         job?.cancel()
                         job = activity.lifecycleScope.launch {

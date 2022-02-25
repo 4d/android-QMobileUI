@@ -23,7 +23,7 @@ class ActionsParametersListAdapter(
     private val fragmentManager: FragmentManager?,
     private val hideKeyboardCallback: () -> Unit,
     private val focusNextCallback: (position: Int) -> Unit,
-    private val actionTypesCallback: (actionTypes: ActionTypes, position: Int) -> Unit,
+    private val actionTypesCallback: (actionTypes: Action.Type, position: Int) -> Unit,
     private val onValueChanged: (String, Any?, String?, Boolean) -> Unit
 ) :
     RecyclerView.Adapter<BaseViewHolder>() {
