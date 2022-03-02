@@ -50,8 +50,8 @@ class EntityDetailFragmentObserver(
     }
 
     private fun observeRelations(relations: Map<Relation, LiveData<List<RoomData>>>, entity: EntityModel) {
-        for ((relation, liveDataRelatedEntity) in relations) {
-            liveDataRelatedEntity.observe(requireNotNull(fragment.viewLifecycleOwner)) { roomRelation ->
+        for ((relation, liveData) in relations) {
+            liveData.observe(requireNotNull(fragment.viewLifecycleOwner)) { roomRelation ->
                 roomRelation?.let {
                     entityViewModel.setRelationToLayout(relation.name, roomRelation)
                     if (relation.type == Relation.Type.MANY_TO_ONE) {

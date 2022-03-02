@@ -62,8 +62,8 @@ class BaseViewHolder(
     }
 
     private fun observeRelations(relations: Map<Relation, LiveData<List<RoomData>>>, entity: EntityModel) {
-        for ((relation, liveDataRelatedEntity) in relations) {
-            liveDataRelatedEntity.observe(requireNotNull(dataBinding.lifecycleOwner)) { roomRelation ->
+        for ((relation, liveData) in relations) {
+            liveData.observe(requireNotNull(dataBinding.lifecycleOwner)) { roomRelation ->
                 if (relation.type == Relation.Type.MANY_TO_ONE)
                     handleManyToOne(roomRelation?.firstOrNull(), relation.name, entity)
                 else
