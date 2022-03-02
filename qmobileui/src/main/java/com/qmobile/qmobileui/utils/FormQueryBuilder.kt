@@ -63,11 +63,11 @@ class FormQueryBuilder(
                 val relation = field.split(".")[0] // manager
                 val relatedField = field.split(".")[1] // FirstName
 
-                val relatedTableName = RelationHelper.getRelation(tableName, relation)?.dest ?: ""
+                val relatedTableName = RelationHelper.getRelation(tableName, relation).dest
 
                 stringBuilder.append(
                     "EXISTS ( SELECT * FROM $relatedTableName AS T2 WHERE " +
-                        "T1.__${relation}Key = T2.__KEY AND "
+                            "T1.__${relation}Key = T2.__KEY AND "
                 )
                 val appendFromFormat = appendFromFormat(field, pattern, "T2.$relatedField")
                 if (appendFromFormat.isEmpty()) {
@@ -146,5 +146,10 @@ class FormQueryBuilder(
             }
         }
         return appendice
+    }
+
+    private fun StringBuilder.removeSuffix(suffix: String) {
+        if (this.endsWith(suffix))
+            this.replace(this.length - (suffix.length + 1), this.length - 1, "")
     }
 }
