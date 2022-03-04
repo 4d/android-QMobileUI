@@ -460,7 +460,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if ((resultCode == RESULT_OK) && (data != null)) {
             val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
             val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
 
@@ -468,7 +467,6 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                 fromCameraOrGallery = true
                 currentFragment.handleResult(requestCode, data)
             }
-        }
     }
 
     private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()
