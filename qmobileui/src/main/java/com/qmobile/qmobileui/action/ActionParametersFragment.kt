@@ -298,10 +298,10 @@ class ActionParametersFragment : Fragment(), BaseFragment {
         })
     }
 
-    fun handleResult(requestCode: Int, data: Intent) {
+    fun handleResult(requestCode: Int, data: Intent?) {
         // the request code is te equivalent of position of item in adapter
         // case of image picked from gallery
-        val uri = data.data
+        val uri = data?.data
         if (uri != null) {
             adapter.getUpdatedImageParameterName(requestCode)?.let {
                 imagesToUpload[it] = uri
