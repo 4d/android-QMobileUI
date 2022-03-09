@@ -53,7 +53,7 @@ class EntityDetailFragmentObserver(
     private fun observeRelations(relations: Map<Relation, LiveData<RoomRelation>>, entity: EntityModel) {
         for ((relation, liveDataRelatedEntity) in relations) {
             liveDataRelatedEntity.observe(requireNotNull(fragment.viewLifecycleOwner)) { roomRelation ->
-                if (!roomRelation.isNullOrEmpty()) {
+                roomRelation?.let {
                     entityViewModel.setRelationToLayout(relation.name, roomRelation)
                     if (relation.type == RelationTypeEnum.MANY_TO_ONE) {
                         roomRelation.toOne?.let {
