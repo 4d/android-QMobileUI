@@ -11,14 +11,15 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.model.entity.Photo
 import com.qmobile.qmobileapi.utils.getSafeAny
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.ImageHelper
-import com.qmobile.qmobileui.binding.Transformations
-import com.qmobile.qmobileui.binding.getColorFromAttr
+import com.qmobile.qmobileui.binding.px
 
 abstract class BaseImageViewHolder(itemView: View) : BaseViewHolder(itemView) {
 
@@ -31,6 +32,7 @@ abstract class BaseImageViewHolder(itemView: View) : BaseViewHolder(itemView) {
 
     companion object {
         const val DEFAULT_PLACEHOLDER_ICON_ALPHA = 0.6F
+        const val ROUNDING_RADIUS = 12
     }
 
     override fun bind(
@@ -58,7 +60,7 @@ abstract class BaseImageViewHolder(itemView: View) : BaseViewHolder(itemView) {
 
         removeItem.setOnClickListener {
             setDefaultPlaceholder()
-            removeItem.visibility = View.GONE
+            removeItem.visibility = View.INVISIBLE
             currentUri = null
             onValueChanged(parameterName, null, null, validate(false))
         }
@@ -75,6 +77,8 @@ abstract class BaseImageViewHolder(itemView: View) : BaseViewHolder(itemView) {
 
         onValueChanged(parameterName, currentUri, null, validate(false))
     }
+
+    abstract fun getPlaceholderRes(): Int
 
     abstract fun onImageClick()
 
@@ -93,7 +97,8 @@ abstract class BaseImageViewHolder(itemView: View) : BaseViewHolder(itemView) {
     }
 
     private fun setDefaultPlaceholder() {
-        ContextCompat.getDrawable(imageView.context, R.drawable.ic_pencil_circle)?.let {
+        ContextCompat.getDrawable(imageView.context, getPlaceholderRes())?.let {
+            imageView.background = null
             imageView.setImageDrawable(it)
             imageView.alpha = DEFAULT_PLACEHOLDER_ICON_ALPHA
         }
@@ -107,18 +112,12 @@ abstract class BaseImageViewHolder(itemView: View) : BaseViewHolder(itemView) {
 
     private fun displayImage(data: Any) {
         currentUri = data.toString()
-        error.visibility = View.GONE
+        error.visibility = View.INVISIBLE
 
         val glideRequest = ImageHelper.getGlideRequest(imageView, data)
+        val options = RequestOptions().centerCrop().transform(RoundedCorners(ROUNDING_RADIUS.px))
+        glideRequest.apply(options).into(imageView)
 
-        Transformations.getTransformation(
-            "CropCircleWithBorder",
-            imageView.context.getColorFromAttr(android.R.attr.colorPrimary)
-        )?.let { transformation ->
-            glideRequest.transform(transformation)
-        }
-
-        glideRequest.into(imageView)
         imageView.alpha = 1F
         removeItem.visibility = View.VISIBLE
     }
