@@ -44,6 +44,8 @@ abstract class BaseInputLessViewHolder(itemView: View) : BaseViewHolder(itemView
             input.setText(itemJsonObject.getSafeString("placeholder"))
 
         container.endIconMode = TextInputLayout.END_ICON_CUSTOM
+        input.isFocusable = false
+        input.isLongClickable = false
 
         getDefaultFieldValue(currentEntity, itemJsonObject) {
             input.setText(formatToDisplay(it.toString()))
