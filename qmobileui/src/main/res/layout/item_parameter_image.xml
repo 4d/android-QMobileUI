@@ -20,10 +20,10 @@
         android:alpha="0.6"
         android:scrollbars="none"
         android:singleLine="true"
-        android:textAlignment="viewStart"
+        android:textAlignment="center"
         android:textColor="?colorOnSurface"
         app:layout_constraintBottom_toTopOf="@+id/error"
-        app:layout_constraintEnd_toStartOf="@+id/image_view"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Label" />
@@ -33,13 +33,13 @@
         style="@style/Widget.MaterialComponents.TextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/small_margin"
         android:scrollbars="none"
         android:singleLine="true"
-        android:textAlignment="viewStart"
+        android:textAlignment="center"
         android:textColor="?colorError"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toStartOf="@+id/image_view"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/image_view"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/label"
         tools:text="Label" />
@@ -48,12 +48,14 @@
         android:id="@+id/image_view"
         android:layout_width="@dimen/image_action_size"
         android:layout_height="@dimen/image_action_size"
+        android:layout_marginTop="12dp"
         android:alpha="0.6"
         android:contentDescription="@string/action_item_image_content_description"
         android:elevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/item_remove"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/error" />
 
     <ImageView
         android:id="@+id/item_remove"
@@ -64,9 +66,9 @@
         android:alpha="0.6"
         android:contentDescription="@string/action_remove_item_image_content_description"
         android:src="@drawable/close_circle_outline"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/image_view"
+        app:layout_constraintTop_toTopOf="@id/image_view"
         app:tint="?colorOnSurface" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,8 +18,6 @@ class ImageViewHolder(
     private val actionTypesCallback: (actionTypes: ActionTypes, position: Int) -> Unit
 ) : BaseImageViewHolder(itemView) {
 
-    override fun getPlaceholderRes(): Int = R.drawable.image_plus
-
     override fun onImageClick() {
         MaterialAlertDialogBuilder(itemView.context, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
             .setTitle(itemView.context.getString(R.string.action_parameter_image_dialog_title))

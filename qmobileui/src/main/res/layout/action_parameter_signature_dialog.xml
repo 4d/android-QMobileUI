@@ -7,16 +7,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="12dp">
+    android:padding="24dp">
 
-    <com.github.gcacace.signaturepad.views.SignaturePad
-        android:id="@+id/signature_pad"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?colorPrimary"
+        android:padding="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:penColor="?colorOnSurface" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.github.gcacace.signaturepad.views.SignaturePad
+            android:id="@+id/signature_pad"
+            android:layout_width="wrap_content"
+            android:layout_height="280dp"
+            android:background="?colorSurface"
+            app:penColor="?colorOnSurface" />
+
+    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

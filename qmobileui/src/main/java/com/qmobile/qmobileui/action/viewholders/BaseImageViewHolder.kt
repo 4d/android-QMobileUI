@@ -58,7 +58,7 @@ abstract class BaseImageViewHolder(itemView: View) : BaseViewHolder(itemView) {
 
         removeItem.setOnClickListener {
             setDefaultPlaceholder()
-            removeItem.visibility = View.INVISIBLE
+            removeItem.visibility = View.GONE
             currentUri = null
             onValueChanged(parameterName, null, null, validate(false))
         }
@@ -76,13 +76,11 @@ abstract class BaseImageViewHolder(itemView: View) : BaseViewHolder(itemView) {
         onValueChanged(parameterName, currentUri, null, validate(false))
     }
 
-    abstract fun getPlaceholderRes(): Int
-
     abstract fun onImageClick()
 
     override fun validate(displayError: Boolean): Boolean {
 
-        if (isMandatory() && currentUri != null) {
+        if (isMandatory() && currentUri == null) {
             if (displayError)
                 showError(itemView.context.getString(R.string.action_parameter_mandatory_error))
             return false
@@ -95,18 +93,21 @@ abstract class BaseImageViewHolder(itemView: View) : BaseViewHolder(itemView) {
     }
 
     private fun setDefaultPlaceholder() {
-        ContextCompat.getDrawable(imageView.context, getPlaceholderRes())?.let {
+        ContextCompat.getDrawable(imageView.context, R.drawable.ic_pencil_circle)?.let {
             imageView.setImageDrawable(it)
             imageView.alpha = DEFAULT_PLACEHOLDER_ICON_ALPHA
         }
     }
 
-    private fun newImageChosen(): Uri? =
-        itemJsonObject.getSafeAny("image_uri") as Uri?
+    private fun newImageChosen(): Uri? {
+        val uri: Uri? = itemJsonObject.getSafeAny("image_uri") as Uri?
+        itemJsonObject.remove("image_uri")
+        return uri
+    }
 
     private fun displayImage(data: Any) {
         currentUri = data.toString()
-        error.visibility = View.INVISIBLE
+        error.visibility = View.GONE
 
         val glideRequest = ImageHelper.getGlideRequest(imageView, data)
 
