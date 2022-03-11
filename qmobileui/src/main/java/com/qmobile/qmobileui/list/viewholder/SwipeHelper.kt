@@ -1,5 +1,6 @@
 package com.qmobile.qmobileui.list.viewholder
 
+import android.R.attr.textSize
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
@@ -17,19 +18,14 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
+import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.getColorFromAttr
+import com.qmobile.qmobileui.binding.px
 import com.qmobile.qmobileui.utils.ColorHelper
 import java.util.LinkedList
 import kotlin.math.abs
 import kotlin.math.max
-
-const val HORIZONTAL_PADDING = 50.0f
-const val BUTTON_TEXT_SIZE = 10.0f
-// Use as margin bottom from the center for icon and as margin top from the center for title
-const val VERTICAL_MARGIN = 25F
-const val ICON_WIDTH_FACTOR = 0.3F
-const val SCREEN_WIDTH_FACTOR = 4
-const val TRUNCATE_FACTOR = 5
+import kotlin.math.sqrt
 
 @SuppressLint("ClickableViewAccessibility")
 abstract class SwipeHelper(
@@ -138,10 +134,12 @@ abstract class SwipeHelper(
     }
 
     abstract fun instantiateUnderlayButton(position: Int): List<ItemActionButton>
+
     interface UnderlayButtonClickListener {
         fun onClick()
     }
 
+    @Suppress("MagicNumber")
     class ItemActionButton(
         private val context: Context,
         private val action: Action?,
@@ -150,27 +148,35 @@ abstract class SwipeHelper(
     ) {
         private var title: String = action?.getPreferredShortName() ?: "..."
         private var clickableRegion: RectF? = null
-        private val textSizeInPixel: Float =
-            BUTTON_TEXT_SIZE * context.resources.displayMetrics.density // dp to px
         val intrinsicWidth: Float
+
+        companion object {
+            private const val ACTION_BUTTON_RADIUS = 20F
+            private const val TRUNCATE_FACTOR = 5
+            // Use as margin bottom from the center for icon and as margin top from the center for title
+            private const val VERTICAL_MARGIN = 70F
+            private const val HORIZONTAL_PADDING = 50.0F
+        }
 
         init {
             val screenWidth: Int = context.resources.displayMetrics.widthPixels
-            val paint = Paint()
-            paint.textSize = textSizeInPixel
-            paint.typeface = Typeface.DEFAULT_BOLD
-            paint.textAlign = Paint.Align.LEFT
-            val titleBounds = Rect()
-
-            paint.getTextBounds(title, 0, title.length, titleBounds)
-            intrinsicWidth = (screenWidth / SCREEN_WIDTH_FACTOR).toFloat() // Fix button width to screenWidth/4
+            intrinsicWidth = (screenWidth / 4).toFloat() // Fix button width to screenWidth/4
         }
 
         fun draw(canvas: Canvas, rect: RectF) {
             val paint = Paint()
+            val paintStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = context.getColorFromAttr(R.attr.colorSurface)
+                style = Paint.Style.STROKE
+                strokeWidth = 10F
+                strokeJoin = Paint.Join.ROUND
+                strokeCap = Paint.Cap.ROUND
+            }
             // Draw background
             paint.color = ColorHelper.getActionButtonColor(horizontalIndex, context)
-            canvas.drawRect(rect, paint)
+
+            canvas.drawRoundRect(rect, ACTION_BUTTON_RADIUS, ACTION_BUTTON_RADIUS, paint)
+            canvas.drawRoundRect(rect, ACTION_BUTTON_RADIUS, ACTION_BUTTON_RADIUS, paintStroke)
 
             // Draw icon
             var iconResId = 0
@@ -178,11 +184,10 @@ abstract class SwipeHelper(
             if (iconDrawablePath != null && iconDrawablePath.isNotEmpty()) {
                 iconResId = context.resources.getIdentifier(iconDrawablePath, "drawable", context.packageName)
             }
-            val iconWith = rect.width() * (ICON_WIDTH_FACTOR)
+            val iconWith = rect.width() * 0.4F
             val iconHeight = iconWith
 
-            val iconLeft =
-                (rect.left + rect.width() / 2 - iconWith.div(2))
+            val iconLeft = (rect.left + rect.width() / 2 - iconWith.div(2))
 
             val iconBottom = rect.bottom - rect.height() / 2
             val iconTop = iconBottom - iconHeight
@@ -207,12 +212,15 @@ abstract class SwipeHelper(
                 iconBottom.toInt()
             )
             iconDrawable?.draw(canvas)
-
             // Draw title
             paint.color = context.getColorFromAttr(R.attr.colorOnPrimary)
-            paint.textSize = textSizeInPixel
-            paint.typeface = Typeface.DEFAULT_BOLD
-            paint.textAlign = Paint.Align.LEFT
+            paint.textSize = 16 * context.resources.displayMetrics.density
+//            val growthRatio = sqrt((rect.width() * rect.height()).toDouble()) / 250
+//            paint.textSize = (12.px * growthRatio).toFloat()
+
+            // trying to mimic Material Design button style
+            paint.typeface = Typeface.SANS_SERIF
+            paint.letterSpacing = 0.0333333333F
 
             title = ellipsize(title, paint, intrinsicWidth - HORIZONTAL_PADDING)
             val titleBounds = Rect()
@@ -229,16 +237,16 @@ abstract class SwipeHelper(
                 }
             }
         }
-    }
-}
 
-fun ellipsize(input: String, paint: Paint, maxWidth: Float): String {
-    val titleBounds = Rect()
-    paint.getTextBounds(input, 0, input.length, titleBounds)
-    return if (titleBounds.width() < maxWidth)
-        input
-    else
-        ellipsize(input.substring(0, input.length - TRUNCATE_FACTOR) + "...", paint, maxWidth)
+        private fun ellipsize(input: String, paint: Paint, maxWidth: Float): String {
+            val titleBounds = Rect()
+            paint.getTextBounds(input, 0, input.length, titleBounds)
+            return if (titleBounds.width() < maxWidth || input.length < TRUNCATE_FACTOR)
+                input
+            else
+                ellipsize(input.substring(0, input.length - TRUNCATE_FACTOR) + "...", paint, maxWidth)
+        }
+    }
 }
 
 private fun List<SwipeHelper.ItemActionButton>.intrinsicWidth(): Float {
