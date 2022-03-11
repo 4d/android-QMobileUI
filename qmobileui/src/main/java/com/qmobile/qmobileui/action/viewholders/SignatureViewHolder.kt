@@ -7,8 +7,8 @@
 package com.qmobile.qmobileui.action.viewholders
 
 import android.view.View
-import com.qmobile.qmobileui.action.ActionTypes
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.ActionTypes
 
 class SignatureViewHolder(
     itemView: View,

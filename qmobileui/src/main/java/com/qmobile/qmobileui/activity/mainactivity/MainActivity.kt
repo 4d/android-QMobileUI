@@ -18,6 +18,8 @@ import android.view.View
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -53,6 +55,7 @@ import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
+import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.ToastHelper
@@ -314,6 +317,11 @@ class MainActivity :
         actions.forEach { action ->
             val drawable =
                 if (withIcons) ActionHelper.getActionIconDrawable(this, action) else null
+
+            drawable?.colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                getColorFromAttr(R.attr.colorOnSurface),
+                BlendModeCompat.SRC_ATOP
+            )
 
             menu.add(action.getPreferredName())
                 .setOnMenuItemClickListener {
