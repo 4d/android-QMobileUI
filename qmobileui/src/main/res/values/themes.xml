@@ -56,4 +56,10 @@
     <style name="Theme.QMobileApp.Text.Color" parent="Theme.QMobileApp">
         <item name="android:textColor">@android:color/black</item>
     </style>
+
+    <style name="parameter_item_theme">
+        <item name="android:colorBackground">@android:color/white</item>
+
+    </style>
+
 </resources>

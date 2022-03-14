@@ -1,0 +1,40 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_marginStart="7dp"
+        android:layout_marginTop="7dp"
+        android:text="TextView:"/>
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/editText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_marginTop="7dp"
+        android:imeOptions="flagNavigateNext"
+        android:inputType="textMultiLine"
+        android:maxLines="15"
+        android:minLines="3"
+        android:paddingLeft="@dimen/param_edit_text_padding_left" />
+
+    <TextView
+        android:id="@+id/error_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_marginStart="7dp"
+        android:layout_marginTop="7dp"
+        android:textColor="@color/error_light"
+        android:textSize="@dimen/error_label_text_size"
+        android:visibility="gone"
+        tools:text="@string/action_parameter_mandatory_error"
+        tools:visibility="visible" />
+</LinearLayout>

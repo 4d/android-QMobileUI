@@ -18,14 +18,11 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
-import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.getColorFromAttr
-import com.qmobile.qmobileui.binding.px
 import com.qmobile.qmobileui.utils.ColorHelper
 import java.util.LinkedList
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.sqrt
 
 @SuppressLint("ClickableViewAccessibility")
 abstract class SwipeHelper(

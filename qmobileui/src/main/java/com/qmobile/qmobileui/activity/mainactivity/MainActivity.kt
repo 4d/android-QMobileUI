@@ -52,6 +52,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.action.ActionNavigable
+import com.qmobile.qmobileui.action.ActionParametersFragment
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.binding.getColorFromAttr
@@ -93,6 +94,8 @@ class MainActivity :
 
     private var serverNotAccessibleString = ""
     private var noInternetString = ""
+
+    private var fromCameraOrGallery = false
 
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
@@ -204,6 +207,11 @@ class MainActivity :
     }
 
     private fun applyOnForegroundEvent() {
+        if (fromCameraOrGallery) {
+            fromCameraOrGallery = false
+            return
+        }
+
         Timber.d("applyOnForegroundEvent")
         if (onLaunch) {
             Timber.d("applyOnForegroundEvent on Launch")
@@ -497,6 +505,17 @@ class MainActivity :
             setupActionBarWithNavController(navController)
         }
         currentNavController = controller
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
+        val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
+
+        if (currentFragment is ActionParametersFragment) {
+            fromCameraOrGallery = true
+            currentFragment.handleResult(requestCode, data)
+        }
     }
 
     private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()

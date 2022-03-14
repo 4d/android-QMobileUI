@@ -120,6 +120,7 @@ class BarcodeScannerFragment : BaseFragment() {
                                 binding.progress.visibility = View.GONE
 
                                 val result = Bundle().apply {
+                                    arguments?.getInt("position")?.let { putInt("position", it) }
                                     putString("barcode_value", value)
                                 }
                                 if (isAdded)

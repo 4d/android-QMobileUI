@@ -6,7 +6,9 @@
 
 package com.qmobile.qmobileui.action
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -16,13 +18,15 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.setFragmentResultListener
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.TextInputEditText
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobileapi.utils.getSafeObject
@@ -32,12 +36,9 @@ import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.writeBitmap
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
-import com.qmobile.qmobileui.ui.CenterLayoutManager
-import com.qmobile.qmobileui.utils.hideKeyboard
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -74,18 +75,24 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private var selectedEntity: EntityModel? = null
     private var actionPosition = -1
 
+    // Is set to true if all recyclerView items are seen at lean once
+    private var areAllItemsSeen = false
+    private var goToCamera: (() -> Unit)? = null
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    var currentDestinationPath: String? = null
+
     companion object {
         const val BARCODE_FRAGMENT_REQUEST_KEY = "scan_request"
     }
 
-    private val onScrollListener = object : RecyclerView.OnScrollListener() {
-        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                triggerError(scrollPos)
-                recyclerView.removeOnScrollListener(this)
-            }
-        }
-    }
+//    private val onScrollListener = object : RecyclerView.OnScrollListener() {
+//        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+//            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                triggerError(scrollPos)
+//                recyclerView.removeOnScrollListener(this)
+//            }
+//        }
+//    }
 
     private val getImageFromGallery = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
@@ -121,11 +128,11 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             RelationHelper.getRelation(tableName, inverseName)?.dest?.let { parentRelationName = it }
         }
 
-        setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
-            bundle.getString("barcode_value")?.let {
-                adapter.updateBarcodeForPosition(actionPosition, it)
-            }
-        }
+//        setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
+//            bundle.getString("barcode_value")?.let {
+//                adapter.updateBarcodeForPosition(actionPosition, it)
+//            }
+//        }
 
         _binding = FragmentActionParametersBinding.inflate(
             inflater,
@@ -133,58 +140,124 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             false
         ).apply {
             lifecycleOwner = viewLifecycleOwner
-            adapter = ActionsParametersListAdapter(
-                context = requireContext(),
-                action = action,
-                currentEntity = selectedEntity,
-                fragmentManager = activity?.supportFragmentManager,
-                hideKeyboardCallback = { onHideKeyboardCallback() },
-                focusNextCallback = { position -> onFocusNextCallback(position) },
-                actionTypesCallback = { actionType, position ->
-                    actionTypesCallback(actionType, position)
-                },
-                onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
-                    onValueChanged(name, value, metaData, isValid)
-                }
-            )
-            val smoothScroller = CenterLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
-            recyclerView.layoutManager = smoothScroller
-            recyclerView.adapter = adapter
-            // Important line : prevent recycled views to get their content reset
-            recyclerView.setItemViewCacheSize(action.parameters.length())
-            // Add this empty view to remove keyboard when click is perform below recyclerView items
-            emptyView.setOnClickListener {
-                onHideKeyboardCallback()
-            }
+            setupRecycleView(recyclerView)
+//            adapter = ActionsParametersListAdapter(
+//                context = requireContext(),
+//                action = action,
+//                currentEntity = selectedEntity,
+//                fragmentManager = activity?.supportFragmentManager,
+//                hideKeyboardCallback = { onHideKeyboardCallback() },
+//                focusNextCallback = { position -> onFocusNextCallback(position) },
+//                actionTypesCallback = { actionType, position ->
+//                    actionTypesCallback(actionType, position)
+//                },
+//                onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+//                    onValueChanged(name, value, metaData, isValid)
+//                }
+//            )
+//            val smoothScroller = CenterLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+//            recyclerView.layoutManager = smoothScroller
+//            recyclerView.adapter = adapter
+//            // Important line : prevent recycled views to get their content reset
+//            recyclerView.setItemViewCacheSize(action.parameters.length())
+//            // Add this empty view to remove keyboard when click is perform below recyclerView items
+//            emptyView.setOnClickListener {
+//                onHideKeyboardCallback()
+//            }
         }
         return binding.root
     }
 
-    private fun onValueChanged(name: String, value: Any?, metaData: String?, isValid: Boolean) {
-        validationMap[name] = isValid
-        paramsToSubmit[name] = value ?: ""
-        metaData?.let {
-            metaDataToSubmit[name] = metaData
-        }
-        if (value == null) {
-            imagesToUpload.remove(name)
-        }
-    }
+    private fun setupRecycleView(recyclerView: RecyclerView) {
+        adapter = ActionsParametersListAdapter(
+            context = requireContext(),
+            list = action.parameters,
+            currentEntity = selectedEntity,
+            onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+                validationMap[name] = isValid
+                paramsToSubmit[name] = value ?: ""
+                metaData?.let {
+                    metaDataToSubmit[name] = metaData
+                }
+            },
+            goToScanner = {
+                BaseApp.genericNavigationResolver.navigateToActionScanner(binding, it)
+            }, goToCamera = { intent: Intent, position: Int, destinationPath: String ->
+            goToCamera = {
+                currentDestinationPath = destinationPath
+                (context as Activity).startActivityForResult(
+                    intent,
+                    // Send position as request code, so we can update image preview only for the selected item
+                    position,
 
-    private fun onHideKeyboardCallback() {
-        activity?.let {
-            hideKeyboard(it)
-        }
-    }
-
-    private fun onFocusNextCallback(position: Int) {
-        binding.recyclerView.findViewHolderForLayoutPosition(position + 1)
-            ?.itemView?.findViewById<TextInputEditText>(R.id.input)
-            ?.requestFocus()
-            ?: kotlin.run {
-                Timber.d("Can't find input to focus at position ${position + 1}, scrolling now")
-                scrollTo(position + 1, false)
+                )
             }
+            requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+        }, onSigned = { parameterName: String, uri: Uri? ->
+            if (uri != null) {
+                imagesToUpload[parameterName] = uri
+            } else {
+                // When user signed and then cleared signature pad we should remove last signature from imagesToUpload
+                imagesToUpload.remove(parameterName)
+            }
+        }
+        )
+        val layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = adapter
+
+        val dividerItemDecoration = DividerItemDecoration(
+            recyclerView.context,
+            layoutManager.orientation
+        )
+        recyclerView.addItemDecoration(dividerItemDecoration)
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+                    areAllItemsSeen = true
+                }
+                super.onScrolled(recyclerView, dx, dy)
+            }
+        })
+        if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+            areAllItemsSeen = true
+        }
+    }
+
+//    private fun onValueChanged(name: String, value: Any?, metaData: String?, isValid: Boolean) {
+//        validationMap[name] = isValid
+//        paramsToSubmit[name] = value ?: ""
+//        metaData?.let {
+//            metaDataToSubmit[name] = metaData
+//        }
+//        if (value == null) {
+//            imagesToUpload.remove(name)
+//        }
+//    }
+
+//    private fun onHideKeyboardCallback() {
+//        activity?.let {
+//            hideKeyboard(it)
+//        }
+//    }
+
+//    private fun onFocusNextCallback(position: Int) {
+//        binding.recyclerView.findViewHolderForLayoutPosition(position + 1)
+//            ?.itemView?.findViewById<TextInputEditText>(R.id.input)
+//            ?.requestFocus()
+//            ?: kotlin.run {
+//                Timber.d("Can't find input to focus at position ${position + 1}, scrolling now")
+//                scrollTo(position + 1, false)
+//            }
+//    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setFragmentResultListener("scan_request") { _: String, bundle: Bundle ->
+            val value = bundle.getString("barcode_value")
+            val position = bundle.getInt("position")
+            value?.let { adapter.updateBarcodeForPosition(position, it) }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -207,6 +280,12 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         return super.onOptionsItemSelected(item)
     }
 
+    private fun isFormValid(): Boolean =
+        if (!areAllItemsSeen)
+            false
+        else
+            validationMap.values.firstOrNull { !it } == null
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is ActionActivity) {
@@ -214,62 +293,73 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             action = actionActivity.getSelectedAction()
             selectedEntity = actionActivity.getSelectedEntity()
         }
-    }
-
-    @Suppress("ReturnCount")
-    private fun isFormValid(): Boolean {
-
-        // first: check if visible items are valid
-        val firstNotValidItemPosition = validationMap.values.indexOfFirst { !it }
-        if (firstNotValidItemPosition > -1) {
-            scrollTo(firstNotValidItemPosition, true)
-            triggerError(firstNotValidItemPosition)
-            return false
-        }
-
-        // second: check if there are not yet visible items
-        val nbItems = adapter.itemCount
-        val viewedItems = validationMap.size
-        if (viewedItems < nbItems) {
-            val pos =
-                (binding.recyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
-            if (pos < nbItems - 1) {
-                scrollTo(pos + 1, true)
-            }
-            return false
-        }
-
-        // third: check any not valid item
-        var formIsValid = true
-        validationMap.values.forEachIndexed { index, isValid ->
-            if (!isValid) {
-                if (formIsValid) { // scroll to first not valid
-                    scrollTo(index, true)
+        requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (isGranted) {
+                    goToCamera?.let { it() }
+                } else {
+                    Toast.makeText(requireActivity(), "Permission Denied", Toast.LENGTH_SHORT)
+                        .show()
                 }
-                formIsValid = false
-                triggerError(index)
             }
-        }
-        if (!formIsValid) {
-            return false
-        }
-
-        return true
     }
 
-    private fun scrollTo(position: Int, shouldHideKeyboard: Boolean) {
-        if (shouldHideKeyboard) onHideKeyboardCallback()
-        scrollPos = position
-        binding.recyclerView.removeOnScrollListener(onScrollListener)
-        binding.recyclerView.addOnScrollListener(onScrollListener)
-        binding.recyclerView.smoothScrollToPosition(position)
-    }
+//    @Suppress("ReturnCount")
+//    private fun isFormValid(): Boolean {
+//
+//        // first: check if visible items are valid
+//        val firstNotValidItemPosition = validationMap.values.indexOfFirst { !it }
+//        if (firstNotValidItemPosition > -1) {
+//            scrollTo(firstNotValidItemPosition, true)
+//            triggerError(firstNotValidItemPosition)
+//            return false
+//        }
+//
+//        // second: check if there are not yet visible items
+//        val nbItems = adapter.itemCount
+//        val viewedItems = validationMap.size
+//        if (viewedItems < nbItems) {
+//            val pos =
+//                (binding.recyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+//            if (pos < nbItems - 1) {
+//                scrollTo(pos + 1, true)
+//            }
+//            return false
+//        }
+//
+//        // third: check any not valid item
+//        var formIsValid = true
+//        validationMap.values.forEachIndexed { index, isValid ->
+//            if (!isValid) {
+//                if (formIsValid) { // scroll to first not valid
+//                    scrollTo(index, true)
+//                }
+//                formIsValid = false
+//                triggerError(index)
+//            }
+//        }
+//        if (!formIsValid) {
+//            return false
+//        }
+//
+//        return true
+//    }
 
-    private fun triggerError(position: Int) {
-        (binding.recyclerView.findViewHolderForLayoutPosition(position) as BaseViewHolder?)?.validate(
-            true
-        )
-    }
+//    private fun scrollTo(position: Int, shouldHideKeyboard: Boolean) {
+//        if (shouldHideKeyboard) onHideKeyboardCallback()
+//        scrollPos = position
+//        binding.recyclerView.removeOnScrollListener(onScrollListener)
+//        binding.recyclerView.addOnScrollListener(onScrollListener)
+//        binding.recyclerView.smoothScrollToPosition(position)
+//    }
+
+//    private fun triggerError(position: Int) {
+//        (binding.recyclerView.findViewHolderForLayoutPosition(position) as BaseViewHolder?)?.validate(
+//            true
+//        )
+//    }
 
     private fun sendAction() {
 
@@ -320,15 +410,15 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         adapter.updateImageForPosition(actionPosition, uri)
     }
 
-    private fun actionTypesCallback(actionType: Action.Type, position: Int) {
-        actionPosition = position
-        when (actionType) {
-            Action.Type.PICK_PHOTO_GALLERY -> pickPhotoFromGallery()
-            Action.Type.TAKE_PICTURE_CAMERA -> takePhotoFromCamera()
-            Action.Type.SCAN -> scan()
-            Action.Type.SIGN -> showSignDialog()
-        }
-    }
+//    private fun actionTypesCallback(actionType: Action.Type, position: Int) {
+//        actionPosition = position
+//        when (actionType) {
+//            Action.Type.PICK_PHOTO_GALLERY -> pickPhotoFromGallery()
+//            Action.Type.TAKE_PICTURE_CAMERA -> takePhotoFromCamera()
+//            Action.Type.SCAN -> scan()
+//            Action.Type.SIGN -> showSignDialog()
+//        }
+//    }
 
     private fun showSignDialog() {
         requireActivity().apply {
@@ -363,19 +453,41 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         }
     }
 
-    private fun pickPhotoFromGallery() {
-        getImageFromGallery.launch("image/*")
-    }
+//    private fun pickPhotoFromGallery() {
+//        getImageFromGallery.launch("image/*")
+//    }
+//
+//    private fun takePhotoFromCamera() {
+//        ImageHelper.getTempImageFile(requireContext(), Bitmap.CompressFormat.JPEG) { uri, photoFilePath ->
+//            currentPhotoPath = photoFilePath
+//            getCameraImage.launch(uri)
+//        }
+//    }
+//
+//    private fun scan() {
+//        delegate.setFullScreenMode(true)
+//        BaseApp.genericNavigationResolver.navigateToActionScanner(binding)
+//    }
 
-    private fun takePhotoFromCamera() {
-        ImageHelper.getTempImageFile(requireContext(), Bitmap.CompressFormat.JPEG) { uri, photoFilePath ->
-            currentPhotoPath = photoFilePath
-            getCameraImage.launch(uri)
+    fun handleResult(requestCode: Int, data: Intent?) {
+        // the request code is te equivalent of position of item in adapter
+        // case of image picked from gallery
+        val uri = data?.data
+        if (uri != null) {
+            adapter.getUpdatedImageParameterName(requestCode)?.let {
+                imagesToUpload[it] = uri
+            }
+            adapter.updateImageForPosition(requestCode, uri)
+        } else {
+            // case of camera capture
+
+            currentDestinationPath?.let {
+                val uri = Uri.fromFile(File(it))
+                adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->
+                    imagesToUpload[parameterName] = uri
+                }
+                adapter.updateImageForPosition(requestCode, uri)
+            }
         }
-    }
-
-    private fun scan() {
-        delegate.setFullScreenMode(true)
-        BaseApp.genericNavigationResolver.navigateToActionScanner(binding)
     }
 }

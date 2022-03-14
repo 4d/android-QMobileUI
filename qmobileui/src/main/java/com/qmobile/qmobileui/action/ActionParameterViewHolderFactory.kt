@@ -3,17 +3,7 @@ package com.qmobile.qmobileui.action
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.fragment.app.FragmentManager
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.viewholders.BarcodeViewHolder
-import com.qmobile.qmobileui.action.viewholders.BaseViewHolder
-import com.qmobile.qmobileui.action.viewholders.BooleanViewHolder
-import com.qmobile.qmobileui.action.viewholders.DateViewHolder
-import com.qmobile.qmobileui.action.viewholders.ImageViewHolder
-import com.qmobile.qmobileui.action.viewholders.NumberViewHolder
-import com.qmobile.qmobileui.action.viewholders.SignatureViewHolder
-import com.qmobile.qmobileui.action.viewholders.TextViewHolder
-import com.qmobile.qmobileui.action.viewholders.TimeViewHolder
 
 @Suppress("LongMethod")
 class ActionParameterViewHolderFactory private constructor() {
@@ -21,10 +11,8 @@ class ActionParameterViewHolderFactory private constructor() {
         fun createViewHolderFromViewType(
             viewType: Int,
             parent: ViewGroup,
-            context: Context,
-            fragmentManager: FragmentManager?,
-            actionTypesCallback: (actionTypes: Action.Type, position: Int) -> Unit
-        ): BaseViewHolder {
+            context: Context
+        ): ActionParameterViewHolder {
 
             return when (val itemType = ActionParameterEnum.values()[viewType]) {
                 // Text
@@ -34,25 +22,55 @@ class ActionParameterViewHolderFactory private constructor() {
                 ActionParameterEnum.TEXT_ZIP,
                 ActionParameterEnum.TEXT_PHONE,
                 ActionParameterEnum.TEXT_ACCOUNT,
-                ActionParameterEnum.TEXT_URL,
-                ActionParameterEnum.TEXT_AREA ->
+                ActionParameterEnum.TEXT_URL ->
                     TextViewHolder(
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_text, parent, false),
                         itemType.format
                     )
+                ActionParameterEnum.TEXT_AREA ->
+                    TextAreaViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_text_area, parent, false)
+                    )
+
+                // Boolean
+                ActionParameterEnum.BOOLEAN_DEFAULT ->
+                    BooleanSwitchViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_boolean_switch, parent, false)
+                    )
+                ActionParameterEnum.BOOLEAN_CHECK ->
+                    BooleanCheckMarkViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_boolean_check_mark, parent, false)
+                    )
+
                 // Number
                 ActionParameterEnum.NUMBER_DEFAULT1,
                 ActionParameterEnum.NUMBER_DEFAULT2,
-                ActionParameterEnum.NUMBER_INTEGER,
-                ActionParameterEnum.NUMBER_PERCENTAGE,
-                ActionParameterEnum.NUMBER_SCIENTIFIC,
-                ActionParameterEnum.NUMBER_SPELL_OUT ->
+                ActionParameterEnum.NUMBER_INTEGER ->
                     NumberViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_text, parent, false),
+                            .inflate(R.layout.item_parameter_number, parent, false),
                         itemType.format
                     )
+                ActionParameterEnum.NUMBER_SPELL_OUT ->
+                    SpellOutViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_number, parent, false)
+                    )
+                ActionParameterEnum.NUMBER_PERCENTAGE ->
+                    PercentageViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_number, parent, false)
+                    )
+                ActionParameterEnum.NUMBER_SCIENTIFIC ->
+                    ScientificViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_number, parent, false)
+                    )
+
                 // Date
                 ActionParameterEnum.DATE_DEFAULT1,
                 ActionParameterEnum.DATE_DEFAULT2,
@@ -61,50 +79,35 @@ class ActionParameterViewHolderFactory private constructor() {
                 ActionParameterEnum.DATE_LONG ->
                     DateViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_text, parent, false),
-                        itemType.format,
-                        fragmentManager
+                            .inflate(R.layout.item_parameter_date, parent, false),
+                        itemType.format
                     )
+
                 // Time
                 ActionParameterEnum.TIME_DEFAULT,
                 ActionParameterEnum.TIME_DURATION ->
                     TimeViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_text, parent, false),
-                        itemType.format,
-                        fragmentManager
+                            .inflate(R.layout.item_parameter_time, parent, false),
+                        itemType.format
                     )
-                // Boolean
-                ActionParameterEnum.BOOLEAN_DEFAULT ->
-                    BooleanViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_boolean_switch, parent, false)
-                    )
-                ActionParameterEnum.BOOLEAN_CHECK ->
-                    BooleanViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_boolean_check_mark, parent, false)
-                    )
+
                 // Image
                 ActionParameterEnum.IMAGE ->
                     ImageViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_image, parent, false),
-                        actionTypesCallback
+                            .inflate(R.layout.item_parameter_image, parent, false)
                     )
-                // Signature
+                // Bar/QR code
+                ActionParameterEnum.BARCODE ->
+                    BarCodeViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_barcode, parent, false)
+                    )
                 ActionParameterEnum.SIGNATURE ->
                     SignatureViewHolder(
                         LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_image, parent, false),
-                        actionTypesCallback
-                    )
-                // Barcode
-                ActionParameterEnum.BARCODE ->
-                    BarcodeViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_text, parent, false),
-                        actionTypesCallback
+                            .inflate(R.layout.item_parameter_signature, parent, false)
                     )
             }
         }
