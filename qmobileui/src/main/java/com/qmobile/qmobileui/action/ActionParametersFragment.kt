@@ -132,14 +132,11 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //        }
 
         arguments?.getString("relationName")?.let { relationName ->
-            arguments?.getString("fromTable")?.let { source ->
-                if (relationName.isNotEmpty() && source.isNotEmpty())
-                    relation = RelationHelper.getRelation(source, relationName).also {
-                        tableName = it.dest
-                    }
-                arguments?.getString("parentItemId")?.let { parentItemId = it }
+            if (relationName.isNotEmpty())
+                relation = RelationHelper.getRelation(tableName, relationName)
+            arguments?.getString("parentItemId")?.let { parentItemId = it }
 //                parentTableName = it
-            }
+
 //            if (it.isNotEmpty()) {
 //                relation = Relation()
 //                tableName = it
