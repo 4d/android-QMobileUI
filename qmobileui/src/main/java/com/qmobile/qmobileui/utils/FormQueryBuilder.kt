@@ -27,7 +27,7 @@ class FormQueryBuilder(
     fun getQuery(pattern: String? = null): SimpleSQLiteQuery {
         if (pattern.isNullOrEmpty())
             return SimpleSQLiteQuery(baseQuery)
-        val stringBuilder = StringBuilder("$baseQuery AS T1 WHERE ")
+        val stringBuilder = StringBuilder("$baseQuery AS T_FINAL WHERE ")
         searchField.getSafeArray(tableName)?.let { columnsToFilter ->
             appendPredicate(stringBuilder, columnsToFilter, pattern)
         }
