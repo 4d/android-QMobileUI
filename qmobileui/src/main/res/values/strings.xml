@@ -34,12 +34,16 @@
     <string name="cat_account_key">account_category</string>
     <string name="cat_title_account">ACCOUNT</string>
     <string name="pref_logout_key">logout</string>
+    <string name="pref_pending_tasks_key">pending</string>
+    <string name="pref_pending_tasks_count">%d pending</string>
     <string name="pref_logout_title">LOGOUT</string>
     <string name="pref_logout_summary">Logout current user</string>
+    <string name="pref_pending_tasks">Pending tasks</string>
     <string name="logout_dialog_negative">Cancel</string>
     <string name="logout_dialog_positive">Logout</string>
     <string name="logout_dialog_title">Are you sure you want to Logout ?</string>
     <string name="logout_dialog_message">You will need to log in again</string>
+    <string name="logout_dialog_message_if_pending_task">Pending tasks will be deleted. Are you sure you want to log out?</string>
 
     <!--    Network -->
     <string name="no_internet">No Internet connection</string>
@@ -71,8 +75,8 @@
     <string name="search_title">search_title</string>
 
     <!-- Actions -->
-    <string name="action_send_no_internet">Please check your network settings and data cover…</string>
-    <string name="action_send_server_not_accessible">The server is not available</string>
+    <string name="action_send_no_internet">Check your connexion, your action will be executed later</string>
+    <string name="action_send_server_not_accessible">The server is not available, your action will be executed later</string>
     <string name="validate_action">Validate</string>
 
     <string name="action_image_content_description">Action dots</string>
@@ -85,6 +89,9 @@
     <string name="action_parameter_invalid_email_error">"Field value should be a valid email!"</string>
     <string name="action_parameter_invalid_url_error">"Field value must be an URL!"</string>
 
+    <string name="task_history_section_title">"COMPLETED"</string>
+    <string name="task_pending_section_title">"PENDING"</string>
+    <string name="task_status_success">SUCCESS</string>
     <!-- Permissions -->
     <string name="permission_dialog_title">Permission required</string>
     <string name="permission_dialog_positive">OK</string>

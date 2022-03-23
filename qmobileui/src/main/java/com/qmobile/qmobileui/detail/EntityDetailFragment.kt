@@ -18,9 +18,14 @@ import android.webkit.WebView
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeObject
+import com.qmobile.qmobiledatastore.dao.ActionInfo
+import com.qmobile.qmobiledatastore.dao.ActionTask
+import com.qmobile.qmobiledatastore.dao.ActionTaskDao
+import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
@@ -30,10 +35,13 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
+import com.qmobile.qmobileui.action.shouldShowActionError
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.checkIfChildIsWebView
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.webview.MyWebViewClient
+import kotlinx.coroutines.launch
+import java.util.Date
 
 open class EntityDetailFragment : Fragment(), BaseFragment {
 
@@ -55,6 +63,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
+    private lateinit var actionTaskDao: ActionTaskDao
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -100,6 +109,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
             webView.webViewClient = MyWebViewClient()
         }
         setHasOptionsMenu(::webView.isInitialized || hasActions())
+        actionTaskDao = BaseApp.daoProvider.getActionTaskDao()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -164,56 +174,124 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                 }
             }
 
-            delegate.setupActionsMenu(menu, actions) { action ->
-                if (action.parameters.length() > 0) {
-                    BaseApp.genericNavigationResolver.navigateToActionForm(
-                        binding,
-                        destinationTable = tableName,
-                        navBarTitle = action.getPreferredShortName(),
-                        inverseName = inverseName,
-                        parentItemId = parentItemId,
-                        fromRelation = fromRelation
-                    )
-                    delegate.setSelectAction(action)
-                    delegate.setSelectedEntity(entityViewModel.entity.value)
-                } else {
-                    delegate.checkNetwork(object : NetworkChecker {
-                        override fun onServerAccessible() {
-                            entityViewModel.sendAction(
-                                action.name,
-                                ActionHelper.getActionContent(
+            delegate.setupActionsMenu(menu, actions) { action, isPendingActionButton ->
+
+                when {
+                    isPendingActionButton -> {
+                        BaseApp.genericNavigationResolver.navigateToActionTasks(
+                            requireActivity(),
+                            binding,
+                            tableName,
+                            entityViewModel.entity.value?.__KEY
+                        )
+                    }
+                    action.parameters.length() > 0 -> {
+                        BaseApp.genericNavigationResolver.navigateToActionForm(
+                            binding,
+                            destinationTable = tableName,
+                            navBarTitle = action.getPreferredShortName(),
+                            inverseName = inverseName,
+                            parentItemId = parentItemId,
+                            fromRelation = fromRelation
+                        )
+                        delegate.setSelectAction(action)
+                        delegate.setSelectedEntity(entityViewModel.entity.value)
+                    }
+                    else -> {
+                        delegate.checkNetwork(object : NetworkChecker {
+                            val task = ActionTask(
+                                status = STATUS.PENDING,
+                                date = Date(),
+                                relatedItemId = itemId,
+                                label = action.getPreferredName(),
+                                actionInfo = ActionInfo(
+                                    paramsToSubmit = null,
+                                    metaDataToSubmit = null,
+                                    imagesToUpload = null,
+                                    validationMap = null,
+                                    allParameters = null,
+                                    actionName = action.name,
                                     tableName = tableName,
-                                    selectedActionId = itemId,
-                                    relationName = inverseName,
-                                    parentPrimaryKey = parentItemId,
-                                    parentTableName = parentTableName,
-                                    parentRelationName = parentRelationName
+                                    currentRecordId = itemId,
+                                    actionUUID = action.id
                                 )
-                            ) {
-                                it?.dataSynchro?.let { shouldSyncData ->
-                                    if (shouldSyncData) {
-                                        forceSyncData()
+                            )
+                            override fun onServerAccessible() {
+                                lifecycleScope.launch {
+                                    task.id = actionTaskDao.insert(
+                                        task
+                                    )
+                                }
+
+                                entityViewModel.sendAction(
+                                    action.name,
+                                    ActionHelper.getActionContent(
+                                        tableName = tableName,
+                                        selectedItemId = itemId,
+                                        relationName = inverseName,
+                                        parentPrimaryKey = parentItemId,
+                                        parentTableName = parentTableName,
+                                        parentRelationName = parentRelationName,
+                                        actionUUID = action.id
+                                    )
+                                ) { actionResponse ->
+                                    actionResponse?.let {
+                                        lifecycleScope.launch {
+                                            val status = if (it.success) {
+                                                STATUS.SUCCESS
+                                            } else {
+                                                STATUS.ERROR_SERVER
+                                            }
+
+                                            task.status = status
+                                            task.message = it.statusText
+                                            actionTaskDao.insert(
+                                                task
+                                            )
+                                        }
+                                        it.dataSynchro?.let { shouldSyncData ->
+                                            if (shouldSyncData) {
+                                                forceSyncData()
+                                            }
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        override fun onServerInaccessible() {
-                            entityViewModel.toastMessage.showMessage(
-                                context?.getString(R.string.action_send_server_not_accessible),
-                                tableName,
-                                MessageType.ERROR
-                            )
-                        }
+                            override fun onServerInaccessible() {
 
-                        override fun onNoInternet() {
-                            entityViewModel.toastMessage.showMessage(
-                                context?.getString(R.string.action_send_no_internet),
-                                tableName,
-                                MessageType.ERROR
-                            )
-                        }
-                    })
+                                lifecycleScope.launch {
+                                    actionTaskDao.insert(
+                                        task
+                                    )
+                                }
+
+                                if (shouldShowActionError()) {
+                                    entityViewModel.toastMessage.showMessage(
+                                        context?.getString(R.string.action_send_server_not_accessible),
+                                        tableName,
+                                        MessageType.NEUTRAL
+                                    )
+                                }
+                            }
+
+                            override fun onNoInternet() {
+                                lifecycleScope.launch {
+                                    actionTaskDao.insert(
+                                        task
+                                    )
+                                }
+
+                                if (shouldShowActionError()) {
+                                    entityViewModel.toastMessage.showMessage(
+                                        context?.getString(R.string.action_send_no_internet),
+                                        tableName,
+                                        MessageType.NEUTRAL
+                                    )
+                                }
+                            }
+                        })
+                    }
                 }
             }
         }

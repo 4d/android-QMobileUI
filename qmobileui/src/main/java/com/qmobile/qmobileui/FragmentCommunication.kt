@@ -45,7 +45,7 @@ interface FragmentCommunication {
 
     fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>)
 
-    fun setupActionsMenu(menu: Menu, actions: List<Action>, onMenuItemClick: (Action) -> Unit)
+    fun setupActionsMenu(menu: Menu, actions: List<Action>, onMenuItemClick: (Action, Boolean) -> Unit)
 
     fun setSelectAction(action: Action)
 

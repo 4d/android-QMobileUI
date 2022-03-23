@@ -8,7 +8,6 @@ package com.qmobile.qmobileui.list
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -23,6 +22,7 @@ import android.widget.ListAdapter
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -31,6 +31,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
+import com.qmobile.qmobiledatastore.dao.ActionInfo
+import com.qmobile.qmobiledatastore.dao.ActionTask
+import com.qmobile.qmobiledatastore.dao.ActionTaskDao
+import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -40,6 +44,7 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
+import com.qmobile.qmobileui.action.shouldShowActionError
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
@@ -49,6 +54,8 @@ import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
+import kotlinx.coroutines.launch
+import java.util.Date
 
 open class EntityListFragment : Fragment(), BaseFragment {
 
@@ -80,6 +87,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     private val tableActions = mutableListOf<Action>()
     private var currentRecordActions = mutableListOf<Action>()
+    private lateinit var actionTaskDao: ActionTaskDao
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -138,6 +146,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         savedInstanceState?.getString(CURRENT_QUERY_KEY, "")?.let { currentQuery = it }
+        actionTaskDao = BaseApp.daoProvider.getActionTaskDao()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -324,12 +333,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
         }
 
         val dialog = dialogBuilder.create()
-        dialog.listView.apply {
-            divider = ColorDrawable(Color.LTGRAY)
-            dividerHeight = 2
-            setFooterDividersEnabled(false)
-            addFooterView(View(context))
-        }
         dialog.show()
     }
 
@@ -346,25 +349,62 @@ open class EntityListFragment : Fragment(), BaseFragment {
             delegate.setSelectAction(action)
             delegate.setSelectedEntity(currentEntityModel)
         } else {
-            sendCurrentRecordAction(action.name, currentEntityModel?.__KEY)
+            sendCurrentRecordAction(action, currentEntityModel?.__KEY, action.id)
         }
     }
 
-    private fun sendAction(actionName: String, selectedActionId: String?) {
+    private fun sendAction(action: Action, selectedItemId: String?, actionUUID: String) {
         delegate.checkNetwork(object : NetworkChecker {
+            val task = ActionTask(
+                status = STATUS.PENDING,
+                date = Date(),
+                relatedItemId = selectedItemId,
+                label = action.getPreferredName(),
+                actionInfo = ActionInfo(
+                    paramsToSubmit = null,
+                    metaDataToSubmit = null,
+                    imagesToUpload = null,
+                    validationMap = null,
+                    allParameters = null,
+                    actionName = action.name,
+                    tableName = tableName,
+                    currentRecordId = delegate.getSelectedEntity()?.__KEY,
+                    actionUUID = actionUUID
+                )
+            )
+
             override fun onServerAccessible() {
+                lifecycleScope.launch {
+                    task.id = actionTaskDao.insert(
+                        task
+                    )
+                }
                 entityListViewModel.sendAction(
-                    actionName,
+                    action.name,
                     ActionHelper.getActionContent(
                         tableName = tableName,
-                        selectedActionId = selectedActionId,
+                        selectedItemId = selectedItemId,
                         relationName = inverseName,
                         parentPrimaryKey = parentItemId,
                         parentTableName = parentTableName,
-                        parentRelationName = parentRelationName
+                        parentRelationName = parentRelationName,
+                        actionUUID = action.name
                     )
                 ) { actionResponse ->
                     actionResponse?.let {
+                        lifecycleScope.launch {
+                            val status = if (actionResponse.success) {
+                                STATUS.SUCCESS
+                            } else {
+                                STATUS.ERROR_SERVER
+                            }
+
+                            task.status = status
+                            task.message = actionResponse.statusText
+                            actionTaskDao.insert(
+                                task
+                            )
+                        }
                         actionResponse.dataSynchro?.let { dataSynchro ->
                             syncDataIfNeeded(dataSynchro)
                         }
@@ -373,25 +413,46 @@ open class EntityListFragment : Fragment(), BaseFragment {
             }
 
             override fun onServerInaccessible() {
-                entityListViewModel.toastMessage.showMessage(
-                    context?.getString(R.string.action_send_server_not_accessible),
-                    tableName,
-                    MessageType.ERROR
-                )
+                lifecycleScope.launch {
+
+                    actionTaskDao.insert(
+                        task
+                    )
+                }
+
+                if (shouldShowActionError()) {
+                    entityListViewModel.toastMessage.showMessage(
+                        context?.getString(R.string.action_send_server_not_accessible),
+                        tableName,
+                        MessageType.NEUTRAL
+                    )
+                }
             }
 
             override fun onNoInternet() {
-                entityListViewModel.toastMessage.showMessage(
-                    context?.getString(R.string.action_send_no_internet),
-                    tableName,
-                    MessageType.ERROR
-                )
+                lifecycleScope.launch {
+                    actionTaskDao.insert(
+                        task
+                    )
+                }
+
+                if (shouldShowActionError()) {
+                    entityListViewModel.toastMessage.showMessage(
+                        context?.getString(R.string.action_send_no_internet),
+                        tableName,
+                        MessageType.NEUTRAL
+                    )
+                }
             }
         })
     }
 
-    private fun sendCurrentRecordAction(actionName: String, selectedActionId: String?) {
-        sendAction(actionName, selectedActionId)
+    private fun sendCurrentRecordAction(
+        action: Action,
+        selectedItemId: String?,
+        actionUUID: String
+    ) {
+        sendAction(action, selectedItemId, actionUUID)
     }
 
     private fun syncDataIfNeeded(shouldSyncData: Boolean) {
@@ -470,21 +531,33 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasTableActions()) {
 
-            delegate.setupActionsMenu(menu, tableActions) { action ->
-                if (action.parameters.length() > 0) {
+            delegate.setupActionsMenu(menu, tableActions) { action, isPendingActionButton ->
 
-                    BaseApp.genericNavigationResolver.navigateToActionForm(
-                        binding,
-                        destinationTable = tableName,
-                        navBarTitle = action.getPreferredShortName(),
-                        inverseName = inverseName,
-                        parentItemId = parentItemId,
-                        fromRelation = fromRelation
-                    )
+                when {
+                    isPendingActionButton -> {
+                        BaseApp.genericNavigationResolver.navigateToActionTasks(
+                            requireActivity(),
+                            binding,
+                            tableName,
+                            null
+                        )
+                    }
+                    action.parameters.length() > 0 -> {
 
-                    delegate.setSelectAction(action)
-                } else {
-                    sendAction(action.name, null)
+                        BaseApp.genericNavigationResolver.navigateToActionForm(
+                            binding,
+                            destinationTable = tableName,
+                            navBarTitle = action.getPreferredShortName(),
+                            inverseName = inverseName,
+                            parentItemId = parentItemId,
+                            fromRelation = fromRelation
+                        )
+
+                        delegate.setSelectAction(action)
+                    }
+                    else -> {
+                        sendAction(action, null, action.id)
+                    }
                 }
             }
         }

@@ -13,6 +13,9 @@ import org.json.JSONObject
 class ActionsParametersListAdapter(
     context: Context,
     val list: JSONArray,
+    // contains data of the failed action, this data will be used for pre-fill form to edit pending task
+    private val paramsToSubmit: HashMap<String, Any>,
+    private val imagesToUpload: HashMap<String, Uri>,
     private val currentEntity: EntityModel?,
     val onValueChanged: (String, Any?, String?, Boolean) -> Unit,
     val goToScanner: (Int) -> Unit,
@@ -36,15 +39,24 @@ class ActionsParametersListAdapter(
     }
 
     override fun onBindViewHolder(holder: ActionParameterViewHolder, position: Int) {
+        val item = list[position]
+        val paramName = (item as JSONObject).getSafeString("name")
+        val alreadyFilledValue = if (holder is ImageViewHolder) {
+            imagesToUpload[paramName]
+        } else {
+            paramsToSubmit[paramName]
+        }
+
         holder.bind(
-            list[position],
+            item,
             currentEntity,
+            alreadyFilledValue,
             { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 onValueChanged(name, value, metaData, isValid)
             }, {
             goToScanner(it)
-        }, { intent: Intent, position: Int, destinationPath ->
-            goToCamera(intent, position, destinationPath)
+        }, { intent: Intent, pos: Int, destinationPath ->
+            goToCamera(intent, pos, destinationPath)
         }, { parameterName: String, uri: Uri? ->
             onSigned(parameterName, uri)
         }

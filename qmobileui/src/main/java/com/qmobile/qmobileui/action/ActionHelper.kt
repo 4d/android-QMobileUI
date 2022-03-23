@@ -5,19 +5,20 @@ import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.collections.HashMap
 
 class ActionHelper private constructor() {
-
     companion object {
         fun getActionContent(
             tableName: String,
-            selectedActionId: String?,
+            selectedItemId: String?,
             parameters: HashMap<String, Any>? = null,
             metaData: HashMap<String, String>? = null,
             relationName: String? = null,
             parentPrimaryKey: String? = null,
             parentTableName: String? = null,
-            parentRelationName: String? = null
+            parentRelationName: String? = null,
+            actionUUID: String
         ): MutableMap<String, Any> {
             val map: MutableMap<String, Any> = mutableMapOf()
             val actionContext = mutableMapOf<String, Any>(
@@ -27,8 +28,8 @@ class ActionHelper private constructor() {
 
             // entity
             val entity = HashMap<String, Any>()
-            if (selectedActionId != null) {
-                entity["primaryKey"] = selectedActionId
+            if (selectedItemId != null) {
+                entity["primaryKey"] = selectedItemId
             }
             if (!relationName.isNullOrEmpty()) {
                 entity["relationName"] = relationName
@@ -38,7 +39,7 @@ class ActionHelper private constructor() {
             }
 
             // parent
-            if ((parentPrimaryKey != null) && (parentPrimaryKey != "0")) {
+            if ((!parentPrimaryKey.isNullOrEmpty()) && (parentPrimaryKey != "0")) {
                 val parent = HashMap<String, Any>()
 
                 parent["primaryKey"] = parentPrimaryKey
@@ -56,6 +57,7 @@ class ActionHelper private constructor() {
             }
 
             map["context"] = actionContext
+            map["id"] = actionUUID
             parameters?.let { map.put("parameters", parameters) }
             metaData?.let { map.put("metadata", ActionMetaData(metaData)) }
             return map

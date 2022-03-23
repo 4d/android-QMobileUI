@@ -14,7 +14,7 @@ import com.qmobile.qmobileui.action.Action
 class ActionDropDownAdapter(
     val context: Context,
     private val items: ArrayList<Action>,
-    val onMenuItemClick: (Action) -> Unit
+    val onMenuItemClick: (Action, Boolean) -> Unit
 ) :
     BaseAdapter() {
     override fun getCount(): Int {
@@ -53,8 +53,9 @@ class ActionDropDownAdapter(
             0
         }
         itemImage.setImageResource(resId)
-        newConvertView.setOnClickListener { _ ->
-            onMenuItemClick(item)
+        newConvertView.setOnClickListener {
+            val isPendingActionButton = position == items.size - 1
+            onMenuItemClick(item, isPendingActionButton)
         }
         return newConvertView
     }

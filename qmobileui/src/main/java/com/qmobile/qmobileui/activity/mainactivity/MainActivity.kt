@@ -6,10 +6,12 @@
 
 package com.qmobile.qmobileui.activity.mainactivity
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -36,6 +38,9 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
+import com.qmobile.qmobiledatastore.dao.ActionTask
+import com.qmobile.qmobiledatastore.dao.ActionTaskDao
+import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.network.NetworkStateEnum
 import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
@@ -51,16 +56,23 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
+import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.action.ActionParametersFragment
+import com.qmobile.qmobileui.action.observeOnce
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.setupWithNavController
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -68,7 +80,11 @@ const val DROP_DOWN_WIDTH = 600
 
 const val BASE_PERMISSION_REQUEST_CODE = 1000
 
-class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver, PermissionChecker {
+class MainActivity :
+    BaseActivity(),
+    FragmentCommunication,
+    LifecycleEventObserver,
+    PermissionChecker {
 
     private var loginStatusText = ""
     private var onLaunch = true
@@ -84,6 +100,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     override lateinit var apiService: ApiService
     private lateinit var selectedAction: Action
     var entity: EntityModel? = null
+    private lateinit var actionTaskDao: ActionTaskDao
 
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
@@ -94,6 +111,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        actionTaskDao = BaseApp.daoProvider.getActionTaskDao()
 
         if (savedInstanceState == null) {
             // Retrieve bundled parameter to know if there was a successful login with statusText
@@ -187,7 +205,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                     shouldDelayOnForegroundEvent.set(true)
                 }
             }
-            else -> {}
+            else -> {
+            }
         }
     }
 
@@ -251,7 +270,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                         DataSyncStateEnum.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
                         DataSyncStateEnum.RESYNC ->
                             Timber.d("Resynchronization table, because globalStamp changed while performing a dataSync")
-                        else -> {}
+                        else -> {
+                        }
                     }
                 }
             }
@@ -298,20 +318,33 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     override fun setupActionsMenu(
         menu: Menu,
         actions: List<Action>,
-        onMenuItemClick: (Action) -> Unit
+        onMenuItemClick: (Action, Boolean) -> Unit
     ) {
         menuInflater.inflate(R.menu.menu_action, menu)
-
         val menuItem =
             menu.findItem(R.id.more).actionView.findViewById(R.id.drop_down_image) as ImageButton
         menuItem.setOnClickListener { v ->
             val popupWindow = PopupWindow(this)
-            val adapter = ActionDropDownAdapter(v.context, actions as ArrayList<Action>) {
+            val actionsWithPendingTaskButton = actions.toMutableList()
+            // Add pending task task button
+            actionsWithPendingTaskButton.add(
+                Action(
+                    "Pending Tasks",
+                    "Pending Tasks",
+                    "Pending Tasks",
+                    "Pending Tasks",
+                    null,
+                    JSONArray()
+                )
+            )
+            val adapter = ActionDropDownAdapter(
+                v.context,
+                actionsWithPendingTaskButton as ArrayList<Action>
+            ) { item, isPendingActionButton ->
                 popupWindow.dismiss()
-                onMenuItemClick(it)
+                onMenuItemClick(item, isPendingActionButton)
             }
             val listViewSort = ListView(this)
-            listViewSort.dividerHeight = 1
             listViewSort.adapter = adapter
             popupWindow.apply {
                 isFocusable = true
@@ -370,8 +403,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                     authenticationRequested = false
                     tryAutoLogin()
                 }
-            }
-            else -> {
+                sendPendingTasks()
             }
         }
     }
@@ -460,28 +492,40 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
-            val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
+        val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
 
-            if (currentFragment is ActionParametersFragment) {
-                fromCameraOrGallery = true
-                currentFragment.handleResult(requestCode, data)
-            }
+        if (currentFragment is ActionParametersFragment) {
+            fromCameraOrGallery = true
+            currentFragment.handleResult(requestCode, data)
+        }
     }
 
     private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()
 
-    fun askPermission(permission: String, rationale: String, callback: (isGranted: Boolean) -> Unit) {
+    fun askPermission(
+        permission: String,
+        rationale: String,
+        callback: (isGranted: Boolean) -> Unit
+    ) {
         val requestPermissionCode = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
         requestPermissionMap[requestPermissionCode] = callback
 
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                permission
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
                 MaterialAlertDialogBuilder(this)
                     .setTitle(getString(R.string.permission_dialog_title))
                     .setMessage(rationale)
                     .setPositiveButton(getString(R.string.permission_dialog_positive)) { _, _ ->
-                        ActivityCompat.requestPermissions(this, arrayOf(permission), requestPermissionCode)
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(permission),
+                            requestPermissionCode
+                        )
                     }
                     .setNegativeButton(getString(R.string.permission_dialog_negative)) { dialog, _ -> dialog.cancel() }
                     .show()
@@ -493,7 +537,11 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when {
             requestPermissionMap.containsKey(requestCode) -> {
@@ -504,7 +552,136 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                 }
                 return
             }
-            else -> {}
+            else -> {
+            }
         }
+    }
+
+    // todo suppress a enlever
+    @SuppressLint("CheckResult")
+    private fun sendPendingTasks() {
+        actionTaskDao.getAll().observeOnce(this, { allTasks ->
+            val pendingTasks = allTasks.filter { actionTask -> actionTask.status == STATUS.PENDING }
+            Observable.fromIterable(pendingTasks)
+                .subscribeOn(Schedulers.io())
+                .subscribe { task ->
+                    if (task.actionInfo.imagesToUpload.isNullOrEmpty()) {
+                        sendTask(task)
+                    } else {
+                        uploadImages(task)
+                    }
+                }
+        })
+    }
+
+    private fun sendTask(task: ActionTask) {
+        val entityListViewModel =
+            entityListViewModelList.first()
+
+        checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                task.actionInfo.tableName?.let { tableName ->
+                    ActionHelper.getActionContent(
+                        tableName = tableName,
+                        task.relatedItemId,
+                        task.actionInfo.paramsToSubmit,
+                        task.actionInfo.metaDataToSubmit,
+                        actionUUID = task.actionInfo.actionUUID
+                    )
+                }?.let {
+                    entityListViewModel.sendAction(
+                        task.actionInfo.actionName,
+                        it
+                    ) { actionResponse ->
+                        actionResponse?.let {
+                            actionResponse.dataSynchro?.let { dataSynchro ->
+                                lifecycleScope.launch {
+
+                                    val status = if (actionResponse.success) {
+                                        STATUS.SUCCESS
+                                    } else {
+                                        STATUS.ERROR_SERVER
+                                    }
+                                    var taskCompleted = task
+                                    taskCompleted.status = status
+                                    task.message = it.statusText
+                                    actionTaskDao.insert(
+                                        taskCompleted
+                                    )
+
+                                    if (dataSynchro) {
+                                        task.actionInfo.tableName?.let { it1 -> requestDataSync(it1) }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onServerInaccessible() {
+                entityListViewModel.toastMessage.showMessage(
+                    getString(R.string.action_send_server_not_accessible),
+                    "tableName",
+                    MessageType.NEUTRAL
+                )
+                // abord tout
+            }
+
+            override fun onNoInternet() {
+                Log.e("-ht-", "onNoInternet 2")
+                entityListViewModel.toastMessage.showMessage(
+                    getString(R.string.action_send_no_internet),
+                    "tableName",
+                    MessageType.NEUTRAL
+                )
+            }
+        })
+    }
+
+    private fun uploadImages(actionTask: ActionTask) {
+        val entityListViewModel =
+            entityListViewModelList.first()
+        val bodies = actionTask.actionInfo.imagesToUpload?.mapValues {
+            val fileUri = Uri.parse("file://" + it.value)
+            val stream = contentResolver?.openInputStream(fileUri)
+            val body = stream?.readBytes()?.let { it1 ->
+                it1
+                    .toRequestBody(
+                        "application/octet".toMediaTypeOrNull(),
+                        0, it1.size
+                    )
+            }
+            body
+        }
+
+        checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                bodies?.let {
+                    entityListViewModel.uploadImage(it, { parameterName, receivedId ->
+                        actionTask.actionInfo.paramsToSubmit?.set(parameterName, receivedId)
+                        actionTask.actionInfo.metaDataToSubmit?.set(parameterName, "uploaded")
+                    }) {
+                        sendTask(actionTask)
+                    }
+                }
+            }
+
+            override fun onServerInaccessible() {
+                entityListViewModel.toastMessage.showMessage(
+                    getString(R.string.action_send_server_not_accessible),
+                    actionTask.actionInfo.tableName,
+                    MessageType.ERROR
+                )
+            }
+
+            override fun onNoInternet() {
+                entityListViewModel.toastMessage.showMessage(
+                    getString(R.string.action_send_no_internet),
+                    actionTask.actionInfo.tableName,
+                    MessageType.ERROR
+                )
+            }
+        })
     }
 }
