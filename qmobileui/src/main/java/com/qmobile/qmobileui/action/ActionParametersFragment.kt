@@ -32,6 +32,7 @@ import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
@@ -57,11 +58,12 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     // fragment parameters
     override var tableName = ""
     private var itemId = ""
-    private var inverseName = ""
+//    private var inverseName = ""
     private var parentItemId = ""
-    private var parentRelationName = ""
-    private var parentTableName = ""
-    private var fromRelation = false
+//    private var parentRelationName = ""
+//    private var parentTableName = ""
+//    private var fromRelation = false
+    private var relation: Relation? = null
 
     override lateinit var actionActivity: ActionActivity
 
@@ -114,18 +116,35 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("itemId")?.let { itemId = it }
-        arguments?.getString("destinationTable")?.let {
-            if (it.isNotEmpty()) {
-                tableName = it
-                fromRelation = true
-            }
-        }
-        arguments?.getString("parentItemId")?.let { parentItemId = it }
-        arguments?.getString("inverseName")?.let { inverseName = it }
+//        arguments?.getString("destinationTable")?.let {
+//            if (it.isNotEmpty()) {
+//                tableName = it
+//                fromRelation = true
+//            }
+//        }
 
-        if (fromRelation) {
-            RelationHelper.getRelation(tableName, inverseName)?.dest?.let { parentTableName = it }
-            RelationHelper.getRelation(tableName, inverseName)?.dest?.let { parentRelationName = it }
+//        arguments?.getString("parentItemId")?.let { parentItemId = it }
+//        arguments?.getString("inverseName")?.let { inverseName = it }
+//
+//        if (fromRelation) {
+//            parentTableName = RelationHelper.getRelation(tableName, inverseName).dest
+//            parentRelationName = RelationHelper.getRelation(tableName, inverseName).inverse
+//        }
+
+        arguments?.getString("relationName")?.let { relationName ->
+            arguments?.getString("fromTable")?.let { source ->
+                if (relationName.isNotEmpty() && source.isNotEmpty())
+                    relation = RelationHelper.getRelation(source, relationName).also {
+                        tableName = it.dest
+                    }
+                arguments?.getString("parentItemId")?.let { parentItemId = it }
+//                parentTableName = it
+            }
+//            if (it.isNotEmpty()) {
+//                relation = Relation()
+//                tableName = it
+//                fromRelation = true
+//            }
         }
 
 //        setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
@@ -393,13 +412,14 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     override fun getActionContent(itemId: String?): MutableMap<String, Any> {
         return ActionHelper.getActionContent(
             tableName = tableName,
-            itemId = itemId ?: "",
+            itemId = itemId ?: this.itemId,
             parameters = paramsToSubmit,
             metaData = metaDataToSubmit,
-            relationName = inverseName,
+//            relationName = inverseName,
             parentItemId = parentItemId,
-            parentTableName = parentTableName,
-            parentRelationName = parentRelationName
+//            parentTableName = parentTableName,
+//            parentRelationName = parentRelationName,
+            relation = relation
         )
     }
 

@@ -149,10 +149,9 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
         BaseApp.genericNavigationResolver.navigateToActionForm(
             viewDataBinding = binding,
             tableName = tableName,
-            itemId = itemId ?: "",
-            destinationTable = "",
+            itemId = itemId ?: this.itemId,
+            relationName = "",
             parentItemId = "",
-            inverseName = "",
             navbarTitle = action.getPreferredShortName()
         )
     }

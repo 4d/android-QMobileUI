@@ -6,13 +6,13 @@
 
 package com.qmobile.qmobileui.detail
 
-import androidx.lifecycle.LiveData
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.parseToString
-import com.qmobile.qmobiledatastore.data.RoomData
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
+import com.qmobile.qmobiledatasync.relation.RelationHelper.setupNavManyToOne
+import com.qmobile.qmobiledatasync.relation.RelationHelper.setupNavOneToMany
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import timber.log.Timber
@@ -36,7 +36,7 @@ class EntityDetailFragmentObserver(
             entity?.let {
 
                 setupObserver(entity)
-                RelationHelper.setupRelationNavigation(fragment.tableName, fragment.binding, entity)
+//                RelationHelper.setupRelationNavigation(fragment.tableName, fragment.binding, entity)
             }
         }
     }
@@ -49,17 +49,16 @@ class EntityDetailFragmentObserver(
         }
     }
 
-    private fun observeRelations(relations: Map<Relation, LiveData<List<RoomData>>>, entity: EntityModel) {
-        for ((relation, liveData) in relations) {
-            liveData.observe(requireNotNull(fragment.viewLifecycleOwner)) { roomRelation ->
+    private fun observeRelations(relations: Map<Relation, Relation.QueryResult>, entity: EntityModel) {
+        for ((relation, queryResult) in relations) {
+            queryResult.liveData.observe(requireNotNull(fragment.viewLifecycleOwner)) { roomRelation ->
                 roomRelation?.let {
                     entityViewModel.setRelationToLayout(relation.name, roomRelation)
+
                     if (relation.type == Relation.Type.MANY_TO_ONE) {
-                        roomRelation.firstOrNull()?.let {
-                            RelationHelper.refreshOneToManyNavForNavbarTitle(
-                                fragment.tableName, fragment.binding, entity, it
-                            )
-                        }
+                        fragment.binding.setupNavManyToOne(roomRelation, relation.name)
+                    } else {
+                        fragment.binding.setupNavOneToMany(queryResult.query, relation.name, entity)
                     }
                 }
             }

@@ -35,14 +35,13 @@ class FormQueryBuilder(
     }
 
     fun getRelationQuery(
-        parentItemId: String,
-        inverseName: String,
-        pattern: String? = null
+        pattern: String? = null,
+        pathQuery: String
     ): SimpleSQLiteQuery {
-        val baseRelationQuery = "$baseQuery AS T1 WHERE T1.__${inverseName}Key = $parentItemId"
+//        val baseRelationQuery = "$baseQuery AS T1 WHERE T1.__${inverseName}Key = $parentItemId"
         if (pattern.isNullOrEmpty())
-            return SimpleSQLiteQuery(baseRelationQuery)
-        val stringBuilder = StringBuilder("$baseRelationQuery AND ( ")
+            return SimpleSQLiteQuery(pathQuery)
+        val stringBuilder = StringBuilder("$pathQuery AND ( ")
         searchField.getSafeArray(tableName)?.let { columnsToFilter ->
             appendPredicate(stringBuilder, columnsToFilter, pattern)
         }
@@ -66,14 +65,14 @@ class FormQueryBuilder(
                 val relatedTableName = RelationHelper.getRelation(tableName, relation).dest
 
                 stringBuilder.append(
-                    "EXISTS ( SELECT * FROM $relatedTableName AS T2 WHERE " +
-                        "T1.__${relation}Key = T2.__KEY AND "
+                    "EXISTS ( SELECT * FROM $relatedTableName AS S2 WHERE " +
+                        "T_FINAL.__${relation}Key = S2.__KEY AND "
                 )
-                val appendFromFormat = appendFromFormat(field, pattern, "T2.$relatedField")
+                val appendFromFormat = appendFromFormat(field, pattern, "S2.$relatedField")
                 if (appendFromFormat.isEmpty()) {
-                    stringBuilder.append("T2.$relatedField LIKE '%$pattern%' OR ")
+                    stringBuilder.append("S2.$relatedField LIKE '%$pattern%' OR ")
                 } else {
-                    stringBuilder.append("( T2.$relatedField LIKE '%$pattern%' OR $appendFromFormat")
+                    stringBuilder.append("( S2.$relatedField LIKE '%$pattern%' OR $appendFromFormat")
                     stringBuilder.removeSuffix("OR ")
                     stringBuilder.append(") ")
                 }

@@ -12,6 +12,8 @@ import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.relation.Relation
+import com.qmobile.qmobiledatasync.relation.RelationHelper.inverseAliasPath
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
@@ -26,10 +28,8 @@ class ActionHelper private constructor() {
             itemId: String = "",
             parameters: HashMap<String, Any>? = null,
             metaData: HashMap<String, String>? = null,
-            relationName: String = "",
             parentItemId: String = "",
-            parentTableName: String = "",
-            parentRelationName: String = ""
+            relation: Relation? = null
         ): MutableMap<String, Any> {
 
             val actionContext = mutableMapOf<String, Any>(
@@ -42,23 +42,20 @@ class ActionHelper private constructor() {
             if (itemId.isNotEmpty())
                 entity["primaryKey"] = itemId
 
-            if (relationName.isNotEmpty())
-                entity["relationName"] = relationName
+            if (relation != null)
+                entity["relationName"] = relation.name
 
             if (entity.isNotEmpty())
                 actionContext["entity"] = entity
 
             // parent
-            if (parentItemId.isNotEmpty()) {
+            if (relation != null) {
                 val parent = HashMap<String, Any>()
 
                 parent["primaryKey"] = parentItemId
 
-                if (parentRelationName.isNotEmpty())
-                    parent["relationName"] = parentRelationName
-
-                if (parentTableName.isNotEmpty())
-                    parent["dataClass"] = parentTableName
+                parent["relationName"] = relation.inverseAliasPath()
+                parent["dataClass"] = relation.source
 
                 if (parent.isNotEmpty())
                     actionContext["parent"] = parent
