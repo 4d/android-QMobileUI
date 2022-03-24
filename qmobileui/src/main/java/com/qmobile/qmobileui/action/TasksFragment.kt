@@ -288,9 +288,6 @@ class TasksFragment : Fragment(), BaseFragment {
             }
 
             override fun onServerInaccessible() {
-                val lastDisplayErrorTime = Date(BaseApp.sharedPreferencesHolder.lastTimeActionErrorDisplayed).time
-
-
                 if (BaseApp.shouldShowActionError()) {
                     entityListViewModel.toastMessage.showMessage(
                         context?.getString(R.string.action_send_server_not_accessible),
