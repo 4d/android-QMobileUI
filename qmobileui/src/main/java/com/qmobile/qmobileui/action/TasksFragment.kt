@@ -36,6 +36,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.Date
 
 class TasksFragment : Fragment(), BaseFragment {
 
@@ -287,6 +288,9 @@ class TasksFragment : Fragment(), BaseFragment {
             }
 
             override fun onServerInaccessible() {
+                val lastDisplayErrorTime = Date(BaseApp.sharedPreferencesHolder.lastTimeActionErrorDisplayed).time
+
+
                 if (shouldShowActionError()) {
                     entityListViewModel.toastMessage.showMessage(
                         context?.getString(R.string.action_send_server_not_accessible),
