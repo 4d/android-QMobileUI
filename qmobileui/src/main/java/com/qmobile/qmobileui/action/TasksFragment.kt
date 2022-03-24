@@ -291,7 +291,7 @@ class TasksFragment : Fragment(), BaseFragment {
                 val lastDisplayErrorTime = Date(BaseApp.sharedPreferencesHolder.lastTimeActionErrorDisplayed).time
 
 
-                if (shouldShowActionError()) {
+                if (BaseApp.shouldShowActionError()) {
                     entityListViewModel.toastMessage.showMessage(
                         context?.getString(R.string.action_send_server_not_accessible),
                         tableName,
@@ -301,7 +301,7 @@ class TasksFragment : Fragment(), BaseFragment {
             }
 
             override fun onNoInternet() {
-                if (shouldShowActionError()) {
+                if (BaseApp.shouldShowActionError()) {
                     entityListViewModel.toastMessage.showMessage(
                         context?.getString(R.string.action_send_no_internet),
                         tableName,

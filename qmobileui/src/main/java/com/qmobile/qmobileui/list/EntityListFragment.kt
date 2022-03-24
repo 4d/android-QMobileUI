@@ -44,7 +44,6 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
-import com.qmobile.qmobileui.action.shouldShowActionError
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
@@ -420,7 +419,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     )
                 }
 
-                if (shouldShowActionError()) {
+                if (BaseApp.shouldShowActionError()) {
                     entityListViewModel.toastMessage.showMessage(
                         context?.getString(R.string.action_send_server_not_accessible),
                         tableName,
@@ -436,7 +435,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
                     )
                 }
 
-                if (shouldShowActionError()) {
+                if (BaseApp.shouldShowActionError()) {
                     entityListViewModel.toastMessage.showMessage(
                         context?.getString(R.string.action_send_no_internet),
                         tableName,

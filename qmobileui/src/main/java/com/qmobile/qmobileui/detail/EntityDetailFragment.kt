@@ -35,7 +35,6 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
-import com.qmobile.qmobileui.action.shouldShowActionError
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.checkIfChildIsWebView
 import com.qmobile.qmobileui.utils.ResourcesHelper
@@ -266,7 +265,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                                     )
                                 }
 
-                                if (shouldShowActionError()) {
+                                if (BaseApp.shouldShowActionError()) {
                                     entityViewModel.toastMessage.showMessage(
                                         context?.getString(R.string.action_send_server_not_accessible),
                                         tableName,
@@ -282,7 +281,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                                     )
                                 }
 
-                                if (shouldShowActionError()) {
+                                if (BaseApp.shouldShowActionError()) {
                                     entityViewModel.toastMessage.showMessage(
                                         context?.getString(R.string.action_send_no_internet),
                                         tableName,

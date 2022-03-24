@@ -364,7 +364,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                         jsonObject.put("params", delegate.getSelectAction().parameters)
 
                         if (delegate.getSelectAction().isOfflineCompatible()) {
-                            if (shouldShowActionError()) {
+                            if (BaseApp.shouldShowActionError()) {
                                 entityListViewModel.toastMessage.showMessage(
                                     context?.getString(R.string.action_send_server_not_accessible),
                                     tableName,
@@ -383,7 +383,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                             actionTaskDao.insert(
                                 task
                             )
-                            if (shouldShowActionError()) {
+                            if (BaseApp.shouldShowActionError()) {
                                 entityListViewModel.toastMessage.showMessage(
                                     context?.getString(R.string.action_send_no_internet),
                                     tableName,
