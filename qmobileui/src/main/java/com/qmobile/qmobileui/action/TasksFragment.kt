@@ -36,7 +36,6 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.util.Date
 
 class TasksFragment : Fragment(), BaseFragment {
 
@@ -146,10 +145,13 @@ class TasksFragment : Fragment(), BaseFragment {
             requireContext(), list
         ) {
             list[it]?.let { it1 ->
-                BaseApp.genericNavigationResolver.navigateFromPendingTasksToActionForm(
-                    binding,
-                    it1.id
-                )
+                it1.actionInfo.tableName?.let { tableName ->
+                    BaseApp.genericNavigationResolver.navigateFromPendingTasksToActionForm(
+                        binding,
+                        it1.id,
+                        tableName
+                    )
+                }
             }
         }
         val layoutManager = LinearLayoutManager(requireContext())

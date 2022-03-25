@@ -41,11 +41,16 @@ class ActionsParametersListAdapter(
     override fun onBindViewHolder(holder: ActionParameterViewHolder, position: Int) {
         val item = list[position]
         val paramName = (item as JSONObject).getSafeString("name")
-        val alreadyFilledValue = if (holder is ImageViewHolder) {
-            imagesToUpload[paramName]
-        } else {
-            paramsToSubmit[paramName]
-        }
+
+        // Value used to pre-fill offline action edit form
+        val alreadyFilledValue =
+            if ((holder is ImageViewHolder) || (holder is SignatureViewHolder)) {
+                // if image or signature we take the uri to pre-fill image/signature preview
+                imagesToUpload[paramName]
+            } else {
+                // for other field we take the value to prefill editText
+                paramsToSubmit[paramName]
+            }
 
         holder.bind(
             item,
@@ -54,12 +59,12 @@ class ActionsParametersListAdapter(
             { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 onValueChanged(name, value, metaData, isValid)
             }, {
-            goToScanner(it)
-        }, { intent: Intent, pos: Int, destinationPath ->
-            goToCamera(intent, pos, destinationPath)
-        }, { parameterName: String, uri: Uri? ->
-            onSigned(parameterName, uri)
-        }
+                goToScanner(it)
+            }, { intent: Intent, pos: Int, destinationPath ->
+                goToCamera(intent, pos, destinationPath)
+            }, { parameterName: String, uri: Uri? ->
+                onSigned(parameterName, uri)
+            }
         )
     }
 

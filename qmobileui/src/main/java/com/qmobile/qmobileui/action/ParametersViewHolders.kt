@@ -378,8 +378,8 @@ class NumberViewHolder(itemView: View, val format: String) :
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
         editText.handleDarkMode()
         alreadFilledValue?.let {
-            if (!(it as String).isNullOrEmpty()) {
-                editText.text = it
+            if (!(it.toString()).isNullOrEmpty()) {
+                editText.text = it.toString()
             }
         }
     }
@@ -516,9 +516,12 @@ class SpellOutViewHolder(itemView: View) :
             }
         }
         editText.handleDarkMode()
-        alreadFilledValue?.let {
-            if (!(it as String).isNullOrEmpty()) {
-                editText.text = it
+
+        alreadFilledValue?.let {value->
+            value.toString().toDoubleOrNull()?.let {
+                SpellOutHelper.convert(it.toLong()).apply {
+                    editText.text = this
+                }
             }
         }
     }
@@ -586,6 +589,8 @@ class ScientificViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var editText: TextView = itemView.findViewById(R.id.editText)
     var numericValue: Float? = null
+    private val numFormat = DecimalFormat("0.#####E0")
+
 
     override fun bind(
         item: Any,
@@ -644,16 +649,15 @@ class ScientificViewHolder(itemView: View) :
                         validate()
                     )
 
-                    val numFormat = DecimalFormat("0.#####E0")
                     editText.text = numFormat.format(numericValue)
                 }
             }
         }
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
         editText.handleDarkMode()
-        alreadFilledValue?.let {
-            if (!(it as String).isNullOrEmpty()) {
-                editText.text = it
+        alreadFilledValue?.let {value->
+         value.toString().toFloatOrNull()?.let {
+                editText.text = numFormat.format(it)
             }
         }
     }
@@ -781,12 +785,12 @@ class PercentageViewHolder(itemView: View) :
                 // Nothing to do
             }
         })
-
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
         editText.handleDarkMode()
-        alreadFilledValue?.let {
-            if (!(it as String).isNullOrEmpty()) {
-                editText.text = it
+
+        alreadFilledValue?.let { value ->
+            (value.toString().toFloatOrNull())?.let {
+                editText.text = "%.2f".format(it / PERCENT_MULTIPLIER)
             }
         }
     }
@@ -1182,6 +1186,22 @@ class TimeViewHolder(itemView: View, val format: String) :
             timePickerDialog.show()
         }
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+
+        alreadFilledValue?.let {
+            (it.toString().toDoubleOrNull())?.let { numberOfSeconds ->
+                val hours: Int = (numberOfSeconds / 3600).toInt()
+                val minutes: Int = (numberOfSeconds % 3600 / 60).toInt()
+                selectedTime.text = if (is24HourFormat) {
+                    "$hours hours $minutes minutes"
+                } else {
+                    if (hours >= 12) {
+                        "${hours - 12}:$minutes $PM_KEY"
+                    } else {
+                        "$hours:$minutes $AM_KEY"
+                    }
+                }
+            }
+        }
     }
 
     override fun validate(): Boolean {
@@ -1279,6 +1299,15 @@ class DateViewHolder(itemView: View, val format: String) :
         selectedDate.setOnClickListener {
             datePickerDialog.show()
         }
+
+        alreadFilledValue?.let {
+            val formattedDate = FormatterUtils.applyFormat(
+                dateFormat,
+                alreadFilledValue.toString()
+            )
+
+            selectedDate.text = formattedDate
+        }
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
     }
 
@@ -1344,6 +1373,11 @@ class BarCodeViewHolder(itemView: View) :
             goToScanner?.let { it1 -> it1(bindingAdapterPosition) }
         }
         showScannedValueIfNeeded(onValueChanged)
+        alreadFilledValue?.let {
+            if (!(it as String).isNullOrEmpty()) {
+                scannedValueTextView.text = it
+            }
+        }
     }
 
     override fun validate(): Boolean {
@@ -1440,6 +1474,20 @@ class SignatureViewHolder(itemView: View) :
             signaturePad?.clear()
         }
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+
+        alreadFilledValue?.let {
+            if (it is Uri) {
+                defaultPreview.visibility = View.VISIBLE
+                bindImageFromUrl(
+                    defaultPreview,
+                    it.path,
+                    null,
+                    null,
+                    null,
+                    null
+                )
+            }
+        }
     }
 
     override fun validate(): Boolean {
