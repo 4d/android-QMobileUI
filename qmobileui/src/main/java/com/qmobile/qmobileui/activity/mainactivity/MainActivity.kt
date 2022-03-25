@@ -403,7 +403,13 @@ class MainActivity :
                     authenticationRequested = false
                     tryAutoLogin()
                 }
-                sendPendingTasks()
+
+                val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
+                val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
+
+                if (currentFragment !is ActionParametersFragment) {
+                    sendPendingTasks()
+                }
             }
         }
     }
