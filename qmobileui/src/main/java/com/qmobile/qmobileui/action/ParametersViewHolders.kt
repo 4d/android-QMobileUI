@@ -183,7 +183,6 @@ class TextViewHolder(itemView: View, val format: String) :
         })
 
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
-
         editText.handleDarkMode()
 
         alreadFilledValue?.let {
@@ -1182,9 +1181,12 @@ class TimeViewHolder(itemView: View, val format: String) :
             timePickerDialog.show()
         }
 
+
         selectedTime.setOnClickListener {
             timePickerDialog.show()
         }
+
+        selectedTime.handleDarkMode()
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
 
         alreadFilledValue?.let {
@@ -1300,6 +1302,7 @@ class DateViewHolder(itemView: View, val format: String) :
             datePickerDialog.show()
         }
 
+        selectedDate.handleDarkMode()
         alreadFilledValue?.let {
             val formattedDate = FormatterUtils.applyFormat(
                 dateFormat,
@@ -1378,6 +1381,8 @@ class BarCodeViewHolder(itemView: View) :
                 scannedValueTextView.text = it
             }
         }
+        scannedValueTextView.handleDarkMode()
+
     }
 
     override fun validate(): Boolean {
