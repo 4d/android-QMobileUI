@@ -17,6 +17,9 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.webkit.WebView
+import android.widget.Button
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import com.qmobile.qmobileui.R
 
@@ -90,4 +93,28 @@ fun ViewGroup.checkIfContainsWebView(): WebView? {
         }
     }
     return childContainsWebView
+}
+
+fun View.disableLink() {
+    when (this) { // Button first has a button is also a TextView
+        is Button -> this.isEnabled = false
+        is TextView -> this.setTextColor(
+            ContextCompat.getColor(
+                this.context,
+                android.R.color.darker_gray
+            )
+        )
+    }
+}
+
+fun View.enableLink() {
+    when (this) { // Button first has a button is also a TextView
+        is Button -> this.isEnabled = true
+        is TextView -> this.setTextColor(
+            ContextCompat.getColor(
+                this.context,
+                R.color.relation_link
+            )
+        )
+    }
 }

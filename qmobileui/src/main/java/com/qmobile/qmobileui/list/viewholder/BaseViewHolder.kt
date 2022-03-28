@@ -72,6 +72,7 @@ class BaseViewHolder(
                     bindOneToMany(roomRelation, relation.name)
                     dataBinding.setupNavOneToMany(queryResult.query, relation.name, entity)
                 }
+                dataBinding.executePendingBindings()
             }
         }
     }
@@ -83,7 +84,6 @@ class BaseViewHolder(
                 relationName,
                 relatedEntity
             )
-            dataBinding.executePendingBindings()
 //            RelationHelper.refreshOneToManyNavForNavbarTitle(tableName, dataBinding, entity, relatedEntity)
         }
     }
@@ -95,7 +95,6 @@ class BaseViewHolder(
                 relationName,
                 toMany
             )
-            dataBinding.executePendingBindings()
         }
     }
 
