@@ -184,7 +184,7 @@ class TasksFragment : Fragment(), BaseFragment {
                 filteredList.filter { actionTask ->
                     actionTask.status == STATUS.SUCCESS ||
                         actionTask.status == STATUS.ERROR_SERVER
-                }
+                }.takeLast(10)
             // The 2 null items used as placeholders for sections titles Pending/History
             setupRecycleView(
                 (
