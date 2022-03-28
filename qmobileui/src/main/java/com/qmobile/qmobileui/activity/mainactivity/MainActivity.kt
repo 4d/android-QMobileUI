@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.activity.mainactivity
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -52,7 +51,9 @@ import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
 import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
+import com.qmobile.qmobiledatasync.viewmodel.factory.getTaskViewModel
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
@@ -105,12 +106,16 @@ class MainActivity :
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
+    lateinit var taskViewModel: TaskViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        taskViewModel = getTaskViewModel(this)
+
         actionTaskDao = BaseApp.daoProvider.getActionTaskDao()
 
         if (savedInstanceState == null) {
@@ -404,7 +409,8 @@ class MainActivity :
                     tryAutoLogin()
                 }
 
-                val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
+                val navHostFragment =
+                    supportFragmentManager.findFragmentById(R.id.nav_host_container)
                 val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
 
                 if (currentFragment !is ActionParametersFragment) {
@@ -427,7 +433,7 @@ class MainActivity :
         intent.putExtra(LOGGED_OUT, true)
         intent.addFlags(
             Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                Intent.FLAG_ACTIVITY_NEW_TASK
+                    Intent.FLAG_ACTIVITY_NEW_TASK
         )
         startActivity(intent)
         finish()
@@ -563,20 +569,16 @@ class MainActivity :
         }
     }
 
-    // todo suppress a enlever
-    @SuppressLint("CheckResult")
     private fun sendPendingTasks() {
         actionTaskDao.getAll().observeOnce(this, { allTasks ->
             val pendingTasks = allTasks.filter { actionTask -> actionTask.status == STATUS.PENDING }
-            Observable.fromIterable(pendingTasks)
-                .subscribeOn(Schedulers.io())
-                .subscribe { task ->
-                    if (task.actionInfo.imagesToUpload.isNullOrEmpty()) {
-                        sendTask(task)
-                    } else {
-                        uploadImages(task)
-                    }
+            taskViewModel.sendPendingTasks(pendingTasks,
+                { task ->
+                    sendTask(task)
                 }
+            ) { task ->
+                uploadImages(task)
+            }
         })
     }
 
@@ -628,14 +630,12 @@ class MainActivity :
             override fun onServerInaccessible() {
                 entityListViewModel.toastMessage.showMessage(
                     getString(R.string.action_send_server_not_accessible),
-                    "tableName",
+                    null,
                     MessageType.NEUTRAL
                 )
-                // abord tout
             }
 
             override fun onNoInternet() {
-                Log.e("-ht-", "onNoInternet 2")
                 entityListViewModel.toastMessage.showMessage(
                     getString(R.string.action_send_no_internet),
                     "tableName",

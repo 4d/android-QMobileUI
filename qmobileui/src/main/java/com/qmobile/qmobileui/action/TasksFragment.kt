@@ -311,17 +311,14 @@ class TasksFragment : Fragment(), BaseFragment {
         })
     }
 
-    // A voir pour supprimer checkREsult
-    @SuppressLint("CheckResult")
-    fun sendPendingTasks(pendingTasks: List<ActionTask>) {
-        Observable.fromIterable(pendingTasks)
-            .subscribeOn(Schedulers.io())
-            .subscribe { task ->
-                if (task.actionInfo.imagesToUpload.isNullOrEmpty()) {
-                    sendTask(task)
-                } else {
-                    uploadImages(task)
-                }
+
+    private fun sendPendingTasks(pendingTasks: List<ActionTask>) {
+        taskViewModel.sendPendingTasks(pendingTasks,
+            { task ->
+                sendTask(task)
             }
+        ) { task ->
+            uploadImages(task)
+        }
     }
 }
