@@ -516,7 +516,7 @@ class SpellOutViewHolder(itemView: View) :
         }
         editText.handleDarkMode()
 
-        alreadFilledValue?.let {value->
+        alreadFilledValue?.let { value ->
             value.toString().toDoubleOrNull()?.let {
                 SpellOutHelper.convert(it.toLong()).apply {
                     editText.text = this
@@ -590,7 +590,6 @@ class ScientificViewHolder(itemView: View) :
     var numericValue: Float? = null
     private val numFormat = DecimalFormat("0.#####E0")
 
-
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
@@ -654,8 +653,8 @@ class ScientificViewHolder(itemView: View) :
         }
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
         editText.handleDarkMode()
-        alreadFilledValue?.let {value->
-         value.toString().toFloatOrNull()?.let {
+        alreadFilledValue?.let { value ->
+            value.toString().toFloatOrNull()?.let {
                 editText.text = numFormat.format(it)
             }
         }
@@ -1181,7 +1180,6 @@ class TimeViewHolder(itemView: View, val format: String) :
             timePickerDialog.show()
         }
 
-
         selectedTime.setOnClickListener {
             timePickerDialog.show()
         }
@@ -1382,7 +1380,6 @@ class BarCodeViewHolder(itemView: View) :
             }
         }
         scannedValueTextView.handleDarkMode()
-
     }
 
     override fun validate(): Boolean {

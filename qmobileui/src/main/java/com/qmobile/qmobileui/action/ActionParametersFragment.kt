@@ -126,8 +126,8 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                             }
                             imagesToUpload =
                                 task.actionInfo.imagesToUpload?.mapValues { entry ->
-                                    Uri.parse(entry.value)
-                                } as HashMap<String, Uri>
+                                Uri.parse(entry.value)
+                            } as HashMap<String, Uri>
                             allParameters = JSONArray(task.actionInfo.allParameters)
                             currentPendingTaskDate = task.date
                             currentTask = task
@@ -160,25 +160,25 @@ class ActionParametersFragment : Fragment(), BaseFragment {
             {
                 BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
             }, { intent: Intent, position: Int, destinationPath: String ->
-                goToCamera = {
-                    currentDestinationPath = destinationPath
-                    (context as Activity).startActivityForResult(
-                        intent,
-                        // Send position as request code, so we can update image preview only for the selected item
-                        position
-                    )
-                }
-                requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-            }, { parameterName: String, uri: Uri? ->
-                if (uri != null) {
-                    imagesToUpload[parameterName] = uri
-                } else {
-                    // When user signed and then cleared signature
-                    // pad we should remove last signature from imagesToUpload
-
-                    imagesToUpload.remove(parameterName)
-                }
+            goToCamera = {
+                currentDestinationPath = destinationPath
+                (context as Activity).startActivityForResult(
+                    intent,
+                    // Send position as request code, so we can update image preview only for the selected item
+                    position
+                )
             }
+            requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+        }, { parameterName: String, uri: Uri? ->
+            if (uri != null) {
+                imagesToUpload[parameterName] = uri
+            } else {
+                // When user signed and then cleared signature
+                // pad we should remove last signature from imagesToUpload
+
+                imagesToUpload.remove(parameterName)
+            }
+        }
         )
         val layoutManager = LinearLayoutManager(requireContext())
         recyclerView.layoutManager = layoutManager
@@ -216,7 +216,6 @@ class ActionParametersFragment : Fragment(), BaseFragment {
         inflater.inflate(R.menu.menu_actions_parameters, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
-
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.validate) {

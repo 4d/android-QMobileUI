@@ -12,7 +12,7 @@ import java.util.Date
 const val MILLISECONDS_IN_SECOND = 1000
 const val SECONDS_IN_MINUTE = 60
 const val MINUTES_IN_HOUR = 60
-const val HOURS_IN_DAY =24
+const val HOURS_IN_DAY = 24
 
 class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)
@@ -73,6 +73,3 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
         }
     }
 }
-
-
-

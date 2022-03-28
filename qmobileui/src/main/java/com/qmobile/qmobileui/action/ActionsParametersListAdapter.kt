@@ -59,12 +59,12 @@ class ActionsParametersListAdapter(
             { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 onValueChanged(name, value, metaData, isValid)
             }, {
-                goToScanner(it)
-            }, { intent: Intent, pos: Int, destinationPath ->
-                goToCamera(intent, pos, destinationPath)
-            }, { parameterName: String, uri: Uri? ->
-                onSigned(parameterName, uri)
-            }
+            goToScanner(it)
+        }, { intent: Intent, pos: Int, destinationPath ->
+            goToCamera(intent, pos, destinationPath)
+        }, { parameterName: String, uri: Uri? ->
+            onSigned(parameterName, uri)
+        }
         )
     }
 

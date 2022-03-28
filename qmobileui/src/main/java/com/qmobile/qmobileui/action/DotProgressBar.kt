@@ -16,11 +16,10 @@ import com.qmobile.qmobileui.R
 
 const val NUMBER_OF_DOTS = 3
 const val ANIMATION_DURATION = 1000L
-const val  MIN_SCALE = 0.1f
+const val MIN_SCALE = 0.1f
 const val MAX_SCALE = 0.7f
 const val MARGIN = 0.1f
 const val RADIUS = 2f
-
 
 class DotProgressBar : FrameLayout {
     private var margin: Int = convertDpToPixel(MARGIN, context)
@@ -191,11 +190,14 @@ class DotProgressBar : FrameLayout {
     }
 */
 
-
     companion object {
         fun convertDpToPixel(dp: Float, context: Context): Int {
-            return (dp * (context.resources.displayMetrics
-                .densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).toInt()
+            return (
+                dp * (
+                    context.resources.displayMetrics
+                        .densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT
+                    )
+                ).toInt()
         }
     }
 }

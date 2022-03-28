@@ -1,7 +1,6 @@
 
 package com.qmobile.qmobileui.action
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.net.Uri
@@ -31,8 +30,6 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionTasksBinding
 import com.qmobile.qmobileui.network.NetworkChecker
-import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -184,8 +181,10 @@ class TasksFragment : Fragment(), BaseFragment {
             }
             pendingTasks = filteredList.filter { actionTask -> actionTask.status == STATUS.PENDING }
             val history =
-                filteredList.filter { actionTask -> actionTask.status == STATUS.SUCCESS
-                        || actionTask.status == STATUS.ERROR_SERVER }
+                filteredList.filter { actionTask ->
+                    actionTask.status == STATUS.SUCCESS ||
+                        actionTask.status == STATUS.ERROR_SERVER
+                }
             // The 2 null items used as placeholders for sections titles Pending/History
             setupRecycleView(
                 (
@@ -311,9 +310,9 @@ class TasksFragment : Fragment(), BaseFragment {
         })
     }
 
-
     private fun sendPendingTasks(pendingTasks: List<ActionTask>) {
-        taskViewModel.sendPendingTasks(pendingTasks,
+        taskViewModel.sendPendingTasks(
+            pendingTasks,
             { task ->
                 sendTask(task)
             }

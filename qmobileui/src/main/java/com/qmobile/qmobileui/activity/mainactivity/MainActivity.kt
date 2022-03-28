@@ -66,8 +66,6 @@ import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.setupWithNavController
-import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -433,7 +431,7 @@ class MainActivity :
         intent.putExtra(LOGGED_OUT, true)
         intent.addFlags(
             Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    Intent.FLAG_ACTIVITY_NEW_TASK
+                Intent.FLAG_ACTIVITY_NEW_TASK
         )
         startActivity(intent)
         finish()
@@ -572,7 +570,8 @@ class MainActivity :
     private fun sendPendingTasks() {
         actionTaskDao.getAll().observeOnce(this, { allTasks ->
             val pendingTasks = allTasks.filter { actionTask -> actionTask.status == STATUS.PENDING }
-            taskViewModel.sendPendingTasks(pendingTasks,
+            taskViewModel.sendPendingTasks(
+                pendingTasks,
                 { task ->
                     sendTask(task)
                 }
