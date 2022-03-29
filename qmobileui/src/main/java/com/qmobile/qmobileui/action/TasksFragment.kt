@@ -137,19 +137,25 @@ class TasksFragment : Fragment(), BaseFragment {
         observeData()
     }
 
-    private fun setupRecycleView(list: MutableList<ActionTask?>) {
+    private fun setupRecycleView(list: MutableList<ActionTask?>, serverStatus: String) {
         adapter = TasksListAdapter(
-            requireContext(), list
-        ) {
-            list[it]?.let { it1 ->
-                it1.actionInfo.tableName?.let { tableName ->
-                    BaseApp.genericNavigationResolver.navigateFromPendingTasksToActionForm(
-                        binding,
-                        it1.id,
-                        tableName
-                    )
+            requireContext(), list, serverStatus
+        ) { position ->
+
+            if(position == 0){
+                sendPendingTasks(pendingTasks)
+            } else{
+                list[position]?.let { it1 ->
+                    it1.actionInfo.tableName?.let { tableName ->
+                        BaseApp.genericNavigationResolver.navigateFromPendingTasksToActionForm(
+                            binding,
+                            it1.id,
+                            tableName
+                        )
+                    }
                 }
             }
+
         }
         val layoutManager = LinearLayoutManager(requireContext())
         recyclerView.layoutManager = layoutManager
@@ -180,19 +186,46 @@ class TasksFragment : Fragment(), BaseFragment {
                 }
             }
             pendingTasks = filteredList.filter { actionTask -> actionTask.status == STATUS.PENDING }
+                .sortedByDescending { actionTask -> actionTask.date }
             val history =
                 filteredList.filter { actionTask ->
                     actionTask.status == STATUS.SUCCESS ||
-                        actionTask.status == STATUS.ERROR_SERVER
-                }.takeLast(10)
+                            actionTask.status == STATUS.ERROR_SERVER
+                }.takeLast(10).sortedByDescending { actionTask -> actionTask.date }
             // The 2 null items used as placeholders for sections titles Pending/History
-            setupRecycleView(
-                (
-                    listOf(null) + pendingTasks.sortedByDescending { actionTask -> actionTask.date } + listOf(
-                        null
-                    ) + history.sortedByDescending { actionTask -> actionTask.date }
-                    ) as MutableList<ActionTask?>
-            )
+
+            delegate.checkNetwork(object : NetworkChecker {
+                override fun onServerAccessible() {
+                    setupRecycleView(
+                        (listOf(null) + pendingTasks + listOf(
+                            null
+                        ) + history
+                                ) as MutableList<ActionTask?>, getString(R.string.server_accessible)
+                    )
+
+                }
+
+                override fun onServerInaccessible() {
+                    setupRecycleView(
+                        (listOf(null) + pendingTasks + listOf(
+                            null
+                        ) + history
+                                ) as MutableList<ActionTask?>,
+                        getString(R.string.server_not_accessible)
+                    )
+                }
+
+                override fun onNoInternet() {
+                    setupRecycleView(
+                        (
+                                listOf(null) + pendingTasks.sortedByDescending { actionTask -> actionTask.date } + listOf(
+                                    null
+                                ) + history.sortedByDescending { actionTask -> actionTask.date }
+                                ) as MutableList<ActionTask?>,
+                        getString(R.string.no_internet)
+                    )
+                }
+            })
         })
     }
 

@@ -11,6 +11,7 @@ import com.qmobile.qmobileui.R
 class TasksListAdapter(
     context: Context,
     var list: MutableList<ActionTask?>,
+    var serverStatus: String? = null,
     val onCLick: (position: Int) -> Unit
 ) :
     RecyclerView.Adapter<TaskListViewHolder>() {
@@ -39,8 +40,9 @@ class TasksListAdapter(
     }
 
     override fun onBindViewHolder(holder: TaskListViewHolder, position: Int) {
+        val item = list[position]
+
         if (holder is TaskViewHolder) {
-            val item = list[position]
             if (item != null) {
                 holder.bind(
                     item
@@ -52,9 +54,9 @@ class TasksListAdapter(
             }
         } else {
             if (position == 0) {
-                (holder as SectionViewHolder).bind(TaskItemTypeEnum.HEADER_PENDING)
-            } else {
-                (holder as SectionViewHolder).bind(TaskItemTypeEnum.HEADER_HISTORY)
+                (holder as SectionViewHolder).bind(TaskItemTypeEnum.HEADER_PENDING, serverStatus.orEmpty()){ onCLick(position)}
+            } else{
+                (holder as SectionViewHolder).bind(TaskItemTypeEnum.HEADER_HISTORY, serverStatus.orEmpty())
             }
         }
     }
