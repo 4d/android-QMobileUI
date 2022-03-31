@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.app.BaseApp
@@ -231,9 +232,14 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
      */
     private fun initOnRefreshListener() {
         binding.fragmentListSwipeToRefresh.setOnRefreshListener {
-            delegate.requestDataSync(tableName)
-            binding.fragmentListRecyclerView.adapter = adapter
-            binding.fragmentListSwipeToRefresh.isRefreshing = false
+
+            //        val kk = BaseApp.genericTableHelper.getXxx(SimpleSQLiteQuery("SELECT * FROM Employee Service WHERE Employee.__serviceKey = Service.__KEY"))
+            val kk = BaseApp.genericTableHelper.getXxx(SimpleSQLiteQuery("SELECT * FROM Employee"))
+            println()
+
+//            delegate.requestDataSync(tableName)
+//            binding.fragmentListRecyclerView.adapter = adapter
+//            binding.fragmentListSwipeToRefresh.isRefreshing = false
         }
     }
 

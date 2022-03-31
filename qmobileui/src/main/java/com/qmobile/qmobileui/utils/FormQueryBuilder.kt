@@ -22,7 +22,11 @@ class FormQueryBuilder(
     private val searchField: JSONObject = BaseApp.runtimeDataHolder.searchField // has columns to Filter
 ) {
 
-    private val baseQuery = "SELECT * FROM $tableName"
+    //    private val baseQuery = "SELECT * FROM $tableName"
+    private val baseQuery = if (tableName == "Employee")
+        "SELECT * FROM $tableName, Service WHERE Employee.__serviceKey = Service.__KEY"
+    else
+        "SELECT * FROM $tableName"
 
     fun getQuery(pattern: String? = null): SimpleSQLiteQuery {
         if (pattern.isNullOrEmpty())
@@ -66,7 +70,7 @@ class FormQueryBuilder(
 
                 stringBuilder.append(
                     "EXISTS ( SELECT * FROM $relatedTableName AS S2 WHERE " +
-                        "T_FINAL.__${relation}Key = S2.__KEY AND "
+                            "T_FINAL.__${relation}Key = S2.__KEY AND "
                 )
                 val appendFromFormat = appendFromFormat(field, pattern, "S2.$relatedField")
                 if (appendFromFormat.isEmpty()) {
