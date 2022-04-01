@@ -9,13 +9,8 @@ package com.qmobile.qmobileui.list.viewholder
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobiledatastore.data.RoomData
 import com.qmobile.qmobiledatastore.data.RoomEntity
-import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
-import com.qmobile.qmobiledatasync.relation.RelationHelper.setupNavManyToOne
-import com.qmobile.qmobiledatasync.relation.RelationHelper.setupNavOneToMany
 import com.qmobile.qmobileui.BR
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 
@@ -35,11 +30,6 @@ class BaseViewHolder(
 
             setupClickListeners(entity)
             RelationHelper.setupRelationNavigation(tableName, dataBinding, entity)
-
-            // unbind because of issue : item at position 11 receives binding of item 0,
-            // item at position 12 receives binding of item at position 1, etc.
-//            unbindRelations()
-//            setupObserver(entity)
         }
     }
 
@@ -54,52 +44,4 @@ class BaseViewHolder(
             }
         }
     }
-
-//    private fun setupObserver(entity: EntityModel) {
-//        RelationHelper.getRelationsLiveDataMap(tableName, entity).let { relationMap ->
-//            if (relationMap.isNotEmpty()) {
-//                observeRelations(relationMap, entity)
-//            }
-//        }
-//    }
-//
-//    private fun observeRelations(relations: Map<Relation, Relation.QueryResult>, entity: EntityModel) {
-//        for ((relation, queryResult) in relations) {
-//            queryResult.liveData.observe(requireNotNull(dataBinding.lifecycleOwner)) { roomRelation ->
-//                if (relation.type == Relation.Type.MANY_TO_ONE) {
-//                    bindManyToOne(roomRelation, relation.name)
-//                    dataBinding.setupNavManyToOne(roomRelation, relation.name)
-//                } else {
-//                    bindOneToMany(roomRelation, relation.name)
-//                    dataBinding.setupNavOneToMany(queryResult.query, relation.name, entity)
-//                }
-//                dataBinding.executePendingBindings()
-//            }
-//        }
-//    }
-//
-//    private fun bindManyToOne(roomRelation: List<RoomEntity>, relationName: String) {
-//        roomRelation.firstOrNull()?.let { relatedEntity ->
-//            BaseApp.genericTableFragmentHelper.setRelationBinding(
-//                dataBinding,
-//                relationName,
-//                relatedEntity
-//            )
-////            RelationHelper.refreshOneToManyNavForNavbarTitle(tableName, dataBinding, entity, relatedEntity)
-//        }
-//    }
-//
-//    private fun bindOneToMany(toMany: List<RoomEntity>?, relationName: String) {
-//        toMany?.let {
-//            BaseApp.genericTableFragmentHelper.setRelationBinding(
-//                dataBinding,
-//                relationName,
-//                toMany
-//            )
-//        }
-//    }
-//
-//    private fun unbindRelations() {
-//        BaseApp.genericTableFragmentHelper.unsetRelationBinding(dataBinding)
-//    }
 }

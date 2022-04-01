@@ -24,13 +24,11 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.sqlite.db.SimpleSQLiteQuery
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
-import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
@@ -74,8 +72,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     override var tableName = ""
     private var inverseName = ""
     private var parentItemId = ""
-    private var parentRelationName = ""
-    private var parentTableName = ""
+//    private var parentRelationName = ""
+//    private var parentTableName = ""
     private var fromRelation = false
 
     private val tableActions = mutableListOf<Action>()
@@ -85,8 +83,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     private var hasCurrentRecordActions = false
     private var isSwipable = false
     private var searchQuery = "" // search area
-    private var pathQuery = "" // path query from parent relation
-    private var currentQuery = "" // global query
+    private var currentSearchQuery = "" // global query
     private var relation: Relation? = null
 
     override fun onCreateView(
@@ -110,12 +107,10 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
         arguments?.getString("parentItemId")?.let { parentItemId = it }
         arguments?.getString("inverseName")?.let { inverseName = it }
-        if (fromRelation) {
-            RelationHelper.getRelation(tableName, inverseName).dest.let { parentTableName = it }
-            RelationHelper.getRelation(tableName, inverseName).inverse.let { parentRelationName = it }
-        }
-
-//        arguments?.getString("inverseName")?.let { inverseName = it }
+//        if (fromRelation) {
+//            RelationHelper.getRelation(tableName, inverseName).dest.let { parentTableName = it }
+//            RelationHelper.getRelation(tableName, inverseName).inverse.let { parentRelationName = it }
+//        }
 
 //        if (fromRelation) {
 // //            parentTableName = RelationHelper.getRelation(tableName, inverseName).dest
@@ -186,7 +181,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 BaseApp.genericNavigationResolver.navigateFromListToViewPager(
                     viewDataBinding = dataBinding,
                     key = key,
-                    query = currentQuery,
+                    query = currentSearchQuery,
                     destinationTable = if (fromRelation) tableName else "",
                     parentItemId = parentItemId,
                     inverseName = inverseName
@@ -404,14 +399,13 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             formQueryBuilder.getRelationQuery(
                 parentItemId = parentItemId,
                 inverseName = inverseName,
-                pattern = currentQuery
+                pattern = currentSearchQuery
             )
         } else {
-            formQueryBuilder.getQuery(currentQuery)
+            formQueryBuilder.getQuery(currentSearchQuery)
         }
         entityListViewModel.setSearchQuery(formQuery)
     }
-
 
     override fun getActionContent(itemId: String?): MutableMap<String, Any> {
         return ActionHelper.getActionContent(

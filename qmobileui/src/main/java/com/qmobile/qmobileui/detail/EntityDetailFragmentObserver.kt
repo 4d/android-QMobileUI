@@ -9,10 +9,7 @@ package com.qmobile.qmobileui.detail
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.parseToString
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
-import com.qmobile.qmobiledatasync.relation.RelationHelper.setupNavManyToOne
-import com.qmobile.qmobiledatasync.relation.RelationHelper.setupNavOneToMany
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobileui.BR
 import com.qmobile.qmobileui.activity.BaseObserver
@@ -38,33 +35,7 @@ class EntityDetailFragmentObserver(
                 fragment.binding.setVariable(BR.entityData, entity)
                 fragment.binding.executePendingBindings()
                 RelationHelper.setupRelationNavigation(fragment.tableName, fragment.binding, entity)
-//                setupObserver(entity)
-//                RelationHelper.setupRelationNavigation(fragment.tableName, fragment.binding, entity)
             }
-        }
-    }
-
-    private fun setupObserver(entity: EntityModel) {
-        RelationHelper.getRelationsLiveDataMap(fragment.tableName, entity).let { relationMap ->
-            if (relationMap.isNotEmpty()) {
-                observeRelations(relationMap, entity)
-            }
-        }
-    }
-
-    private fun observeRelations(relations: Map<Relation, Relation.QueryResult>, entity: EntityModel) {
-        for ((relation, queryResult) in relations) {
-//            queryResult.liveData.observe(requireNotNull(fragment.viewLifecycleOwner)) { roomRelation ->
-//                roomRelation?.let {
-//                    entityViewModel.setRelationToLayout(relation.name, roomRelation)
-//
-//                    if (relation.type == Relation.Type.MANY_TO_ONE) {
-//                        fragment.binding.setupNavManyToOne(roomRelation, relation.name)
-//                    } else {
-//                        fragment.binding.setupNavOneToMany(queryResult.query, relation.name, entity)
-//                    }
-//                }
-//            }
         }
     }
 }

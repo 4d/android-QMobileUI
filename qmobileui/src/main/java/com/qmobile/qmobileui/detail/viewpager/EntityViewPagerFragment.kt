@@ -14,7 +14,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.viewpager2.widget.ViewPager2
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -39,11 +38,10 @@ class EntityViewPagerFragment : BaseFragment() {
     internal var key = ""
     private var tableName = ""
 //    private var query = ""
-    private var currentQuery = ""
+    private var searchQueryPattern = ""
     private var inverseName = ""
     private var parentItemId = ""
     private var fromRelation = false
-
 
     private lateinit var formQueryBuilder: FormQueryBuilder
     private lateinit var actionActivity: ActionActivity
@@ -56,7 +54,7 @@ class EntityViewPagerFragment : BaseFragment() {
         viewPager = inflater.inflate(R.layout.fragment_pager, container, false) as ViewPager2
         arguments?.getString("key")?.let { key = it }
         arguments?.getString("tableName")?.let { tableName = it }
-        arguments?.getString("query")?.let { currentQuery = it }
+        arguments?.getString("searchQueryPattern")?.let { searchQueryPattern = it }
 
         arguments?.getString("destinationTable")?.let {
             if (it.isNotEmpty()) {
@@ -159,15 +157,15 @@ class EntityViewPagerFragment : BaseFragment() {
     }
 
     private fun setSearchQuery() {
-         val formQuery = if (fromRelation) {
-             formQueryBuilder.getRelationQuery(
-                 parentItemId = parentItemId,
-                 inverseName = inverseName,
-                 pattern = currentQuery,
-             )
-         } else {
-             formQueryBuilder.getQuery(currentQuery)
-         }
+        val formQuery = if (fromRelation) {
+            formQueryBuilder.getRelationQuery(
+                parentItemId = parentItemId,
+                inverseName = inverseName,
+                pattern = searchQueryPattern,
+            )
+        } else {
+            formQueryBuilder.getQuery(searchQueryPattern)
+        }
         entityListViewModel.setSearchQuery(formQuery)
     }
 }

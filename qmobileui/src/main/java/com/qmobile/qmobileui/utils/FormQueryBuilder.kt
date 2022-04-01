@@ -67,13 +67,12 @@ class FormQueryBuilder(
 
                 stringBuilder.append(
                     "EXISTS ( SELECT * FROM $relatedTableName AS T2 WHERE " +
-                            "T1.__${relation}Key = T2.__KEY AND "
+                        "T1.__${relation}Key = T2.__KEY AND "
                 )
                 val appendFromFormat = appendFromFormat(field, pattern, "T2.$relatedField")
 
                 if (appendFromFormat.isEmpty()) {
                     stringBuilder.append("T2.$relatedField LIKE '%$pattern%' OR ")
-
                 } else {
                     stringBuilder.append("( T2.$relatedField LIKE '%$pattern%' OR $appendFromFormat")
 

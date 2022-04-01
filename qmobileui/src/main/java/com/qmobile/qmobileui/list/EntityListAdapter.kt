@@ -14,7 +14,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobiledatastore.data.RoomData
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.list.viewholder.BaseViewHolder
 import com.qmobile.qmobileui.utils.ResourcesHelper
