@@ -22,16 +22,12 @@ class FormQueryBuilder(
     private val searchField: JSONObject = BaseApp.runtimeDataHolder.searchField // has columns to Filter
 ) {
 
-    //    private val baseQuery = "SELECT * FROM $tableName"
-    private val baseQuery = if (tableName == "Employee")
-        "SELECT * FROM $tableName, Service WHERE Employee.__serviceKey = Service.__KEY"
-    else
-        "SELECT * FROM $tableName"
+    private val baseQuery = "SELECT * FROM $tableName"
 
     fun getQuery(pattern: String? = null): SimpleSQLiteQuery {
         if (pattern.isNullOrEmpty())
             return SimpleSQLiteQuery(baseQuery)
-        val stringBuilder = StringBuilder("$baseQuery AS T_FINAL WHERE ")
+        val stringBuilder = StringBuilder("$baseQuery AS T1 WHERE ")
         searchField.getSafeArray(tableName)?.let { columnsToFilter ->
             appendPredicate(stringBuilder, columnsToFilter, pattern)
         }
@@ -39,13 +35,14 @@ class FormQueryBuilder(
     }
 
     fun getRelationQuery(
-        pattern: String? = null,
-        pathQuery: String
+        parentItemId: String,
+        inverseName: String,
+        pattern: String? = null
     ): SimpleSQLiteQuery {
-//        val baseRelationQuery = "$baseQuery AS T1 WHERE T1.__${inverseName}Key = $parentItemId"
+        val baseRelationQuery = "$baseQuery AS T1 WHERE T1.__${inverseName}Key = $parentItemId"
         if (pattern.isNullOrEmpty())
-            return SimpleSQLiteQuery(pathQuery)
-        val stringBuilder = StringBuilder("$pathQuery AND ( ")
+            return SimpleSQLiteQuery(baseRelationQuery)
+        val stringBuilder = StringBuilder("$baseRelationQuery AND ( ")
         searchField.getSafeArray(tableName)?.let { columnsToFilter ->
             appendPredicate(stringBuilder, columnsToFilter, pattern)
         }
@@ -69,14 +66,17 @@ class FormQueryBuilder(
                 val relatedTableName = RelationHelper.getRelation(tableName, relation).dest
 
                 stringBuilder.append(
-                    "EXISTS ( SELECT * FROM $relatedTableName AS S2 WHERE " +
-                            "T_FINAL.__${relation}Key = S2.__KEY AND "
+                    "EXISTS ( SELECT * FROM $relatedTableName AS T2 WHERE " +
+                            "T1.__${relation}Key = T2.__KEY AND "
                 )
-                val appendFromFormat = appendFromFormat(field, pattern, "S2.$relatedField")
+                val appendFromFormat = appendFromFormat(field, pattern, "T2.$relatedField")
+
                 if (appendFromFormat.isEmpty()) {
-                    stringBuilder.append("S2.$relatedField LIKE '%$pattern%' OR ")
+                    stringBuilder.append("T2.$relatedField LIKE '%$pattern%' OR ")
+
                 } else {
-                    stringBuilder.append("( S2.$relatedField LIKE '%$pattern%' OR $appendFromFormat")
+                    stringBuilder.append("( T2.$relatedField LIKE '%$pattern%' OR $appendFromFormat")
+
                     stringBuilder.removeSuffix("OR ")
                     stringBuilder.append(") ")
                 }

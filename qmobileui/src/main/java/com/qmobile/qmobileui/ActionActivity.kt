@@ -8,6 +8,7 @@ package com.qmobile.qmobileui
 
 import android.view.Menu
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionNavigable
 import okhttp3.RequestBody
@@ -39,7 +40,7 @@ interface ActionActivity {
 
     fun getSelectedAction(): Action
 
-    fun getSelectedEntity(): EntityModel?
+    fun getSelectedEntity(): RoomEntity?
 
-    fun setCurrentEntityModel(entityModel: EntityModel?)
+    fun setCurrentEntityModel(roomEntity: RoomEntity?)
 }

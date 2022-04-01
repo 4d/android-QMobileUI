@@ -14,6 +14,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatastore.data.RoomData
+import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.list.viewholder.BaseViewHolder
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
@@ -21,22 +23,22 @@ class EntityListAdapter internal constructor(
     private val tableName: String,
     private val lifecycleOwner: LifecycleOwner,
     private val onItemClick: (ViewDataBinding, String) -> Unit,
-    private val onItemLongClick: (EntityModel) -> Unit
+    private val onItemLongClick: (RoomEntity) -> Unit
 ) :
-    PagingDataAdapter<EntityModel, BaseViewHolder>(DIFF_CALLBACK) {
+    PagingDataAdapter<RoomEntity, BaseViewHolder>(DIFF_CALLBACK) {
 
     companion object {
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<EntityModel>() {
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<RoomEntity>() {
             // The ID property identifies when items are the same.
-            override fun areItemsTheSame(oldItem: EntityModel, newItem: EntityModel) =
-                oldItem.__KEY == newItem.__KEY
+            override fun areItemsTheSame(oldItem: RoomEntity, newItem: RoomEntity) =
+                (oldItem.__entity as EntityModel).__KEY == (newItem.__entity as EntityModel).__KEY
 
             // If you use the "==" operator, make sure that the object implements
             // .equals(). Alternatively, write custom data comparison logic here.
             override fun areContentsTheSame(
-                oldItem: EntityModel,
-                newItem: EntityModel
-            ) = oldItem.__STAMP == newItem.__STAMP
+                oldItem: RoomEntity,
+                newItem: RoomEntity
+            ) = (oldItem.__entity as EntityModel).__STAMP == (newItem.__entity as EntityModel).__STAMP
         }
     }
 
@@ -57,7 +59,7 @@ class EntityListAdapter internal constructor(
         holder.bind(getItem(position))
     }
 
-    fun getSelectedItem(position: Int): EntityModel? {
+    fun getSelectedItem(position: Int): RoomEntity? {
         return getItem(position)
     }
 }

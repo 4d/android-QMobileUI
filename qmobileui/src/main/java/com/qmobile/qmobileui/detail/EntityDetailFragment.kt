@@ -66,7 +66,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
             container,
             false
         ).apply {
-            BaseApp.genericTableFragmentHelper.setEntityViewModel(this, entityViewModel)
+//            BaseApp.genericTableFragmentHelper.setEntityViewModel(this, entityViewModel)
             lifecycleOwner = viewLifecycleOwner
         }
 

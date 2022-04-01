@@ -31,6 +31,7 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
@@ -74,7 +75,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private var scrollPos = 0
     private lateinit var currentPhotoPath: String
     private lateinit var action: Action
-    private var selectedEntity: EntityModel? = null
+    private var selectedEntity: RoomEntity? = null
     private var actionPosition = -1
 
     // Is set to true if all recyclerView items are seen at lean once
@@ -188,7 +189,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         adapter = ActionsParametersListAdapter(
             context = requireContext(),
             list = action.parameters,
-            currentEntity = selectedEntity,
+            currentEntity = selectedEntity?.__entity as EntityModel?,
             onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 validationMap[name] = isValid
                 paramsToSubmit[name] = value ?: ""
@@ -381,7 +382,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
         actionActivity.sendAction(
             actionName = action.name,
-            actionContent = getActionContent(selectedEntity?.__KEY),
+            actionContent = getActionContent((selectedEntity?.__entity as EntityModel?)?.__KEY),
             tableName = tableName
         ) {
             activity?.onBackPressed()

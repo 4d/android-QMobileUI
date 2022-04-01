@@ -36,6 +36,7 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
+import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.network.NetworkState
 import com.qmobile.qmobiledatasync.sync.DataSync
@@ -90,7 +91,7 @@ class MainActivity :
     // FragmentCommunication
     override lateinit var apiService: ApiService
     private lateinit var selectedAction: Action
-    var currentEntity: EntityModel? = null
+    var currentEntity: RoomEntity? = null
 
     private var serverNotAccessibleString = ""
     private var noInternetString = ""
@@ -149,7 +150,8 @@ class MainActivity :
     private fun getEntityListViewModelList() {
         entityListViewModelList = mutableListOf()
         BaseApp.genericTableHelper.tableNames().forEach { tableName ->
-            val clazz = BaseApp.genericTableHelper.entityListViewModelClassFromTable(tableName)
+//            val clazz = BaseApp.genericTableHelper.entityListViewModelClassFromTable(tableName)
+            val clazz = EntityListViewModel::class.java as Class<EntityListViewModel<EntityModel>>
 
             entityListViewModelList.add(
                 ViewModelProvider(
@@ -345,11 +347,11 @@ class MainActivity :
             selectedAction = action
             if (!isEntityAction)
                 currentEntity = null
-            actionNavigable.navigationToActionForm(action, currentEntity?.__KEY)
+            actionNavigable.navigationToActionForm(action, (currentEntity?.__entity as EntityModel?)?.__KEY)
         } else {
             sendAction(
                 actionName = action.name,
-                actionContent = actionNavigable.getActionContent(currentEntity?.__KEY),
+                actionContent = actionNavigable.getActionContent((currentEntity?.__entity as EntityModel?)?.__KEY),
                 tableName = actionNavigable.tableName
             ) {
                 // Nothing to do
@@ -361,12 +363,12 @@ class MainActivity :
         return selectedAction
     }
 
-    override fun getSelectedEntity(): EntityModel? {
+    override fun getSelectedEntity(): RoomEntity? {
         return currentEntity
     }
 
-    override fun setCurrentEntityModel(entityModel: EntityModel?) {
-        currentEntity = entityModel
+    override fun setCurrentEntityModel(roomEntity: RoomEntity?) {
+        currentEntity = roomEntity
     }
 
     override fun sendAction(

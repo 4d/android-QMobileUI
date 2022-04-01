@@ -17,18 +17,21 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.BR
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
 class ViewPagerAdapter(fragment: Fragment, private val tableName: String) :
-    PagedListPagerAdapter<EntityModel>(fragment) {
+    PagedListPagerAdapter<RoomEntity>(fragment) {
 
     override var isSmoothScroll = true
 
     override fun createItem(position: Int): Fragment {
-        val entity = getValue(position)
-        val itemId = entity?.__KEY ?: "0"
+        var itemId = "0"
+        getValue(position)?.let { roomEntity ->
+            (roomEntity.__entity as EntityModel).__KEY?.let { itemId = it }
+        }
         return BaseApp.genericTableFragmentHelper.getDetailFragment(tableName).apply {
             arguments = Bundle().apply {
                 putString("itemId", itemId)
