@@ -30,7 +30,7 @@ class ViewPagerAdapter(fragment: Fragment, private val tableName: String) :
     override fun createItem(position: Int): Fragment {
         var itemId = "0"
         getValue(position)?.let { roomEntity ->
-            (roomEntity.__entity as EntityModel).__KEY?.let { itemId = it }
+            (roomEntity.__entity as EntityModel?)?.__KEY?.let { itemId = it }
         }
         return BaseApp.genericTableFragmentHelper.getDetailFragment(tableName).apply {
             arguments = Bundle().apply {

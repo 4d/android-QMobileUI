@@ -288,7 +288,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         position: Int,
         action: Action?,
         horizontalIndex: Int,
-        onActionClick: (action: Action, entity: RoomEntity) -> Unit
+        onActionClick: (action: Action, roomEntity: RoomEntity) -> Unit
     ): SwipeHelper.ItemActionButton {
         return SwipeHelper.ItemActionButton(
             requireContext(),

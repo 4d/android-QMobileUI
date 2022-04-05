@@ -23,23 +23,23 @@ class BaseViewHolder(
     RecyclerView.ViewHolder(dataBinding.root) {
 
     // Applies DataBinding
-    fun bind(entityModel: RoomEntity?) {
-        entityModel?.let { entity ->
-            dataBinding.setVariable(BR.entityData, entity)
+    fun bind(roomEntity: RoomEntity?) {
+        roomEntity?.let {
+            dataBinding.setVariable(BR.entityData, roomEntity)
             dataBinding.executePendingBindings()
 
-            setupClickListeners(entity)
-            RelationHelper.setupRelationNavigation(tableName, dataBinding, entity)
+            setupClickListeners(roomEntity)
+            RelationHelper.setupRelationNavigation(tableName, dataBinding, roomEntity)
         }
     }
 
-    private fun setupClickListeners(entity: RoomEntity) {
-        (entity.__entity as EntityModel).__KEY?.let { key ->
+    private fun setupClickListeners(roomEntity: RoomEntity) {
+        (roomEntity.__entity as EntityModel?)?.__KEY?.let { key ->
             itemView.setOnSingleClickListener {
                 onItemClick(dataBinding, key)
             }
             itemView.setOnLongClickListener {
-                onItemLongClick(entity)
+                onItemLongClick(roomEntity)
                 true
             }
         }

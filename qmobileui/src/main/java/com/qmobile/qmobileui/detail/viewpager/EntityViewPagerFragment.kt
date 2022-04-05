@@ -90,7 +90,7 @@ class EntityViewPagerFragment : BaseFragment() {
             override fun onPageSelected(position: Int) {
                 adapter.getValue(position)?.let { roomEntity ->
                     actionActivity.setCurrentEntityModel(roomEntity)
-                    key = (roomEntity.__entity as EntityModel).__KEY ?: ""
+                    key = (roomEntity.__entity as EntityModel?)?.__KEY ?: ""
                     arguments?.putString("key", key)
                 }
                 handleActionPreviousEnability(position)
