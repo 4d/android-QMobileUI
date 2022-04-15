@@ -152,7 +152,7 @@ class SettingsFragment :
                     true
                 }
                 pendingTaskPrefKey -> {
-                    BaseApp.genericNavigationResolver.navigateFromSettingsToTasks(requireActivity())
+                    BaseApp.genericNavigationResolver.navigateToActionTasks(requireActivity(), null,"", null)
                     true
                 }
 
