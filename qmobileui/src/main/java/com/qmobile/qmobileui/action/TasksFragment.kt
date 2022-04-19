@@ -332,7 +332,7 @@ class TasksFragment : Fragment(), BaseFragment {
             }
 
             override fun onNoInternet() {
-                if (BaseApp.shouldShowActionError()) {
+                if (shouldShowActionError()) {
                     entityListViewModel.toastMessage.showMessage(
                         context?.getString(R.string.action_send_no_internet),
                         tableName,
