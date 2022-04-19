@@ -322,7 +322,7 @@ class TasksFragment : Fragment(), BaseFragment {
             }
 
             override fun onServerInaccessible() {
-                if (BaseApp.shouldShowActionError()) {
+                if (shouldShowActionError()) {
                     entityListViewModel.toastMessage.showMessage(
                         context?.getString(R.string.action_send_server_not_accessible),
                         tableName,
