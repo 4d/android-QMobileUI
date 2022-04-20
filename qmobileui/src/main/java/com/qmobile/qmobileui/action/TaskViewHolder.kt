@@ -65,10 +65,10 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
         val days = hours / HOURS_IN_DAY
 
         return when {
-            days > 0 -> "$days days ago"
-            hours > 0 -> "$hours hours ago"
-            minutes > 0 -> "$minutes minutes ago"
-            seconds > 0 -> "$seconds seconds ago"
+            days > 0 -> "$days ${getDayWord(days)} ago"
+            hours > 0 -> "$hours ${getHourWord(hours)} ago"
+            minutes > 0 -> "$minutes ${getMinuteWord(minutes)} ago"
+            seconds > 0 -> "$seconds ${getSecondWord(seconds)} ago"
             else -> ""
         }
     }
