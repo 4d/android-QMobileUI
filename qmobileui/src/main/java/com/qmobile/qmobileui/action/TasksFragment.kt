@@ -72,6 +72,7 @@ class TasksFragment : Fragment(), BaseFragment {
             delegate.apiService
         )
         taskViewModel = getTaskViewModel(activity)
+        actionTaskDao = taskViewModel.dao
 
         if (_binding == null) {
             _binding = FragmentActionTasksBinding.inflate(
@@ -132,7 +133,6 @@ class TasksFragment : Fragment(), BaseFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        actionTaskDao = BaseApp.daoProvider.getActionTaskDao()
         initOnRefreshListener()
         observeData()
     }

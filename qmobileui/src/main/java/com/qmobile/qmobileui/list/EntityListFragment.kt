@@ -38,7 +38,9 @@ import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getTaskViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -75,6 +77,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
     lateinit var adapter: EntityListAdapter
     private var _binding: FragmentListBinding? = null
+    lateinit var taskViewModel: TaskViewModel
+
 
     // This property is only valid between onCreateView and onDestroyView.
     val binding get() = _binding!!
@@ -123,7 +127,8 @@ open class EntityListFragment : Fragment(), BaseFragment {
             this.setHasOptionsMenu(true)
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-
+        taskViewModel = getTaskViewModel(activity)
+        actionTaskDao =  taskViewModel.dao
         _binding = FragmentListBinding.inflate(inflater, container, false).apply {
             viewModel = entityListViewModel
             lifecycleOwner = viewLifecycleOwner
@@ -146,7 +151,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         savedInstanceState?.getString(CURRENT_QUERY_KEY, "")?.let { currentQuery = it }
-        actionTaskDao = BaseApp.daoProvider.getActionTaskDao()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

@@ -39,7 +39,9 @@ import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getTaskViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -87,6 +89,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
 
     private var currentTask: ActionTask? = null
     private var taskId: Long? = null
+    lateinit var taskViewModel: TaskViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -110,6 +113,10 @@ class ActionParametersFragment : Fragment(), BaseFragment {
         }
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
+
+        taskViewModel = getTaskViewModel(activity)
+        actionTaskDao = taskViewModel.dao
+
         if (_binding == null) {
             _binding = FragmentActionParametersBinding.inflate(
                 inflater,

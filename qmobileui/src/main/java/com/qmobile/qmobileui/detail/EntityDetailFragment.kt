@@ -29,7 +29,9 @@ import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getTaskViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -64,6 +66,8 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
     private lateinit var actionTaskDao: ActionTaskDao
+    lateinit var taskViewModel: TaskViewModel
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -109,8 +113,8 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
             webView.webViewClient = MyWebViewClient()
         }
         setHasOptionsMenu(::webView.isInitialized || hasActions())
-        actionTaskDao = BaseApp.daoProvider.getActionTaskDao()
-    }
+        taskViewModel = getTaskViewModel(activity)
+        actionTaskDao = taskViewModel.dao}
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_webview, menu)

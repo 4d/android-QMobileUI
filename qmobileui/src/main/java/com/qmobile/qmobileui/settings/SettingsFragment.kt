@@ -23,8 +23,10 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
+import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getTaskViewModel
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
@@ -67,6 +69,7 @@ class SettingsFragment :
     // ViewModels
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var connectivityViewModel: ConnectivityViewModel
+    lateinit var taskViewModel: TaskViewModel
     private lateinit var actionTaskDao: ActionTaskDao
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -105,13 +108,15 @@ class SettingsFragment :
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        actionTaskDao = BaseApp.daoProvider.getActionTaskDao()
         loginViewModel = getLoginViewModel(activity, delegate.loginApiService)
         connectivityViewModel = getConnectivityViewModel(
             activity,
             delegate.connectivityManager,
             delegate.accessibilityApiService
         )
+        taskViewModel = getTaskViewModel(activity)
+        actionTaskDao = taskViewModel.dao
+
         initLayout()
         SettingsFragmentObserver(this, connectivityViewModel).initObservers()
     }

@@ -113,8 +113,7 @@ class MainActivity :
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         taskViewModel = getTaskViewModel(this)
-
-        actionTaskDao = BaseApp.daoProvider.getActionTaskDao()
+        actionTaskDao = taskViewModel.dao
 
         if (savedInstanceState == null) {
             // Retrieve bundled parameter to know if there was a successful login with statusText
