@@ -434,6 +434,14 @@ class SpellOutViewHolder(itemView: View) :
                 s?.let {
                     it.toString().toLongOrNull()?.let { it1 ->
                         numericValue = it1
+                        numericValue?.let { value ->
+                            onValueChanged(
+                                parameterName,
+                                value,
+                                null,
+                                validate()
+                            )
+                        }
                     }
                 }
             }
@@ -554,6 +562,14 @@ class ScientificViewHolder(itemView: View) :
                 s?.let {
                     it.toString().toFloatOrNull()?.let { it1 ->
                         numericValue = it1
+                        numericValue?.let { value ->
+                            onValueChanged(
+                                parameterName,
+                                value,
+                                null,
+                                validate()
+                            )
+                        }
                     }
                 }
             }
