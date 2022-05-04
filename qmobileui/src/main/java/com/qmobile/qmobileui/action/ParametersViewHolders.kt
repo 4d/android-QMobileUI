@@ -1089,6 +1089,7 @@ class DateViewHolder(itemView: View, val format: String) :
         ActionParameterEnum.DATE_FULL.format -> "fullDate"
         else -> "shortDate"
     }
+    private var datePickerDialog : DatePickerDialog? = null
 
     override fun bind(
         item: Any,
@@ -1116,17 +1117,23 @@ class DateViewHolder(itemView: View, val format: String) :
                 onValueChanged(parameterName, dateToSubmit, "simpleDate", validate())
             }
 
-        val datePickerDialog = DatePickerDialog(
+        val calendar = Calendar.getInstance()
+        val currentYear = calendar[Calendar.YEAR]
+        val currentMonth = calendar[Calendar.MONTH]
+        val currentDay = calendar[Calendar.DAY_OF_MONTH]
+
+        datePickerDialog = DatePickerDialog(
             itemView.context,
             android.R.style.Theme_Holo_Light_Dialog_NoActionBar,
-            dateSetListener, SELECTED_YEAR, SELECTED_MONTH, SELECTED_DAY
+            dateSetListener, currentYear, currentMonth, currentDay
         )
+
         itemView.setOnClickListener {
-            datePickerDialog.show()
+            datePickerDialog?.show()
         }
 
         selectedDate.setOnClickListener {
-            datePickerDialog.show()
+            datePickerDialog?.show()
         }
         setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
     }
@@ -1155,7 +1162,9 @@ class DateViewHolder(itemView: View, val format: String) :
                         value
                     )
                     selectedDate.text = formattedDate
-                    onValueChanged(parameterName, it, null, validate())
+                    onValueChanged(parameterName, value, null, validate())
+                    val dateArray = value.split("!").toTypedArray().map { item -> item.toInt() }
+                    datePickerDialog?.updateDate(dateArray[2], dateArray[1]-1, dateArray[0] )
                 }
             }
         }
