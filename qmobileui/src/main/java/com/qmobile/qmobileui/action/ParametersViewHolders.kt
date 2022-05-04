@@ -1061,8 +1061,17 @@ class TimeViewHolder(itemView: View, val format: String) :
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
-                    selectedTime.text = value
-                    onValueChanged(parameterName, value, null, validate())
+
+                    val totalSecs = value.toLong() / 1000
+                    val hours = totalSecs / 3600;
+                    val minutes = (totalSecs % 3600) / 60;
+
+                    selectedTime.text = if (hours >= 12) {
+                        "${hours - 12}:$minutes $PM_KEY"
+                    } else {
+                        "$hours:$minutes $AM_KEY"
+                    }
+                    onValueChanged(parameterName, totalSecs, null, validate())
                 }
             }
         }
