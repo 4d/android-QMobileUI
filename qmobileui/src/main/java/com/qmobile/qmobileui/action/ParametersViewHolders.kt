@@ -814,9 +814,9 @@ class BooleanSwitchViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
-            val defaultField = itemJsonObject.getSafeString("defaultField")
+           val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<Boolean>(it, defaultField).also { value ->
+                EntityHelper.readInstanceProperty<Boolean?>(it, defaultField)?.also { value ->
                     switch.isChecked = value
                     onValueChanged(parameterName, value, null, true)
                 }
@@ -1102,7 +1102,7 @@ class TimeViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
+                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
 
                     val totalSecs = value.toLong() / 1000
                     val hours = totalSecs / 3600;
@@ -1203,7 +1203,7 @@ class DateViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
+                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
                     val formattedDate = FormatterUtils.applyFormat(
                         dateFormat,
                         value
@@ -1258,7 +1258,7 @@ class BarCodeViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
+                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
                     scannedValueTextView.text = value
                     onValueChanged(parameterName, value, null, validate())
                 }
