@@ -15,6 +15,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomEntity
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.list.viewholder.BaseViewHolder
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
@@ -38,6 +39,7 @@ class EntityListAdapter internal constructor(
                 oldItem: RoomEntity,
                 newItem: RoomEntity
             ) = (oldItem.__entity as EntityModel?)?.__STAMP == (newItem.__entity as EntityModel?)?.__STAMP
+                    && BaseApp.genericRelationHelper.relationsEquals(oldItem, newItem)
         }
     }
 

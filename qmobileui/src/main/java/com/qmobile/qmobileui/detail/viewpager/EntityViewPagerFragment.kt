@@ -37,10 +37,10 @@ class EntityViewPagerFragment : BaseFragment() {
     // fragment parameters
     internal var key = ""
     private var tableName = ""
-//    private var query = ""
     private var searchQueryPattern = ""
-    private var inverseName = ""
     private var parentItemId = ""
+    private var parentTableName = ""
+    private var path = ""
     private var fromRelation = false
 
     private lateinit var formQueryBuilder: FormQueryBuilder
@@ -63,7 +63,8 @@ class EntityViewPagerFragment : BaseFragment() {
             }
         }
         arguments?.getString("parentItemId")?.let { parentItemId = it }
-        arguments?.getString("inverseName")?.let { inverseName = it }
+        arguments?.getString("parentTableName")?.let { parentTableName = it }
+        arguments?.getString("path")?.let { path = it }
 
         formQueryBuilder = FormQueryBuilder(tableName)
 
@@ -160,8 +161,9 @@ class EntityViewPagerFragment : BaseFragment() {
         val formQuery = if (fromRelation) {
             formQueryBuilder.getRelationQuery(
                 parentItemId = parentItemId,
-                inverseName = inverseName,
                 pattern = searchQueryPattern,
+                parentTableName = parentTableName,
+                path = path
             )
         } else {
             formQueryBuilder.getQuery(searchQueryPattern)

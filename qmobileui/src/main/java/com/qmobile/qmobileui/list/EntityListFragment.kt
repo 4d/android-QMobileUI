@@ -70,10 +70,9 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
     // fragment parameters
     override var tableName = ""
-    private var inverseName = ""
+    private var parentTableName = ""
+    private var path = ""
     private var parentItemId = ""
-//    private var parentRelationName = ""
-//    private var parentTableName = ""
     private var fromRelation = false
 
     private val tableActions = mutableListOf<Action>()
@@ -82,8 +81,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     private var hasTableActions = false
     private var hasCurrentRecordActions = false
     private var isSwipable = false
-    private var searchQuery = "" // search area
-    private var currentSearchQuery = "" // global query
+    private var searchPattern = "" // search area
+    //    private var globalSearchQuery = "" // global query
     private var relation: Relation? = null
 
     override fun onCreateView(
@@ -102,23 +101,10 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 fromRelation = true
             }
         }
-        arguments?.getString("currentItemId")?.let { parentItemId = it }
-        arguments?.getString("inverseName")?.let { inverseName = it }
 
         arguments?.getString("parentItemId")?.let { parentItemId = it }
-        arguments?.getString("inverseName")?.let { inverseName = it }
-//        if (fromRelation) {
-//            RelationHelper.getRelation(tableName, inverseName).dest.let { parentTableName = it }
-//            RelationHelper.getRelation(tableName, inverseName).inverse.let { parentRelationName = it }
-//        }
-
-//        if (fromRelation) {
-// //            parentTableName = RelationHelper.getRelation(tableName, inverseName).dest
-// //            parentRelationName = RelationHelper.getRelation(tableName, inverseName).inverse
-//            arguments?.getString("query")?.let { pathQuery = it }
-//            arguments?.getString("parentItemId")?.let { parentItemId = it }
-//
-//        }
+        arguments?.getString("parentTableName")?.let { parentTableName = it }
+        arguments?.getString("path")?.let { path = it }
 
         formQueryBuilder = FormQueryBuilder(tableName)
 
@@ -149,7 +135,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        savedInstanceState?.getString(CURRENT_SEARCH_QUERY_KEY, "")?.let { searchQuery = it }
+        savedInstanceState?.getString(CURRENT_SEARCH_QUERY_KEY, "")?.let { searchPattern = it }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -181,10 +167,11 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 BaseApp.genericNavigationResolver.navigateFromListToViewPager(
                     viewDataBinding = dataBinding,
                     key = key,
-                    query = currentSearchQuery,
+                    query = searchPattern,
                     destinationTable = if (fromRelation) tableName else "",
                     parentItemId = parentItemId,
-                    inverseName = inverseName
+                    parentTableName = parentTableName,
+                    path = path
                 )
             },
             onItemLongClick = { currentEntity ->
@@ -319,8 +306,10 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 newText?.let {
-                    searchQuery = it
-                    setSearchQuery()
+                    if (searchPattern != it) {
+                        searchPattern = it
+                        setSearchQuery()
+                    }
                 }
                 return true
             }
@@ -330,10 +319,10 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         if (hasSearch) {
             searchView.setOnQueryTextListener(searchListener)
 
-            if (searchQuery.isEmpty()) {
+            if (searchPattern.isEmpty()) {
                 searchView.onActionViewCollapsed()
             } else {
-                searchView.setQuery(searchQuery, true)
+                searchView.setQuery(searchPattern, true)
                 searchView.isIconified = false
                 searchPlate.clearFocus()
             }
@@ -391,18 +380,19 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString(CURRENT_SEARCH_QUERY_KEY, searchQuery)
+        outState.putString(CURRENT_SEARCH_QUERY_KEY, searchPattern)
     }
 
     private fun setSearchQuery() {
         val formQuery = if (fromRelation) {
             formQueryBuilder.getRelationQuery(
                 parentItemId = parentItemId,
-                inverseName = inverseName,
-                pattern = currentSearchQuery
+                pattern = searchPattern,
+                parentTableName = parentTableName,
+                path = path
             )
         } else {
-            formQueryBuilder.getQuery(currentSearchQuery)
+            formQueryBuilder.getQuery(searchPattern)
         }
         entityListViewModel.setSearchQuery(formQuery)
     }
