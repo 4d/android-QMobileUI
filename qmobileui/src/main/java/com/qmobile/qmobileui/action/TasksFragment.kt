@@ -42,7 +42,6 @@ class TasksFragment : Fragment(), BaseFragment {
     override lateinit var delegate: FragmentCommunication
 
     lateinit var adapter: TasksListAdapter
-    private lateinit var actionTaskDao: ActionTaskDao
     lateinit var recyclerView: RecyclerView
 
     lateinit var taskViewModel: TaskViewModel
@@ -72,7 +71,6 @@ class TasksFragment : Fragment(), BaseFragment {
             delegate.apiService
         )
         taskViewModel = getTaskViewModel(activity)
-        actionTaskDao = taskViewModel.dao
 
         if (_binding == null) {
             _binding = FragmentActionTasksBinding.inflate(
@@ -114,7 +112,7 @@ class TasksFragment : Fragment(), BaseFragment {
                         if (adapter.isItemDeletable(viewHolder.adapterPosition)) {
                             lifecycleScope.launch {
                                 adapter.getItemByPosition(viewHolder.absoluteAdapterPosition)?.let {
-                                    actionTaskDao.deleteById(
+                                    delegate.getActionTaskViewModel().deleteById(
                                         it.id
                                     )
                                 }
@@ -169,7 +167,7 @@ class TasksFragment : Fragment(), BaseFragment {
     }
 
     private fun observeData() {
-        actionTaskDao.getAll().observe(viewLifecycleOwner, { allTasks ->
+        delegate.getActionTaskViewModel().getAllTasks().observe(viewLifecycleOwner) { allTasks ->
             val filteredList = allTasks.filter {
                 if (!tableName.isNullOrEmpty()) {
                     it.actionInfo.tableName == tableName
@@ -226,7 +224,7 @@ class TasksFragment : Fragment(), BaseFragment {
                     )
                 }
             })
-        })
+        }
     }
 
     override fun onAttach(context: Context) {
@@ -311,9 +309,8 @@ class TasksFragment : Fragment(), BaseFragment {
                             } else {
                                 STATUS.ERROR_SERVER
                             }
-
                             task.status = status
-                            actionTaskDao.insert(
+                            delegate.getActionTaskViewModel().insertTask(
                                 task
                             )
                         }

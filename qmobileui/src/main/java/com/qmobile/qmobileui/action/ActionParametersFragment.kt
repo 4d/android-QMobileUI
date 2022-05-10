@@ -34,7 +34,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.dao.ActionInfo
 import com.qmobile.qmobiledatastore.dao.ActionTask
-import com.qmobile.qmobiledatastore.dao.ActionTaskDao
 import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.MessageType
@@ -77,7 +76,6 @@ class ActionParametersFragment : Fragment(), BaseFragment {
     private var validationMap = HashMap<String, Boolean>()
     lateinit var adapter: ActionsParametersListAdapter
     private var fromRelation = false
-    private lateinit var actionTaskDao: ActionTaskDao
     private lateinit var allParameters: JSONArray
 
     // Is set to true if all recyclerView items are seen at lean once
@@ -89,7 +87,6 @@ class ActionParametersFragment : Fragment(), BaseFragment {
 
     private var currentTask: ActionTask? = null
     private var taskId: Long? = null
-    lateinit var taskViewModel: TaskViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -114,9 +111,6 @@ class ActionParametersFragment : Fragment(), BaseFragment {
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
 
-        taskViewModel = getTaskViewModel(activity)
-        actionTaskDao = taskViewModel.dao
-
         if (_binding == null) {
             _binding = FragmentActionParametersBinding.inflate(
                 inflater,
@@ -125,7 +119,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
             ).apply {
                 lifecycleOwner = viewLifecycleOwner
                 if (taskId != 0L) {
-                    actionTaskDao.getAll().observeOnce(requireParentFragment(), {
+                    delegate.getActionTaskViewModel().getAllTasks().observeOnce(requireParentFragment()) {
                         it.find { actionTask -> actionTask.id == taskId }?.let { task ->
                             task.actionInfo.validationMap?.let { map -> validationMap = map }
                             task.actionInfo.paramsToSubmit?.let { params ->
@@ -133,14 +127,14 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                             }
                             imagesToUpload =
                                 task.actionInfo.imagesToUpload?.mapValues { entry ->
-                                Uri.parse(entry.value)
-                            } as HashMap<String, Uri>
+                                    Uri.parse(entry.value)
+                                } as HashMap<String, Uri>
                             allParameters = JSONArray(task.actionInfo.allParameters)
                             currentPendingTaskDate = task.date
                             currentTask = task
                         }
                         setupRecycleView(recyclerView)
-                    })
+                    }
                 } else {
                     allParameters = delegate.getSelectAction().parameters
                     setupRecycleView(recyclerView)
@@ -231,7 +225,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                     taskId?.let { id ->
                         currentPendingTaskDate?.let { date ->
                             currentTask?.let { task ->
-                                actionTaskDao.insert(
+                                delegate.getActionTaskViewModel().insertTask(
                                     ActionTask(
                                         id = id,
                                         status = STATUS.PENDING,
@@ -320,7 +314,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                 override fun onServerAccessible() {
                     if (delegate.getSelectAction().isOfflineCompatible()) {
                         lifecycleScope.launch {
-                            task.id = actionTaskDao.insert(task)
+                            task.id = delegate.getActionTaskViewModel().insertTask(task)
                         }
                     }
 
@@ -348,7 +342,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                                 }
                                 task.status = status
                                 task.message = actionResponse.statusText
-                                actionTaskDao.insert(
+                                delegate.getActionTaskViewModel().insertTask(
                                     task
                                 )
                             }
@@ -376,7 +370,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                                     MessageType.NEUTRAL
                                 )
                             }
-                            actionTaskDao.insert(task)
+                            delegate.getActionTaskViewModel().insertTask(task)
                         }
                         activity?.onBackPressed()
                     }
@@ -385,7 +379,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                 override fun onNoInternet() {
                     lifecycleScope.launch {
                         if (delegate.getSelectAction().isOfflineCompatible()) {
-                            actionTaskDao.insert(
+                            delegate.getActionTaskViewModel().insertTask(
                                 task
                             )
                             if (shouldShowActionError()) {
@@ -450,7 +444,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
             override fun onServerInaccessible() {
 
                 lifecycleScope.launch {
-                    actionTaskDao.insert(
+                    delegate.getActionTaskViewModel().insertTask(
                         task
                     )
                 }
@@ -464,7 +458,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
 
             override fun onNoInternet() {
                 lifecycleScope.launch {
-                    actionTaskDao.insert(
+                    delegate.getActionTaskViewModel().insertTask(
                         task
                     )
                 }

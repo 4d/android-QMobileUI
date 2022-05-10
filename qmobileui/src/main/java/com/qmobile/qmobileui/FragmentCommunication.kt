@@ -12,8 +12,10 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.network.LoginApiService
+import com.qmobile.qmobiledatastore.dao.ActionTaskDao
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
+import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.network.RemoteUrlChange
@@ -56,4 +58,6 @@ interface FragmentCommunication {
     fun getSelectedEntity(): EntityModel?
 
     fun setFullScreenMode(isFullScreen: Boolean)
+
+    fun getActionTaskViewModel(): TaskViewModel
 }

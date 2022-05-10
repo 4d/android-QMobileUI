@@ -47,6 +47,7 @@ import java.io.IOException
 import java.io.OutputStream
 import java.text.DecimalFormat
 
+//!!!! To refactor ASAP !!!!!////
 abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     lateinit var itemJsonObject: JSONObject
     var label: TextView = itemView.findViewById(R.id.label)

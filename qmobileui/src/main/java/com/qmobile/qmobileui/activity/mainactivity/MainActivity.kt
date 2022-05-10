@@ -422,6 +422,10 @@ class MainActivity :
         mainActivityObserver.observeEntityToastMessage(message)
     }
 
+    override fun getActionTaskViewModel(): TaskViewModel {
+        return taskViewModel
+    }
+
     /**
      * Goes back to login page
      */
@@ -567,7 +571,7 @@ class MainActivity :
     }
 
     private fun sendPendingTasks() {
-        actionTaskDao.getAll().observeOnce(this, { allTasks ->
+        actionTaskDao.getAll().observeOnce(this) { allTasks ->
             val pendingTasks = allTasks.filter { actionTask -> actionTask.status == STATUS.PENDING }
             taskViewModel.sendPendingTasks(
                 pendingTasks,
@@ -577,12 +581,14 @@ class MainActivity :
             ) { task ->
                 uploadImages(task)
             }
-        })
+        }
     }
 
     private fun sendTask(task: ActionTask) {
         val entityListViewModel =
             entityListViewModelList.first()
+
+        //!!!! checkNetwork to refactor ASAP to avoid redundant code !!!!!////
 
         checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {

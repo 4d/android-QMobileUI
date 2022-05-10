@@ -77,8 +77,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
     lateinit var adapter: EntityListAdapter
     private var _binding: FragmentListBinding? = null
-    lateinit var taskViewModel: TaskViewModel
-
 
     // This property is only valid between onCreateView and onDestroyView.
     val binding get() = _binding!!
@@ -91,7 +89,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
     private val tableActions = mutableListOf<Action>()
     private var currentRecordActions = mutableListOf<Action>()
-    private lateinit var actionTaskDao: ActionTaskDao
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
@@ -127,8 +124,6 @@ open class EntityListFragment : Fragment(), BaseFragment {
             this.setHasOptionsMenu(true)
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-        taskViewModel = getTaskViewModel(activity)
-        actionTaskDao =  taskViewModel.dao
         _binding = FragmentListBinding.inflate(inflater, container, false).apply {
             viewModel = entityListViewModel
             lifecycleOwner = viewLifecycleOwner
@@ -379,7 +374,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
             override fun onServerAccessible() {
                 lifecycleScope.launch {
-                    task.id = actionTaskDao.insert(
+                    task.id = delegate.getActionTaskViewModel().insertTask(
                         task
                     )
                 }
@@ -405,7 +400,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
                             task.status = status
                             task.message = actionResponse.statusText
-                            actionTaskDao.insert(
+                            delegate.getActionTaskViewModel().insertTask(
                                 task
                             )
                         }
@@ -419,7 +414,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
             override fun onServerInaccessible() {
                 lifecycleScope.launch {
 
-                    actionTaskDao.insert(
+                    delegate.getActionTaskViewModel().insertTask(
                         task
                     )
                 }
@@ -435,7 +430,7 @@ open class EntityListFragment : Fragment(), BaseFragment {
 
             override fun onNoInternet() {
                 lifecycleScope.launch {
-                    actionTaskDao.insert(
+                    delegate.getActionTaskViewModel().insertTask(
                         task
                     )
                 }

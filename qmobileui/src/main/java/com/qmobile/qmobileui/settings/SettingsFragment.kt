@@ -69,8 +69,6 @@ class SettingsFragment :
     // ViewModels
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var connectivityViewModel: ConnectivityViewModel
-    lateinit var taskViewModel: TaskViewModel
-    private lateinit var actionTaskDao: ActionTaskDao
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preferences)
@@ -114,8 +112,6 @@ class SettingsFragment :
             delegate.connectivityManager,
             delegate.accessibilityApiService
         )
-        taskViewModel = getTaskViewModel(activity)
-        actionTaskDao = taskViewModel.dao
 
         initLayout()
         SettingsFragmentObserver(this, connectivityViewModel).initObservers()
@@ -136,11 +132,11 @@ class SettingsFragment :
         pendingTaskPref = findPreference(pendingTaskPrefKey)
         pendingTaskPref?.onPreferenceClickListener = this
 
-        actionTaskDao.getAll().observe(viewLifecycleOwner, { allTasks ->
+        delegate.getActionTaskViewModel().getAllTasks().observe(viewLifecycleOwner) { allTasks ->
             val pendingTasks = allTasks.filter { actionTask -> actionTask.status == STATUS.PENDING }
             pendingTaskPref?.summary =
                 getString(R.string.pref_pending_tasks_count, pendingTasks.size)
-        })
+        }
     }
 
     override fun onPreferenceClick(preference: Preference?): Boolean {
@@ -173,7 +169,7 @@ class SettingsFragment :
      * Displays a dialog to confirm logout
      */
     private fun showLogoutDialog() {
-        actionTaskDao.getAll().observe(
+        delegate.getActionTaskViewModel().getAllTasks().observe(
             viewLifecycleOwner,
             Observer {
                 val nbPendingTask =
@@ -203,7 +199,7 @@ class SettingsFragment :
         if (isReady()) {
             loginViewModel.disconnectUser {}
             lifecycleScope.launch {
-                actionTaskDao.deleteAll()
+                delegate.getActionTaskViewModel().deleteAll()
             }
         } else {
             if (!connectivityViewModel.isConnected()) {

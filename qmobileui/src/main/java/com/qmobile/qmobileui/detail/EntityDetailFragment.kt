@@ -65,8 +65,6 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
     // BaseFragment
     override lateinit var delegate: FragmentCommunication
-    private lateinit var actionTaskDao: ActionTaskDao
-    lateinit var taskViewModel: TaskViewModel
 
 
     override fun onCreateView(
@@ -113,8 +111,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
             webView.webViewClient = MyWebViewClient()
         }
         setHasOptionsMenu(::webView.isInitialized || hasActions())
-        taskViewModel = getTaskViewModel(activity)
-        actionTaskDao = taskViewModel.dao}
+        }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_webview, menu)
@@ -222,7 +219,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                             )
                             override fun onServerAccessible() {
                                 lifecycleScope.launch {
-                                    task.id = actionTaskDao.insert(
+                                    task.id = delegate.getActionTaskViewModel().insertTask(
                                         task
                                     )
                                 }
@@ -249,7 +246,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
                                             task.status = status
                                             task.message = it.statusText
-                                            actionTaskDao.insert(
+                                            delegate.getActionTaskViewModel().insertTask(
                                                 task
                                             )
                                         }
@@ -265,7 +262,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
                             override fun onServerInaccessible() {
 
                                 lifecycleScope.launch {
-                                    actionTaskDao.insert(
+                                    delegate.getActionTaskViewModel().insertTask(
                                         task
                                     )
                                 }
@@ -281,7 +278,7 @@ open class EntityDetailFragment : Fragment(), BaseFragment {
 
                             override fun onNoInternet() {
                                 lifecycleScope.launch {
-                                    actionTaskDao.insert(
+                                    delegate.getActionTaskViewModel().insertTask(
                                         task
                                     )
                                 }
