@@ -43,14 +43,14 @@ class ActionsParametersListAdapter(
         val paramName = (item as JSONObject).getSafeString("name")
 
         // Value used to pre-fill offline action edit form
-        val alreadyFilledValue =
-            if ((holder is ImageViewHolder) || (holder is SignatureViewHolder)) {
+        val alreadyFilledValue = when (holder) {
+            is ImageViewHolder, is SignatureViewHolder ->
                 // if image or signature we take the uri to pre-fill image/signature preview
                 imagesToUpload[paramName]
-            } else {
+            else ->
                 // for other field we take the value to prefill editText
                 paramsToSubmit[paramName]
-            }
+        }
 
         holder.bind(
             item,

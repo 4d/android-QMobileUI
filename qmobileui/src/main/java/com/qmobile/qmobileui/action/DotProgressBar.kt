@@ -27,11 +27,7 @@ class DotProgressBar : FrameLayout {
     private val animators = mutableListOf<Animator>()
     private var primaryAnimator: ValueAnimator? = null
     private lateinit var progressBar: LinearLayout
-    private var dotBackground = if (BaseApp.nightMode()) {
-        R.drawable.ic_dot_dark
-    } else {
-        R.drawable.ic_dot
-    }
+    private var dotBackground = R.drawable.ic_dot
     private var dotAnimator: ValueAnimator? = null
 
     constructor(context: Context) : super(context)
@@ -115,7 +111,7 @@ class DotProgressBar : FrameLayout {
     }
 
     fun isAnimationRunning(): Boolean {
-        return primaryAnimator!!.isRunning
+        return primaryAnimator?.isRunning ?: false
     }
 
     override fun setVisibility(visibility: Int) {

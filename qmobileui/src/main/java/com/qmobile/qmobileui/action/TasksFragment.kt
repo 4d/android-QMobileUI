@@ -137,7 +137,7 @@ class TasksFragment : Fragment(), BaseFragment {
         observeData()
     }
 
-    private fun setupRecycleView(list: MutableList<ActionTask?>, serverStatus: String) {
+    private fun setupRecyclerView(list: MutableList<ActionTask?>, serverStatus: String) {
         adapter = TasksListAdapter(
             requireContext(), list, serverStatus
         ) { position ->
@@ -196,7 +196,7 @@ class TasksFragment : Fragment(), BaseFragment {
 
             delegate.checkNetwork(object : NetworkChecker {
                 override fun onServerAccessible() {
-                    setupRecycleView(
+                    setupRecyclerView(
                         (listOf(null) + pendingTasks + listOf(
                             null
                         ) + history
@@ -206,7 +206,7 @@ class TasksFragment : Fragment(), BaseFragment {
                 }
 
                 override fun onServerInaccessible() {
-                    setupRecycleView(
+                    setupRecyclerView(
                         (listOf(null) + pendingTasks + listOf(
                             null
                         ) + history
@@ -216,7 +216,7 @@ class TasksFragment : Fragment(), BaseFragment {
                 }
 
                 override fun onNoInternet() {
-                    setupRecycleView(
+                    setupRecyclerView(
                         (
                                 listOf(null) + pendingTasks.sortedByDescending { actionTask -> actionTask.date } + listOf(
                                     null

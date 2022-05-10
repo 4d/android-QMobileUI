@@ -216,7 +216,6 @@ class ActionParametersFragment : Fragment(), BaseFragment {
             val position = bundle.getInt("position")
             value?.let { adapter.updateBarcodeForPosition(position, it) }
         }
-        actionTaskDao = BaseApp.daoProvider.getActionTaskDao()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
