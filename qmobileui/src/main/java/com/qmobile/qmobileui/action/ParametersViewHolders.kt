@@ -813,6 +813,8 @@ class BooleanSwitchViewHolder(itemView: View) :
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
+        // Default value always true (used for add case when user validate without check/uncheck switch)
+        onValueChanged(parameterName, true, null, true)
         currentEntity?.let {
            val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
@@ -1021,13 +1023,12 @@ class ImageViewHolder(itemView: View) :
  */
 const val AM_KEY = "AM"
 const val PM_KEY = "PM"
-const val SELECTED_HOUR = 12
-const val SELECTED_MINUTE = 30
 
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class TimeViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
     private var selectedTime: TextView = itemView.findViewById(R.id.selectedTime)
+    private lateinit var timePickerDialog: TimePickerDialog
     override fun bind(
         item: Any,
         currentEntityJsonObject: EntityModel?,
@@ -1038,8 +1039,11 @@ class TimeViewHolder(itemView: View, val format: String) :
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
 
-        var selectedHour = SELECTED_HOUR
-        val selectedMinute = SELECTED_MINUTE
+
+        val calendar = Calendar.getInstance()
+        var selectedHour = calendar[Calendar.HOUR_OF_DAY]
+        val selectedMinute = calendar[Calendar.MINUTE]
+
         val is24HourFormat = format == "duration"
 
         itemJsonObject.getSafeString("placeholder")?.let {
@@ -1066,7 +1070,7 @@ class TimeViewHolder(itemView: View, val format: String) :
                 onValueChanged(parameterName, numberOfSeconds, null, validate())
             }
 
-        val timePickerDialog = TimePickerDialog(
+         timePickerDialog = TimePickerDialog(
             itemView.context,
             android.R.style.Theme_Holo_Light_Dialog_NoActionBar,
             timeSetListener,
@@ -1114,6 +1118,7 @@ class TimeViewHolder(itemView: View, val format: String) :
                         "$hours:$minutes $AM_KEY"
                     }
                     onValueChanged(parameterName, totalSecs, null, validate())
+                    timePickerDialog.updateTime(hours.toInt(), minutes.toInt())
                 }
             }
         }
