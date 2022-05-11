@@ -38,8 +38,8 @@ class EntityListAdapter internal constructor(
             override fun areContentsTheSame(
                 oldItem: RoomEntity,
                 newItem: RoomEntity
-            ) = (oldItem.__entity as EntityModel?)?.__STAMP == (newItem.__entity as EntityModel?)?.__STAMP
-                    && BaseApp.genericRelationHelper.relationsEquals(oldItem, newItem)
+            ) = (oldItem.__entity as EntityModel?)?.__STAMP == (newItem.__entity as EntityModel?)?.__STAMP &&
+                BaseApp.genericRelationHelper.relationsEquals(oldItem, newItem)
         }
     }
 

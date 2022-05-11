@@ -25,12 +25,12 @@ object SearchQueryBuilder {
         pattern: String
     ) {
         (0 until columnsToFilter.length()).forEach eachColumn@{ index ->
-            val field = columnsToFilter.getSafeString(index)
-            if (field !is String) return@eachColumn
+            val fieldName = columnsToFilter.getSafeString(index)
+            if (fieldName !is String) return@eachColumn
 
-            if (field.contains(".")) { // manager.FirstName
+            if (fieldName.contains(".")) { // manager.FirstName
 
-                val pathWithoutFieldName = field.substringBeforeLast(".")
+                val pathWithoutFieldName = fieldName.substringBeforeLast(".")
 
                 val relation = if (pathWithoutFieldName.contains(".")) { // alias
                     RelationHelper.getRelations(tableName).find { it.path == pathWithoutFieldName }
@@ -41,36 +41,39 @@ object SearchQueryBuilder {
                 relation?.let { rel ->
                     val baseQuery = getBaseQuery(rel)
                     stringBuilder.append(baseQuery)
-                    val depth = field.count { it == '.' }
-                    val fieldName = field.substringAfterLast(".")
+                    val depth = fieldName.count { it == '.' }
+                    val endFieldName = fieldName.substringAfterLast(".")
+                    val appendFromFormat = appendFromFormat(tableName, fieldName, pattern, "T${depth + 1}.$endFieldName")
+                    if (appendFromFormat.isNotEmpty())
+                        stringBuilder.append("( ")
                     stringBuilder.append("T${depth + 1}.$fieldName LIKE \'%$pattern%\' OR ")
-                    stringBuilder.append(appendFromFormat(tableName, field, pattern))
+                    stringBuilder.append(appendFromFormat)
                     stringBuilder.removeSuffix(" OR ")
+                    if (appendFromFormat.isNotEmpty())
+                        stringBuilder.append(" )")
                     repeat(baseQuery.count { it == '(' }) {
                         stringBuilder.append(" )")
                     }
                     stringBuilder.append(" OR ")
                 }
-
             } else {
-                stringBuilder.append("T1.$field LIKE \'%$pattern%\' OR ")
-                stringBuilder.append(appendFromFormat(tableName, field, pattern))
+                stringBuilder.append("T1.$fieldName LIKE \'%$pattern%\' OR ")
+                stringBuilder.append(appendFromFormat(tableName, fieldName, pattern, "T1.$fieldName"))
             }
         }
     }
 
     private fun appendFromFormat(
         tableName: String,
-        field: String,
+        fieldName: String,
         pattern: String,
-        relatedField: String? = null
+        fieldForQuery: String
     ): String {
         var appendice = ""
-        BaseApp.runtimeDataHolder.customFormatters[tableName.tableNameAdjustment()]?.get(field.fieldAdjustment())
+        BaseApp.runtimeDataHolder.customFormatters[tableName.tableNameAdjustment()]?.get(fieldName.fieldAdjustment())
             ?.let { fieldMapping ->
                 if (fieldMapping.binding == "localizedText") {
 
-                    val fieldForQuery: String = relatedField ?: field
                     val choiceList = fieldMapping.choiceList
                     appendice = when (choiceList) {
                         is Map<*, *> -> {
@@ -124,7 +127,7 @@ object SearchQueryBuilder {
 
     private fun StringBuilder.removeSuffix(suffix: String) {
         if (this.endsWith(suffix))
-            this.replace(this.length - (suffix.length), this.length - 1, "")
+            this.replace(this.length - (suffix.length), this.length, "")
     }
 
     private fun getBaseQuery(relation: Relation): String {

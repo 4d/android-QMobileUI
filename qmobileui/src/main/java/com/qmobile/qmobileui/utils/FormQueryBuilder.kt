@@ -52,11 +52,10 @@ class FormQueryBuilder(
             searchField.getSafeArray(tableName)?.let { columnsToFilter ->
                 SearchQueryBuilder.appendPredicate(tableName, stringBuilder, columnsToFilter, pattern)
             }
-            return SimpleSQLiteQuery(stringBuilder.toString().removeSuffix("OR ").plus(")"))
-
+            return SimpleSQLiteQuery(stringBuilder.toString().removeSuffix(" OR ").plus(" )"))
         } ?: kotlin.run {
             Timber.e("Missing relation with path [$path] from table [$tableName]")
-            return SimpleSQLiteQuery(baseQuery)
+            return SimpleSQLiteQuery("$baseQuery WHERE __KEY = -1")
         }
     }
 }

@@ -31,7 +31,7 @@ object DeepQueryBuilder {
                 builder.append(" )")
             }
         } else {
-            builder.append(endCondition(parentItemId, 1))
+            builder.append(endCondition(relation, parentItemId, 1))
         }
 
         return builder.toString()
@@ -51,7 +51,7 @@ object DeepQueryBuilder {
                 query.append(" AND EXISTS ( ")
                 query.append(partQuery(relation, path.size))
                 query.append(" AND ")
-                query.append(endCondition(parentItemId, path.size + 1))
+                query.append(endCondition(relation, parentItemId, path.size))
             }
             path.size - 1 -> { // last
                 query.append(partQuery(relation, 1))
@@ -73,7 +73,10 @@ object DeepQueryBuilder {
             "SELECT * FROM ${relation.source} AS T${depth + 1} WHERE T$depth.__${relation.inverse}Key = T${depth + 1}.__KEY"
     }
 
-    private fun endCondition(parentItemId: String, depth: Int): String {
-        return "T$depth.__KEY = $parentItemId"
+    private fun endCondition(relation: Relation, parentItemId: String, depth: Int): String {
+        return if (relation.type == Relation.Type.ONE_TO_MANY)
+            "T$depth.__${relation.inverse}Key = $parentItemId"
+        else
+            "T${depth + 1}.__KEY = $parentItemId"
     }
 }
