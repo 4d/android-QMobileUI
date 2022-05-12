@@ -210,7 +210,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
                 )
             }
             requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-        }, onSigned = { parameterName: String, uri: Uri? ->
+        }, queueForUpload = { parameterName: String, uri: Uri? ->
             if (uri != null) {
                 imagesToUpload[parameterName] = uri
             } else {
@@ -486,7 +486,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //        delegate.setFullScreenMode(true)
 //        BaseApp.genericNavigationResolver.navigateToActionScanner(binding)
 //    }
-    
+
     fun handleResult(requestCode: Int, data: Intent?) {
         // the request code is te equivalent of position of item in adapter
         // case of image picked from gallery

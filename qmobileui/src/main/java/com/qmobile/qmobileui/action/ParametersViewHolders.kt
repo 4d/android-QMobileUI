@@ -677,7 +677,8 @@ class PercentageViewHolder(itemView: View) :
         goToCamera: ((Intent, Int, String) -> Unit)?,
         queueForUpload: ((String, Uri?) -> Unit)?
     ) {
-        super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null
+        super.bind(
+            item, currentEntityJsonObject, onValueChanged, null, null, null
         )
 
         editText.hint = itemJsonObject.getSafeString("placeholder")
@@ -821,7 +822,7 @@ class BooleanSwitchViewHolder(itemView: View) :
         // Default value always true (used for add case when user validate without check/uncheck switch)
         onValueChanged(parameterName, true, null, true)
         currentEntity?.let {
-           val defaultField = itemJsonObject.getSafeString("defaultField")
+            val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 EntityHelper.readInstanceProperty<Boolean?>(it, defaultField)?.also { value ->
                     switch.isChecked = value
@@ -886,7 +887,7 @@ class ImageViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     var imageButton: ImageView = itemView.findViewById(R.id.image_button)
     var container: View = itemView.findViewById(R.id.container)
-    var queueImageForUploadCallBack :((String, Uri?) -> Unit)? = null
+    var queueImageForUploadCallBack: ((String, Uri?) -> Unit)? = null
 
     override fun bind(
         item: Any,
@@ -975,7 +976,6 @@ class ImageViewHolder(itemView: View) :
 
                                 override fun onLoadCleared(p0: Drawable?) {
                                 }
-
                             })
 
                         onValueChanged(parameterName, "", null, validate())
@@ -1044,7 +1044,6 @@ class TimeViewHolder(itemView: View, val format: String) :
     ) {
         super.bind(item, currentEntityJsonObject, onValueChanged, null, null, null)
 
-
         val calendar = Calendar.getInstance()
         var selectedHour = calendar[Calendar.HOUR_OF_DAY]
         val selectedMinute = calendar[Calendar.MINUTE]
@@ -1075,7 +1074,7 @@ class TimeViewHolder(itemView: View, val format: String) :
                 onValueChanged(parameterName, numberOfSeconds, null, validate())
             }
 
-         timePickerDialog = TimePickerDialog(
+        timePickerDialog = TimePickerDialog(
             itemView.context,
             android.R.style.Theme_Holo_Light_Dialog_NoActionBar,
             timeSetListener,
@@ -1114,8 +1113,8 @@ class TimeViewHolder(itemView: View, val format: String) :
                 EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
 
                     val totalSecs = value.toLong() / 1000
-                    val hours = totalSecs / 3600;
-                    val minutes = (totalSecs % 3600) / 60;
+                    val hours = totalSecs / 3600
+                    val minutes = (totalSecs % 3600) / 60
 
                     selectedTime.text = if (hours >= 12) {
                         "${hours - 12}:$minutes $PM_KEY"
@@ -1134,7 +1133,6 @@ class TimeViewHolder(itemView: View, val format: String) :
  * DATE VIEW HOLDERS
  */
 
-
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
 class DateViewHolder(itemView: View, val format: String) :
     ActionParameterViewHolder(itemView) {
@@ -1147,7 +1145,7 @@ class DateViewHolder(itemView: View, val format: String) :
         ActionParameterEnum.DATE_FULL.format -> "fullDate"
         else -> "shortDate"
     }
-    private var datePickerDialog : DatePickerDialog? = null
+    private var datePickerDialog: DatePickerDialog? = null
 
     override fun bind(
         item: Any,
@@ -1221,7 +1219,7 @@ class DateViewHolder(itemView: View, val format: String) :
                     selectedDate.text = formattedDate
                     onValueChanged(parameterName, value, null, validate())
                     val dateArray = value.split("!").toTypedArray().map { item -> item.toInt() }
-                    datePickerDialog?.updateDate(dateArray[2], dateArray[1]-1, dateArray[0] )
+                    datePickerDialog?.updateDate(dateArray[2], dateArray[1] - 1, dateArray[0])
                 }
             }
         }
@@ -1399,6 +1397,4 @@ class SignatureViewHolder(itemView: View) :
         }
         return null
     }
-
-
 }

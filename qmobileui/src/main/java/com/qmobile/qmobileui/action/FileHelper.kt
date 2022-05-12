@@ -27,8 +27,7 @@ fun createImageFile(context: Context): File {
     )
 }
 
-
- fun saveBitmapToJPG(bitmap: Bitmap, photo: File?) {
+fun saveBitmapToJPG(bitmap: Bitmap, photo: File?) {
     val newBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(newBitmap)
     canvas.drawColor(Color.WHITE)
