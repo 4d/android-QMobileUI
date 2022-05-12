@@ -46,7 +46,7 @@ object SearchQueryBuilder {
                     val appendFromFormat = appendFromFormat(tableName, fieldName, pattern, "T${depth + 1}.$endFieldName")
                     if (appendFromFormat.isNotEmpty())
                         stringBuilder.append("( ")
-                    stringBuilder.append("T${depth + 1}.$fieldName LIKE \'%$pattern%\' OR ")
+                    stringBuilder.append("T${depth + 1}.$endFieldName LIKE \'%$pattern%\' OR ")
                     stringBuilder.append(appendFromFormat)
                     stringBuilder.removeSuffix(" OR ")
                     if (appendFromFormat.isNotEmpty())
