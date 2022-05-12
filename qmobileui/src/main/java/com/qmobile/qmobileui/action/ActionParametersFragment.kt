@@ -486,7 +486,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //        delegate.setFullScreenMode(true)
 //        BaseApp.genericNavigationResolver.navigateToActionScanner(binding)
 //    }
-
+    
     fun handleResult(requestCode: Int, data: Intent?) {
         // the request code is te equivalent of position of item in adapter
         // case of image picked from gallery

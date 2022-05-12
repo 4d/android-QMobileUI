@@ -7,8 +7,13 @@
 package com.qmobile.qmobileui.action
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.os.Environment
 import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 fun createImageFile(context: Context): File {
@@ -20,4 +25,15 @@ fun createImageFile(context: Context): File {
         ".jpg", /* suffix */
         storageDir /* directory */
     )
+}
+
+
+ fun saveBitmapToJPG(bitmap: Bitmap, photo: File?) {
+    val newBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(newBitmap)
+    canvas.drawColor(Color.WHITE)
+    canvas.drawBitmap(bitmap, ORIGIN_POSITION, ORIGIN_POSITION, null)
+    val stream: OutputStream = FileOutputStream(photo)
+    newBitmap.compress(Bitmap.CompressFormat.JPEG, BITMAP_QUALITY, stream)
+    stream.close()
 }
