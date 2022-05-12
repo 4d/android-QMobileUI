@@ -213,8 +213,8 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
                 val outRect = Rect()
                 v.getGlobalVisibleRect(outRect)
                 if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
-                    v.clearFocus()
                     hideKeyboard(this)
+                    v.clearFocus()
                 }
             }
         }
