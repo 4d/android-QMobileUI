@@ -7,6 +7,9 @@
 package com.qmobile.qmobileui.formatters
 
 import com.qmobile.qmobileapi.utils.safeParse
+import com.qmobile.qmobileui.action.AM_KEY
+import com.qmobile.qmobileui.action.PM_KEY
+import com.qmobile.qmobileui.utils.getAmPmFormattedTime
 import java.lang.StringBuilder
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -44,10 +47,7 @@ object TimeFormat {
                 } ?: ""
             }
             "mediumTime" -> {
-                formatNameMap[format]?.let {
-                    DateFormat.getTimeInstance(it)
-                        .format(getTimeFromString(baseText).time)
-                } ?: ""
+             getAmPmFormattedTime(baseText)
             }
             "duration" -> {
                 formatNameMap[format]?.let {
