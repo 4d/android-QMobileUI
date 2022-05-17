@@ -46,6 +46,7 @@ import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.bindImageFromUrl
 import com.qmobile.qmobileui.formatters.FormatterUtils
+import com.qmobile.qmobileui.formatters.TimeFormat
 import com.qmobile.qmobileui.list.SpellOutHelper
 import org.json.JSONObject
 import timber.log.Timber
@@ -1111,16 +1112,13 @@ class TimeViewHolder(itemView: View, val format: String) :
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
+                    selectedTime.text = TimeFormat.getAmPmFormattedTime(value)
 
                     val totalSecs = value.toLong() / 1000
+
                     val hours = totalSecs / 3600
                     val minutes = (totalSecs % 3600) / 60
 
-                    selectedTime.text = if (hours >= 12) {
-                        "${hours - 12}:$minutes $PM_KEY"
-                    } else {
-                        "$hours:$minutes $AM_KEY"
-                    }
                     onValueChanged(parameterName, totalSecs, null, validate())
                     timePickerDialog.updateTime(hours.toInt(), minutes.toInt())
                 }

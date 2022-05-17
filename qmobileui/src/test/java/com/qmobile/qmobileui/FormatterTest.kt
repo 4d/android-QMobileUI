@@ -86,9 +86,14 @@ class FormatterTest {
     fun testTimeFormat() {
         val inputTime = "946693832"
         timeFormatTest(inputTime, "113480208800", "timeInteger")
-        timeFormatTest(inputTime, "11:58:13 AM", "mediumTime")
         timeFormatTest(inputTime, "11:58 AM", "shortTime")
         timeFormatTest(inputTime, "262:58:13", "duration")
+    }
+
+    @Test
+    fun testAmPmFormat(){
+        val inputTime = "9540000"
+        timeFormatTest(inputTime, "2:39 AM", "mediumTime")
     }
 
     @Test

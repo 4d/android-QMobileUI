@@ -7,6 +7,8 @@
 package com.qmobile.qmobileui.formatters
 
 import com.qmobile.qmobileapi.utils.safeParse
+import com.qmobile.qmobileui.action.AM_KEY
+import com.qmobile.qmobileui.action.PM_KEY
 import java.lang.StringBuilder
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -19,6 +21,7 @@ object TimeFormat {
     private const val INT_3600 = 3600
     private const val INT_60: Int = 60
     private const val INT_1000: Int = 1000
+    private const val INT_12: Int = 12
 
     private val formatNameMap: Map<String, Int> = mapOf(
         "shortTime" to DateFormat.SHORT,
@@ -44,10 +47,7 @@ object TimeFormat {
                 } ?: ""
             }
             "mediumTime" -> {
-                formatNameMap[format]?.let {
-                    DateFormat.getTimeInstance(it)
-                        .format(getTimeFromString(baseText).time)
-                } ?: ""
+                getAmPmFormattedTime(baseText)
             }
             "duration" -> {
                 formatNameMap[format]?.let {
@@ -90,4 +90,16 @@ object TimeFormat {
 
     private fun getTimeFromLong(timestamp: Long) =
         SimpleDateFormat("hh:mm:ss", Locale.getDefault()).format(Date(timestamp)).toString()
+
+    fun getAmPmFormattedTime(baseText: String): String {
+        val totalSecs = baseText.toLong() / INT_1000
+        val hours = totalSecs / INT_3600
+        val minutes = (totalSecs % INT_3600) / INT_60
+
+        return if (hours >= INT_12) {
+            "${hours - INT_12}:$minutes $PM_KEY"
+        } else {
+            "$hours:$minutes $AM_KEY"
+        }
+    }
 }
