@@ -9,7 +9,6 @@ package com.qmobile.qmobileui.action
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,12 +24,8 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.github.gcacace.signaturepad.views.SignaturePad
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.APP_OCTET
-import com.qmobile.qmobileapi.utils.getSafeObject
-import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
@@ -38,15 +33,11 @@ import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.binding.ImageHelper
-import com.qmobile.qmobileui.binding.writeBitmap
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import timber.log.Timber
 import java.io.File
-import java.lang.IllegalArgumentException
 
 class ActionParametersFragment : BaseFragment(), ActionProvider {
 
@@ -54,16 +45,12 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private lateinit var adapter: ActionsParametersListAdapter
     private var _binding: FragmentActionParametersBinding? = null
     private val binding get() = _binding!!
-    private lateinit var signatureDialog: View
+//    private lateinit var signatureDialog: View
 
     // fragment parameters
     override var tableName = ""
     private var itemId = ""
-//    private var inverseName = ""
     private var parentItemId = ""
-//    private var parentRelationName = ""
-//    private var parentTableName = ""
-//    private var fromRelation = false
     private var relation: Relation? = null
 
     override lateinit var actionActivity: ActionActivity
@@ -72,11 +59,11 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private val metaDataToSubmit = HashMap<String, String>()
     private val validationMap = mutableMapOf<String, Boolean>()
     private val imagesToUpload = HashMap<String, Uri>()
-    private var scrollPos = 0
-    private lateinit var currentPhotoPath: String
+//    private var scrollPos = 0
+//    private lateinit var currentPhotoPath: String
     private lateinit var action: Action
     private var selectedEntity: RoomEntity? = null
-    private var actionPosition = -1
+//    private var actionPosition = -1
 
     // Is set to true if all recyclerView items are seen at lean once
     private var areAllItemsSeen = false
@@ -97,16 +84,16 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //        }
 //    }
 
-    private val getImageFromGallery = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            onImageChosen(uri)
-        }
-    }
+//    private val getImageFromGallery = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+//        uri?.let {
+//            onImageChosen(uri)
+//        }
+//    }
 
-    private val getCameraImage = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success)
-            onImageChosen(Uri.fromFile(File(currentPhotoPath)))
-    }
+//    private val getCameraImage = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+//        if (success)
+//            onImageChosen(Uri.fromFile(File(currentPhotoPath)))
+//    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -117,32 +104,11 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("itemId")?.let { itemId = it }
-//        arguments?.getString("destinationTable")?.let {
-//            if (it.isNotEmpty()) {
-//                tableName = it
-//                fromRelation = true
-//            }
-//        }
-
-//        arguments?.getString("parentItemId")?.let { parentItemId = it }
-//        arguments?.getString("inverseName")?.let { inverseName = it }
-//
-//        if (fromRelation) {
-//            parentTableName = RelationHelper.getRelation(tableName, inverseName).dest
-//            parentRelationName = RelationHelper.getRelation(tableName, inverseName).inverse
-//        }
 
         arguments?.getString("relationName")?.let { relationName ->
             if (relationName.isNotEmpty())
                 relation = RelationHelper.getRelation(tableName, relationName)
             arguments?.getString("parentItemId")?.let { parentItemId = it }
-//                parentTableName = it
-
-//            if (it.isNotEmpty()) {
-//                relation = Relation()
-//                tableName = it
-//                fromRelation = true
-//            }
         }
 
 //        setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
@@ -413,20 +379,17 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             itemId = itemId ?: this.itemId,
             parameters = paramsToSubmit,
             metaData = metaDataToSubmit,
-//            relationName = inverseName,
             parentItemId = parentItemId,
-//            parentTableName = parentTableName,
-//            parentRelationName = parentRelationName,
             relation = relation
         )
     }
 
-    private fun onImageChosen(uri: Uri) {
-        action.parameters.getSafeObject(actionPosition)?.getSafeString("name")?.let { parameterName ->
-            imagesToUpload[parameterName] = uri
-        }
-        adapter.updateImageForPosition(actionPosition, uri)
-    }
+//    private fun onImageChosen(uri: Uri) {
+//        action.parameters.getSafeObject(actionPosition)?.getSafeString("name")?.let { parameterName ->
+//            imagesToUpload[parameterName] = uri
+//        }
+//        adapter.updateImageForPosition(actionPosition, uri)
+//    }
 
 //    private fun actionTypesCallback(actionType: Action.Type, position: Int) {
 //        actionPosition = position
@@ -438,38 +401,38 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //        }
 //    }
 
-    private fun showSignDialog() {
-        requireActivity().apply {
-            signatureDialog = LayoutInflater.from(this)
-                .inflate(R.layout.action_parameter_signature_dialog, findViewById(android.R.id.content), false)
+//    private fun showSignDialog() {
+//        requireActivity().apply {
+//            signatureDialog = LayoutInflater.from(this)
+//                .inflate(R.layout.action_parameter_signature_dialog, findViewById(android.R.id.content), false)
+//
+//            MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
+//                .setView(signatureDialog)
+//                .setTitle(getString(R.string.signature_dialog_title))
+//                .setPositiveButton(getString(R.string.signature_dialog_positive)) { _, _ ->
+//                    onSigned()
+//                }
+//                .setNegativeButton(getString(R.string.signature_dialog_cancel), null)
+//                .show()
+//        }
+//    }
 
-            MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
-                .setView(signatureDialog)
-                .setTitle(getString(R.string.signature_dialog_title))
-                .setPositiveButton(getString(R.string.signature_dialog_positive)) { _, _ ->
-                    onSigned()
-                }
-                .setNegativeButton(getString(R.string.signature_dialog_cancel), null)
-                .show()
-        }
-    }
-
-    private fun onSigned() {
-        ImageHelper.getTempImageFile(requireContext(), Bitmap.CompressFormat.PNG) { _, signatureFilePath ->
-            File(signatureFilePath).apply {
-                val bitmap = try {
-                    signatureDialog.findViewById<SignaturePad>(R.id.signature_pad)?.transparentSignatureBitmap
-                } catch (e: IllegalArgumentException) {
-                    Timber.d("Could not get the signature bitmap (${e.message})")
-                    null
-                }
-                bitmap?.let {
-                    this.writeBitmap(it)
-                    onImageChosen(Uri.fromFile(this))
-                }
-            }
-        }
-    }
+//    private fun onSigned() {
+//        ImageHelper.getTempImageFile(requireContext(), Bitmap.CompressFormat.PNG) { _, signatureFilePath ->
+//            File(signatureFilePath).apply {
+//                val bitmap = try {
+//                    signatureDialog.findViewById<SignaturePad>(R.id.signature_pad)?.transparentSignatureBitmap
+//                } catch (e: IllegalArgumentException) {
+//                    Timber.d("Could not get the signature bitmap (${e.message})")
+//                    null
+//                }
+//                bitmap?.let {
+//                    this.writeBitmap(it)
+//                    onImageChosen(Uri.fromFile(this))
+//                }
+//            }
+//        }
+//    }
 
 //    private fun pickPhotoFromGallery() {
 //        getImageFromGallery.launch("image/*")

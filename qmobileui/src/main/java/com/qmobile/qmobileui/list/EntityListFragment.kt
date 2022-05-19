@@ -82,7 +82,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     private var hasCurrentRecordActions = false
     private var isSwipable = false
     private var searchPattern = "" // search area
-    //    private var globalSearchQuery = "" // global query
     private var relation: Relation? = null
 
     override fun onCreateView(
@@ -401,10 +400,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         return ActionHelper.getActionContent(
             tableName = tableName,
             itemId = itemId ?: "",
-//            relationName = inverseName,
             parentItemId = parentItemId,
-//            parentTableName = parentTableName,
-//            parentRelationName = parentRelationName,
             relation = relation
         )
     }

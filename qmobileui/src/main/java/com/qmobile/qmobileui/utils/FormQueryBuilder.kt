@@ -45,14 +45,16 @@ class FormQueryBuilder(
 
         relation?.let {
             val query = DeepQueryBuilder.createQuery(relation, parentItemId)
-            if (pattern.isEmpty())
-                return SimpleSQLiteQuery(query)
+            return if (pattern.isEmpty()) {
+                SimpleSQLiteQuery(query)
+            } else {
 
-            val stringBuilder = StringBuilder("$query AND ( ")
-            searchField.getSafeArray(tableName)?.let { columnsToFilter ->
-                SearchQueryBuilder.appendPredicate(tableName, stringBuilder, columnsToFilter, pattern)
+                val stringBuilder = StringBuilder("$query AND ( ")
+                searchField.getSafeArray(tableName)?.let { columnsToFilter ->
+                    SearchQueryBuilder.appendPredicate(tableName, stringBuilder, columnsToFilter, pattern)
+                }
+                SimpleSQLiteQuery(stringBuilder.toString().removeSuffix(" OR ").plus(" )"))
             }
-            return SimpleSQLiteQuery(stringBuilder.toString().removeSuffix(" OR ").plus(" )"))
         } ?: kotlin.run {
             Timber.e("Missing relation with path [$path] from table [$tableName]")
             return SimpleSQLiteQuery("$baseQuery WHERE __KEY = -1")

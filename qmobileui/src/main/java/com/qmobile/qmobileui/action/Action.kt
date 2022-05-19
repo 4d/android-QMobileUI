@@ -9,7 +9,6 @@ package com.qmobile.qmobileui.action
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import org.json.JSONArray
 
-@Suppress("LongParameterList")
 class Action(
     val name: String = "",
     val shortLabel: String? = null,

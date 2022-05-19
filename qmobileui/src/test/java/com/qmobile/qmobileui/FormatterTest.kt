@@ -91,7 +91,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testAmPmFormat(){
+    fun testAmPmFormat() {
         val inputTime = "9540000"
         timeFormatTest(inputTime, "2:39 AM", "mediumTime")
     }

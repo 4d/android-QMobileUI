@@ -13,6 +13,7 @@ import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.utils.containsIgnoreCase
 import com.qmobile.qmobiledatasync.utils.fieldAdjustment
 import com.qmobile.qmobiledatasync.utils.tableNameAdjustment
+import com.qmobile.qmobileui.utils.SearchQueryBuilder.removeSuffix
 import org.json.JSONArray
 import timber.log.Timber
 
@@ -39,28 +40,38 @@ object SearchQueryBuilder {
                 }
 
                 relation?.let { rel ->
-                    val baseQuery = getBaseQuery(rel)
-                    stringBuilder.append(baseQuery)
-                    val depth = fieldName.count { it == '.' }
-                    val endFieldName = fieldName.substringAfterLast(".")
-                    val appendFromFormat = appendFromFormat(tableName, fieldName, pattern, "T${depth + 1}.$endFieldName")
-                    if (appendFromFormat.isNotEmpty())
-                        stringBuilder.append("( ")
-                    stringBuilder.append("T${depth + 1}.$endFieldName LIKE \'%$pattern%\' OR ")
-                    stringBuilder.append(appendFromFormat)
-                    stringBuilder.removeSuffix(" OR ")
-                    if (appendFromFormat.isNotEmpty())
-                        stringBuilder.append(" )")
-                    repeat(baseQuery.count { it == '(' }) {
-                        stringBuilder.append(" )")
-                    }
-                    stringBuilder.append(" OR ")
+                    appendRelationQuery(tableName, stringBuilder, fieldName, pattern, rel)
                 }
             } else {
                 stringBuilder.append("T1.$fieldName LIKE \'%$pattern%\' OR ")
                 stringBuilder.append(appendFromFormat(tableName, fieldName, pattern, "T1.$fieldName"))
             }
         }
+    }
+
+    private fun appendRelationQuery(
+        tableName: String,
+        stringBuilder: StringBuilder,
+        fieldName: String,
+        pattern: String,
+        relation: Relation
+    ) {
+        val baseQuery = getBaseQuery(relation)
+        stringBuilder.append(baseQuery)
+        val depth = fieldName.count { it == '.' }
+        val endFieldName = fieldName.substringAfterLast(".")
+        val appendFromFormat = appendFromFormat(tableName, fieldName, pattern, "T${depth + 1}.$endFieldName")
+        if (appendFromFormat.isNotEmpty())
+            stringBuilder.append("( ")
+        stringBuilder.append("T${depth + 1}.$endFieldName LIKE \'%$pattern%\' OR ")
+        stringBuilder.append(appendFromFormat)
+        stringBuilder.removeSuffix(" OR ")
+        if (appendFromFormat.isNotEmpty())
+            stringBuilder.append(" )")
+        repeat(baseQuery.count { it == '(' }) {
+            stringBuilder.append(" )")
+        }
+        stringBuilder.append(" OR ")
     }
 
     private fun appendFromFormat(

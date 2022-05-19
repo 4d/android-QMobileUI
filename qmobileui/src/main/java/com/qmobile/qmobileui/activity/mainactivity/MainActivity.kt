@@ -312,7 +312,6 @@ class MainActivity :
         }
     }
 
-    @Suppress("RestrictedApi")
     override fun setupActionsMenu(
         menu: Menu,
         actions: List<Action>,

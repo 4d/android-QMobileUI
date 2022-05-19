@@ -68,9 +68,11 @@ object DeepQueryBuilder {
 
     private fun partQuery(relation: Relation, depth: Int): String {
         return if (relation.type == Relation.Type.MANY_TO_ONE)
-            "SELECT * FROM ${relation.source} AS T${depth + 1} WHERE T$depth.__KEY = T${depth + 1}.__${relation.name}Key"
+            "SELECT * FROM ${relation.source} AS T${depth + 1} " +
+                "WHERE T$depth.__KEY = T${depth + 1}.__${relation.name}Key"
         else
-            "SELECT * FROM ${relation.source} AS T${depth + 1} WHERE T$depth.__${relation.inverse}Key = T${depth + 1}.__KEY"
+            "SELECT * FROM ${relation.source} AS T${depth + 1} " +
+                "WHERE T$depth.__${relation.inverse}Key = T${depth + 1}.__KEY"
     }
 
     private fun endCondition(relation: Relation, parentItemId: String, depth: Int): String {
