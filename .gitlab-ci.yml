@@ -7,10 +7,10 @@ before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
   - chmod +x ./gradlew
 
-#cache:
-#  paths:
-#    - .gradle/wrapper
-#    - .gradle/caches
+cache:
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
 
 .prepare_sdk: &prepare_sdk |
   export ANDROID_HOME=/Users/4d/builds/khqL5qp1/0/qmobile/android/android-sdk
