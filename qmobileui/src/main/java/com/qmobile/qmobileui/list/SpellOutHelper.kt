@@ -72,7 +72,7 @@ object SpellOutHelper {
         val df = DecimalFormat(mask)
         val sNumber = df.format(number)
 
-        // XXXnnnnnnnn
+        // XXXnnnnnnnnn
         val billions = sNumber.substring(0, 3).toInt()
         // nnnXXXnnnnnn
         val millions = sNumber.substring(3, 6).toInt()
