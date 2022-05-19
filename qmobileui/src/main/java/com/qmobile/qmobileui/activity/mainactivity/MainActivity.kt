@@ -13,13 +13,13 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
-import android.view.WindowManager
-import android.widget.ImageButton
-import android.widget.ListView
-import android.widget.PopupWindow
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -31,29 +31,32 @@ import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
+import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.network.NetworkStateEnum
-import com.qmobile.qmobiledatasync.relation.ManyToOneRelation
-import com.qmobile.qmobiledatasync.relation.OneToManyRelation
-import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
+import com.qmobile.qmobiledatasync.network.NetworkState
+import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.sync.resetIsToSync
 import com.qmobile.qmobiledatasync.toast.Event
-import com.qmobile.qmobiledatasync.toast.MessageType
-import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
-import com.qmobile.qmobiledatasync.utils.ScheduleRefreshEnum
+import com.qmobile.qmobiledatasync.toast.ToastMessage
+import com.qmobile.qmobiledatasync.utils.ScheduleRefresh
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
+import com.qmobile.qmobileui.ActionActivity
+import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
+import com.qmobile.qmobileui.action.ActionHelper
+import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.ActionParametersFragment
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
+import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.ToastHelper
@@ -61,29 +64,39 @@ import com.qmobile.qmobileui.utils.setupWithNavController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import okhttp3.RequestBody
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
-const val DROP_DOWN_WIDTH = 600
-
 const val BASE_PERMISSION_REQUEST_CODE = 1000
 
-class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserver, PermissionChecker {
+class MainActivity :
+    BaseActivity(),
+    FragmentCommunication,
+    ActivitySettingsInterface,
+    LifecycleEventObserver,
+    PermissionChecker,
+    ActionActivity {
 
     private var loginStatusText = ""
     private var onLaunch = true
     private var authenticationRequested = true
     private var shouldDelayOnForegroundEvent = AtomicBoolean(false)
     private var currentNavController: LiveData<NavController>? = null
+    private lateinit var bottomNav: BottomNavigationView
     private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
     private var job: Job? = null
-    private var fromCameraOrGallery = false
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
     private lateinit var selectedAction: Action
-    var entity: EntityModel? = null
+    var currentEntity: RoomEntity? = null
+
+    private var serverNotAccessibleString = ""
+    private var noInternetString = ""
+
+    private var fromCameraOrGallery = false
 
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
@@ -91,6 +104,9 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        serverNotAccessibleString = getString(R.string.server_not_accessible)
+        noInternetString = getString(R.string.no_internet)
 
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -179,7 +195,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                 shouldDelayOnForegroundEvent.set(false)
             }
             Lifecycle.Event.ON_START -> {
-                if (loginViewModel.authenticationState.value == AuthenticationStateEnum.AUTHENTICATED) {
+                if (loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED) {
                     Timber.d("[${Lifecycle.Event.ON_START}]")
                     applyOnForegroundEvent()
                 } else {
@@ -205,8 +221,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             // going on previous remoteUrl
             refreshAllApiClients()
             entityListViewModelList.resetIsToSync()
+            dataSync()
         }
-        dataSync()
     }
 
     override fun requestAuthentication() {
@@ -227,20 +243,21 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
 
         checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
-                if (loginViewModel.authenticationState.value != AuthenticationStateEnum.AUTHENTICATED) {
+                if (loginViewModel.authenticationState.value != AuthenticationState.AUTHENTICATED) {
                     // This is to schedule a notifyDataSetChanged() because of cached images (only on first dataSync)
-                    entityListViewModel?.setScheduleRefreshState(ScheduleRefreshEnum.SCHEDULE)
+                    entityListViewModel?.setScheduleRefreshState(ScheduleRefresh.SCHEDULE)
                     requestAuthentication()
                 } else {
                     // AUTHENTICATED
                     when (entityListViewModel?.dataSynchronized?.value) {
-                        DataSyncStateEnum.UNSYNCHRONIZED -> dataSync()
-                        DataSyncStateEnum.SYNCHRONIZED -> {
+                        DataSync.State.UNSYNCHRONIZED -> dataSync()
+                        DataSync.State.SYNCHRONIZED -> {
                             job?.cancel()
                             job = lifecycleScope.launch {
                                 entityListViewModel.getEntities { shouldSyncData ->
                                     if (shouldSyncData) {
                                         Timber.d("GlobalStamp changed, synchronization is required")
+                                        Timber.i("Starting a dataSync procedure")
                                         dataSync(currentTableName)
                                     } else {
                                         Timber.d("GlobalStamp unchanged, no synchronization is required")
@@ -248,8 +265,8 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                                 }
                             }
                         }
-                        DataSyncStateEnum.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
-                        DataSyncStateEnum.RESYNC ->
+                        DataSync.State.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
+                        DataSync.State.RESYNC ->
                             Timber.d("Resynchronization table, because globalStamp changed while performing a dataSync")
                         else -> {}
                     }
@@ -257,35 +274,35 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             }
 
             override fun onServerInaccessible() {
-                connectivityViewModel.toastMessage.showMessage(
-                    getString(R.string.action_send_server_not_accessible),
-                    currentTableName,
-                    MessageType.ERROR
-                )
+                onServerInaccessible(currentTableName)
             }
 
             override fun onNoInternet() {
-                connectivityViewModel.toastMessage.showMessage(
-                    getString(R.string.action_send_no_internet),
-                    currentTableName,
-                    MessageType.ERROR
-                )
+                onNoInternet(currentTableName)
             }
         })
     }
 
-    override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
+    private fun onServerInaccessible(tableName: String) {
+        connectivityViewModel.toastMessage.showMessage(serverNotAccessibleString, tableName, ToastMessage.Type.ERROR)
+    }
+
+    private fun onNoInternet(tableName: String) {
+        connectivityViewModel.toastMessage.showMessage(noInternetString, tableName, ToastMessage.Type.ERROR)
+    }
+
+    override fun handleAuthenticationState(authenticationState: AuthenticationState) {
         when (authenticationState) {
-            AuthenticationStateEnum.AUTHENTICATED -> {
+            AuthenticationState.AUTHENTICATED -> {
                 if (loginStatusText.isNotEmpty()) {
-                    ToastHelper.show(this, loginStatusText, MessageType.SUCCESS)
+                    ToastHelper.show(this, loginStatusText, ToastMessage.Type.SUCCESS)
                     loginStatusText = ""
                 }
                 if (shouldDelayOnForegroundEvent.getAndSet(false)) {
                     applyOnForegroundEvent()
                 }
             }
-            AuthenticationStateEnum.LOGOUT -> {
+            AuthenticationState.LOGOUT -> {
                 // Logout performed
                 if (!BaseApp.runtimeDataHolder.guestLogin)
                     startLoginActivity()
@@ -298,69 +315,124 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
     override fun setupActionsMenu(
         menu: Menu,
         actions: List<Action>,
-        onMenuItemClick: (Action) -> Unit
+        actionNavigable: ActionNavigable,
+        isEntityAction: Boolean
     ) {
-        menuInflater.inflate(R.menu.menu_action, menu)
+        (menu as? MenuBuilder)?.setOptionalIconsVisible(true)
 
-        val menuItem =
-            menu.findItem(R.id.more).actionView.findViewById(R.id.drop_down_image) as ImageButton
-        menuItem.setOnClickListener { v ->
-            val popupWindow = PopupWindow(this)
-            val adapter = ActionDropDownAdapter(v.context, actions as ArrayList<Action>) {
-                popupWindow.dismiss()
-                onMenuItemClick(it)
-            }
-            val listViewSort = ListView(this)
-            listViewSort.dividerHeight = 1
-            listViewSort.adapter = adapter
-            popupWindow.apply {
-                isFocusable = true
-                width = DROP_DOWN_WIDTH
-                height = WindowManager.LayoutParams.WRAP_CONTENT
-                contentView = listViewSort
-                showAsDropDown(v, 0, 0)
+        val withIcons = actions.firstOrNull { it.getIconDrawablePath() != null } != null
+        actions.forEach { action ->
+            val drawable =
+                if (withIcons) ActionHelper.getActionIconDrawable(this, action) else null
+
+            drawable?.colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                getColorFromAttr(R.attr.colorOnSurface),
+                BlendModeCompat.SRC_ATOP
+            )
+
+            menu.add(action.getPreferredName())
+                .setOnMenuItemClickListener {
+                    onActionClick(action, actionNavigable, isEntityAction)
+                    true
+                }
+                .setIcon(drawable)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+        }
+    }
+
+    override fun onActionClick(action: Action, actionNavigable: ActionNavigable, isEntityAction: Boolean) {
+        if (action.parameters.length() > 0) {
+            selectedAction = action
+            if (!isEntityAction)
+                currentEntity = null
+            actionNavigable.navigationToActionForm(action, (currentEntity?.__entity as EntityModel?)?.__KEY)
+        } else {
+            sendAction(
+                actionName = action.name,
+                actionContent = actionNavigable.getActionContent((currentEntity?.__entity as EntityModel?)?.__KEY),
+                tableName = actionNavigable.tableName
+            ) {
+                // Nothing to do
             }
         }
     }
 
-    override fun setSelectAction(action: Action) {
-        selectedAction = action
-    }
-
-    override fun getSelectAction(): Action {
+    override fun getSelectedAction(): Action {
         return selectedAction
     }
 
-    override fun setSelectedEntity(entityModel: EntityModel?) {
-        entity = entityModel
+    override fun getSelectedEntity(): RoomEntity? {
+        return currentEntity
     }
 
-    override fun getSelectedEntity(): EntityModel? {
-        return entity
+    override fun setCurrentEntityModel(roomEntity: RoomEntity?) {
+        currentEntity = roomEntity
     }
 
-    override fun setFullScreenMode(isFullScreen: Boolean) {
-        val bottomNav = this.findViewById<BottomNavigationView>(R.id.bottom_nav)
-        bottomNav.visibility = if (isFullScreen) {
-            View.GONE
-        } else {
-            View.VISIBLE
-        }
-        supportActionBar?.apply {
-            if (isFullScreen) {
-                hide()
-            } else {
-                show()
+    override fun sendAction(
+        actionName: String,
+        actionContent: MutableMap<String, Any>,
+        tableName: String,
+        onActionSent: () -> Unit
+    ) {
+        checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                entityListViewModelList[0].sendAction(actionName, actionContent) { actionResponse ->
+                    actionResponse?.let {
+                        actionResponse.dataSynchro?.let { dataSynchro ->
+                            if (dataSynchro) {
+                                requestDataSync(tableName)
+                            }
+                        }
+                        onActionSent()
+                    }
+                }
             }
-        }
+
+            override fun onServerInaccessible() {
+                onServerInaccessible(tableName)
+            }
+
+            override fun onNoInternet() {
+                onNoInternet(tableName)
+            }
+        })
     }
 
-    override fun handleNetworkState(networkState: NetworkStateEnum) {
+    override fun uploadImage(
+        bodies: Map<String, RequestBody?>,
+        tableName: String,
+        onImageUploaded: (parameterName: String, receivedId: String) -> Unit,
+        onAllUploadFinished: () -> Unit
+    ) {
+        checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                entityListViewModelList[0].uploadImage(
+                    imagesToUpload = bodies,
+                    onImageUploaded = { parameterName, receivedId ->
+                        onImageUploaded(parameterName, receivedId)
+                    }
+                ) {
+                    onAllUploadFinished()
+                }
+            }
+
+            override fun onServerInaccessible() {
+                onServerInaccessible(tableName)
+            }
+
+            override fun onNoInternet() {
+                onNoInternet(tableName)
+            }
+        })
+    }
+
+    override fun handleNetworkState(networkState: NetworkState) {
         when (networkState) {
-            NetworkStateEnum.CONNECTED -> {
+            NetworkState.CONNECTED -> {
                 // Setting the authenticationState to its initial value
                 if (BaseApp.sharedPreferencesHolder.sessionToken.isNotEmpty())
-                    loginViewModel.setAuthenticationState(AuthenticationStateEnum.AUTHENTICATED)
+                    loginViewModel.setAuthenticationState(AuthenticationState.AUTHENTICATED)
 
                 // If guest and not yet logged in, auto login
                 if (BaseApp.sharedPreferencesHolder.sessionToken.isEmpty() &&
@@ -371,13 +443,12 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
                     tryAutoLogin()
                 }
             }
-            else -> {
-            }
+            else -> {}
         }
     }
 
     // Observe any toast message from Entity Detail
-    override fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>) {
+    override fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessage.Holder>>) {
         mainActivityObserver.observeEntityToastMessage(message)
     }
 
@@ -404,11 +475,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         } else {
             authenticationRequested = true
             Timber.d("No Internet connection, authenticationRequested")
-            ToastHelper.show(
-                this,
-                resources.getString(R.string.no_internet_auto_login),
-                MessageType.WARNING
-            )
+            ToastHelper.show(this, getString(R.string.no_internet_auto_login), ToastMessage.Type.WARNING)
         }
     }
 
@@ -416,7 +483,7 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
      * Called on first creation and when restoring state.
      */
     private fun setupBottomNavigationBar() {
-        val bottomNav = this.findViewById<BottomNavigationView>(R.id.bottom_nav)
+        bottomNav = this.findViewById(R.id.bottom_nav)
         bottomNav.menu.clear() // clear old inflated items.
         BaseApp.bottomNavigationMenu?.let {
             bottomNav.inflateMenu(it)
@@ -440,44 +507,29 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
         currentNavController = controller
     }
 
-    /**
-     * Commands the appropriate EntityListViewModel to add the related entity in its dao
-     */
-    fun dispatchNewRelatedEntity(manyToOneRelation: ManyToOneRelation) {
-        val entityListViewModel =
-            entityListViewModelList.find { it.getAssociatedTableName() == manyToOneRelation.className }
-        entityListViewModel?.insertNewRelatedEntity(manyToOneRelation)
-    }
-
-    /**
-     * Commands the appropriate EntityListViewModel to add the related entities in its dao
-     */
-    fun dispatchNewRelatedEntities(oneToManyRelation: OneToManyRelation) {
-        val entityListViewModel =
-            entityListViewModelList.find { it.getAssociatedTableName() == oneToManyRelation.className }
-        entityListViewModel?.insertNewRelatedEntities(oneToManyRelation)
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
-            val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
+        val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
 
-            if (currentFragment is ActionParametersFragment) {
-                fromCameraOrGallery = true
-                currentFragment.handleResult(requestCode, data)
-            }
+        if (currentFragment is ActionParametersFragment) {
+            fromCameraOrGallery = true
+            currentFragment.handleResult(requestCode, data)
+        }
     }
 
     private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()
 
+    /**
+     * This method is accessible from BindingAdapters for Custom formatters
+     */
     fun askPermission(permission: String, rationale: String, callback: (isGranted: Boolean) -> Unit) {
         val requestPermissionCode = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
         requestPermissionMap[requestPermissionCode] = callback
 
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-                MaterialAlertDialogBuilder(this)
+                MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
                     .setTitle(getString(R.string.permission_dialog_title))
                     .setMessage(rationale)
                     .setPositiveButton(getString(R.string.permission_dialog_positive)) { _, _ ->
@@ -506,5 +558,20 @@ class MainActivity : BaseActivity(), FragmentCommunication, LifecycleEventObserv
             }
             else -> {}
         }
+    }
+
+    override fun setFullScreenMode(isFullScreen: Boolean) {
+        bottomNav.visibility = if (isFullScreen) {
+            supportActionBar?.hide()
+            View.GONE
+        } else {
+            supportActionBar?.show()
+            View.VISIBLE
+        }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        setFullScreenMode(false)
     }
 }

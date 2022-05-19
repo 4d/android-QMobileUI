@@ -10,5 +10,5 @@
         path="Pictures" />
     <external-path
         name="ext_download"
-        path="Download/"/>
+        path="Download/" />
 </paths>

@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.activity.loginactivity
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
@@ -21,32 +20,31 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
+import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.auth.isEmailValid
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.network.NetworkStateEnum
-import com.qmobile.qmobiledatasync.toast.MessageType
+import com.qmobile.qmobiledatasync.network.NetworkState
+import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.binding.bindImageFromDrawable
 import com.qmobile.qmobileui.databinding.ActivityLoginBinding
-import com.qmobile.qmobileui.network.RemoteUrlChange
+import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.clearViewInParent
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.ui.setOnVeryLongClickListener
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.hideKeyboard
 
-class LoginActivity : BaseActivity(), RemoteUrlChange {
+class LoginActivity : BaseActivity(), RemoteUrlChanger {
 
     private var loggedOut = false
 
@@ -54,7 +52,6 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
     private var remoteUrl = ""
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
-    private lateinit var remoteUrlDisplayDialogBuilder: MaterialAlertDialogBuilder
     private lateinit var shakeAnimation: Animation
 
     // UI strings
@@ -113,11 +110,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
         bindImageFromDrawable(binding.loginLogo, BaseApp.loginLogoDrawable)
 
         if (loggedOut) {
-            ToastHelper.show(
-                this,
-                resources.getString(R.string.login_logged_out),
-                MessageType.SUCCESS
-            )
+            ToastHelper.show(this, getString(R.string.login_logged_out), ToastMessage.Type.SUCCESS)
         }
 
         // Login button
@@ -126,11 +119,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
                 binding.loginButtonAuth.isEnabled = false
                 loginViewModel.login(email = binding.loginEmailInput.text.toString()) { }
             } else {
-                ToastHelper.show(
-                    this,
-                    resources.getString(R.string.no_internet),
-                    MessageType.WARNING
-                )
+                ToastHelper.show(this, getString(R.string.no_internet), ToastMessage.Type.WARNING)
             }
         }
 
@@ -144,8 +133,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
                     binding.loginEmailContainer.error = null
                 } else {
                     binding.loginEmailInput.startAnimation(shakeAnimation)
-                    binding.loginEmailContainer.error =
-                        resources.getString(R.string.login_invalid_email)
+                    binding.loginEmailContainer.error = getString(R.string.login_invalid_email)
                     loginViewModel.setEmailValidState(false)
                 }
             } else {
@@ -166,11 +154,6 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
         this.remoteUrl = BaseApp.sharedPreferencesHolder.remoteUrl
         initRemoteUrlDisplayDialog()
 
-        remoteUrlDisplayDialogBuilder = MaterialAlertDialogBuilder(
-            this,
-            R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
-        )
-
         binding.loginLogo.setOnVeryLongClickListener {
             checkNetwork(this)
             showRemoteUrlDisplayDialog()
@@ -180,27 +163,23 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
     private fun showRemoteUrlDisplayDialog() {
         remoteUrlDisplayDialog.clearViewInParent()
 
-        remoteUrlDisplayDialogBuilder
+        MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
             .setView(remoteUrlDisplayDialog)
             .setTitle(getString(R.string.pref_remote_url_title))
-            .setPositiveButton(getString(R.string.remote_url_dialog_edit), null)
+            .setPositiveButton(getString(R.string.remote_url_dialog_edit)) { _, _ ->
+                showRemoteUrlEditDialog(remoteUrl, this@LoginActivity)
+            }
             .setNegativeButton(getString(R.string.remote_url_dialog_done), null)
-            .create().apply {
-                setOnShowListener {
-                    getButton(AlertDialog.BUTTON_POSITIVE).setOnSingleClickListener {
-                        showRemoteUrlEditDialog(remoteUrl, this@LoginActivity)
-                    }
-                }
-            }.show()
+            .show()
     }
 
     private fun initRemoteUrlDisplayDialog() {
         serverAccessibleDrawable = ContextCompat.getDrawable(this, R.drawable.network_ok_circle)
         serverNotAccessibleDrawable =
             ContextCompat.getDrawable(this, R.drawable.network_nok_circle)
-        noInternetString = resources.getString(R.string.no_internet)
-        serverAccessibleString = resources.getString(R.string.server_accessible)
-        serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
+        noInternetString = getString(R.string.no_internet)
+        serverAccessibleString = getString(R.string.server_accessible)
+        serverNotAccessibleString = getString(R.string.server_not_accessible)
 
         remoteUrlDisplayDialog = LayoutInflater.from(this)
             .inflate(R.layout.login_remote_url_display_dialog, findViewById(android.R.id.content), false)
@@ -208,8 +187,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
         remoteUrlMessage = remoteUrlDisplayDialog.findViewById(R.id.remote_url_message)
 
         serverNotAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
-        remoteUrlMessage.text =
-            getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
+        remoteUrlMessage.text = getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
     }
 
     /**
@@ -235,10 +213,8 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
                 val outRect = Rect()
                 v.getGlobalVisibleRect(outRect)
                 if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
+                    hideKeyboard(this)
                     v.clearFocus()
-                    val imm: InputMethodManager =
-                        getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0)
                 }
             }
         }
@@ -246,12 +222,12 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
     }
 
     // Observe authentication state
-    override fun handleAuthenticationState(authenticationState: AuthenticationStateEnum) {
+    override fun handleAuthenticationState(authenticationState: AuthenticationState) {
         when (authenticationState) {
-            AuthenticationStateEnum.AUTHENTICATED -> {
+            AuthenticationState.AUTHENTICATED -> {
                 startMainActivity(false, loginViewModel.statusMessage)
             }
-            AuthenticationStateEnum.INVALID_AUTHENTICATION -> {
+            AuthenticationState.INVALID_AUTHENTICATION -> {
                 binding.loginButtonAuth.isEnabled = true
             }
             else -> {
@@ -261,26 +237,23 @@ class LoginActivity : BaseActivity(), RemoteUrlChange {
         }
     }
 
-    override fun handleNetworkState(networkState: NetworkStateEnum) {
+    override fun handleNetworkState(networkState: NetworkState) {
         // Checking network for remote Url dialog
         checkNetwork(this)
     }
 
     override fun onServerAccessible() {
-        remoteUrlMessage.text =
-            getString(R.string.remote_url_placeholder, remoteUrl, serverAccessibleString)
+        remoteUrlMessage.text = getString(R.string.remote_url_placeholder, remoteUrl, serverAccessibleString)
         serverAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
     }
 
     override fun onServerInaccessible() {
-        remoteUrlMessage.text =
-            getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
+        remoteUrlMessage.text = getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
         serverNotAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
     }
 
     override fun onNoInternet() {
-        remoteUrlMessage.text =
-            getString(R.string.remote_url_placeholder, remoteUrl, noInternetString)
+        remoteUrlMessage.text = getString(R.string.remote_url_placeholder, remoteUrl, noInternetString)
         serverNotAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
     }
 

@@ -6,8 +6,9 @@
 
 package com.qmobile.qmobileui.detail.viewpager
 
+import androidx.lifecycle.Lifecycle
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobiledatasync.utils.collectWhenStarted
+import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 
@@ -22,12 +23,22 @@ class EntityViewPagerFragmentObserver(
 
     // Observe entity list
     private fun observeEntityList() {
-        fragment.viewLifecycleOwner.collectWhenStarted(entityListViewModel.entityListPagedListSharedFlow) {
+        entityListViewModel.entityListPagedListSharedFlow.launchAndCollectIn(
+            fragment.viewLifecycleOwner,
+            Lifecycle.State.STARTED
+        ) {
             fragment.adapter.submitList(it)
-            val index = it.indexOfFirst { entityModel -> entityModel.__KEY == fragment.key }
+            val index = it.indexOfFirst { roomEntity -> (roomEntity.__entity as EntityModel?)?.__KEY == fragment.key }
             if (index > -1) {
                 fragment.viewPager?.setCurrentItem(index, false)
             }
         }
+//        fragment.viewLifecycleOwner.collectWhenStarted(entityListViewModel.entityListPagedListSharedFlow) {
+//            fragment.adapter.submitList(it)
+//            val index = it.indexOfFirst { entityModel -> entityModel.__KEY == fragment.key }
+//            if (index > -1) {
+//                fragment.viewPager?.setCurrentItem(index, false)
+//            }
+//        }
     }
 }

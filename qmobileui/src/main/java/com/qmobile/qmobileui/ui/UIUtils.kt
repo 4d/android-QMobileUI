@@ -17,6 +17,9 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.webkit.WebView
+import android.widget.Button
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import com.qmobile.qmobileui.R
 
@@ -72,16 +75,46 @@ fun View.clearViewInParent() {
         (this.parent as ViewGroup).removeView(this)
 }
 
+fun View.checkIfChildIsWebView(): WebView? = when (this) {
+    is ViewGroup -> this.checkIfContainsWebView()
+    is WebView -> this
+    else -> null
+}
+
 @Suppress("ReturnCount")
-fun View.checkIfChildIsWebView(): WebView? {
-    if (this is WebView) return this
-    if (this as? ViewGroup != null) {
-        (this as? ViewGroup)?.children?.forEach { child ->
-            if (child as? ViewGroup != null) {
-                return child.checkIfChildIsWebView()
-            }
-            if (child is WebView) return child
+fun ViewGroup.checkIfContainsWebView(): WebView? {
+    var childContainsWebView: WebView? = null
+    this.children.forEach { child ->
+        if (child is WebView) return child
+        if (child is ViewGroup) {
+            childContainsWebView = child.checkIfContainsWebView()
+            if (childContainsWebView != null)
+                return childContainsWebView
         }
     }
-    return null
+    return childContainsWebView
+}
+
+fun View.disableLink() {
+    when (this) { // Button first has a button is also a TextView
+        is Button -> this.isEnabled = false
+        is TextView -> this.setTextColor(
+            ContextCompat.getColor(
+                this.context,
+                android.R.color.darker_gray
+            )
+        )
+    }
+}
+
+fun View.enableLink() {
+    when (this) { // Button first has a button is also a TextView
+        is Button -> this.isEnabled = true
+        is TextView -> this.setTextColor(
+            ContextCompat.getColor(
+                this.context,
+                R.color.relation_link
+            )
+        )
+    }
 }

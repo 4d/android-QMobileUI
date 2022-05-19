@@ -91,7 +91,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testAmPmFormat(){
+    fun testAmPmFormat() {
         val inputTime = "9540000"
         timeFormatTest(inputTime, "2:39 AM", "mediumTime")
     }
@@ -134,7 +134,7 @@ class FormatterTest {
         } ?: kotlin.run { Assert.fail() }
 
         tableName = "Table_4"
-        fieldName = "relationfield.field_1"
+        fieldName = "relationField.field_1"
         customFormatters[tableName]?.get(fieldName)?.let { fieldMapping ->
             Assert.assertEquals("localizedText", fieldMapping.binding)
             Assert.assertEquals("UX designers", fieldMapping.getChoiceListString("0"))

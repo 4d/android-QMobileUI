@@ -25,6 +25,7 @@ lint:
   stage: lint
   script:
     - *prepare_sdk
+    - rm -fr .gradle/caches
 #    - rm -fr build
     - ./gradlew ktlintFormat --console=rich
     - ./gradlew detekt --console=rich

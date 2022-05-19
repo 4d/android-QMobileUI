@@ -39,6 +39,7 @@ dependencies {
     implementation Libs.androidx_room
     implementation Libs.androidx_room_runtime
     kapt Libs.androidx_room_compiler
+    implementation Libs.room_paging
 
     // Jackson
     implementation Libs.jackson
@@ -78,7 +79,6 @@ dependencies {
     testImplementation Libs.mockito
     testImplementation Libs.mockk
 }
-
 
 def libraryGroupId = 'com.qmobile.qmobileui'
 def libraryArtifactId = 'qmobileui'

@@ -5,9 +5,9 @@
   -->
 
 <resources>
-    <color name="error_dark">#FFCF6679</color>
-    <color name="error_light">#FFB00020</color>
     <color name="relation_link">#007AFF</color>
+    <color name="android_green">#3ddc84</color>
+    <color name="error_light">#FFB00020</color>
 
     <color name="grey_light_1">#E9E9EB</color>
     <color name="grey_light_2">#F2F2F7</color>

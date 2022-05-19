@@ -6,7 +6,8 @@
 
 package com.qmobile.qmobileui.activity
 
-import com.qmobile.qmobiledatasync.utils.collectWhenStarted
+import androidx.lifecycle.Lifecycle
+import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import timber.log.Timber
@@ -26,10 +27,17 @@ class BaseActivityObserver(
 
     // Observe authentication state
     private fun observeAuthenticationState() {
-        activity.collectWhenStarted(loginViewModel.authenticationState) { authenticationState ->
+        loginViewModel.authenticationState.launchAndCollectIn(
+            activity,
+            Lifecycle.State.STARTED
+        ) { authenticationState ->
             Timber.i("[AuthenticationState : $authenticationState]")
             activity.handleAuthenticationState(authenticationState)
         }
+//        activity.collectWhenStarted(loginViewModel.authenticationState) { authenticationState ->
+//            Timber.i("[AuthenticationState : $authenticationState]")
+//            activity.handleAuthenticationState(authenticationState)
+//        }
     }
 
     // Observe network status
@@ -43,14 +51,20 @@ class BaseActivityObserver(
     }
 
     private fun observeConnectivityToastMessage() {
-        activity.collectWhenStarted(connectivityViewModel.toastMessage.message) { event ->
+        connectivityViewModel.toastMessage.message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
             activity.handleEvent(event)
         }
+//        activity.collectWhenStarted(connectivityViewModel.toastMessage.message) { event ->
+//            activity.handleEvent(event)
+//        }
     }
 
     private fun observeLoginToastMessage() {
-        activity.collectWhenStarted(loginViewModel.toastMessage.message) { event ->
+        loginViewModel.toastMessage.message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
             activity.handleEvent(event)
         }
+//        activity.collectWhenStarted(loginViewModel.toastMessage.message) { event ->
+//            activity.handleEvent(event)
+//        }
     }
 }

@@ -12,10 +12,10 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.FieldMapping
+import com.qmobile.qmobiledatasync.utils.fieldAdjustment
+import com.qmobile.qmobiledatasync.utils.tableNameAdjustment
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.formatters.ImageNamed
-import com.qmobile.qmobileui.utils.fieldAdjustment
-import com.qmobile.qmobileui.utils.tableNameAdjustment
 
 @BindingAdapter(
     value = ["text", "format", "tableName", "fieldName", "imageWidth", "imageHeight"],

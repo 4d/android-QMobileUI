@@ -47,7 +47,7 @@ object TimeFormat {
                 } ?: ""
             }
             "mediumTime" -> {
-             getAmPmFormattedTime(baseText)
+                getAmPmFormattedTime(baseText)
             }
             "duration" -> {
                 formatNameMap[format]?.let {

@@ -15,22 +15,22 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.qmobile.qmobileapi.auth.AuthenticationStateEnum
-import com.qmobile.qmobileapi.auth.isRemoteUrlValid
+import com.qmobile.qmobileapi.auth.AuthenticationState
+import com.qmobile.qmobileapi.auth.isUrlValid
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.network.NetworkStateEnum
+import com.qmobile.qmobiledatasync.network.NetworkState
 import com.qmobile.qmobiledatasync.toast.Event
-import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
+import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.network.NetworkChecker
-import com.qmobile.qmobileui.network.RemoteUrlChange
+import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.clearViewInParent
 import com.qmobile.qmobileui.ui.getShakeAnimation
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
@@ -50,8 +50,8 @@ abstract class BaseActivity : AppCompatActivity() {
         const val LOGIN_STATUS_TEXT = "loginStatusText"
     }
 
-    fun handleEvent(event: Event<ToastMessageHolder>) {
-        event.getContentIfNotHandled()?.let { toastMessageHolder: ToastMessageHolder ->
+    fun handleEvent(event: Event<ToastMessage.Holder>) {
+        event.getContentIfNotHandled()?.let { toastMessageHolder: ToastMessage.Holder ->
             val message = ResourcesHelper.fetchResourceString(this.baseContext, toastMessageHolder.message)
             ToastHelper.show(this, message, toastMessageHolder.type)
         }
@@ -63,10 +63,8 @@ abstract class BaseActivity : AppCompatActivity() {
     lateinit var accessibilityApiService: AccessibilityApiService
     lateinit var loginApiService: LoginApiService
 
-    private lateinit var remoteUrlEditDialogBuilder: MaterialAlertDialogBuilder
-
-    abstract fun handleAuthenticationState(authenticationState: AuthenticationStateEnum)
-    abstract fun handleNetworkState(networkState: NetworkStateEnum)
+    abstract fun handleAuthenticationState(authenticationState: AuthenticationState)
+    abstract fun handleNetworkState(networkState: NetworkState)
 
     fun initViewModels() {
         loginViewModel = getLoginViewModel(this, loginApiService)
@@ -98,21 +96,17 @@ abstract class BaseActivity : AppCompatActivity() {
         }
     }
 
-    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChange: RemoteUrlChange) {
+    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChanger: RemoteUrlChanger) {
         val remoteUrlEditDialog = LayoutInflater.from(this)
             .inflate(R.layout.remote_url_edit_dialog, findViewById(android.R.id.content), false)
         val remoteUrlEditLayout = remoteUrlEditDialog.findViewById<TextInputLayout>(R.id.remote_url_edit_layout)
         val remoteUrlEditEditText = remoteUrlEditDialog.findViewById<TextInputEditText>(R.id.remote_url_edit_edittext)
-        remoteUrlEditDialogBuilder = MaterialAlertDialogBuilder(
-            this,
-            R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog
-        )
 
         remoteUrlEditDialog.clearViewInParent()
         remoteUrlEditLayout.editText?.setText(remoteUrl)
         remoteUrlEditLayout.error = null
 
-        remoteUrlEditDialogBuilder
+        MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
             .setView(remoteUrlEditDialog)
             .setTitle(getString(R.string.pref_remote_url_title))
             .setPositiveButton(getString(R.string.remote_url_dialog_positive), null)
@@ -121,14 +115,13 @@ abstract class BaseActivity : AppCompatActivity() {
                 setOnShowListener {
                     getButton(AlertDialog.BUTTON_POSITIVE).setOnSingleClickListener {
                         val newRemoteUrl = remoteUrlEditLayout.editText?.text.toString()
-                        if (newRemoteUrl.isRemoteUrlValid()) {
-                            remoteUrlChange.onValidRemoteUrlChange(newRemoteUrl)
-                            checkNetwork(remoteUrlChange)
+                        if (newRemoteUrl.isUrlValid()) {
+                            remoteUrlChanger.onValidRemoteUrlChange(newRemoteUrl)
+                            checkNetwork(remoteUrlChanger)
                             dismiss()
                         } else {
                             remoteUrlEditEditText.startAnimation(getShakeAnimation(this@BaseActivity))
-                            remoteUrlEditLayout.error =
-                                resources.getString(R.string.remote_url_invalid)
+                            remoteUrlEditLayout.error = getString(R.string.remote_url_invalid)
                         }
                     }
                 }

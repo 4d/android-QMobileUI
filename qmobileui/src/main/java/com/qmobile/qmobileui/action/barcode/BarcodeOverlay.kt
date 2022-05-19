@@ -1,16 +1,24 @@
-package com.qmobile.qmobileui.action
+/*
+ * Created by qmarciset on 10/2/2022.
+ * 4D SAS
+ * Copyright (c) 2022 qmarciset. All rights reserved.
+ */
+
+package com.qmobile.qmobileui.action.barcode
 
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Canvas
-import android.graphics.Color
+import android.graphics.CornerPathEffect
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
 import android.media.Image
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.barcode.common.Barcode
+import com.qmobile.qmobileui.R
 
 @Suppress("MagicNumber")
 class BarcodeOverlay @JvmOverloads constructor(
@@ -22,10 +30,14 @@ class BarcodeOverlay @JvmOverloads constructor(
     private var scale = 1.0f
     private var translX = 0.0f
     private var translY = 0.0f
+
     private val mRectPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#4CAF50")
+        color = ContextCompat.getColor(context, R.color.android_green)
         style = Paint.Style.STROKE
         strokeWidth = 10F
+        strokeJoin = Paint.Join.ROUND
+        strokeCap = Paint.Cap.ROUND
+        pathEffect = CornerPathEffect(50F)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -34,7 +46,6 @@ class BarcodeOverlay @JvmOverloads constructor(
             for (barcode in barcodes) {
                 barcode.boundingBox?.let { boundingBox ->
                     val rect = translateRect(boundingBox)
-
                     canvas.drawRect(rect, mRectPaint)
                 }
             }

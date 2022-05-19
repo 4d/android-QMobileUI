@@ -6,7 +6,7 @@
 
 package com.qmobile.qmobileui.settings
 
-import com.qmobile.qmobiledatasync.network.NetworkStateEnum
+import com.qmobile.qmobiledatasync.network.NetworkState
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 
@@ -24,9 +24,9 @@ class SettingsFragmentObserver(
         connectivityViewModel.networkStateMonitor.observe(
             fragment.viewLifecycleOwner
         ) { networkState ->
-            if (fragment.firstTime || !fragment.firstTime && networkState == NetworkStateEnum.CONNECTED) {
+            if (fragment.firstTime || !fragment.firstTime && networkState == NetworkState.CONNECTED) {
                 fragment.firstTime = false
-                fragment.delegate.checkNetwork(fragment)
+                fragment.activitySettingsInterface.checkNetwork(fragment)
             }
         }
     }

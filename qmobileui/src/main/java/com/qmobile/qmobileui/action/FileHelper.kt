@@ -1,3 +1,9 @@
+/*
+ * Created by qmarciset on 14/3/2022.
+ * 4D SAS
+ * Copyright (c) 2022 qmarciset. All rights reserved.
+ */
+
 package com.qmobile.qmobileui.action
 
 import android.content.Context
@@ -21,8 +27,7 @@ fun createImageFile(context: Context): File {
     )
 }
 
-
- fun saveBitmapToJPG(bitmap: Bitmap, photo: File?) {
+fun saveBitmapToJPG(bitmap: Bitmap, photo: File?) {
     val newBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(newBitmap)
     canvas.drawColor(Color.WHITE)

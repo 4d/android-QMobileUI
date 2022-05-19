@@ -10,7 +10,7 @@ import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.sync.notifyDataUnSynced
-import com.qmobile.qmobiledatasync.toast.MessageType
+import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.ToastHelper
@@ -45,11 +45,7 @@ class MainActivityDataSync(private val activity: MainActivity) {
                 } // else : Nothing to do, errors already provided in isServerConnectionOk
             }
         } else {
-            ToastHelper.show(
-                activity,
-                activity.resources.getString(R.string.no_internet),
-                MessageType.WARNING
-            )
+            ToastHelper.show(activity, activity.getString(R.string.no_internet), ToastMessage.Type.WARNING)
         }
     }
 

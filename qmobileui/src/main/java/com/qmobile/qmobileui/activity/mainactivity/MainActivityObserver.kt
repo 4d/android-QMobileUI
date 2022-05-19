@@ -6,12 +6,13 @@
 
 package com.qmobile.qmobileui.activity.mainactivity
 
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobiledatasync.sync.DataSyncStateEnum
+import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.toast.Event
-import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
-import com.qmobile.qmobiledatasync.utils.collectWhenStarted
+import com.qmobile.qmobiledatasync.toast.ToastMessage
+import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import kotlinx.coroutines.Job
@@ -28,17 +29,19 @@ class MainActivityObserver(
         activity.initObservers()
         entityListViewModelList.forEach { entityListViewModel ->
             observeDataSynchronized(entityListViewModel)
-            observeNewRelatedEntity(entityListViewModel)
-            observeNewRelatedEntities(entityListViewModel)
+            observeJSONRelation(entityListViewModel)
             observeEntityListToastMessage(entityListViewModel)
         }
     }
 
     // Observe any toast message from Entity Detail
-    fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>) {
-        activity.collectWhenStarted(message) { event ->
+    fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessage.Holder>>) {
+        message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
             activity.handleEvent(event)
         }
+//        activity.collectWhenStarted(message) { event ->
+//            activity.handleEvent(event)
+//        }
     }
 
     // Observe when data are synchronized
@@ -46,14 +49,14 @@ class MainActivityObserver(
 
         var job: Job? = null
 
-        activity.collectWhenStarted(entityListViewModel.dataSynchronized) { dataSyncState ->
+        entityListViewModel.dataSynchronized.launchAndCollectIn(activity, Lifecycle.State.STARTED) { dataSyncState ->
             Timber.d(
                 "[DataSyncState : $dataSyncState, " +
                     "Table : ${entityListViewModel.getAssociatedTableName()}, " +
                     "Instance : $entityListViewModel]"
             )
             when (dataSyncState) {
-                DataSyncStateEnum.SYNCHRONIZING, DataSyncStateEnum.RESYNC -> {
+                DataSync.State.SYNCHRONIZING, DataSync.State.RESYNC -> {
                     if (entityListViewModel.isToSync.getAndSet(false)) {
                         job?.cancel()
                         job = activity.lifecycleScope.launch {
@@ -66,26 +69,48 @@ class MainActivityObserver(
                 else -> {}
             }
         }
+
+//        activity.collectWhenStarted(entityListViewModel.dataSynchronized) { dataSyncState ->
+//            Timber.d(
+//                "[DataSyncState : $dataSyncState, " +
+//                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
+//                    "Instance : $entityListViewModel]"
+//            )
+//            when (dataSyncState) {
+//                DataSyncStateEnum.SYNCHRONIZING, DataSyncStateEnum.RESYNC -> {
+//                    if (entityListViewModel.isToSync.getAndSet(false)) {
+//                        job?.cancel()
+//                        job = activity.lifecycleScope.launch {
+//                            entityListViewModel.getEntities {
+//                                Timber.v("Requested data for ${entityListViewModel.getAssociatedTableName()}")
+//                            }
+//                        }
+//                    }
+//                }
+//                else -> {}
+//            }
+//        }
     }
 
-    // Observe when there is a new related entity to be inserted in a dao
-    private fun observeNewRelatedEntity(entityListViewModel: EntityListViewModel<EntityModel>) {
-        activity.collectWhenStarted(entityListViewModel.newRelatedEntity) { manyToOneRelation ->
-            activity.dispatchNewRelatedEntity(manyToOneRelation)
+    // Observe when there is a new relation to be inserted in a dao
+    private fun observeJSONRelation(entityListViewModel: EntityListViewModel<EntityModel>) {
+        entityListViewModel.jsonRelation.launchAndCollectIn(activity, Lifecycle.State.STARTED) { jsonRelation ->
+            entityListViewModelList.find { it.getAssociatedTableName() == jsonRelation.getDestinationTable() }
+                ?.insertRelation(jsonRelation)
         }
-    }
-
-    // Observe when there is a related entities to be inserted in a dao
-    private fun observeNewRelatedEntities(entityListViewModel: EntityListViewModel<EntityModel>) {
-        activity.collectWhenStarted(entityListViewModel.newRelatedEntities) { oneToManyRelation ->
-            activity.dispatchNewRelatedEntities(oneToManyRelation)
-        }
+//        activity.collectWhenStarted(entityListViewModel.jsonRelation) { jsonRelation ->
+//            entityListViewModelList.find { it.getAssociatedTableName() == jsonRelation.getDestinationTable() }
+//                ?.insertRelation(jsonRelation)
+//        }
     }
 
     // Observe any toast message from EntityList
     private fun observeEntityListToastMessage(entityListViewModel: EntityListViewModel<EntityModel>) {
-        activity.collectWhenStarted(entityListViewModel.toastMessage.message) { event ->
+        entityListViewModel.toastMessage.message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
             activity.handleEvent(event)
         }
+//        activity.collectWhenStarted(entityListViewModel.toastMessage.message) { event ->
+//            activity.handleEvent(event)
+//        }
     }
 }
