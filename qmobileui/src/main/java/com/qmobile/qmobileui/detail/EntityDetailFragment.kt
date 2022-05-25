@@ -27,8 +27,6 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.action.ActionNavigable
-import com.qmobile.qmobileui.navigation.navigateToActionForm
-import com.qmobile.qmobileui.navigation.navigateToPendingTasks
 import com.qmobile.qmobileui.ui.checkIfChildIsWebView
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.webview.MyWebViewClient
@@ -139,10 +137,13 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
     }
 
     override fun navigateToPendingTasks() {
-        activity?.navigateToPendingTasks(
-            tableName = tableName,
-            currentItemId = itemId
-        )
+        activity?.let {
+            BaseApp.genericNavigationResolver.navigateToPendingTasks(
+                fragmentActivity = it,
+                tableName = tableName,
+                currentItemId = itemId
+            )
+        }
     }
 
     override fun getActionContent(actionUUID: String, itemId: String?): MutableMap<String, Any> {
@@ -156,7 +157,8 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
 
     override fun navigateToActionForm(action: Action, itemId: String?) {
         // Event if we are in a N-1 relation, we don't need to provide parent information in the request
-        binding.navigateToActionForm(
+        BaseApp.genericNavigationResolver.navigateToActionForm(
+            viewDataBinding = binding,
             tableName = tableName,
             itemId = itemId ?: this.itemId,
             relationName = "",

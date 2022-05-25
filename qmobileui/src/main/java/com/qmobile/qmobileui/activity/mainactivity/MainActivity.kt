@@ -582,7 +582,7 @@ class MainActivity :
             bottomNav.inflateMenu(it)
         }
 
-        val navGraphIds = BaseApp.navGraphIds.plusElement(R.navigation.settings)
+        val navGraphIds = BaseApp.navGraphIds
 
         // Setup the bottom navigation view with a list of navigation graphs
         val controller = bottomNav.setupWithNavController(

@@ -34,13 +34,13 @@ import com.qmobile.qmobiledatastore.dao.ActionInfo
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobiledatastore.data.RoomEntity
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
-import com.qmobile.qmobileui.navigation.navigateToActionScanner
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -199,7 +199,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
                 }
             },
             goToScanner = {
-                binding.navigateToActionScanner(it)
+                BaseApp.genericNavigationResolver.navigateToActionScanner(binding, it)
             }, goToCamera = { intent: Intent, position: Int, destinationPath: String ->
             goToCamera = {
                 currentDestinationPath = destinationPath

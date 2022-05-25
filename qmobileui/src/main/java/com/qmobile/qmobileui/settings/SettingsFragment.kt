@@ -24,7 +24,6 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.navigation.navigateToPendingTasks
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.utils.ToastHelper
 import timber.log.Timber
@@ -138,7 +137,13 @@ class SettingsFragment :
                     true
                 }
                 pendingTaskPrefKey -> {
-                    activity?.navigateToPendingTasks("", "")
+                    activity?.let {
+                        BaseApp.genericNavigationResolver.navigateToPendingTasks(
+                            fragmentActivity = it,
+                            tableName = "",
+                            currentItemId = ""
+                        )
+                    }
                     true
                 }
 
