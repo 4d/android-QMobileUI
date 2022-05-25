@@ -78,23 +78,36 @@
     <string name="action_send_no_internet">Check your connexion, your action will be executed later</string>
     <string name="action_send_server_not_accessible">The server is not available, your action will be executed later</string>
     <string name="validate_action">Validate</string>
-
-    <string name="action_image_content_description">Action dots</string>
+    <string name="action_list_title">Actions</string>
     <string name="action_item_image_content_description">Action item image</string>
-    <string name="action_menu_title">More Options</string>
-
-    <string name="action_parameter_mandatory_error">Field required!</string>
-    <string name="action_parameter_min_value_error">Field value must be greater or equal than %s</string>
-    <string name="action_parameter_max_value_error">Field value must be smaller or equal than %s</string>
-    <string name="action_parameter_invalid_email_error">"Field value should be a valid email!"</string>
-    <string name="action_parameter_invalid_url_error">"Field value must be an URL!"</string>
-
+    <string name="action_remove_item_image_content_description">Remove item image</string>
+    <string name="action_parameter_mandatory_error">Field required</string>
+    <string name="action_parameter_min_value_error">Must be greater than or equal to %s</string>
+    <string name="action_parameter_max_value_error">Must be less than or equal to %s</string>
+    <string name="action_parameter_number_error">Field value must be a number</string>
+    <string name="action_parameter_invalid_email_error">Invalid email</string>
+    <string name="action_parameter_invalid_url_error">Invalid URL</string>
+    <string name="action_parameter_image_dialog_title">Add an image</string>
+    <string name="action_parameter_image_dialog_photo">Take photo</string>
+    <string name="action_parameter_image_dialog_gallery">Choose from Gallery</string>
     <string name="task_history_section_title">"COMPLETED"</string>
     <string name="task_pending_section_title">"PENDING"</string>
     <string name="task_status_success">SUCCESS</string>
+    <string name="pending_task_menu_item">Pending Tasks</string>
+
     <!-- Permissions -->
     <string name="permission_dialog_title">Permission required</string>
     <string name="permission_dialog_positive">OK</string>
     <string name="permission_dialog_negative">No, thank you</string>
+    <string name="permission_rationale_barcode">Permission required to scan bar codes</string>
+    <string name="permission_rationale_camera">Permission required to take photos</string>
+
+    <!-- Barcode -->
+    <string name="barcode_camera_back_content_description">Back</string>
+
+    <!-- Signature -->
+    <string name="signature_dialog_title">Sign here</string>
+    <string name="signature_dialog_positive">Done</string>
+    <string name="signature_dialog_cancel">Cancel</string>
 
 </resources>

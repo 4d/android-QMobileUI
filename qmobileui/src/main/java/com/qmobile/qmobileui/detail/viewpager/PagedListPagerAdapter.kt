@@ -9,10 +9,11 @@ package com.qmobile.qmobileui.detail.viewpager
 import androidx.fragment.app.Fragment
 import androidx.paging.PagedList
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.qmobile.qmobiledatastore.data.RoomEntity
 import timber.log.Timber
 import java.lang.IndexOutOfBoundsException
 
-abstract class PagedListPagerAdapter<T : Any>(fragment: Fragment) :
+abstract class PagedListPagerAdapter<T : RoomEntity>(fragment: Fragment) :
     FragmentStateAdapter(fragment) {
 
     private var pagedList: PagedList<T>? = null
@@ -36,7 +37,7 @@ abstract class PagedListPagerAdapter<T : Any>(fragment: Fragment) :
         return try {
             pagedList?.get(position)
         } catch (e: IndexOutOfBoundsException) {
-            Timber.d(e.localizedMessage)
+            Timber.d(e.message.orEmpty())
             null
         }
     }

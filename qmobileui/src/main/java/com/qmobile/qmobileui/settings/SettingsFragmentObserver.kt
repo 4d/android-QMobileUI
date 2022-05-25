@@ -6,8 +6,9 @@
 
 package com.qmobile.qmobileui.settings
 
-import com.qmobile.qmobiledatasync.network.NetworkStateEnum
+import com.qmobile.qmobiledatasync.network.NetworkState
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
+import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseObserver
 
 class SettingsFragmentObserver(
@@ -17,6 +18,7 @@ class SettingsFragmentObserver(
 
     override fun initObservers() {
         observeNetworkStatus()
+        observePendingTasks()
     }
 
     // Observe network status
@@ -24,10 +26,16 @@ class SettingsFragmentObserver(
         connectivityViewModel.networkStateMonitor.observe(
             fragment.viewLifecycleOwner
         ) { networkState ->
-            if (fragment.firstTime || !fragment.firstTime && networkState == NetworkStateEnum.CONNECTED) {
+            if (fragment.firstTime || !fragment.firstTime && networkState == NetworkState.CONNECTED) {
                 fragment.firstTime = false
-                fragment.delegate.checkNetwork(fragment)
+                fragment.activitySettingsInterface.checkNetwork(fragment)
             }
+        }
+    }
+
+    private fun observePendingTasks() {
+        fragment.actionActivity.getTaskViewModel().pendingTasks.observe(fragment.viewLifecycleOwner) { pendingTasks ->
+            fragment.pendingTaskPref?.summary = fragment.getString(R.string.pref_pending_tasks_count, pendingTasks.size)
         }
     }
 }

@@ -15,9 +15,9 @@ object ColorHelper {
 
     private const val LUMINANCE_DARK_THRESHOLD = 0.5F
     private const val LUMINANCE_BRIGHT_THRESHOLD = 0.8F
-    private const val DARK_COLOR_FACTOR = 1.1F
-    private const val BRIGHT_COLOR_FACTOR = 0.96F
-    private const val MEDIUM_COLOR_FACTOR = 1.04F
+    private const val DARK_COLOR_FACTOR = 1.15F
+    private const val BRIGHT_COLOR_FACTOR = 0.85F
+    private const val MEDIUM_COLOR_FACTOR = 1F
 
     fun getActionButtonColor(horizontalIndex: Int, context: Context): Int {
         val themeColor = context.getColorFromAttr(R.attr.colorPrimary)

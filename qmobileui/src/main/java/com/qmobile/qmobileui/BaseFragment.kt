@@ -6,10 +6,17 @@
 
 package com.qmobile.qmobileui
 
-/**
- * Base interface for fragments
- */
-interface BaseFragment {
+import android.content.Context
+import androidx.fragment.app.Fragment
 
-    var delegate: FragmentCommunication
+abstract class BaseFragment : Fragment() {
+
+    internal lateinit var delegate: FragmentCommunication
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is FragmentCommunication) {
+            delegate = context
+        }
+    }
 }

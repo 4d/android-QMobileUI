@@ -19,7 +19,7 @@
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/fragment_list_guideline"
+            android:id="@+id/fragment_tasks_guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -31,12 +31,12 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/list_margin_medium"
             android:visibility="@{safeUnbox(viewModel.dataLoading) ? View.VISIBLE : View.GONE}"
-            app:layout_constraintBottom_toTopOf="@+id/fragment_list_guideline"
+            app:layout_constraintBottom_toTopOf="@+id/fragment_tasks_guideline"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/fragment_list_swipe_to_refresh"
+            android:id="@+id/fragment_tasks_swipe_to_refresh"
             android:layout_width="wrap_content"
             android:layout_height="0px"
             android:layout_weight="1"
@@ -48,7 +48,7 @@
             app:visibleGone="@{!viewModel.dataLoading}">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view"
+                android:id="@+id/fragment_tasks_recycler_view"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 app:layout_constraintBottom_toBottomOf="parent"

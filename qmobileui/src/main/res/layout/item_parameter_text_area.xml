@@ -38,4 +38,3 @@
         tools:text="@string/action_parameter_mandatory_error"
         tools:visibility="visible" />
 </LinearLayout>
-

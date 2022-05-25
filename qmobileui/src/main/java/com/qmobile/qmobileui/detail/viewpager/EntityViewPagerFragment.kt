@@ -14,38 +14,37 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
-import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.ColorHelper
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 
-class EntityViewPagerFragment : Fragment(), BaseFragment {
+class EntityViewPagerFragment : BaseFragment() {
 
-    var key: String = ""
-    var tableName: String = ""
-    private var currentQuery = ""
-    var viewPager: ViewPager2? = null
-    private lateinit var formQueryBuilder: FormQueryBuilder
-    lateinit var adapter: ViewPagerAdapter
-//    lateinit var adapter: ViewPagerAdapter2
-    private var fromRelation = false
-    private var inverseName: String = ""
-    private var parentItemId: String = "0"
-
+    // views
+    internal var viewPager: ViewPager2? = null
+    internal lateinit var adapter: ViewPagerAdapter
+    //    lateinit var adapter: ViewPagerAdapter2
     private lateinit var actionPrevious: MenuItem
     private lateinit var actionNext: MenuItem
+    private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
 
-    // BaseFragment
-    override lateinit var delegate: FragmentCommunication
+    // fragment parameters
+    internal var key = ""
+    private var tableName = ""
+    private var searchQueryPattern = ""
+    private var parentItemId = ""
+    private var parentTableName = ""
+    private var path = ""
+    private var fromRelation = false
 
-    // ViewModel
-    lateinit var entityListViewModel: EntityListViewModel<EntityModel>
+    private lateinit var formQueryBuilder: FormQueryBuilder
+    private lateinit var actionActivity: ActionActivity
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,7 +54,7 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
         viewPager = inflater.inflate(R.layout.fragment_pager, container, false) as ViewPager2
         arguments?.getString("key")?.let { key = it }
         arguments?.getString("tableName")?.let { tableName = it }
-        arguments?.getString("query")?.let { currentQuery = it }
+        arguments?.getString("searchQueryPattern")?.let { searchQueryPattern = it }
 
         arguments?.getString("destinationTable")?.let {
             if (it.isNotEmpty()) {
@@ -63,8 +62,9 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
                 fromRelation = true
             }
         }
-        arguments?.getString("currentItemId")?.let { parentItemId = it }
-        arguments?.getString("inverseName")?.let { inverseName = it }
+        arguments?.getString("parentItemId")?.let { parentItemId = it }
+        arguments?.getString("parentTableName")?.let { parentTableName = it }
+        arguments?.getString("path")?.let { path = it }
 
         formQueryBuilder = FormQueryBuilder(tableName)
 
@@ -76,21 +76,22 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is FragmentCommunication) {
-            delegate = context
+        if (context is ActionActivity) {
+            actionActivity = context
         }
         // Access resources elements
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         adapter = ViewPagerAdapter(this, tableName)
 //        adapter = ViewPagerAdapter2(tableName, this.viewLifecycleOwner)
         viewPager?.adapter = adapter
         viewPager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                adapter.getValue(position)?.let { item ->
-                    key = item.__KEY ?: ""
+                adapter.getValue(position)?.let { roomEntity ->
+                    actionActivity.setCurrentEntityModel(roomEntity)
+                    key = (roomEntity.__entity as EntityModel?)?.__KEY ?: ""
                     arguments?.putString("key", key)
                 }
                 handleActionPreviousEnability(position)
@@ -160,11 +161,12 @@ class EntityViewPagerFragment : Fragment(), BaseFragment {
         val formQuery = if (fromRelation) {
             formQueryBuilder.getRelationQuery(
                 parentItemId = parentItemId,
-                inverseName = inverseName,
-                pattern = currentQuery
+                pattern = searchQueryPattern,
+                parentTableName = parentTableName,
+                path = path
             )
         } else {
-            formQueryBuilder.getQuery(currentQuery)
+            formQueryBuilder.getQuery(searchQueryPattern)
         }
         entityListViewModel.setSearchQuery(formQuery)
     }

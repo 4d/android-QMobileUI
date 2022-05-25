@@ -54,8 +54,10 @@ class TasksListAdapter(
             }
         } else {
             if (position == 0) {
-                (holder as SectionViewHolder).bind(TaskItemTypeEnum.HEADER_PENDING, serverStatus.orEmpty()){ onCLick(position)}
-            } else{
+                (holder as SectionViewHolder).bind(TaskItemTypeEnum.HEADER_PENDING, serverStatus.orEmpty()) {
+                    onCLick(position)
+                }
+            } else {
                 (holder as SectionViewHolder).bind(TaskItemTypeEnum.HEADER_HISTORY, serverStatus.orEmpty())
             }
         }

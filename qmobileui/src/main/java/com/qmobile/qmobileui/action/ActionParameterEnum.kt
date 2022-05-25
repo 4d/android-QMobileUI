@@ -10,8 +10,6 @@ enum class ActionParameterEnum(val type: String, val format: String = "default")
     TEXT_PHONE("string", "phone"),
     TEXT_ACCOUNT("string", "account"),
     TEXT_AREA("string", "textArea"),
-    // Bar/Qr code
-    BARCODE("string", "barcode"),
 
     // Boolean
     BOOLEAN_DEFAULT("bool", "default"),
@@ -38,5 +36,8 @@ enum class ActionParameterEnum(val type: String, val format: String = "default")
 
     // Image
     IMAGE("image"),
-    SIGNATURE("image", "signature");
+    SIGNATURE("image", "signature"),
+
+    // Barcode
+    BARCODE("string", "barcode")
 }

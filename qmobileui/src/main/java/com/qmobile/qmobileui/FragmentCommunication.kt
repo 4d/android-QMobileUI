@@ -6,58 +6,21 @@
 
 package com.qmobile.qmobileui
 
-import android.net.ConnectivityManager
-import android.view.Menu
-import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiService
-import com.qmobile.qmobileapi.network.LoginApiService
-import com.qmobile.qmobiledatastore.dao.ActionTaskDao
 import com.qmobile.qmobiledatasync.toast.Event
-import com.qmobile.qmobiledatasync.toast.ToastMessageHolder
-import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
-import com.qmobile.qmobileui.action.Action
-import com.qmobile.qmobileui.network.NetworkChecker
-import com.qmobile.qmobileui.network.RemoteUrlChange
+import com.qmobile.qmobiledatasync.toast.ToastMessage
 import kotlinx.coroutines.flow.SharedFlow
 
 /**
  * Interface implemented by MainActivity to provide elements that depend on generated type
  */
-@Suppress("TooManyFunctions")
 interface FragmentCommunication {
 
-    val apiService: ApiService
+    val apiService: ApiService // list, viewpager, detail
 
-    val loginApiService: LoginApiService
+    fun requestDataSync(currentTableName: String) // list
 
-    val accessibilityApiService: AccessibilityApiService
+    fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessage.Holder>>) // detail
 
-    val connectivityManager: ConnectivityManager
-
-    fun refreshAllApiClients()
-
-    fun requestDataSync(currentTableName: String)
-
-    fun requestAuthentication()
-
-    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChange: RemoteUrlChange)
-
-    fun checkNetwork(networkChecker: NetworkChecker)
-
-    fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessageHolder>>)
-
-    fun setupActionsMenu(menu: Menu, actions: List<Action>, onMenuItemClick: (Action, Boolean) -> Unit)
-
-    fun setSelectAction(action: Action)
-
-    fun getSelectAction(): Action
-
-    fun setSelectedEntity(entityModel: EntityModel?)
-
-    fun getSelectedEntity(): EntityModel?
-
-    fun setFullScreenMode(isFullScreen: Boolean)
-
-    fun getActionTaskViewModel(): TaskViewModel
+    fun setFullScreenMode(isFullScreen: Boolean) // actions
 }

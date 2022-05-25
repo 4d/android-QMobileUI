@@ -11,7 +11,6 @@ import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
-import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 
 const val NUMBER_OF_DOTS = 3
@@ -45,11 +44,8 @@ class DotProgressBar : FrameLayout {
     }
 
     private fun init() {
-        background = if (BaseApp.nightMode()) {
-            ContextCompat.getDrawable(context, R.drawable.circle_bg)
-        } else {
-            ContextCompat.getDrawable(context, R.drawable.circle_bg_dark)
-        }
+        background = ContextCompat.getDrawable(context, R.drawable.circle_bg)
+
         clipChildren = false
         clipToPadding = false
         progressBar = LinearLayout(context)

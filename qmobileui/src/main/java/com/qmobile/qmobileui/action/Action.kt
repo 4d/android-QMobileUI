@@ -13,10 +13,13 @@ import java.util.UUID
 
 class Action(
     val name: String = "",
-    private val icon: String?,
-    private val label: String?,
-    private val shortLabel: String?,
-    val preset: String?,
+    val shortLabel: String? = null,
+    val label: String? = null,
+    val scope: String? = null,
+    val tableNumber: Int? = null,
+    val icon: String? = null,
+    val preset: String? = null,
+    val style: String? = null,
     val parameters: JSONArray
 ) {
     val id = UUID.randomUUID().toString()
@@ -41,7 +44,9 @@ class Action(
             name
     }
 
-    fun isOfflineCompatible(): Boolean {
-        return preset?.lowercase(Locale.getDefault()) != "share"
+    fun isOfflineCompatible() = preset?.lowercase(Locale.getDefault()) != "share"
+
+    enum class Type {
+        TAKE_PICTURE_CAMERA, PICK_PHOTO_GALLERY, SCAN, SIGN
     }
 }

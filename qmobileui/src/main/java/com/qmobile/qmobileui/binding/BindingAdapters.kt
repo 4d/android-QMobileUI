@@ -6,19 +6,13 @@
 
 package com.qmobile.qmobileui.binding
 
-import android.net.Uri
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.glide.CustomRequestListener
 
 /**
  * Use Glide to load image url in a view
@@ -35,22 +29,8 @@ fun bindImageFromUrl(
     tableName: String?,
     transform: String? = null
 ) {
-    val factory =
-        DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
-
-    val imageFromAssetUri: Uri? = ImageHelper.tryImageFromAssets(tableName, key, fieldName)
-
-    val glideRequest = Glide.with(view.context.applicationContext)
-        .load(
-            imageFromAssetUri
-                ?: if (!imageUrl.isNullOrEmpty()) imageUrl else R.drawable.ic_placeholder
-        )
-        .transition(DrawableTransitionOptions.withCrossFade(factory))
-        .diskCacheStrategy(DiskCacheStrategy.ALL)
-//        .listener(listener)
-        .listener(CustomRequestListener())
-        .error(R.drawable.ic_placeholder)
-//        .placeholder(R.drawable.ic_placeholder)
+    val image: Any = ImageHelper.getImage(imageUrl, tableName, key, fieldName)
+    val glideRequest = ImageHelper.getGlideRequest(view, image)
 
     Transformations.getTransformation(
         transform,
@@ -70,15 +50,7 @@ fun bindImageFromDrawable(view: ImageView, imageDrawable: Int?) {
     if (imageDrawable == null)
         return
 
-    val factory =
-        DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
-
-    Glide.with(view.context.applicationContext)
-        .load(imageDrawable)
-        .transition(DrawableTransitionOptions.withCrossFade(factory))
-        .diskCacheStrategy(DiskCacheStrategy.ALL)
-        .error(R.drawable.ic_error_outline)
-        .into(view)
+    ImageHelper.getGlideRequest(view, imageDrawable).into(view)
 }
 
 @BindingAdapter("visibleGone")

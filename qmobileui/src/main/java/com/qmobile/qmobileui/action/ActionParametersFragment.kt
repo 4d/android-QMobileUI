@@ -24,33 +24,27 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.databinding.ViewDataBinding
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobiledatastore.dao.ActionInfo
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.dao.STATUS
+import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.toast.MessageType
-import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getTaskViewModel
+import com.qmobile.qmobiledatasync.relation.Relation
+import com.qmobile.qmobiledatasync.relation.RelationHelper
+import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
-import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
-import com.qmobile.qmobileui.network.NetworkChecker
-import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
-import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
@@ -59,108 +53,153 @@ import java.io.OutputStream
 import java.util.Date
 import kotlin.collections.HashMap
 
-class ActionParametersFragment : Fragment(), BaseFragment {
+class ActionParametersFragment : BaseFragment(), ActionProvider {
 
-    private var _binding: ViewDataBinding? = null
-    internal lateinit var entityListViewModel: EntityListViewModel<EntityModel>
-    val binding get() = _binding!!
-    lateinit var tableName: String
-    private var inverseName: String = ""
-    private var parentItemId: String = "0"
-    private var parentRelationName: String = ""
-    private var parentTableName: String? = null
-    override lateinit var delegate: FragmentCommunication
-    private var paramsToSubmit = HashMap<String, Any>()
+    // views
+    private lateinit var adapter: ActionsParametersListAdapter
+    private var _binding: FragmentActionParametersBinding? = null
+    private val binding get() = _binding!!
+//    private lateinit var signatureDialog: View
+
+    // fragment parameters
+    override var tableName = ""
+    private var itemId = ""
+    private var parentItemId = ""
+    private var relation: Relation? = null
+
+    override lateinit var actionActivity: ActionActivity
+
+    internal var paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
-    private var imagesToUpload = HashMap<String, Uri>()
-    private var validationMap = HashMap<String, Boolean>()
-    lateinit var adapter: ActionsParametersListAdapter
-    private var fromRelation = false
-    private lateinit var allParameters: JSONArray
+    internal var validationMap = hashMapOf<String, Boolean>()
+    internal var imagesToUpload = HashMap<String, Uri>()
+//    private var scrollPos = 0
+//    private lateinit var currentPhotoPath: String
+    private lateinit var action: Action
+    private var selectedEntity: RoomEntity? = null
+//    private var actionPosition = -1
 
     // Is set to true if all recyclerView items are seen at lean once
     private var areAllItemsSeen = false
     private var goToCamera: (() -> Unit)? = null
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     var currentDestinationPath: String? = null
-    var currentPendingTaskDate: Date? = null
 
-    private var currentTask: ActionTask? = null
-    private var taskId: Long? = null
+    internal var currentTask: ActionTask? = null
+    internal var taskId: Long? = null
+    private var fromPendingTasks = false
+    internal lateinit var allParameters: JSONArray
+
+    companion object {
+        const val BARCODE_FRAGMENT_REQUEST_KEY = "scan_request"
+    }
+
+//    private val onScrollListener = object : RecyclerView.OnScrollListener() {
+//        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+//            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                triggerError(scrollPos)
+//                recyclerView.removeOnScrollListener(this)
+//            }
+//        }
+//    }
+
+//    private val getImageFromGallery = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+//        uri?.let {
+//            onImageChosen(uri)
+//        }
+//    }
+
+//    private val getCameraImage = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+//        if (success)
+//            onImageChosen(Uri.fromFile(File(currentPhotoPath)))
+//    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
+
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
-        arguments?.getString("currentItemId")?.let { parentItemId = it }
-        arguments?.getBoolean("fromRelation")?.let { fromRelation = it }
-        arguments?.getString("inverseName")?.let { inverseName = it }
+        arguments?.getString("itemId")?.let { itemId = it }
         arguments?.getLong("taskId")?.let {
-            taskId = it
-        }
-
-        if (fromRelation) {
-            parentTableName =
-                BaseApp.genericRelationHelper.getRelatedTableName(tableName, inverseName)
-            parentRelationName =
-                BaseApp.genericRelationHelper.getInverseRelationName(tableName, inverseName)
-        }
-
-        entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-
-        if (_binding == null) {
-            _binding = FragmentActionParametersBinding.inflate(
-                inflater,
-                container,
-                false
-            ).apply {
-                lifecycleOwner = viewLifecycleOwner
-                if (taskId != 0L) {
-                    delegate.getActionTaskViewModel().getAllTasks().observeOnce(requireParentFragment()) {
-                        it.find { actionTask -> actionTask.id == taskId }?.let { task ->
-                            task.actionInfo.validationMap?.let { map -> validationMap = map }
-                            task.actionInfo.paramsToSubmit?.let { params ->
-                                paramsToSubmit = params
-                            }
-                            imagesToUpload =
-                                task.actionInfo.imagesToUpload?.mapValues { entry ->
-                                    Uri.parse(entry.value)
-                                } as HashMap<String, Uri>
-                            allParameters = JSONArray(task.actionInfo.allParameters)
-                            currentPendingTaskDate = task.date
-                            currentTask = task
-                        }
-                        setupRecycleView(recyclerView)
-                    }
-                } else {
-                    allParameters = delegate.getSelectAction().parameters
-                    setupRecycleView(recyclerView)
-                }
+            if (it != -1L) {
+                taskId = it
+                fromPendingTasks = true
             }
+        }
+        arguments?.getString("relationName")?.let { relationName ->
+            if (relationName.isNotEmpty())
+                relation = RelationHelper.getRelation(tableName, relationName)
+            arguments?.getString("parentItemId")?.let { parentItemId = it }
+        }
+
+//        setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
+//            bundle.getString("barcode_value")?.let {
+//                adapter.updateBarcodeForPosition(actionPosition, it)
+//            }
+//        }
+
+        _binding = FragmentActionParametersBinding.inflate(
+            inflater,
+            container,
+            false
+        ).apply {
+            lifecycleOwner = viewLifecycleOwner
+            if (fromPendingTasks)
+                allParameters = action.parameters
+            else
+                setupRecyclerView()
+//            adapter = ActionsParametersListAdapter(
+//                context = requireContext(),
+//                action = action,
+//                currentEntity = selectedEntity,
+//                fragmentManager = activity?.supportFragmentManager,
+//                hideKeyboardCallback = { onHideKeyboardCallback() },
+//                focusNextCallback = { position -> onFocusNextCallback(position) },
+//                actionTypesCallback = { actionType, position ->
+//                    actionTypesCallback(actionType, position)
+//                },
+//                onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+//                    onValueChanged(name, value, metaData, isValid)
+//                }
+//            )
+//            val smoothScroller = CenterLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+//            recyclerView.layoutManager = smoothScroller
+//            recyclerView.adapter = adapter
+//            // Important line : prevent recycled views to get their content reset
+//            recyclerView.setItemViewCacheSize(action.parameters.length())
+//            // Add this empty view to remove keyboard when click is perform below recyclerView items
+//            emptyView.setOnClickListener {
+//                onHideKeyboardCallback()
+//            }
         }
         return binding.root
     }
 
-    private fun setupRecycleView(recyclerView: RecyclerView) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        ActionParametersFragmentObserver(this).initObservers()
+    }
+
+    internal fun setupRecyclerView() {
         adapter = ActionsParametersListAdapter(
-            requireContext(),
-            allParameters,
-            paramsToSubmit,
-            imagesToUpload,
-            delegate.getSelectedEntity(),
-            { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+            context = requireContext(),
+            list = allParameters,
+            paramsToSubmit = paramsToSubmit,
+            imagesToUpload = imagesToUpload,
+            currentEntity = selectedEntity?.__entity as EntityModel?,
+            onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 validationMap[name] = isValid
                 paramsToSubmit[name] = value ?: ""
                 metaData?.let {
                     metaDataToSubmit[name] = metaData
                 }
             },
-            {
-                BaseApp.genericNavigationResolver.navigateToBarCodeScanner(binding, it)
-            }, { intent: Intent, position: Int, destinationPath: String ->
+            goToScanner = {
+                BaseApp.genericNavigationResolver.navigateToActionScanner(binding, it)
+            }, goToCamera = { intent: Intent, position: Int, destinationPath: String ->
             goToCamera = {
                 currentDestinationPath = destinationPath
                 (context as Activity).startActivityForResult(
@@ -170,7 +209,7 @@ class ActionParametersFragment : Fragment(), BaseFragment {
                 )
             }
             requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-        }, { parameterName: String, uri: Uri? ->
+        }, queueForUpload = { parameterName: String, uri: Uri? ->
             if (uri != null) {
                 imagesToUpload[parameterName] = uri
             } else {
@@ -182,15 +221,15 @@ class ActionParametersFragment : Fragment(), BaseFragment {
         }
         )
         val layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = layoutManager
+        binding.recyclerView.adapter = adapter
 
         val dividerItemDecoration = DividerItemDecoration(
-            recyclerView.context,
+            binding.recyclerView.context,
             layoutManager.orientation
         )
-        recyclerView.addItemDecoration(dividerItemDecoration)
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        binding.recyclerView.addItemDecoration(dividerItemDecoration)
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
                     areAllItemsSeen = true
@@ -203,10 +242,37 @@ class ActionParametersFragment : Fragment(), BaseFragment {
         }
     }
 
+//    private fun onValueChanged(name: String, value: Any?, metaData: String?, isValid: Boolean) {
+//        validationMap[name] = isValid
+//        paramsToSubmit[name] = value ?: ""
+//        metaData?.let {
+//            metaDataToSubmit[name] = metaData
+//        }
+//        if (value == null) {
+//            imagesToUpload.remove(name)
+//        }
+//    }
+
+//    private fun onHideKeyboardCallback() {
+//        activity?.let {
+//            hideKeyboard(it)
+//        }
+//    }
+
+//    private fun onFocusNextCallback(position: Int) {
+//        binding.recyclerView.findViewHolderForLayoutPosition(position + 1)
+//            ?.itemView?.findViewById<TextInputEditText>(R.id.input)
+//            ?.requestFocus()
+//            ?: kotlin.run {
+//                Timber.d("Can't find input to focus at position ${position + 1}, scrolling now")
+//                scrollTo(position + 1, false)
+//            }
+//    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setFragmentResultListener("scan_request") { _: String, bundle: Bundle ->
-            val value = bundle.getString("scanned")
+            val value = bundle.getString("barcode_value")
             val position = bundle.getInt("position")
             value?.let { adapter.updateBarcodeForPosition(position, it) }
         }
@@ -219,55 +285,56 @@ class ActionParametersFragment : Fragment(), BaseFragment {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.validate) {
-            // When coming from pending task
-            if (taskId != 0L) {
-                lifecycleScope.launch {
-                    taskId?.let { id ->
-                        currentPendingTaskDate?.let { date ->
-                            currentTask?.let { task ->
-                                delegate.getActionTaskViewModel().insertTask(
-                                    ActionTask(
-                                        id = id,
-                                        status = STATUS.PENDING,
-                                        date = date,
-                                        relatedItemId = currentTask?.relatedItemId,
-                                        label = task.label,
-                                        actionInfo = task.actionInfo
-                                    )
-                                )
-                            }
-                        }
-                        activity?.onBackPressed()
-                    }
-                }
+            if (fromPendingTasks) {
+                // When coming from pending task
+                validatePendingTask()
             } else {
                 // When coming from actions
-                var relatedEntityId: String? = null
-                delegate.getSelectAction().preset?.let {
-                    if (it == "edit") {
-                        relatedEntityId = delegate.getSelectedEntity()?.__KEY
-                    }
-                }
-                if (imagesToUpload.isNotEmpty()) {
-                    uploadImages(
-                        relatedEntityId,
-                        delegate.getSelectAction().id
-                    )
-                } else {
-                    sendAction(
-                        relatedEntityId,
-                        delegate.getSelectAction().id
-                    )
-                }
+                validateAction()
             }
         }
         return super.onOptionsItemSelected(item)
     }
 
+    private fun validatePendingTask() {
+        currentTask?.let { task ->
+            val actionTask = ActionTask(
+                id = task.id,
+                status = STATUS.PENDING,
+                date = task.date,
+                relatedItemId = task.relatedItemId,
+                label = task.label,
+                actionInfo = task.actionInfo
+            )
+            actionActivity.getTaskViewModel().insert(actionTask)
+        }
+        activity?.onBackPressed()
+    }
+
+    private fun validateAction() {
+        if (isFormValid()) {
+            if (imagesToUpload.isEmpty()) {
+                sendAction()
+            } else {
+                uploadImages {
+                    sendAction()
+                }
+            }
+        }
+    }
+
+    private fun isFormValid(): Boolean =
+        if (!areAllItemsSeen)
+            false
+        else
+            validationMap.values.firstOrNull { !it } == null
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is FragmentCommunication) {
-            delegate = context
+        if (context is ActionActivity) {
+            actionActivity = context
+            action = actionActivity.getSelectedAction()
+            selectedEntity = actionActivity.getSelectedEntity()
         }
         requestPermissionLauncher =
             registerForActivityResult(
@@ -282,196 +349,189 @@ class ActionParametersFragment : Fragment(), BaseFragment {
             }
     }
 
-    private fun isFormValid(): Boolean =
-        if (!areAllItemsSeen)
-            false
-        else
-            validationMap.values.firstOrNull { !it } == null
+//    @Suppress("ReturnCount")
+//    private fun isFormValid(): Boolean {
+//
+//        // first: check if visible items are valid
+//        val firstNotValidItemPosition = validationMap.values.indexOfFirst { !it }
+//        if (firstNotValidItemPosition > -1) {
+//            scrollTo(firstNotValidItemPosition, true)
+//            triggerError(firstNotValidItemPosition)
+//            return false
+//        }
+//
+//        // second: check if there are not yet visible items
+//        val nbItems = adapter.itemCount
+//        val viewedItems = validationMap.size
+//        if (viewedItems < nbItems) {
+//            val pos =
+//                (binding.recyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+//            if (pos < nbItems - 1) {
+//                scrollTo(pos + 1, true)
+//            }
+//            return false
+//        }
+//
+//        // third: check any not valid item
+//        var formIsValid = true
+//        validationMap.values.forEachIndexed { index, isValid ->
+//            if (!isValid) {
+//                if (formIsValid) { // scroll to first not valid
+//                    scrollTo(index, true)
+//                }
+//                formIsValid = false
+//                triggerError(index)
+//            }
+//        }
+//        if (!formIsValid) {
+//            return false
+//        }
+//
+//        return true
+//    }
 
-    private fun sendAction(relatedEntityId: String?, actionUUID: String) {
-        if (isFormValid()) {
-            delegate.checkNetwork(object : NetworkChecker {
-                val task = ActionTask(
-                    status = STATUS.PENDING,
-                    date = Date(),
-                    relatedItemId = relatedEntityId,
-                    label = delegate.getSelectAction().getPreferredName(),
-                    actionInfo = ActionInfo(
-                        paramsToSubmit = paramsToSubmit,
-                        metaDataToSubmit = metaDataToSubmit,
-                        imagesToUpload = imagesToUpload.mapValues { entry ->
-                            entry.value.path
-                        } as HashMap<String, String>,
-                        validationMap = validationMap,
-                        allParameters = delegate.getSelectAction().parameters.toString(),
-                        actionName = delegate.getSelectAction().name,
-                        tableName = tableName,
-                        currentRecordId = delegate.getSelectedEntity()?.__KEY,
-                        actionUUID = delegate.getSelectAction().id
-                    )
-                )
+//    private fun scrollTo(position: Int, shouldHideKeyboard: Boolean) {
+//        if (shouldHideKeyboard) onHideKeyboardCallback()
+//        scrollPos = position
+//        binding.recyclerView.removeOnScrollListener(onScrollListener)
+//        binding.recyclerView.addOnScrollListener(onScrollListener)
+//        binding.recyclerView.smoothScrollToPosition(position)
+//    }
 
-                override fun onServerAccessible() {
-                    if (delegate.getSelectAction().isOfflineCompatible()) {
-                        lifecycleScope.launch {
-                            task.id = delegate.getActionTaskViewModel().insertTask(task)
-                        }
-                    }
+//    private fun triggerError(position: Int) {
+//        (binding.recyclerView.findViewHolderForLayoutPosition(position) as BaseViewHolder?)?.validate(
+//            true
+//        )
+//    }
 
-                    entityListViewModel.sendAction(
-                        delegate.getSelectAction().name,
-                        ActionHelper.getActionContent(
-                            tableName,
-                            relatedEntityId,
-                            paramsToSubmit,
-                            metaDataToSubmit,
-                            relationName = inverseName,
-                            parentPrimaryKey = parentItemId,
-                            parentTableName = parentTableName,
-                            parentRelationName = parentRelationName,
-                            actionUUID = actionUUID
-                        )
-                    ) { actionResponse ->
-                        actionResponse?.let {
-
-                            lifecycleScope.launch {
-                                val status = if (actionResponse.success) {
-                                    STATUS.SUCCESS
-                                } else {
-                                    STATUS.ERROR_SERVER
-                                }
-                                task.status = status
-                                task.message = actionResponse.statusText
-                                delegate.getActionTaskViewModel().insertTask(
-                                    task
-                                )
-                            }
-
-                            actionResponse.dataSynchro?.let { dataSynchro ->
-                                if (dataSynchro) {
-                                    delegate.requestDataSync(tableName)
-                                }
-                                activity?.onBackPressed()
-                            }
-                        }
-                    }
-                }
-
-                override fun onServerInaccessible() {
-                    lifecycleScope.launch {
-                        val jsonObject = JSONObject()
-                        jsonObject.put("params", delegate.getSelectAction().parameters)
-
-                        if (delegate.getSelectAction().isOfflineCompatible()) {
-                            if (shouldShowActionError()) {
-                                entityListViewModel.toastMessage.showMessage(
-                                    context?.getString(R.string.action_send_server_not_accessible),
-                                    tableName,
-                                    MessageType.NEUTRAL
-                                )
-                            }
-                            delegate.getActionTaskViewModel().insertTask(task)
-                        }
-                        activity?.onBackPressed()
-                    }
-                }
-
-                override fun onNoInternet() {
-                    lifecycleScope.launch {
-                        if (delegate.getSelectAction().isOfflineCompatible()) {
-                            delegate.getActionTaskViewModel().insertTask(
-                                task
-                            )
-                            if (shouldShowActionError()) {
-                                entityListViewModel.toastMessage.showMessage(
-                                    context?.getString(R.string.action_send_no_internet),
-                                    tableName,
-                                    MessageType.NEUTRAL
-                                )
-                            }
-                        }
-                        activity?.onBackPressed()
-                    }
-                }
-            })
-        }
-    }
-
-    private fun uploadImages(relatedEntityId: String?, actionUUID: String) {
-        val bodies = imagesToUpload.mapValues {
-            val fileUri = it.value as Uri
-            val stream = activity?.contentResolver?.openInputStream(fileUri)
-            val body = stream?.readBytes()?.let { it1 ->
-                it1
-                    .toRequestBody(
-                        "application/octet".toMediaTypeOrNull(),
-                        0, it1.size
-                    )
-            }
-            body
-        }
-
-        delegate.checkNetwork(object : NetworkChecker {
-            val task = ActionTask(
-                status = STATUS.PENDING,
-                date = Date(),
-                relatedItemId = relatedEntityId,
-                label = delegate.getSelectAction().getPreferredName(),
-                actionInfo = ActionInfo(
-                    paramsToSubmit = paramsToSubmit,
-                    metaDataToSubmit = metaDataToSubmit,
-                    imagesToUpload = imagesToUpload.mapValues { entry ->
-                        entry.value.toString()
-                    } as HashMap<String, String>,
-                    validationMap = validationMap,
-                    allParameters = delegate.getSelectAction().parameters.toString(),
-                    actionName = delegate.getSelectAction().name,
-                    tableName = tableName,
-                    currentRecordId = delegate.getSelectedEntity()?.__KEY,
-                    actionUUID = delegate.getSelectAction().id
-                )
+    private fun sendAction() {
+        val pendingTask = ActionTask(
+            status = STATUS.PENDING,
+            date = Date(),
+            relatedItemId = (selectedEntity?.__entity as EntityModel?)?.__KEY,
+            label = action.getPreferredName(),
+            actionInfo = ActionInfo(
+                paramsToSubmit = paramsToSubmit,
+                metaDataToSubmit = metaDataToSubmit,
+                imagesToUpload = imagesToUpload.mapValues { entry ->
+                    entry.value.path
+                } as HashMap<String, String>,
+                validationMap = validationMap,
+                allParameters = action.parameters.toString(),
+                actionName = action.name,
+                tableName = tableName,
+                currentRecordId = (selectedEntity?.__entity as EntityModel?)?.__KEY,
+                actionUUID = action.id,
+                isOfflineCompatible = action.isOfflineCompatible(),
+                preferredShortName = action.getPreferredShortName()
             )
-
-            override fun onServerAccessible() {
-                entityListViewModel.uploadImage(bodies, { parameterName, receivedId ->
-                    paramsToSubmit[parameterName] = receivedId
-                    metaDataToSubmit[parameterName] = "uploaded"
-                }) {
-                    sendAction(relatedEntityId, actionUUID)
-                }
-            }
-
-            override fun onServerInaccessible() {
-
-                lifecycleScope.launch {
-                    delegate.getActionTaskViewModel().insertTask(
-                        task
-                    )
-                }
-                entityListViewModel.toastMessage.showMessage(
-                    context?.getString(R.string.action_send_server_not_accessible),
-                    tableName,
-                    MessageType.NEUTRAL
-                )
-                activity?.onBackPressed()
-            }
-
-            override fun onNoInternet() {
-                lifecycleScope.launch {
-                    delegate.getActionTaskViewModel().insertTask(
-                        task
-                    )
-                }
-                entityListViewModel.toastMessage.showMessage(
-                    context?.getString(R.string.action_send_no_internet),
-                    tableName,
-                    MessageType.NEUTRAL
-                )
-                activity?.onBackPressed()
-            }
-        })
+        )
+        actionActivity.sendAction(
+            actionContent = getActionContent(action.id, (selectedEntity?.__entity as EntityModel?)?.__KEY),
+            actionTask = pendingTask,
+            tableName = tableName
+        ) {
+            activity?.onBackPressed()
+        }
     }
 
+    private fun uploadImages(proceed: () -> Unit) {
+        val bodies: Map<String, RequestBody?> = imagesToUpload.mapValues {
+            val stream = activity?.contentResolver?.openInputStream(it.value)
+            stream?.readBytes()?.toRequestBody(APP_OCTET.toMediaTypeOrNull())
+        }
+
+        actionActivity.uploadImage(
+            bodies = bodies,
+            tableName = tableName,
+            onImageUploaded = { parameterName, receivedId ->
+                paramsToSubmit[parameterName] = receivedId
+                metaDataToSubmit[parameterName] = "uploaded"
+            }
+        ) {
+            proceed()
+        }
+    }
+
+    override fun getActionContent(actionUUID: String, itemId: String?): MutableMap<String, Any> {
+        return ActionHelper.getActionContent(
+            tableName = tableName,
+            actionUUID = actionUUID,
+            itemId = itemId ?: this.itemId,
+            parameters = paramsToSubmit,
+            metaData = metaDataToSubmit,
+            parentItemId = parentItemId,
+            relation = relation
+        )
+    }
+
+//    private fun onImageChosen(uri: Uri) {
+//        action.parameters.getSafeObject(actionPosition)?.getSafeString("name")?.let { parameterName ->
+//            imagesToUpload[parameterName] = uri
+//        }
+//        adapter.updateImageForPosition(actionPosition, uri)
+//    }
+
+//    private fun actionTypesCallback(actionType: Action.Type, position: Int) {
+//        actionPosition = position
+//        when (actionType) {
+//            Action.Type.PICK_PHOTO_GALLERY -> pickPhotoFromGallery()
+//            Action.Type.TAKE_PICTURE_CAMERA -> takePhotoFromCamera()
+//            Action.Type.SCAN -> scan()
+//            Action.Type.SIGN -> showSignDialog()
+//        }
+//    }
+
+//    private fun showSignDialog() {
+//        requireActivity().apply {
+//            signatureDialog = LayoutInflater.from(this)
+//                .inflate(R.layout.action_parameter_signature_dialog, findViewById(android.R.id.content), false)
+//
+//            MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
+//                .setView(signatureDialog)
+//                .setTitle(getString(R.string.signature_dialog_title))
+//                .setPositiveButton(getString(R.string.signature_dialog_positive)) { _, _ ->
+//                    onSigned()
+//                }
+//                .setNegativeButton(getString(R.string.signature_dialog_cancel), null)
+//                .show()
+//        }
+//    }
+
+//    private fun onSigned() {
+//        ImageHelper.getTempImageFile(requireContext(), Bitmap.CompressFormat.PNG) { _, signatureFilePath ->
+//            File(signatureFilePath).apply {
+//                val bitmap = try {
+//                    signatureDialog.findViewById<SignaturePad>(R.id.signature_pad)?.transparentSignatureBitmap
+//                } catch (e: IllegalArgumentException) {
+//                    Timber.d("Could not get the signature bitmap (${e.message})")
+//                    null
+//                }
+//                bitmap?.let {
+//                    this.writeBitmap(it)
+//                    onImageChosen(Uri.fromFile(this))
+//                }
+//            }
+//        }
+//    }
+
+//    private fun pickPhotoFromGallery() {
+//        getImageFromGallery.launch("image/*")
+//    }
+//
+//    private fun takePhotoFromCamera() {
+//        ImageHelper.getTempImageFile(requireContext(), Bitmap.CompressFormat.JPEG) { uri, photoFilePath ->
+//            currentPhotoPath = photoFilePath
+//            getCameraImage.launch(uri)
+//        }
+//    }
+//
+//    private fun scan() {
+//        delegate.setFullScreenMode(true)
+//        BaseApp.genericNavigationResolver.navigateToActionScanner(binding)
+//    }
+
+    @Suppress("NestedBlockDepth")
     fun handleResult(requestCode: Int, data: Intent?) {
         // the request code is te equivalent of position of item in adapter
         // case of image picked from gallery

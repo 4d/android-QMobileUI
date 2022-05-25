@@ -20,7 +20,7 @@ class ActionsParametersListAdapter(
     val onValueChanged: (String, Any?, String?, Boolean) -> Unit,
     val goToScanner: (Int) -> Unit,
     val goToCamera: (Intent, Int, String) -> Unit,
-    val onSigned: (String, Uri?) -> Unit
+    val queueForUpload: (String, Uri?) -> Unit
 ) :
     RecyclerView.Adapter<ActionParameterViewHolder>() {
 
@@ -63,7 +63,7 @@ class ActionsParametersListAdapter(
         }, { intent: Intent, pos: Int, destinationPath ->
             goToCamera(intent, pos, destinationPath)
         }, { parameterName: String, uri: Uri? ->
-            onSigned(parameterName, uri)
+            queueForUpload(parameterName, uri)
         }
         )
     }
