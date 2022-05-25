@@ -334,7 +334,6 @@ class MainActivity :
                 if (shouldDelayOnForegroundEvent.getAndSet(false)) {
                     applyOnForegroundEvent()
                 }
-                checkPendingTasks()
             }
             AuthenticationState.LOGOUT -> {
                 // Logout performed
@@ -521,17 +520,17 @@ class MainActivity :
         when (networkState) {
             NetworkState.CONNECTED -> {
                 // Setting the authenticationState to its initial value
-                if (isAlreadyLoggedIn())
+                if (isAlreadyLoggedIn()) {
                     loginViewModel.setAuthenticationState(AuthenticationState.AUTHENTICATED)
+                    checkPendingTasks()
+                }
 
                 // If guest and not yet logged in, auto login
                 if (!isAlreadyLoggedIn() && BaseApp.runtimeDataHolder.guestLogin && authenticationRequested) {
                     authenticationRequested = false
                     tryAutoLogin()
-                }
-
-                if (isAlreadyLoggedIn())
                     checkPendingTasks()
+                }
             }
             else -> {}
         }

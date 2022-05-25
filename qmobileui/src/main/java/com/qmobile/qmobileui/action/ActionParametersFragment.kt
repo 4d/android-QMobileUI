@@ -141,16 +141,15 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //            }
 //        }
 
+        if (!fromPendingTasks)
+            allParameters = action.parameters
+
         _binding = FragmentActionParametersBinding.inflate(
             inflater,
             container,
             false
         ).apply {
             lifecycleOwner = viewLifecycleOwner
-            if (fromPendingTasks)
-                allParameters = action.parameters
-            else
-                setupRecyclerView()
 //            adapter = ActionsParametersListAdapter(
 //                context = requireContext(),
 //                action = action,
@@ -180,6 +179,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (!fromPendingTasks)
+            setupRecyclerView()
         ActionParametersFragmentObserver(this).initObservers()
     }
 
