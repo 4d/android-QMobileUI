@@ -41,6 +41,8 @@ import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.list.viewholder.SwipeHelper
+import com.qmobile.qmobileui.navigation.navigateToActionForm
+import com.qmobile.qmobileui.navigation.navigateToPendingTasks
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.utils.FormQueryBuilder
@@ -166,6 +168,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                     viewDataBinding = dataBinding,
                     key = key,
                     query = searchPattern,
+                    sourceTable = if (fromRelation) parentTableName else tableName,
                     destinationTable = if (fromRelation) tableName else "",
                     parentItemId = parentItemId,
                     parentTableName = parentTableName,
@@ -406,8 +409,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     }
 
     override fun navigateToActionForm(action: Action, itemId: String?) {
-        BaseApp.genericNavigationResolver.navigateToActionForm(
-            viewDataBinding = binding,
+        binding.navigateToActionForm(
             tableName = relation?.source ?: tableName,
             itemId = itemId ?: "",
             relationName = relation?.name ?: "",
@@ -418,12 +420,9 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     }
 
     override fun navigateToPendingTasks() {
-        activity?.let {
-            BaseApp.genericNavigationResolver.navigateToPendingTasks(
-                fragmentActivity = it,
-                tableName = relation?.source ?: tableName,
-                currentItemId = ""
-            )
-        }
+        activity?.navigateToPendingTasks(
+            tableName = relation?.source ?: tableName,
+            currentItemId = ""
+        )
     }
 }

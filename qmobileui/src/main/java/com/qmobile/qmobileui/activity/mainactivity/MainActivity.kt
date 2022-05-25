@@ -9,6 +9,7 @@ package com.qmobile.qmobileui.activity.mainactivity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
@@ -366,10 +367,7 @@ class MainActivity :
             val drawable =
                 if (withIcons) ActionHelper.getActionIconDrawable(this, action) else null
 
-            drawable?.colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                getColorFromAttr(R.attr.colorOnSurface),
-                BlendModeCompat.SRC_ATOP
-            )
+            drawable?.setMenuItemColorFilter()
 
             menu.add(action.getPreferredName())
                 .setOnMenuItemClickListener {
@@ -381,13 +379,23 @@ class MainActivity :
         }
 
         // Add pendingTasks menu item at the end
+        val drawable =
+            if (withIcons) ContextCompat.getDrawable(this, R.drawable.dots_horizontal_circle_outline) else null
+        drawable?.setMenuItemColorFilter()
         menu.add(pendingTaskString)
             .setOnMenuItemClickListener {
                 actionNavigable.navigateToPendingTasks()
                 true
             }
-//            .setIcon(drawable)
+            .setIcon(drawable)
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+    }
+
+    private fun Drawable?.setMenuItemColorFilter() {
+        this?.colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+            getColorFromAttr(R.attr.colorOnSurface),
+            BlendModeCompat.SRC_ATOP
+        )
     }
 
     override fun onActionClick(action: Action, actionNavigable: ActionNavigable, isEntityAction: Boolean) {
@@ -517,7 +525,7 @@ class MainActivity :
                     loginViewModel.setAuthenticationState(AuthenticationState.AUTHENTICATED)
 
                 // If guest and not yet logged in, auto login
-                if (isAlreadyLoggedIn() && BaseApp.runtimeDataHolder.guestLogin && authenticationRequested) {
+                if (!isAlreadyLoggedIn() && BaseApp.runtimeDataHolder.guestLogin && authenticationRequested) {
                     authenticationRequested = false
                     tryAutoLogin()
                 }
@@ -575,7 +583,7 @@ class MainActivity :
             bottomNav.inflateMenu(it)
         }
 
-        val navGraphIds = BaseApp.navGraphIds
+        val navGraphIds = BaseApp.navGraphIds.plusElement(R.navigation.settings)
 
         // Setup the bottom navigation view with a list of navigation graphs
         val controller = bottomNav.setupWithNavController(

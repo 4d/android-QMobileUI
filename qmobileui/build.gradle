@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply plugin: 'kotlin-kapt'
 
 apply from: "$rootDir/buildscripts/ktlint.gradle"
@@ -47,6 +48,10 @@ dependencies {
 
     // Paging
     implementation Libs.androidx_paging3
+
+    // Navigation
+    implementation Libs.androidx_navigation_fragment
+    implementation Libs.androidx_navigation_ui
 
     // Glide
     implementation Libs.glide

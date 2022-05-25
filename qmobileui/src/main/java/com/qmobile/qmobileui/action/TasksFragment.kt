@@ -12,12 +12,12 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobiledatastore.dao.ActionTask
-import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionTasksBinding
+import com.qmobile.qmobileui.navigation.navigateToActionForm
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
 
@@ -162,8 +162,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                 actionActivity.sendPendingTasks()
             } else {
                 newList[position]?.let { task ->
-                    BaseApp.genericNavigationResolver.navigateToActionForm(
-                        viewDataBinding = binding,
+                    binding.navigateToActionForm(
                         tableName = task.actionInfo.tableName,
                         itemId = "",
                         relationName = "",
