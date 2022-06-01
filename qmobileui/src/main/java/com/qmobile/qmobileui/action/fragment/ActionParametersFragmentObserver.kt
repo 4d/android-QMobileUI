@@ -1,12 +1,13 @@
 /*
- * Created by qmarciset on 24/5/2022.
+ * Created by htemanni on 1/6/2022.
  * 4D SAS
- * Copyright (c) 2022 qmarciset. All rights reserved.
+ * Copyright (c) 2022 htemanni. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action
+package com.qmobile.qmobileui.action.fragment
 
 import android.net.Uri
+import com.qmobile.qmobileui.action.observeOnce
 import com.qmobile.qmobileui.activity.BaseObserver
 import org.json.JSONArray
 

@@ -1,4 +1,4 @@
-package com.qmobile.qmobileui.action
+package com.qmobile.qmobileui.action.utils
 
 import android.content.Context
 import android.graphics.Canvas

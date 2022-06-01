@@ -1,8 +1,15 @@
-package com.qmobile.qmobileui.action
+/*
+ * Created by htemanni on 1/6/2022.
+ * 4D SAS
+ * Copyright (c) 2022 htemanni. All rights reserved.
+ */
+
+package com.qmobile.qmobileui.action.viewholder
 
 import android.view.View
 import android.widget.TextView
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.model.TaskItemTypeEnum
 
 class SectionViewHolder(itemView: View) : TaskListViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)

@@ -1,12 +1,22 @@
-package com.qmobile.qmobileui.action
+/*
+ * Created by htemanni on 1/6/2022.
+ * 4D SAS
+ * Copyright (c) 2022 htemanni. All rights reserved.
+ */
+
+package com.qmobile.qmobileui.action.viewholder
 
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import com.example.dotprogressbar.DotProgressBar
+import com.qmobile.qmobileui.action.utils.DotProgressBar
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.utils.getDayWord
+import com.qmobile.qmobileui.action.utils.getHourWord
+import com.qmobile.qmobileui.action.utils.getMinuteWord
+import com.qmobile.qmobileui.action.utils.getSecondWord
 import java.util.Date
 
 const val MILLISECONDS_IN_SECOND = 1000

@@ -1,4 +1,10 @@
-package com.qmobile.qmobileui.action
+/*
+ * Created by htemanni on 1/6/2022.
+ * 4D SAS
+ * Copyright (c) 2022 htemanni. All rights reserved.
+ */
+
+package com.qmobile.qmobileui.action.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,6 +13,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.model.TaskItemTypeEnum
+import com.qmobile.qmobileui.action.viewholder.SectionViewHolder
+import com.qmobile.qmobileui.action.viewholder.TaskListViewHolder
+import com.qmobile.qmobileui.action.viewholder.TaskViewHolder
 
 class TasksListAdapter(
     context: Context,

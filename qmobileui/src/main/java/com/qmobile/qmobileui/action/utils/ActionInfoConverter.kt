@@ -4,7 +4,7 @@
  * Copyright (c) 2022 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action
+package com.qmobile.qmobileui.action.utils
 
 import androidx.room.TypeConverter
 import com.qmobile.qmobileapi.utils.parseToString

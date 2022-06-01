@@ -1,4 +1,10 @@
-package com.qmobile.qmobileui.action
+/*
+ * Created by htemanni on 1/6/2022.
+ * 4D SAS
+ * Copyright (c) 2022 htemanni. All rights reserved.
+ */
+
+package com.qmobile.qmobileui.action.utils
 
 fun getDayWord(days: Long): String = if (days <= 1) "day" else "days"
 fun getHourWord(hours: Long): String = if (hours <= 1) "hour" else "hours"

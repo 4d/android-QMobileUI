@@ -1,5 +1,11 @@
+/*
+ * Created by htemanni on 1/6/2022.
+ * 4D SAS
+ * Copyright (c) 2022 htemanni. All rights reserved.
+ */
 
-package com.qmobile.qmobileui.action
+
+package com.qmobile.qmobileui.action.fragment
 
 import android.content.Context
 import android.graphics.Canvas
@@ -17,6 +23,8 @@ import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.adapter.TasksListAdapter
+import com.qmobile.qmobileui.action.utils.SwipeToDeleteCallback
 import com.qmobile.qmobileui.databinding.FragmentActionTasksBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory

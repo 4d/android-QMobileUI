@@ -1,4 +1,10 @@
-package com.qmobile.qmobileui.action
+/*
+ * Created by htemanni on 1/6/2022.
+ * 4D SAS
+ * Copyright (c) 2022 htemanni. All rights reserved.
+ */
+
+package com.qmobile.qmobileui.action.adapter
 
 import android.content.Context
 import android.content.Intent
@@ -7,6 +13,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileui.action.ActionParameterViewHolderFactory
+import com.qmobile.qmobileui.action.model.ActionParameterEnum
+import com.qmobile.qmobileui.action.viewholder.ActionParameterViewHolder
+import com.qmobile.qmobileui.action.viewholder.ImageViewHolder
+import com.qmobile.qmobileui.action.viewholder.SignatureViewHolder
 import org.json.JSONArray
 import org.json.JSONObject
 

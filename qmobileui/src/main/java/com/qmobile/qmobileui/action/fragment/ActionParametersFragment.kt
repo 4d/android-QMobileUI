@@ -1,11 +1,12 @@
 /*
- * Created by Quentin Marciset on 7/2/2020.
+ * Created by htemanni on 1/6/2022.
  * 4D SAS
- * Copyright (c) 2020 Quentin Marciset. All rights reserved.
+ * Copyright (c) 2022 htemanni. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action
+package com.qmobile.qmobileui.action.fragment
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -40,6 +41,13 @@ import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.ActionProvider
+import com.qmobile.qmobileui.action.adapter.ActionsParametersListAdapter
+import com.qmobile.qmobileui.action.model.Action
+import com.qmobile.qmobileui.action.utils.ActionHelper
+import com.qmobile.qmobileui.action.utils.createImageFile
+import com.qmobile.qmobileui.action.viewholder.BITMAP_QUALITY
+import com.qmobile.qmobileui.action.viewholder.ORIGIN_POSITION
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
@@ -86,7 +94,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     var currentDestinationPath: String? = null
 
     internal var currentTask: ActionTask? = null
-    internal var taskId: Long? = null
+    internal var taskId: String? = null
     private var fromPendingTasks = false
     internal lateinit var allParameters: JSONArray
 
@@ -123,8 +131,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("itemId")?.let { itemId = it }
-        arguments?.getLong("taskId")?.let {
-            if (it != -1L) {
+        arguments?.getString("taskId")?.let {
+            if (it.isNotEmpty()) {
                 taskId = it
                 fromPendingTasks = true
             }
@@ -209,7 +217,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
                     position
                 )
             }
-            requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
         }, queueForUpload = { parameterName: String, uri: Uri? ->
             if (uri != null) {
                 imagesToUpload[parameterName] = uri
@@ -300,14 +308,28 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private fun validatePendingTask() {
         currentTask?.let { task ->
             val actionTask = ActionTask(
-                id = task.id,
                 status = STATUS.PENDING,
                 date = task.date,
                 relatedItemId = task.relatedItemId,
                 label = task.label,
-                actionInfo = task.actionInfo
+                actionInfo  = ActionInfo(
+                    paramsToSubmit = paramsToSubmit,
+                    metaDataToSubmit = metaDataToSubmit,
+                    imagesToUpload = imagesToUpload.mapValues { entry ->
+                        entry.value.path
+                    } as HashMap<String, String>,
+                    validationMap = validationMap,
+                    allParameters = action.parameters.toString(),
+                    actionName = action.name,
+                    tableName = tableName,
+                    actionUUID = action.id,
+                    isOfflineCompatible = action.isOfflineCompatible(),
+                    preferredShortName = action.getPreferredShortName()
+                )
             )
-            actionActivity.getTaskViewModel().insert(actionTask)
+            actionTask.id = task.id
+
+            actionActivity.getTaskViewModel().insertOrReplace(actionTask)
         }
         activity?.onBackPressed()
     }
@@ -405,8 +427,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //        )
 //    }
 
-    private fun sendAction() {
-        val pendingTask = ActionTask(
+    private fun createPendingTask(): ActionTask {
+        return ActionTask(
             status = STATUS.PENDING,
             date = Date(),
             relatedItemId = (selectedEntity?.__entity as EntityModel?)?.__KEY,
@@ -421,12 +443,15 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
                 allParameters = action.parameters.toString(),
                 actionName = action.name,
                 tableName = tableName,
-                currentRecordId = (selectedEntity?.__entity as EntityModel?)?.__KEY,
                 actionUUID = action.id,
                 isOfflineCompatible = action.isOfflineCompatible(),
                 preferredShortName = action.getPreferredShortName()
             )
         )
+    }
+
+    private fun sendAction() {
+        val pendingTask = createPendingTask()
         actionActivity.sendAction(
             actionContent = getActionContent(action.id, (selectedEntity?.__entity as EntityModel?)?.__KEY),
             actionTask = pendingTask,
@@ -445,6 +470,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         actionActivity.uploadImage(
             bodies = bodies,
             tableName = tableName,
+            isFromAction = true,
+            taskToSendIfOffline = createPendingTask(),
             onImageUploaded = { parameterName, receivedId ->
                 paramsToSubmit[parameterName] = receivedId
                 metaDataToSubmit[parameterName] = "uploaded"
