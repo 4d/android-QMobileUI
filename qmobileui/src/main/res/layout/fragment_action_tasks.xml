@@ -13,7 +13,6 @@
             type="com.qmobile.qmobiledatasync.viewmodel.TaskViewModel" />
     </data>
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -34,8 +33,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:swipeRefreshLayoutProgressSpinnerBackgroundColor="?android:attr/colorPrimary"
-          >
+            app:swipeRefreshLayoutProgressSpinnerBackgroundColor="?android:attr/colorPrimary">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/fragment_tasks_recycler_view"
