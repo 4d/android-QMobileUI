@@ -149,18 +149,6 @@ class ActionHelper private constructor() {
             }
         }
 
-        fun shouldShowActionError(): Boolean {
-            val sharedPreferencesHolder = BaseApp.sharedPreferencesHolder
-            val lastDisplayErrorTime =
-                Date(sharedPreferencesHolder.lastTimeActionErrorDisplayed).time
-            val diffInSeconds = (Date().time - lastDisplayErrorTime) / MILLISECONDS_IN_SECOND
-
-            if (diffInSeconds >= SECONDS_IN_MINUTE) {
-                // reset lastTimeActionErrorDisplayed with the currentTime
-                sharedPreferencesHolder.lastTimeActionErrorDisplayed = Date().time
-                return true
-            }
-            return false
-        }
+       
     }
 }
