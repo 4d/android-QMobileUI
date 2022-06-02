@@ -10,10 +10,11 @@ import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.sync.notifyDataUnSynced
+import com.qmobile.qmobiledatasync.sync.syncDeletedRecords
 import com.qmobile.qmobiledatasync.toast.ToastMessage
-import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.utils.ToastHelper
+import timber.log.Timber
 
 class MainActivityDataSync(private val activity: MainActivity) {
 
@@ -33,12 +34,9 @@ class MainActivityDataSync(private val activity: MainActivity) {
             loginRequiredCallbackForDataSync
         )
 
-    fun dataSync(
-        connectivityViewModel: ConnectivityViewModel,
-        alreadyRefreshedTable: String?
-    ) {
-        if (connectivityViewModel.isConnected()) {
-            connectivityViewModel.isServerConnectionOk { isAccessible ->
+    fun dataSync(alreadyRefreshedTable: String? = null) {
+        if (activity.connectivityViewModel.isConnected()) {
+            activity.connectivityViewModel.isServerConnectionOk { isAccessible ->
                 if (isAccessible) {
                     prepareViewModelsForDataSync(alreadyRefreshedTable)
                     dataSync.perform()
@@ -55,6 +53,17 @@ class MainActivityDataSync(private val activity: MainActivity) {
             activity.entityListViewModelList.find {
                 it.getAssociatedTableName() == alreadyRefreshedTable
             }?.isToSync?.set(false)
+        }
+    }
+
+    fun shouldDataSync(currentTableName: String) {
+        Timber.d("GlobalStamp changed, synchronization is required")
+        if (activity.entityListViewModelList.size > 1) {
+            Timber.i("Starting a dataSync procedure")
+            dataSync(currentTableName)
+        } else {
+            Timber.i("The only table has already been synced. Only checking deletedRecords now")
+            activity.entityListViewModelList.syncDeletedRecords()
         }
     }
 }
