@@ -24,9 +24,10 @@ class TasksFragmentObserver(
         // remove old history tasks if we have more than 10
         fragment.actionActivity.getTaskViewModel().allTasks.observe(fragment.viewLifecycleOwner) { allTasks ->
             val allHistory = allTasks
-                .filter { ((it.actionInfo.tableName == fragment.tableName) && (it.status == STATUS.SUCCESS || it.status == STATUS.ERROR_SERVER)) }
+                .filter { ((it.actionInfo.tableName == fragment.tableName)
+                        && (it.status == STATUS.SUCCESS || it.status == STATUS.ERROR_SERVER)) }
                 .sortedByDescending { it.date }
-            if (allHistory.size > 10) {
+            if (allHistory.size > MAX_PENDING_TASKS) {
                 val historyToDelete = allHistory.subList(MAX_PENDING_TASKS - 1, allHistory.size - 1)
                 fragment.actionActivity.getTaskViewModel()
                     .deleteList(historyToDelete.map { actionTask -> actionTask.id })
