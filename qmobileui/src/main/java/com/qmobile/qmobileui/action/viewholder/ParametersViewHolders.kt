@@ -1061,9 +1061,9 @@ class ImageViewHolder(itemView: View) :
     private fun displaySelectedImageIfNeed() {
         try {
             if (itemJsonObject.get("uri") != null) {
-              /*  val uri = itemJsonObject.get("uri") as Uri
+                val uri = itemJsonObject.get("uri") as Uri
                 imageButton.setImageURI(uri)
-                itemJsonObject.remove("uri")*/
+                itemJsonObject.remove("uri")
             }
         } catch (e: Exception) {
             Timber.e("ActionParameterViewHolder: ", e.localizedMessage)
