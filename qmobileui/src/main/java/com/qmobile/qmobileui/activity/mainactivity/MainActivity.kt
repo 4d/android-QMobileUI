@@ -42,7 +42,6 @@ import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobiledatastore.dao.ActionInfo
 import com.qmobile.qmobiledatastore.dao.ActionTask
-import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.network.NetworkState
@@ -59,12 +58,13 @@ import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.Action
-import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.action.ActionNavigable
-import com.qmobile.qmobileui.action.ActionParametersFragment
+import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
+import com.qmobile.qmobileui.action.model.Action
+import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
+import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.utils.PermissionChecker
@@ -386,7 +386,7 @@ class MainActivity :
                 actionNavigable.navigateToPendingTasks()
                 true
             }
-            .setIcon(drawable)
+            .setIcon(drawable.adjustActionDrawableMargins(this))
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
     }
 
@@ -406,14 +406,13 @@ class MainActivity :
         } else {
 
             val task = ActionTask(
-                status = STATUS.PENDING,
+                status = ActionTask.Status.PENDING,
                 date = Date(),
                 relatedItemId = (currentEntity?.__entity as EntityModel?)?.__KEY,
                 label = action.getPreferredName(),
                 actionInfo = ActionInfo(
                     actionName = action.name,
                     tableName = actionNavigable.tableName,
-                    currentRecordId = (currentEntity?.__entity as EntityModel?)?.__KEY,
                     actionUUID = action.id,
                     isOfflineCompatible = action.isOfflineCompatible(),
                     preferredShortName = action.getPreferredShortName()
@@ -460,18 +459,15 @@ class MainActivity :
                         actionResponse?.let {
 
                             actionTask.status = if (actionResponse.success)
-                                STATUS.SUCCESS
+                                ActionTask.Status.SUCCESS
                             else
-                                STATUS.ERROR_SERVER
+                                ActionTask.Status.ERROR_SERVER
 
                             actionTask.message = actionResponse.statusText
-                            taskViewModel.insert(actionTask)
 
-                            actionResponse.dataSynchro?.let { dataSynchro ->
-                                if (dataSynchro) {
-                                    requestDataSync(tableName)
-                                }
-                            }
+                            taskViewModel.insert(actionTask)
+                            if (actionResponse.dataSynchro == true)
+                                requestDataSync(tableName)
                             onActionSent()
                         }
                     }
@@ -491,6 +487,7 @@ class MainActivity :
         bodies: Map<String, RequestBody?>,
         tableName: String,
         isFromAction: Boolean,
+        taskToSendIfOffline: ActionTask?,
         onImageUploaded: (parameterName: String, receivedId: String) -> Unit,
         onAllUploadFinished: () -> Unit
     ) {
@@ -508,10 +505,12 @@ class MainActivity :
 
             override fun onServerInaccessible() {
                 onServerInaccessible(tableName, isFromAction)
+                taskToSendIfOffline?.let { taskViewModel.insert(it) }
             }
 
             override fun onNoInternet() {
                 onNoInternet(tableName, isFromAction)
+                taskToSendIfOffline?.let { taskViewModel.insert(it) }
             }
         })
     }
@@ -698,6 +697,7 @@ class MainActivity :
                     bodies = bodies,
                     tableName = "PendingTasks", // just for logs
                     isFromAction = true,
+                    taskToSendIfOffline = null,
                     onImageUploaded = { parameterName, receivedId ->
                         pendingTask.actionInfo.paramsToSubmit?.set(parameterName, receivedId)
                         pendingTask.actionInfo.metaDataToSubmit?.set(parameterName, "uploaded")

@@ -1,4 +1,4 @@
-package com.qmobile.qmobileui.action
+package com.qmobile.qmobileui.action.utils
 
 import android.text.Editable
 import android.text.Selection

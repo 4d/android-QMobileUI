@@ -4,7 +4,7 @@
  * Copyright (c) 2021 htemanni. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action
+package com.qmobile.qmobileui.action.model
 
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import org.json.JSONArray
@@ -15,11 +15,8 @@ class Action(
     val name: String = "",
     val shortLabel: String? = null,
     val label: String? = null,
-    val scope: String? = null,
-    val tableNumber: Int? = null,
     val icon: String? = null,
     val preset: String? = null,
-    val style: String? = null,
     val parameters: JSONArray
 ) {
     val id = UUID.randomUUID().toString()

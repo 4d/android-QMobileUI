@@ -1,4 +1,10 @@
-package com.qmobile.qmobileui.action
+/*
+ * Created by htemanni on 1/6/2022.
+ * 4D SAS
+ * Copyright (c) 2022 htemanni. All rights reserved.
+ */
+
+package com.qmobile.qmobileui.action.utils
 
 import android.content.Context
 import android.graphics.drawable.Drawable
@@ -9,17 +15,17 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import com.qmobile.qmobileapi.utils.getSafeArray
-import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper.inverseAliasPath
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.model.Action
+import com.qmobile.qmobileui.action.model.ActionMetaData
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Date
 import kotlin.collections.HashMap
 
 class ActionHelper private constructor() {
@@ -78,11 +84,8 @@ class ActionHelper private constructor() {
                     name = getSafeString("name") ?: "",
                     shortLabel = getSafeString("shortLabel"),
                     label = getSafeString("label"),
-                    scope = getSafeString("scope"),
-                    tableNumber = getSafeInt("tableNumber"),
                     icon = getSafeString("icon"),
                     preset = getSafeString("preset"),
-                    style = getSafeString("style"),
                     parameters = getSafeArray("parameters") ?: JSONArray()
                 )
             }
@@ -141,20 +144,6 @@ class ActionHelper private constructor() {
                     return itemView
                 }
             }
-        }
-
-        fun shouldShowActionError(): Boolean {
-            val sharedPreferencesHolder = BaseApp.sharedPreferencesHolder
-            val lastDisplayErrorTime =
-                Date(sharedPreferencesHolder.lastTimeActionErrorDisplayed).time
-            val diffInSeconds = (Date().time - lastDisplayErrorTime) / MILLISECONDS_IN_SECOND
-
-            if (diffInSeconds >= SECONDS_IN_MINUTE) {
-                // reset lastTimeActionErrorDisplayed with the currentTime
-                sharedPreferencesHolder.lastTimeActionErrorDisplayed = Date().time
-                return true
-            }
-            return false
         }
     }
 }

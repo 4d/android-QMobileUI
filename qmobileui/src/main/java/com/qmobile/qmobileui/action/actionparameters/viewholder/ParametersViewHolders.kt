@@ -1,12 +1,12 @@
 /*
- * Created by qmarciset on 14/3/2022.
+ * Created by htemanni on 1/6/2022.
  * 4D SAS
- * Copyright (c) 2022 qmarciset. All rights reserved.
+ * Copyright (c) 2022 htemanni. All rights reserved.
  */
 
 @file:Suppress("TooGenericExceptionCaught", "SwallowedException", "UnusedPrivateMember")
 
-package com.qmobile.qmobileui.action
+package com.qmobile.qmobileui.action.viewholder
 
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -44,6 +44,11 @@ import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.actionparameters.ActionParameterEnum
+import com.qmobile.qmobileui.action.utils.addSuffix
+import com.qmobile.qmobileui.action.utils.createImageFile
+import com.qmobile.qmobileui.action.utils.handleDarkMode
+import com.qmobile.qmobileui.action.utils.saveBitmapToJPG
 import com.qmobile.qmobileui.binding.bindImageFromUrl
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.formatters.TimeFormat

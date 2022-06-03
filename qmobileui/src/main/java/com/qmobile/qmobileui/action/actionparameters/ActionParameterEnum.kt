@@ -1,4 +1,4 @@
-package com.qmobile.qmobileui.action
+package com.qmobile.qmobileui.action.actionparameters
 
 enum class ActionParameterEnum(val type: String, val format: String = "default") {
     // Text

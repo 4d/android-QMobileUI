@@ -10,8 +10,8 @@ import android.view.Menu
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
-import com.qmobile.qmobileui.action.Action
 import com.qmobile.qmobileui.action.ActionNavigable
+import com.qmobile.qmobileui.action.model.Action
 import okhttp3.RequestBody
 
 interface ActionActivity {
@@ -36,6 +36,7 @@ interface ActionActivity {
         bodies: Map<String, RequestBody?>,
         tableName: String,
         isFromAction: Boolean = false,
+        taskToSendIfOffline: ActionTask?,
         onImageUploaded: (parameterName: String, receivedId: String) -> Unit,
         onAllUploadFinished: () -> Unit
     )

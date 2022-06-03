@@ -7,8 +7,8 @@
 package com.qmobile.qmobileui.formatters
 
 import com.qmobile.qmobileapi.utils.safeParse
-import com.qmobile.qmobileui.action.AM_KEY
-import com.qmobile.qmobileui.action.PM_KEY
+import com.qmobile.qmobileui.action.viewholder.AM_KEY
+import com.qmobile.qmobileui.action.viewholder.PM_KEY
 import java.lang.StringBuilder
 import java.text.DateFormat
 import java.text.SimpleDateFormat

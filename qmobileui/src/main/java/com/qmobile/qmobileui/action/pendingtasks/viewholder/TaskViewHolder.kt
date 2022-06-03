@@ -1,12 +1,22 @@
-package com.qmobile.qmobileui.action
+/*
+ * Created by qmarciset on 3/6/2022.
+ * 4D SAS
+ * Copyright (c) 2022 qmarciset. All rights reserved.
+ */
+
+package com.qmobile.qmobileui.action.pendingtasks.viewholder
 
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import com.example.dotprogressbar.DotProgressBar
 import com.qmobile.qmobiledatastore.dao.ActionTask
-import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.pendingtasks.TaskListViewHolder
+import com.qmobile.qmobileui.action.utils.DotProgressBar
+import com.qmobile.qmobileui.action.utils.getDayWord
+import com.qmobile.qmobileui.action.utils.getHourWord
+import com.qmobile.qmobileui.action.utils.getMinuteWord
+import com.qmobile.qmobileui.action.utils.getSecondWord
 import java.util.Date
 
 const val MILLISECONDS_IN_SECOND = 1000
@@ -30,7 +40,7 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
         }
         label.text = item.label
         when (item.status) {
-            STATUS.SUCCESS -> {
+            ActionTask.Status.SUCCESS -> {
                 if (!item.message.isNullOrEmpty()) {
                     status.visibility = View.VISIBLE
                     status.text = item.message
@@ -39,7 +49,7 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
                 dotProgressBar.visibility = View.INVISIBLE
                 icon.visibility = View.VISIBLE
             }
-            STATUS.ERROR_SERVER -> {
+            ActionTask.Status.ERROR_SERVER -> {
                 icon.setImageResource(R.drawable.alert_circle)
                 dotProgressBar.visibility = View.INVISIBLE
                 icon.visibility = View.VISIBLE

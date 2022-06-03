@@ -34,9 +34,9 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.Action
-import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.action.ActionNavigable
+import com.qmobile.qmobileui.action.model.Action
+import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
@@ -413,7 +413,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             itemId = itemId ?: "",
             relationName = relation?.name ?: "",
             parentItemId = parentItemId,
-            pendingTaskId = -1L,
+            pendingTaskId = "",
             navbarTitle = action.getPreferredShortName()
         )
     }

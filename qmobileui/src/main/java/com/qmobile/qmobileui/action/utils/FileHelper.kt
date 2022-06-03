@@ -1,16 +1,18 @@
 /*
- * Created by qmarciset on 14/3/2022.
+ * Created by htemanni on 1/6/2022.
  * 4D SAS
- * Copyright (c) 2022 qmarciset. All rights reserved.
+ * Copyright (c) 2022 htemanni. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action
+package com.qmobile.qmobileui.action.utils
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Environment
+import com.qmobile.qmobileui.action.viewholder.BITMAP_QUALITY
+import com.qmobile.qmobileui.action.viewholder.ORIGIN_POSITION
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
