@@ -32,11 +32,11 @@ class TasksFragmentObserver(
                 .filter { it.filterEntityTasks(fragment.currentItemId) }
 
             val pendingTasks = filteredList
-                .filter { it.pendingElement() }
+                .filter { it.isPending() }
                 .sortedByDescending { it.date }
 
             val history = filteredList
-                .filter { it.historyElement() }
+                .filter { it.isHistory() }
                 .takeLast(MAX_PENDING_TASKS)
                 .sortedByDescending { it.date }
 
@@ -48,7 +48,7 @@ class TasksFragmentObserver(
     private fun cleanObsoleteHistory(allTasks: List<ActionTask>) {
         val allHistory = allTasks
             .filter { it.actionInfo.tableName == fragment.tableName }
-            .filter { it.historyElement() }
+            .filter { it.isHistory() }
             .sortedByDescending { it.date }
 
         if (allHistory.size > MAX_PENDING_TASKS) {

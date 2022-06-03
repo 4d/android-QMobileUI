@@ -46,7 +46,7 @@ class TasksListAdapter(
             is TaskViewHolder -> {
                 if (item != null)
                     holder.bind(item) {
-                        if (!item.actionInfo.allParameters.isNullOrEmpty() && item.status == ActionTask.Status.PENDING) {
+                        if (!item.actionInfo.allParameters.isNullOrEmpty() && item.isPending()) {
                             onCLick(position)
                         }
                     }
