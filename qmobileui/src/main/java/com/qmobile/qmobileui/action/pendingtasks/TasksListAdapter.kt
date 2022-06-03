@@ -65,11 +65,10 @@ class TasksListAdapter(
     override fun getItemViewType(position: Int): Int {
 
         if (list[position] == null) {
-            return if (position == 0) { // header pending
+            return if (position == 0) // header pending
                 TaskItemTypeEnum.HEADER_PENDING.ordinal
-            } else { // header history
+            else // header history
                 TaskItemTypeEnum.HEADER_HISTORY.ordinal
-            }
         }
         return TaskItemTypeEnum.TASK.ordinal
     }

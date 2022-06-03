@@ -250,6 +250,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             }
         }
         )
+        binding.recyclerView.adapter = adapter
     }
 
 //    private fun onValueChanged(name: String, value: Any?, metaData: String?, isValid: Boolean) {

@@ -25,10 +25,10 @@ const val MINUTES_IN_HOUR = 60
 const val HOURS_IN_DAY = 24
 
 class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
-    var label: TextView = itemView.findViewById(R.id.label)
-    var status: TextView = itemView.findViewById(R.id.status)
-    var date: TextView = itemView.findViewById(R.id.date)
-    var icon: ImageView = itemView.findViewById(R.id.icon_state)
+    private var label: TextView = itemView.findViewById(R.id.label)
+    private var status: TextView = itemView.findViewById(R.id.status)
+    private var date: TextView = itemView.findViewById(R.id.date)
+    private var icon: ImageView = itemView.findViewById(R.id.icon_state)
     private var dotProgressBar: DotProgressBar = itemView.findViewById(R.id.dot_progress_bar)
 
     fun bind(

@@ -7,7 +7,7 @@
 package com.qmobile.qmobileui.action.actionparameters
 
 import android.net.Uri
-import com.qmobile.qmobileui.action.observeOnce
+import com.qmobile.qmobiledatasync.utils.observeOnce
 import com.qmobile.qmobileui.activity.BaseObserver
 import org.json.JSONArray
 
@@ -21,6 +21,8 @@ class ActionParametersFragmentObserver(
 
     private fun observeTask() {
         fragment.taskId?.let { id ->
+            // ObserveOnce is used here to prevent the tasks observation done in TasksFragment from triggering event on
+            // a fragment not displayed
             fragment.actionActivity.getTaskViewModel().getTask(id).observeOnce(fragment.viewLifecycleOwner) { task ->
                 task.actionInfo.validationMap?.let { map -> fragment.validationMap = map }
                 task.actionInfo.paramsToSubmit?.let { params -> fragment.paramsToSubmit = params }

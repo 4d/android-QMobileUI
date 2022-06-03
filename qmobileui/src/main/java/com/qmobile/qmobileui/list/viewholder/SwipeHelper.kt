@@ -227,11 +227,8 @@ abstract class SwipeHelper(
         }
 
         fun handle(event: MotionEvent) {
-            clickableRegion?.let {
-                if (it.contains(event.x, event.y)) {
-                    clickListener.onClick()
-                }
-            }
+            if (clickableRegion?.contains(event.x, event.y) == true)
+                clickListener.onClick()
         }
 
         private fun ellipsize(input: String, paint: Paint, maxWidth: Float): String {
