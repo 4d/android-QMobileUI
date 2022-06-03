@@ -467,11 +467,8 @@ class MainActivity :
                             actionTask.message = actionResponse.statusText
 
                             taskViewModel.insertOrReplace(actionTask)
-                            actionResponse.dataSynchro?.let { dataSynchro ->
-                                if (dataSynchro) {
-                                    requestDataSync(tableName)
-                                }
-                            }
+                            if (actionResponse.dataSynchro == true)
+                                requestDataSync(tableName)
                             onActionSent()
                         }
                     }
