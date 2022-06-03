@@ -471,7 +471,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             bodies = bodies,
             tableName = tableName,
             isFromAction = true,
-            taskToSendIfOffline = createPendingTask(),
+            taskToSendIfOffline = if(action.isOfflineCompatible()){createPendingTask()} else{null},
             onImageUploaded = { parameterName, receivedId ->
                 paramsToSubmit[parameterName] = receivedId
                 metaDataToSubmit[parameterName] = "uploaded"
