@@ -1,10 +1,10 @@
 /*
- * Created by htemanni on 1/6/2022.
+ * Created by qmarciset on 3/6/2022.
  * 4D SAS
- * Copyright (c) 2022 htemanni. All rights reserved.
+ * Copyright (c) 2022 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action.adapter
+package com.qmobile.qmobileui.action.actionparameters
 
 import android.content.Context
 import android.content.Intent
@@ -13,8 +13,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeString
-import com.qmobile.qmobileui.action.ActionParameterViewHolderFactory
-import com.qmobile.qmobileui.action.model.ActionParameterEnum
+import com.qmobile.qmobileui.action.actionparameters.viewholder.ActionParameterViewHolderFactory
 import com.qmobile.qmobileui.action.viewholder.ActionParameterViewHolder
 import com.qmobile.qmobileui.action.viewholder.ImageViewHolder
 import com.qmobile.qmobileui.action.viewholder.SignatureViewHolder

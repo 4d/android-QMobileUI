@@ -1,10 +1,10 @@
 /*
- * Created by htemanni on 1/6/2022.
+ * Created by qmarciset on 3/6/2022.
  * 4D SAS
- * Copyright (c) 2022 htemanni. All rights reserved.
+ * Copyright (c) 2022 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action.fragment
+package com.qmobile.qmobileui.action.actionparameters
 
 import android.net.Uri
 import com.qmobile.qmobileui.action.observeOnce
@@ -30,7 +30,7 @@ class ActionParametersFragmentObserver(
                 } as HashMap<String, Uri>
                 fragment.allParameters = JSONArray(task.actionInfo.allParameters)
                 fragment.currentTask = task
-                fragment.setupRecyclerView()
+                fragment.setupAdapter()
             }
         }
     }

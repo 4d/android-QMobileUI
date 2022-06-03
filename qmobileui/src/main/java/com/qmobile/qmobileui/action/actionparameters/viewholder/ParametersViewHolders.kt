@@ -44,7 +44,7 @@ import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.model.ActionParameterEnum
+import com.qmobile.qmobileui.action.actionparameters.ActionParameterEnum
 import com.qmobile.qmobileui.action.utils.addSuffix
 import com.qmobile.qmobileui.action.utils.createImageFile
 import com.qmobile.qmobileui.action.utils.handleDarkMode

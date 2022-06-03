@@ -1,10 +1,10 @@
 /*
- * Created by htemanni on 1/6/2022.
+ * Created by qmarciset on 3/6/2022.
  * 4D SAS
- * Copyright (c) 2022 htemanni. All rights reserved.
+ * Copyright (c) 2022 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action.fragment
+package com.qmobile.qmobileui.action.actionparameters
 
 import android.Manifest
 import android.app.Activity
@@ -33,7 +33,6 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobiledatastore.dao.ActionInfo
 import com.qmobile.qmobiledatastore.dao.ActionTask
-import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
@@ -42,7 +41,6 @@ import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionProvider
-import com.qmobile.qmobileui.action.adapter.ActionsParametersListAdapter
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.action.utils.createImageFile
@@ -81,7 +79,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private val metaDataToSubmit = HashMap<String, String>()
     internal var validationMap = hashMapOf<String, Boolean>()
     internal var imagesToUpload = HashMap<String, Uri>()
-//    private var scrollPos = 0
+
+    //    private var scrollPos = 0
 //    private lateinit var currentPhotoPath: String
     private lateinit var action: Action
     private var selectedEntity: RoomEntity? = null
@@ -149,8 +148,10 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //            }
 //        }
 
-        if (!fromPendingTasks)
-            allParameters = action.parameters
+        allParameters = if (!fromPendingTasks)
+            action.parameters
+        else
+            JSONArray()
 
         _binding = FragmentActionParametersBinding.inflate(
             inflater,
@@ -187,12 +188,32 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (!fromPendingTasks)
-            setupRecyclerView()
+        setupAdapter()
+        setupRecyclerView()
         ActionParametersFragmentObserver(this).initObservers()
     }
 
-    internal fun setupRecyclerView() {
+    private fun setupRecyclerView() {
+        val layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.layoutManager = layoutManager
+        binding.recyclerView.adapter = adapter
+
+        val dividerItemDecoration = DividerItemDecoration(binding.recyclerView.context, layoutManager.orientation)
+        binding.recyclerView.addItemDecoration(dividerItemDecoration)
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+                    areAllItemsSeen = true
+                }
+                super.onScrolled(recyclerView, dx, dy)
+            }
+        })
+        if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+            areAllItemsSeen = true
+        }
+    }
+
+    internal fun setupAdapter() {
         adapter = ActionsParametersListAdapter(
             context = requireContext(),
             list = allParameters,
@@ -229,26 +250,6 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             }
         }
         )
-        val layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerView.layoutManager = layoutManager
-        binding.recyclerView.adapter = adapter
-
-        val dividerItemDecoration = DividerItemDecoration(
-            binding.recyclerView.context,
-            layoutManager.orientation
-        )
-        binding.recyclerView.addItemDecoration(dividerItemDecoration)
-        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-                    areAllItemsSeen = true
-                }
-                super.onScrolled(recyclerView, dx, dy)
-            }
-        })
-        if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-            areAllItemsSeen = true
-        }
     }
 
 //    private fun onValueChanged(name: String, value: Any?, metaData: String?, isValid: Boolean) {
@@ -305,31 +306,33 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         return super.onOptionsItemSelected(item)
     }
 
+    private fun getActionInfo(): ActionInfo = ActionInfo(
+        paramsToSubmit = paramsToSubmit,
+        metaDataToSubmit = metaDataToSubmit,
+        imagesToUpload = imagesToUpload.mapValues { entry ->
+            entry.value.path
+        } as HashMap<String, String>,
+        validationMap = validationMap,
+        allParameters = action.parameters.toString(),
+        actionName = action.name,
+        tableName = tableName,
+        actionUUID = action.id,
+        isOfflineCompatible = action.isOfflineCompatible(),
+        preferredShortName = action.getPreferredShortName()
+    )
+
     private fun validatePendingTask() {
         currentTask?.let { task ->
             val actionTask = ActionTask(
-                status = STATUS.PENDING,
+                status = ActionTask.Status.PENDING,
                 date = task.date,
                 relatedItemId = task.relatedItemId,
                 label = task.label,
-                actionInfo  = ActionInfo(
-                    paramsToSubmit = paramsToSubmit,
-                    metaDataToSubmit = metaDataToSubmit,
-                    imagesToUpload = imagesToUpload.mapValues { entry ->
-                        entry.value.path
-                    } as HashMap<String, String>,
-                    validationMap = validationMap,
-                    allParameters = action.parameters.toString(),
-                    actionName = action.name,
-                    tableName = tableName,
-                    actionUUID = action.id,
-                    isOfflineCompatible = action.isOfflineCompatible(),
-                    preferredShortName = action.getPreferredShortName()
-                )
+                actionInfo = getActionInfo()
             )
             actionTask.id = task.id
 
-            actionActivity.getTaskViewModel().insertOrReplace(actionTask)
+            actionActivity.getTaskViewModel().insert(actionTask)
         }
         activity?.onBackPressed()
     }
@@ -429,24 +432,11 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     private fun createPendingTask(): ActionTask {
         return ActionTask(
-            status = STATUS.PENDING,
+            status = ActionTask.Status.PENDING,
             date = Date(),
             relatedItemId = (selectedEntity?.__entity as EntityModel?)?.__KEY,
             label = action.getPreferredName(),
-            actionInfo = ActionInfo(
-                paramsToSubmit = paramsToSubmit,
-                metaDataToSubmit = metaDataToSubmit,
-                imagesToUpload = imagesToUpload.mapValues { entry ->
-                    entry.value.path
-                } as HashMap<String, String>,
-                validationMap = validationMap,
-                allParameters = action.parameters.toString(),
-                actionName = action.name,
-                tableName = tableName,
-                actionUUID = action.id,
-                isOfflineCompatible = action.isOfflineCompatible(),
-                preferredShortName = action.getPreferredShortName()
-            )
+            actionInfo = getActionInfo()
         )
     }
 
@@ -471,7 +461,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             bodies = bodies,
             tableName = tableName,
             isFromAction = true,
-            taskToSendIfOffline = if(action.isOfflineCompatible()){createPendingTask()} else{null},
+            taskToSendIfOffline = if (action.isOfflineCompatible()) createPendingTask() else null,
             onImageUploaded = { parameterName, receivedId ->
                 paramsToSubmit[parameterName] = receivedId
                 metaDataToSubmit[parameterName] = "uploaded"

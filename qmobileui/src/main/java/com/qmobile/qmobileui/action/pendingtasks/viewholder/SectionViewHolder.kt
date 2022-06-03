@@ -1,15 +1,15 @@
 /*
- * Created by htemanni on 1/6/2022.
+ * Created by qmarciset on 3/6/2022.
  * 4D SAS
- * Copyright (c) 2022 htemanni. All rights reserved.
+ * Copyright (c) 2022 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action.viewholder
+package com.qmobile.qmobileui.action.pendingtasks.viewholder
 
 import android.view.View
 import android.widget.TextView
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.model.TaskItemTypeEnum
+import com.qmobile.qmobileui.action.pendingtasks.TaskListViewHolder
 
 class SectionViewHolder(itemView: View) : TaskListViewHolder(itemView) {
     var label: TextView = itemView.findViewById(R.id.label)

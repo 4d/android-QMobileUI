@@ -22,13 +22,10 @@ import com.qmobile.qmobiledatasync.relation.RelationHelper.inverseAliasPath
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.model.ActionMetaData
-import com.qmobile.qmobileui.action.viewholder.MILLISECONDS_IN_SECOND
-import com.qmobile.qmobileui.action.viewholder.SECONDS_IN_MINUTE
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Date
 import kotlin.collections.HashMap
 
 class ActionHelper private constructor() {
@@ -148,7 +145,5 @@ class ActionHelper private constructor() {
                 }
             }
         }
-
-       
     }
 }

@@ -4,7 +4,7 @@
  * Copyright (c) 2022 htemanni. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action.viewholder
+package com.qmobile.qmobileui.action.pendingtasks
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView

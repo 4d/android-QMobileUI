@@ -42,7 +42,6 @@ import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobiledatastore.dao.ActionInfo
 import com.qmobile.qmobiledatastore.dao.ActionTask
-import com.qmobile.qmobiledatastore.dao.STATUS
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.network.NetworkState
@@ -59,10 +58,10 @@ import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.ActionNavigable
+import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
-import com.qmobile.qmobileui.action.ActionNavigable
-import com.qmobile.qmobileui.action.fragment.ActionParametersFragment
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
@@ -407,7 +406,7 @@ class MainActivity :
         } else {
 
             val task = ActionTask(
-                status = STATUS.PENDING,
+                status = ActionTask.Status.PENDING,
                 date = Date(),
                 relatedItemId = (currentEntity?.__entity as EntityModel?)?.__KEY,
                 label = action.getPreferredName(),
@@ -451,7 +450,7 @@ class MainActivity :
     ) {
 
         if (actionTask.actionInfo.isOfflineCompatible)
-            taskViewModel.insertOrReplace(actionTask)
+            taskViewModel.insert(actionTask)
 
         checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
@@ -460,13 +459,13 @@ class MainActivity :
                         actionResponse?.let {
 
                             actionTask.status = if (actionResponse.success)
-                                STATUS.SUCCESS
+                                ActionTask.Status.SUCCESS
                             else
-                                STATUS.ERROR_SERVER
+                                ActionTask.Status.ERROR_SERVER
 
                             actionTask.message = actionResponse.statusText
 
-                            taskViewModel.insertOrReplace(actionTask)
+                            taskViewModel.insert(actionTask)
                             if (actionResponse.dataSynchro == true)
                                 requestDataSync(tableName)
                             onActionSent()
@@ -506,13 +505,12 @@ class MainActivity :
 
             override fun onServerInaccessible() {
                 onServerInaccessible(tableName, isFromAction)
-                taskToSendIfOffline?.let { taskViewModel.insertOrReplace(it) }
-
+                taskToSendIfOffline?.let { taskViewModel.insert(it) }
             }
 
             override fun onNoInternet() {
                 onNoInternet(tableName, isFromAction)
-                taskToSendIfOffline?.let { taskViewModel.insertOrReplace(it) }
+                taskToSendIfOffline?.let { taskViewModel.insert(it) }
             }
         })
     }

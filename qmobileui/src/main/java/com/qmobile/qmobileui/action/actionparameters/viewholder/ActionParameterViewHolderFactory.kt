@@ -1,10 +1,16 @@
-package com.qmobile.qmobileui.action
+/*
+ * Created by qmarciset on 3/6/2022.
+ * 4D SAS
+ * Copyright (c) 2022 qmarciset. All rights reserved.
+ */
+
+package com.qmobile.qmobileui.action.actionparameters.viewholder
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.model.ActionParameterEnum
+import com.qmobile.qmobileui.action.actionparameters.ActionParameterEnum
 import com.qmobile.qmobileui.action.viewholder.ActionParameterViewHolder
 import com.qmobile.qmobileui.action.viewholder.BarCodeViewHolder
 import com.qmobile.qmobileui.action.viewholder.BooleanCheckMarkViewHolder

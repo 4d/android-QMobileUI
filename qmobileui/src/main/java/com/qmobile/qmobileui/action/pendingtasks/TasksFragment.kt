@@ -1,11 +1,10 @@
 /*
- * Created by htemanni on 1/6/2022.
+ * Created by qmarciset on 3/6/2022.
  * 4D SAS
- * Copyright (c) 2022 htemanni. All rights reserved.
+ * Copyright (c) 2022 qmarciset. All rights reserved.
  */
 
-
-package com.qmobile.qmobileui.action.fragment
+package com.qmobile.qmobileui.action.pendingtasks
 
 import android.content.Context
 import android.graphics.Canvas
@@ -23,7 +22,6 @@ import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.adapter.TasksListAdapter
 import com.qmobile.qmobileui.action.utils.SwipeToDeleteCallback
 import com.qmobile.qmobileui.databinding.FragmentActionTasksBinding
 import com.qmobile.qmobileui.network.NetworkChecker
@@ -106,8 +104,6 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                 actionState: Int,
                 isCurrentlyActive: Boolean
             ) {
-                val adapter = recyclerView.adapter as TasksListAdapter
-
                 if (adapter.isItemDeletable(viewHolder.bindingAdapterPosition)) {
                     super.onChildDraw(
                         c,
@@ -122,8 +118,6 @@ class TasksFragment : BaseFragment(), NetworkChecker {
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val adapter = binding.fragmentTasksRecyclerView.adapter as TasksListAdapter
-
                 if (adapter.isItemDeletable(viewHolder.bindingAdapterPosition)) {
                     adapter.getItemByPosition(viewHolder.absoluteAdapterPosition)?.let {
                         actionActivity.getTaskViewModel().deleteOne(it.id)
