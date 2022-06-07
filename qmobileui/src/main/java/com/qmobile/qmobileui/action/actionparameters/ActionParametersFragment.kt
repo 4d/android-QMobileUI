@@ -74,7 +74,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     // fragment parameters
     override var tableName = ""
     private var itemId = ""
-    private var actionId = ""
+    private var actionUUID = ""
     private var parentItemId = ""
     private var relation: Relation? = null
 
@@ -137,7 +137,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("itemId")?.let { itemId = it }
-        arguments?.getString("actionId")?.let { actionId = it }
+        arguments?.getString("actionUUID")?.let { actionUUID = it }
         arguments?.getString("taskId")?.let {
             if (it.isNotEmpty()) {
                 taskId = it
@@ -150,19 +150,11 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             arguments?.getString("parentItemId")?.let { parentItemId = it }
         }
 
-        // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
-        entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
-
 //        setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
 //            bundle.getString("barcode_value")?.let {
 //                adapter.updateBarcodeForPosition(actionPosition, it)
 //            }
 //        }
-
-        action = retrieveAction()
-
-        if (!fromPendingTasks)
-            allParameters = action.parameters
 
         _binding = FragmentActionParametersBinding.inflate(
             inflater,
@@ -199,8 +191,16 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        action = retrieveAction()
+
         setupAdapter()
         setupRecyclerView()
+
+        if (!fromPendingTasks) {
+            entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
+            allParameters = action.parameters
+        }
         ActionParametersFragmentObserver(this).initObservers()
     }
 
@@ -241,25 +241,25 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             goToScanner = {
                 BaseApp.genericNavigationResolver.navigateToActionScanner(binding, it)
             }, goToCamera = { intent: Intent, position: Int, destinationPath: String ->
-            goToCamera = {
-                currentDestinationPath = destinationPath
-                (context as Activity).startActivityForResult(
-                    intent,
-                    // Send position as request code, so we can update image preview only for the selected item
-                    position
-                )
-            }
-            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-        }, queueForUpload = { parameterName: String, uri: Uri? ->
-            if (uri != null) {
-                imagesToUpload[parameterName] = uri
-            } else {
-                // When user signed and then cleared signature
-                // pad we should remove last signature from imagesToUpload
+                goToCamera = {
+                    currentDestinationPath = destinationPath
+                    (context as Activity).startActivityForResult(
+                        intent,
+                        // Send position as request code, so we can update image preview only for the selected item
+                        position
+                    )
+                }
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }, queueForUpload = { parameterName: String, uri: Uri? ->
+                if (uri != null) {
+                    imagesToUpload[parameterName] = uri
+                } else {
+                    // When user signed and then cleared signature
+                    // pad we should remove last signature from imagesToUpload
 
-                imagesToUpload.remove(parameterName)
+                    imagesToUpload.remove(parameterName)
+                }
             }
-        }
         )
         binding.recyclerView.adapter = adapter
     }
@@ -326,7 +326,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         allParameters = action.parameters.toString(),
         actionName = action.name,
         tableName = tableName,
-        actionId = action.id,
+        actionUUID = action.uuid,
         isOfflineCompatible = action.isOfflineCompatible(),
         preferredShortName = action.getPreferredShortName()
     )
@@ -441,15 +441,13 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //    }
 
     private fun retrieveAction(): Action {
-        val json = if (itemId.isEmpty())
-            BaseApp.runtimeDataHolder.tableActions
-        else
-            BaseApp.runtimeDataHolder.currentRecordActions
-        ActionHelper.getActionObjectList(json, tableName).forEach { action ->
-            if (action.getSafeString("id") == actionId)
-                return ActionHelper.createActionFromJsonObject(action)
-        }
-        throw Action.ActionException("Couldn't find action from table [$tableName], with id [$actionId]")
+        ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.tableActions, tableName)
+            .plus(ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.currentRecordActions, tableName))
+            .forEach { action ->
+                if (action.getSafeString("uuid") == actionUUID)
+                    return ActionHelper.createActionFromJsonObject(action)
+            }
+        throw Action.ActionException("Couldn't find action from table [$tableName], with uuid [$actionUUID]")
     }
 
     private fun createPendingTask(): ActionTask {
@@ -465,7 +463,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private fun sendAction() {
         val pendingTask = createPendingTask()
         actionActivity.sendAction(
-            actionContent = getActionContent(action.id, (selectedEntity?.__entity as EntityModel?)?.__KEY),
+            actionContent = getActionContent(action.uuid, (selectedEntity?.__entity as EntityModel?)?.__KEY),
             actionTask = pendingTask,
             tableName = tableName
         ) {

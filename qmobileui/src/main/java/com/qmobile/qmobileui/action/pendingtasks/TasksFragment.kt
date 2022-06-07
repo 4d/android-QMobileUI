@@ -163,7 +163,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                         relationName = "",
                         parentItemId = "",
                         pendingTaskId = task.id,
-                        actionId = task.actionInfo.actionId,
+                        actionUUID = task.actionInfo.actionUUID,
                         navbarTitle = task.actionInfo.preferredShortName
                     )
                 }

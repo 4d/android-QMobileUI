@@ -403,7 +403,7 @@ class MainActivity :
                 actionInfo = ActionInfo(
                     actionName = action.name,
                     tableName = actionNavigable.tableName,
-                    actionId = action.id,
+                    actionUUID = action.uuid,
                     isOfflineCompatible = action.isOfflineCompatible(),
                     preferredShortName = action.getPreferredShortName()
                 )
@@ -411,7 +411,7 @@ class MainActivity :
 
             sendAction(
                 actionContent = actionNavigable
-                    .getActionContent(action.id, (currentEntity?.__entity as EntityModel?)?.__KEY),
+                    .getActionContent(action.uuid, (currentEntity?.__entity as EntityModel?)?.__KEY),
                 actionTask = task,
                 tableName = actionNavigable.tableName
             ) {
@@ -656,7 +656,7 @@ class MainActivity :
 
             val actionContent = ActionHelper.getActionContent(
                 tableName = pendingTask.actionInfo.tableName,
-                actionUUID = pendingTask.actionInfo.actionId,
+                actionUUID = pendingTask.actionInfo.actionUUID,
                 itemId = pendingTask.relatedItemId ?: "",
                 parameters = pendingTask.actionInfo.paramsToSubmit,
                 metaData = pendingTask.actionInfo.metaDataToSubmit

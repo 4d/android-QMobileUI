@@ -18,7 +18,7 @@ class Action(
     val preset: String? = null,
     val scope: Scope? = null,
     val parameters: JSONArray,
-    val id: String
+    val uuid: String
 ) {
 
     fun getIconDrawablePath(): String? =

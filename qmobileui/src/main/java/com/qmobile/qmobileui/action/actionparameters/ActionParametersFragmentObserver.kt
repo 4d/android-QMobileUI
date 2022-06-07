@@ -9,6 +9,7 @@ package com.qmobile.qmobileui.action.actionparameters
 import com.qmobile.qmobileapi.utils.parseToString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.observeOnce
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
 import com.qmobile.qmobileui.action.utils.UriHelper.stringToUri
 import com.qmobile.qmobileui.activity.BaseObserver
 import org.json.JSONArray
@@ -24,6 +25,7 @@ class ActionParametersFragmentObserver(
     }
 
     private fun observeTask() {
+        // If from pendingTasks
         fragment.taskId?.let { id ->
             // ObserveOnce is used here to prevent the tasks observation done in TasksFragment from triggering events on
             // a fragment not displayed
@@ -33,7 +35,16 @@ class ActionParametersFragmentObserver(
                 fragment.imagesToUpload = task.actionInfo.imagesToUpload?.stringToUri() ?: hashMapOf()
                 fragment.allParameters = JSONArray(task.actionInfo.allParameters)
                 fragment.currentTask = task
-                fragment.setupAdapter()
+
+                task.relatedItemId?.let {
+                    if (fragment.entityViewModel == null) {
+                        fragment.entityViewModel =
+                            getEntityViewModel(fragment, fragment.tableName, it, fragment.delegate.apiService)
+                        observeEntity()
+                    }
+                } ?: kotlin.run {
+                    fragment.setupAdapter()
+                }
             }
         }
     }
@@ -43,6 +54,7 @@ class ActionParametersFragmentObserver(
         fragment.entityViewModel?.entity?.observe(fragment.viewLifecycleOwner) { entity ->
             Timber.d("Observed entity from Room, json = ${BaseApp.mapper.parseToString(entity)}")
             fragment.selectedEntity = entity
+            fragment.setupAdapter()
         }
     }
 }

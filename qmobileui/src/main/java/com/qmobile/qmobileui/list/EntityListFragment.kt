@@ -414,7 +414,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             relationName = relation?.name ?: "",
             parentItemId = parentItemId,
             pendingTaskId = "",
-            actionId = action.id,
+            actionUUID = action.uuid,
             navbarTitle = action.getPreferredShortName()
         )
     }

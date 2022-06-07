@@ -88,7 +88,7 @@ class ActionHelper private constructor() {
                     preset = getSafeString("preset"),
                     scope = if (getSafeString("scope") == "table") Action.Scope.TABLE else Action.Scope.CURRENT_RECORD,
                     parameters = getSafeArray("parameters") ?: JSONArray(),
-                    id = getSafeString("id") ?: ""
+                    uuid = getSafeString("uuid") ?: ""
                 )
             }
         }
