@@ -46,6 +46,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionProvider
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
+import com.qmobile.qmobileui.action.utils.UriHelper.uriToString
 import com.qmobile.qmobileui.action.utils.createImageFile
 import com.qmobile.qmobileui.action.viewholder.BITMAP_QUALITY
 import com.qmobile.qmobileui.action.viewholder.ORIGIN_POSITION
@@ -320,9 +321,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private fun getActionInfo(): ActionInfo = ActionInfo(
         paramsToSubmit = paramsToSubmit,
         metaDataToSubmit = metaDataToSubmit,
-        imagesToUpload = imagesToUpload.mapValues { entry ->
-            entry.value.path
-        } as HashMap<String, String>,
+        imagesToUpload = imagesToUpload.uriToString(),
         validationMap = validationMap,
         allParameters = action.parameters.toString(),
         actionName = action.name,

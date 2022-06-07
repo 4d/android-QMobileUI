@@ -6,10 +6,10 @@
 
 package com.qmobile.qmobileui.action.actionparameters
 
-import android.net.Uri
 import com.qmobile.qmobileapi.utils.parseToString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.observeOnce
+import com.qmobile.qmobileui.action.utils.UriHelper.stringToUri
 import com.qmobile.qmobileui.activity.BaseObserver
 import org.json.JSONArray
 import timber.log.Timber
@@ -30,10 +30,7 @@ class ActionParametersFragmentObserver(
             fragment.actionActivity.getTaskViewModel().getTask(id).observeOnce(fragment.viewLifecycleOwner) { task ->
                 task.actionInfo.validationMap?.let { map -> fragment.validationMap = map }
                 task.actionInfo.paramsToSubmit?.let { params -> fragment.paramsToSubmit = params }
-                fragment.imagesToUpload =
-                    task.actionInfo.imagesToUpload?.mapValues { entry ->
-                    Uri.parse(entry.value)
-                } as HashMap<String, Uri>
+                fragment.imagesToUpload = task.actionInfo.imagesToUpload?.stringToUri() ?: hashMapOf()
                 fragment.allParameters = JSONArray(task.actionInfo.allParameters)
                 fragment.currentTask = task
                 fragment.setupAdapter()
