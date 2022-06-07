@@ -242,17 +242,13 @@ class MainActivity :
             // going on previous remoteUrl
             refreshAllApiClients()
             entityListViewModelList.resetIsToSync()
-            dataSync()
+            mainActivityDataSync.dataSync()
         }
     }
 
     override fun requestAuthentication() {
         authenticationRequested = false
         tryAutoLogin()
-    }
-
-    private fun dataSync(alreadyRefreshedTable: String? = null) {
-        mainActivityDataSync.dataSync(connectivityViewModel, alreadyRefreshedTable)
     }
 
     /**
@@ -271,18 +267,15 @@ class MainActivity :
                 } else {
                     // AUTHENTICATED
                     when (entityListViewModel?.dataSynchronized?.value) {
-                        DataSync.State.UNSYNCHRONIZED -> dataSync()
+                        DataSync.State.UNSYNCHRONIZED -> mainActivityDataSync.dataSync()
                         DataSync.State.SYNCHRONIZED -> {
                             job?.cancel()
                             job = lifecycleScope.launch {
                                 entityListViewModel.getEntities { shouldSyncData ->
-                                    if (shouldSyncData) {
-                                        Timber.d("GlobalStamp changed, synchronization is required")
-                                        Timber.i("Starting a dataSync procedure")
-                                        dataSync(currentTableName)
-                                    } else {
+                                    if (shouldSyncData)
+                                        mainActivityDataSync.shouldDataSync(currentTableName)
+                                    else
                                         Timber.d("GlobalStamp unchanged, no synchronization is required")
-                                    }
                                 }
                             }
                         }
