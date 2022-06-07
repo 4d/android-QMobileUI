@@ -177,7 +177,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 if (hasCurrentRecordActions && !isSwipable) {
                     showDialog { action ->
                         actionActivity.setCurrentEntityModel(currentEntity)
-                        actionActivity.onActionClick(action, this@EntityListFragment, true)
+                        actionActivity.onActionClick(action, this@EntityListFragment)
                     }
                 }
             }
@@ -249,7 +249,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                             val action = if ((i + 1) > MAX_ACTIONS_VISIBLE) null else currentRecordActions[i]
                             val button = createButton(position, action, i) { clickedAction, entity ->
                                 actionActivity.setCurrentEntityModel(entity)
-                                actionActivity.onActionClick(clickedAction, this@EntityListFragment, true)
+                                actionActivity.onActionClick(clickedAction, this@EntityListFragment)
                             }
                             buttons.add(button)
                             if (action == null) break
@@ -338,7 +338,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasTableActions) {
-            actionActivity.setupActionsMenu(menu, tableActions, this, false)
+            actionActivity.setupActionsMenu(menu, tableActions, this)
         }
     }
 
@@ -414,6 +414,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             relationName = relation?.name ?: "",
             parentItemId = parentItemId,
             pendingTaskId = "",
+            actionId = action.id,
             navbarTitle = action.getPreferredShortName()
         )
     }

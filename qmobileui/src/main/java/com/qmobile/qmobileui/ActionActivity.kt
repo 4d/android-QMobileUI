@@ -16,14 +16,9 @@ import okhttp3.RequestBody
 
 interface ActionActivity {
 
-    fun setupActionsMenu(
-        menu: Menu,
-        actions: List<Action>,
-        actionNavigable: ActionNavigable,
-        isEntityAction: Boolean
-    )
+    fun setupActionsMenu(menu: Menu, actions: List<Action>, actionNavigable: ActionNavigable)
 
-    fun onActionClick(action: Action, actionNavigable: ActionNavigable, isEntityAction: Boolean)
+    fun onActionClick(action: Action, actionNavigable: ActionNavigable)
 
     fun sendAction(
         actionContent: MutableMap<String, Any>,
@@ -40,10 +35,6 @@ interface ActionActivity {
         onImageUploaded: (parameterName: String, receivedId: String) -> Unit,
         onAllUploadFinished: () -> Unit
     )
-
-    fun getSelectedAction(): Action
-
-    fun getSelectedEntity(): RoomEntity?
 
     fun setCurrentEntityModel(roomEntity: RoomEntity?)
 

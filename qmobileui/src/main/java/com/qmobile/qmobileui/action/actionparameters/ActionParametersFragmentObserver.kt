@@ -7,9 +7,12 @@
 package com.qmobile.qmobileui.action.actionparameters
 
 import android.net.Uri
+import com.qmobile.qmobileapi.utils.parseToString
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.observeOnce
 import com.qmobile.qmobileui.activity.BaseObserver
 import org.json.JSONArray
+import timber.log.Timber
 
 class ActionParametersFragmentObserver(
     private val fragment: ActionParametersFragment
@@ -17,11 +20,12 @@ class ActionParametersFragmentObserver(
 
     override fun initObservers() {
         observeTask()
+        observeEntity()
     }
 
     private fun observeTask() {
         fragment.taskId?.let { id ->
-            // ObserveOnce is used here to prevent the tasks observation done in TasksFragment from triggering event on
+            // ObserveOnce is used here to prevent the tasks observation done in TasksFragment from triggering events on
             // a fragment not displayed
             fragment.actionActivity.getTaskViewModel().getTask(id).observeOnce(fragment.viewLifecycleOwner) { task ->
                 task.actionInfo.validationMap?.let { map -> fragment.validationMap = map }
@@ -34,6 +38,14 @@ class ActionParametersFragmentObserver(
                 fragment.currentTask = task
                 fragment.setupAdapter()
             }
+        }
+    }
+
+    // Observe entity
+    private fun observeEntity() {
+        fragment.entityViewModel?.entity?.observe(fragment.viewLifecycleOwner) { entity ->
+            Timber.d("Observed entity from Room, json = ${BaseApp.mapper.parseToString(entity)}")
+            fragment.selectedEntity = entity
         }
     }
 }

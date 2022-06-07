@@ -31,12 +31,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.APP_OCTET
+import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.dao.ActionInfo
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
+import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
@@ -70,6 +73,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     // fragment parameters
     override var tableName = ""
     private var itemId = ""
+    private var actionId = ""
     private var parentItemId = ""
     private var relation: Relation? = null
 
@@ -82,8 +86,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     //    private var scrollPos = 0
 //    private lateinit var currentPhotoPath: String
-    private lateinit var action: Action
-    private var selectedEntity: RoomEntity? = null
+    internal lateinit var action: Action
+    internal var selectedEntity: RoomEntity? = null
 //    private var actionPosition = -1
 
     // Is set to true if all recyclerView items are seen at lean once
@@ -95,7 +99,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     internal var currentTask: ActionTask? = null
     internal var taskId: String? = null
     private var fromPendingTasks = false
-    internal lateinit var allParameters: JSONArray
+    internal var allParameters = JSONArray()
+
+    internal var entityViewModel: EntityViewModel<EntityModel>? = null
 
     companion object {
         const val BARCODE_FRAGMENT_REQUEST_KEY = "scan_request"
@@ -130,6 +136,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("itemId")?.let { itemId = it }
+        arguments?.getString("actionId")?.let { actionId = it }
         arguments?.getString("taskId")?.let {
             if (it.isNotEmpty()) {
                 taskId = it
@@ -142,16 +149,19 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             arguments?.getString("parentItemId")?.let { parentItemId = it }
         }
 
+        // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
+        entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
+
 //        setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
 //            bundle.getString("barcode_value")?.let {
 //                adapter.updateBarcodeForPosition(actionPosition, it)
 //            }
 //        }
 
-        allParameters = if (!fromPendingTasks)
-            action.parameters
-        else
-            JSONArray()
+        action = retrieveAction()
+
+        if (!fromPendingTasks)
+            allParameters = action.parameters
 
         _binding = FragmentActionParametersBinding.inflate(
             inflater,
@@ -317,7 +327,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         allParameters = action.parameters.toString(),
         actionName = action.name,
         tableName = tableName,
-        actionUUID = action.id,
+        actionId = action.id,
         isOfflineCompatible = action.isOfflineCompatible(),
         preferredShortName = action.getPreferredShortName()
     )
@@ -360,8 +370,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         super.onAttach(context)
         if (context is ActionActivity) {
             actionActivity = context
-            action = actionActivity.getSelectedAction()
-            selectedEntity = actionActivity.getSelectedEntity()
+//            action = actionActivity.getSelectedAction()
+//            selectedEntity = actionActivity.getSelectedEntity()
         }
         requestPermissionLauncher =
             registerForActivityResult(
@@ -430,6 +440,18 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //            true
 //        )
 //    }
+
+    private fun retrieveAction(): Action {
+        val json = if (itemId.isEmpty())
+            BaseApp.runtimeDataHolder.tableActions
+        else
+            BaseApp.runtimeDataHolder.currentRecordActions
+        ActionHelper.getActionObjectList(json, tableName).forEach { action ->
+            if (action.getSafeString("id") == actionId)
+                return ActionHelper.createActionFromJsonObject(action)
+        }
+        throw Action.ActionException("Couldn't find action from table [$tableName], with id [$actionId]")
+    }
 
     private fun createPendingTask(): ActionTask {
         return ActionTask(

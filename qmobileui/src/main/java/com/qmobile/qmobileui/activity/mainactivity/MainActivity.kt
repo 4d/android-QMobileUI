@@ -102,7 +102,6 @@ class MainActivity :
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
-    private lateinit var selectedAction: Action
     private var currentEntity: RoomEntity? = null
 
     private var serverNotAccessibleString = ""
@@ -356,8 +355,7 @@ class MainActivity :
     override fun setupActionsMenu(
         menu: Menu,
         actions: List<Action>,
-        actionNavigable: ActionNavigable,
-        isEntityAction: Boolean
+        actionNavigable: ActionNavigable
     ) {
         (menu as? MenuBuilder)?.setOptionalIconsVisible(true)
 
@@ -370,7 +368,7 @@ class MainActivity :
 
             menu.add(action.getPreferredName())
                 .setOnMenuItemClickListener {
-                    onActionClick(action, actionNavigable, isEntityAction)
+                    onActionClick(action, actionNavigable)
                     true
                 }
                 .setIcon(drawable)
@@ -397,10 +395,9 @@ class MainActivity :
         )
     }
 
-    override fun onActionClick(action: Action, actionNavigable: ActionNavigable, isEntityAction: Boolean) {
+    override fun onActionClick(action: Action, actionNavigable: ActionNavigable) {
         if (action.parameters.length() > 0) {
-            selectedAction = action
-            if (!isEntityAction)
+            if (action.scope == Action.Scope.TABLE)
                 currentEntity = null
             actionNavigable.navigateToActionForm(action, (currentEntity?.__entity as EntityModel?)?.__KEY)
         } else {
@@ -413,7 +410,7 @@ class MainActivity :
                 actionInfo = ActionInfo(
                     actionName = action.name,
                     tableName = actionNavigable.tableName,
-                    actionUUID = action.id,
+                    actionId = action.id,
                     isOfflineCompatible = action.isOfflineCompatible(),
                     preferredShortName = action.getPreferredShortName()
                 )
@@ -428,14 +425,6 @@ class MainActivity :
                 // Nothing to do
             }
         }
-    }
-
-    override fun getSelectedAction(): Action {
-        return selectedAction
-    }
-
-    override fun getSelectedEntity(): RoomEntity? {
-        return currentEntity
     }
 
     override fun setCurrentEntityModel(roomEntity: RoomEntity?) {
@@ -674,7 +663,7 @@ class MainActivity :
 
             val actionContent = ActionHelper.getActionContent(
                 tableName = pendingTask.actionInfo.tableName,
-                actionUUID = pendingTask.actionInfo.actionUUID,
+                actionUUID = pendingTask.actionInfo.actionId,
                 itemId = pendingTask.relatedItemId ?: "",
                 parameters = pendingTask.actionInfo.paramsToSubmit,
                 metaData = pendingTask.actionInfo.metaDataToSubmit

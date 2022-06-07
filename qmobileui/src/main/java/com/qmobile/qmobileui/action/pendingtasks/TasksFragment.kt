@@ -105,15 +105,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                 isCurrentlyActive: Boolean
             ) {
                 if (adapter.isItemDeletable(viewHolder.bindingAdapterPosition)) {
-                    super.onChildDraw(
-                        c,
-                        recyclerView,
-                        viewHolder,
-                        dX,
-                        dY,
-                        actionState,
-                        isCurrentlyActive
-                    )
+                    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
                 }
             }
 
@@ -171,6 +163,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                         relationName = "",
                         parentItemId = "",
                         pendingTaskId = task.id,
+                        actionId = task.actionInfo.actionId,
                         navbarTitle = task.actionInfo.preferredShortName
                     )
                 }

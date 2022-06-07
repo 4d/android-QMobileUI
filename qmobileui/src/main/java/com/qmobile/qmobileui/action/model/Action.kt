@@ -9,7 +9,6 @@ package com.qmobile.qmobileui.action.model
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import org.json.JSONArray
 import java.util.Locale
-import java.util.UUID
 
 class Action(
     val name: String = "",
@@ -17,9 +16,11 @@ class Action(
     val label: String? = null,
     val icon: String? = null,
     val preset: String? = null,
-    val parameters: JSONArray
+    val scope: Scope? = null,
+    val parameters: JSONArray,
+    val id: String
 ) {
-    val id = UUID.randomUUID().toString()
+
     fun getIconDrawablePath(): String? =
         ResourcesHelper.correctIconPath(icon)
 
@@ -46,4 +47,10 @@ class Action(
     enum class Type {
         TAKE_PICTURE_CAMERA, PICK_PHOTO_GALLERY, SCAN, SIGN
     }
+
+    enum class Scope {
+        TABLE, CURRENT_RECORD
+    }
+
+    class ActionException(message: String) : Exception(message)
 }

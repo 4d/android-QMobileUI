@@ -78,7 +78,7 @@ class ActionHelper private constructor() {
             return map
         }
 
-        private fun createActionFromJsonObject(jsonObject: JSONObject): Action {
+        fun createActionFromJsonObject(jsonObject: JSONObject): Action {
             jsonObject.apply {
                 return Action(
                     name = getSafeString("name") ?: "",
@@ -86,7 +86,9 @@ class ActionHelper private constructor() {
                     label = getSafeString("label"),
                     icon = getSafeString("icon"),
                     preset = getSafeString("preset"),
-                    parameters = getSafeArray("parameters") ?: JSONArray()
+                    scope = if (getSafeString("scope") == "table") Action.Scope.TABLE else Action.Scope.CURRENT_RECORD,
+                    parameters = getSafeArray("parameters") ?: JSONArray(),
+                    id = getSafeString("id") ?: ""
                 )
             }
         }
@@ -110,13 +112,21 @@ class ActionHelper private constructor() {
             (ImageHelper.ICON_MARGIN * context.resources.displayMetrics.density).toInt()
 
         fun fillActionList(json: JSONObject, tableName: String, actionList: MutableList<Action>) {
-            json.getSafeArray(tableName)?.let { currentRecordActionsArray ->
-                for (i in 0 until currentRecordActionsArray.length()) {
-                    currentRecordActionsArray.getJSONObject(i)?.let {
-                        actionList.add(createActionFromJsonObject(it))
+            getActionObjectList(json, tableName).forEach {
+                actionList.add(createActionFromJsonObject(it))
+            }
+        }
+
+        fun getActionObjectList(json: JSONObject, tableName: String): List<JSONObject> {
+            val objectList = mutableListOf<JSONObject>()
+            json.getSafeArray(tableName)?.let { actionsArray ->
+                for (i in 0 until actionsArray.length()) {
+                    actionsArray.getJSONObject(i)?.let {
+                        objectList.add(it)
                     }
                 }
             }
+            return objectList
         }
 
         fun getActionArrayAdapter(context: Context, actionList: List<Action>): ArrayAdapter<Action> {
