@@ -144,4 +144,6 @@ abstract class BaseActivity : AppCompatActivity() {
             networkChecker.onNoInternet()
         }
     }
+
+    fun isAlreadyLoggedIn() = BaseApp.sharedPreferencesHolder.sessionToken.isNotEmpty()
 }

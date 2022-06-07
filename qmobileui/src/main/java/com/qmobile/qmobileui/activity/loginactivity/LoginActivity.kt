@@ -71,7 +71,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         loggedOut = intent.getBooleanExtra(LOGGED_OUT, false)
 
         // If guest or already logged in, skip LoginActivity
-        if (BaseApp.sharedPreferencesHolder.sessionToken.isNotEmpty() || BaseApp.runtimeDataHolder.guestLogin) {
+        if (isAlreadyLoggedIn() || BaseApp.runtimeDataHolder.guestLogin) {
             startMainActivity(true)
         } else {
 

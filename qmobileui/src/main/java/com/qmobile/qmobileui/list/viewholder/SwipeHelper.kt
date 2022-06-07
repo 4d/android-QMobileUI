@@ -1,6 +1,5 @@
 package com.qmobile.qmobileui.list.viewholder
 
-import android.R.attr.textSize
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
@@ -17,7 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.Action
+import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.utils.ColorHelper
 import java.util.LinkedList
@@ -228,11 +227,8 @@ abstract class SwipeHelper(
         }
 
         fun handle(event: MotionEvent) {
-            clickableRegion?.let {
-                if (it.contains(event.x, event.y)) {
-                    clickListener.onClick()
-                }
-            }
+            if (clickableRegion?.contains(event.x, event.y) == true)
+                clickListener.onClick()
         }
 
         private fun ellipsize(input: String, paint: Paint, maxWidth: Float): String {

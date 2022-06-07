@@ -48,14 +48,14 @@ dependencies {
     // Paging
     implementation Libs.androidx_paging3
 
+    // Navigation
+    implementation Libs.androidx_navigation_fragment
+    implementation Libs.androidx_navigation_ui
+
     // Glide
     implementation Libs.glide
     implementation Libs.glide_transformations
     kapt Libs.glide_compiler
-
-    // Navigation
-    implementation Libs.androidx_navigation_fragment
-    implementation Libs.androidx_navigation_ui
 
     // Rx
     implementation Libs.rxjava

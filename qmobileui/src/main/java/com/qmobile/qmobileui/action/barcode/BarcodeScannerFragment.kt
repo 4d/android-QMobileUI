@@ -25,7 +25,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.qmobile.qmobileui.BaseFragment
-import com.qmobile.qmobileui.action.ActionParametersFragment.Companion.BARCODE_FRAGMENT_REQUEST_KEY
+import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_FRAGMENT_REQUEST_KEY
 import com.qmobile.qmobileui.databinding.FragmentBarcodeBinding
 import timber.log.Timber
 import java.util.concurrent.ExecutorService

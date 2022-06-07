@@ -7,25 +7,22 @@
 package com.qmobile.qmobileui
 
 import android.view.Menu
+import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.data.RoomEntity
-import com.qmobile.qmobileui.action.Action
+import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobileui.action.ActionNavigable
+import com.qmobile.qmobileui.action.model.Action
 import okhttp3.RequestBody
 
 interface ActionActivity {
 
-    fun setupActionsMenu(
-        menu: Menu,
-        actions: List<Action>,
-        actionNavigable: ActionNavigable,
-        isEntityAction: Boolean
-    )
+    fun setupActionsMenu(menu: Menu, actions: List<Action>, actionNavigable: ActionNavigable)
 
-    fun onActionClick(action: Action, actionNavigable: ActionNavigable, isEntityAction: Boolean)
+    fun onActionClick(action: Action, actionNavigable: ActionNavigable)
 
     fun sendAction(
-        actionName: String,
         actionContent: MutableMap<String, Any>,
+        actionTask: ActionTask,
         tableName: String,
         onActionSent: () -> Unit
     )
@@ -33,13 +30,15 @@ interface ActionActivity {
     fun uploadImage(
         bodies: Map<String, RequestBody?>,
         tableName: String,
+        isFromAction: Boolean = false,
+        taskToSendIfOffline: ActionTask?,
         onImageUploaded: (parameterName: String, receivedId: String) -> Unit,
         onAllUploadFinished: () -> Unit
     )
 
-    fun getSelectedAction(): Action
-
-    fun getSelectedEntity(): RoomEntity?
-
     fun setCurrentEntityModel(roomEntity: RoomEntity?)
+
+    fun getTaskViewModel(): TaskViewModel
+
+    fun sendPendingTasks()
 }

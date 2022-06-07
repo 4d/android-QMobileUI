@@ -14,6 +14,11 @@
             app:summary="@string/pref_remote_url_summary"
             app:title="@string/pref_remote_url_title" />
 
+        <Preference
+            app:key="@string/pref_pending_tasks_key"
+            app:summary="@string/pref_pending_tasks"
+            app:title="@string/pref_pending_tasks" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

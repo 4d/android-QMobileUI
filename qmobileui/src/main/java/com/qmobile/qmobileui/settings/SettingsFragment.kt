@@ -21,6 +21,7 @@ import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
+import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.network.RemoteUrlChanger
@@ -35,17 +36,21 @@ class SettingsFragment :
     var firstTime = true
     private var logoutDialogTitle = ""
     private var logoutDialogMessage = ""
+    private var logoutDialogMessageIfPendingTask = ""
     private var logoutDialogPositive = ""
     private var logoutDialogNegative = ""
     private var remoteUrlPref: Preference? = null
+    var pendingTaskPref: Preference? = null
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
     private lateinit var accountCategoryKey: String
     private lateinit var remoteUrlPrefKey: String
+    private lateinit var pendingTaskPrefKey: String
     private lateinit var logoutPrefKey: String
     private lateinit var remoteUrl: String
 
     internal lateinit var activitySettingsInterface: ActivitySettingsInterface
+    internal lateinit var actionActivity: ActionActivity
 
     // UI strings
     private lateinit var noInternetString: String
@@ -65,8 +70,12 @@ class SettingsFragment :
         if (context is ActivitySettingsInterface) {
             activitySettingsInterface = context
         }
+        if (context is ActionActivity) {
+            actionActivity = context
+        }
         // Access resources elements
         remoteUrlPrefKey = resources.getString(R.string.pref_remote_url_key)
+        pendingTaskPrefKey = resources.getString(R.string.pref_pending_tasks_key)
         accountCategoryKey = resources.getString(R.string.cat_account_key)
         logoutPrefKey = resources.getString(R.string.pref_logout_key)
         serverAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.network_ok_circle)
@@ -78,6 +87,8 @@ class SettingsFragment :
 
         logoutDialogTitle = resources.getString(R.string.logout_dialog_title)
         logoutDialogMessage = resources.getString(R.string.logout_dialog_message)
+        logoutDialogMessageIfPendingTask =
+            resources.getString(R.string.logout_dialog_message_if_pending_task)
         logoutDialogPositive = resources.getString(R.string.logout_dialog_positive)
         logoutDialogNegative = resources.getString(R.string.logout_dialog_negative)
     }
@@ -86,11 +97,13 @@ class SettingsFragment :
         super.onActivityCreated(savedInstanceState)
 
         loginViewModel = getLoginViewModel(activity, activitySettingsInterface.loginApiService)
+
         connectivityViewModel = getConnectivityViewModel(
             activity,
             activitySettingsInterface.connectivityManager,
             activitySettingsInterface.accessibilityApiService
         )
+
         initLayout()
         SettingsFragmentObserver(this, connectivityViewModel).initObservers()
     }
@@ -106,12 +119,14 @@ class SettingsFragment :
         findPreference<Preference>(logoutPrefKey)?.onPreferenceClickListener = this
         remoteUrlPref = findPreference(remoteUrlPrefKey)
         remoteUrlPref?.onPreferenceClickListener = this
+
+        pendingTaskPref = findPreference(pendingTaskPrefKey)
+        pendingTaskPref?.onPreferenceClickListener = this
     }
 
     override fun onPreferenceClick(preference: Preference?): Boolean {
         preference?.let {
             return when (preference.key) {
-
                 remoteUrlPrefKey -> {
                     activitySettingsInterface.showRemoteUrlEditDialog(remoteUrl, this)
                     true
@@ -121,6 +136,17 @@ class SettingsFragment :
                     showLogoutDialog()
                     true
                 }
+                pendingTaskPrefKey -> {
+                    activity?.let {
+                        BaseApp.genericNavigationResolver.navigateToPendingTasks(
+                            fragmentActivity = it,
+                            tableName = "",
+                            currentItemId = ""
+                        )
+                    }
+                    true
+                }
+
                 else -> {
                     false
                 }
@@ -133,14 +159,19 @@ class SettingsFragment :
      * Displays a dialog to confirm logout
      */
     private fun showLogoutDialog() {
+        val nbPendingTask = actionActivity.getTaskViewModel().pendingTasks.value?.size ?: 0
+        val title = if (nbPendingTask > 0) {
+            logoutDialogMessageIfPendingTask
+        } else {
+            logoutDialogTitle
+        }
         MaterialAlertDialogBuilder(requireContext(), R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
-            .setTitle(logoutDialogTitle)
+            .setTitle(title)
             .setMessage(logoutDialogMessage)
             .setNegativeButton(logoutDialogNegative, null)
             .setPositiveButton(logoutDialogPositive) { _, _ ->
                 logout()
             }
-            .show()
     }
 
     /**
@@ -149,6 +180,7 @@ class SettingsFragment :
     private fun logout() {
         if (isReady()) {
             loginViewModel.disconnectUser {}
+            actionActivity.getTaskViewModel().deleteAll()
         } else {
             if (!connectivityViewModel.isConnected()) {
                 activity?.let {

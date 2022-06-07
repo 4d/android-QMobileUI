@@ -9,7 +9,9 @@ package com.qmobile.qmobileui.activity.mainactivity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -20,6 +22,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -35,7 +38,10 @@ import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
+import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
+import com.qmobile.qmobiledatastore.dao.ActionInfo
+import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.network.NetworkState
@@ -45,17 +51,20 @@ import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.utils.ScheduleRefresh
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
+import com.qmobile.qmobiledatasync.viewmodel.factory.getTaskViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.Action
-import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.action.ActionNavigable
-import com.qmobile.qmobileui.action.ActionParametersFragment
+import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
+import com.qmobile.qmobileui.action.model.Action
+import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
+import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.utils.PermissionChecker
@@ -64,8 +73,11 @@ import com.qmobile.qmobileui.utils.setupWithNavController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
+import java.util.Date
 import java.util.concurrent.atomic.AtomicBoolean
 
 const val BASE_PERMISSION_REQUEST_CODE = 1000
@@ -90,23 +102,30 @@ class MainActivity :
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
-    private lateinit var selectedAction: Action
-    var currentEntity: RoomEntity? = null
+    private var currentEntity: RoomEntity? = null
 
     private var serverNotAccessibleString = ""
+    private var serverNotAccessibleActionString = ""
     private var noInternetString = ""
+    private var noInternetActionString = ""
+    private var pendingTaskString = ""
 
     private var fromCameraOrGallery = false
 
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
+    private lateinit var taskViewModel: TaskViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         serverNotAccessibleString = getString(R.string.server_not_accessible)
+        serverNotAccessibleActionString = getString(R.string.action_send_server_not_accessible)
         noInternetString = getString(R.string.no_internet)
+        noInternetActionString = getString(R.string.action_send_no_internet)
+        pendingTaskString = getString(R.string.pending_task_menu_item)
 
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -122,7 +141,8 @@ class MainActivity :
 
         initViewModels()
         getEntityListViewModelList()
-        mainActivityObserver = MainActivityObserver(this, entityListViewModelList).apply {
+        taskViewModel = getTaskViewModel(this)
+        mainActivityObserver = MainActivityObserver(this, entityListViewModelList, taskViewModel).apply {
             initObservers()
         }
 
@@ -203,7 +223,8 @@ class MainActivity :
                     shouldDelayOnForegroundEvent.set(true)
                 }
             }
-            else -> {}
+            else -> {
+            }
         }
     }
 
@@ -261,7 +282,8 @@ class MainActivity :
                         DataSync.State.SYNCHRONIZING -> Timber.d("Synchronization already in progress")
                         DataSync.State.RESYNC ->
                             Timber.d("Resynchronization table, because globalStamp changed while performing a dataSync")
-                        else -> {}
+                        else -> {
+                        }
                     }
                 }
             }
@@ -276,12 +298,22 @@ class MainActivity :
         })
     }
 
-    private fun onServerInaccessible(tableName: String) {
-        connectivityViewModel.toastMessage.showMessage(serverNotAccessibleString, tableName, ToastMessage.Type.ERROR)
+    private fun onServerInaccessible(tableName: String, isFromAction: Boolean = false) {
+        if (isFromAction)
+            connectivityViewModel.toastMessage
+                .showMessage(serverNotAccessibleActionString, tableName, ToastMessage.Type.NEUTRAL)
+        else
+            connectivityViewModel.toastMessage
+                .showMessage(serverNotAccessibleString, tableName, ToastMessage.Type.ERROR)
     }
 
-    private fun onNoInternet(tableName: String) {
-        connectivityViewModel.toastMessage.showMessage(noInternetString, tableName, ToastMessage.Type.ERROR)
+    private fun onNoInternet(tableName: String, isFromAction: Boolean = false) {
+        if (isFromAction)
+            connectivityViewModel.toastMessage
+                .showMessage(noInternetActionString, tableName, ToastMessage.Type.NEUTRAL)
+        else
+            connectivityViewModel.toastMessage
+                .showMessage(noInternetString, tableName, ToastMessage.Type.ERROR)
     }
 
     override fun handleAuthenticationState(authenticationState: AuthenticationState) {
@@ -305,11 +337,18 @@ class MainActivity :
         }
     }
 
+    private fun checkPendingTasks() {
+        val currentFragment = getCurrentFragment()
+        // User is editing the action, don't try to send it now
+        if (currentFragment !is ActionParametersFragment) {
+            sendPendingTasks()
+        }
+    }
+
     override fun setupActionsMenu(
         menu: Menu,
         actions: List<Action>,
-        actionNavigable: ActionNavigable,
-        isEntityAction: Boolean
+        actionNavigable: ActionNavigable
     ) {
         (menu as? MenuBuilder)?.setOptionalIconsVisible(true)
 
@@ -318,31 +357,62 @@ class MainActivity :
             val drawable =
                 if (withIcons) ActionHelper.getActionIconDrawable(this, action) else null
 
-            drawable?.colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                getColorFromAttr(R.attr.colorOnSurface),
-                BlendModeCompat.SRC_ATOP
-            )
+            drawable?.setMenuItemColorFilter()
 
             menu.add(action.getPreferredName())
                 .setOnMenuItemClickListener {
-                    onActionClick(action, actionNavigable, isEntityAction)
+                    onActionClick(action, actionNavigable)
                     true
                 }
                 .setIcon(drawable)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         }
+
+        // Add pendingTasks menu item at the end
+        val drawable =
+            if (withIcons) ContextCompat.getDrawable(this, R.drawable.dots_horizontal_circle_outline) else null
+        drawable?.setMenuItemColorFilter()
+        menu.add(pendingTaskString)
+            .setOnMenuItemClickListener {
+                actionNavigable.navigateToPendingTasks()
+                true
+            }
+            .setIcon(drawable.adjustActionDrawableMargins(this))
+            .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
     }
 
-    override fun onActionClick(action: Action, actionNavigable: ActionNavigable, isEntityAction: Boolean) {
+    private fun Drawable?.setMenuItemColorFilter() {
+        this?.colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+            getColorFromAttr(R.attr.colorOnSurface),
+            BlendModeCompat.SRC_ATOP
+        )
+    }
+
+    override fun onActionClick(action: Action, actionNavigable: ActionNavigable) {
         if (action.parameters.length() > 0) {
-            selectedAction = action
-            if (!isEntityAction)
+            if (action.scope == Action.Scope.TABLE)
                 currentEntity = null
-            actionNavigable.navigationToActionForm(action, (currentEntity?.__entity as EntityModel?)?.__KEY)
+            actionNavigable.navigateToActionForm(action, (currentEntity?.__entity as EntityModel?)?.__KEY)
         } else {
+
+            val task = ActionTask(
+                status = ActionTask.Status.PENDING,
+                date = Date(),
+                relatedItemId = (currentEntity?.__entity as EntityModel?)?.__KEY,
+                label = action.getPreferredName(),
+                actionInfo = ActionInfo(
+                    actionName = action.name,
+                    tableName = actionNavigable.tableName,
+                    actionId = action.id,
+                    isOfflineCompatible = action.isOfflineCompatible(),
+                    preferredShortName = action.getPreferredShortName()
+                )
+            )
+
             sendAction(
-                actionName = action.name,
-                actionContent = actionNavigable.getActionContent((currentEntity?.__entity as EntityModel?)?.__KEY),
+                actionContent = actionNavigable
+                    .getActionContent(action.id, (currentEntity?.__entity as EntityModel?)?.__KEY),
+                actionTask = task,
                 tableName = actionNavigable.tableName
             ) {
                 // Nothing to do
@@ -350,44 +420,47 @@ class MainActivity :
         }
     }
 
-    override fun getSelectedAction(): Action {
-        return selectedAction
-    }
-
-    override fun getSelectedEntity(): RoomEntity? {
-        return currentEntity
-    }
-
     override fun setCurrentEntityModel(roomEntity: RoomEntity?) {
         currentEntity = roomEntity
     }
 
     override fun sendAction(
-        actionName: String,
         actionContent: MutableMap<String, Any>,
+        actionTask: ActionTask,
         tableName: String,
         onActionSent: () -> Unit
     ) {
+
+        if (actionTask.actionInfo.isOfflineCompatible)
+            taskViewModel.insert(actionTask)
+
         checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
-                entityListViewModelList[0].sendAction(actionName, actionContent) { actionResponse ->
-                    actionResponse?.let {
-                        actionResponse.dataSynchro?.let { dataSynchro ->
-                            if (dataSynchro) {
+                entityListViewModelList.firstOrNull()
+                    ?.sendAction(actionTask.actionInfo.actionName, actionContent) { actionResponse ->
+                        actionResponse?.let {
+
+                            actionTask.status = if (actionResponse.success)
+                                ActionTask.Status.SUCCESS
+                            else
+                                ActionTask.Status.ERROR_SERVER
+
+                            actionTask.message = actionResponse.statusText
+
+                            taskViewModel.insert(actionTask)
+                            if (actionResponse.dataSynchro == true)
                                 requestDataSync(tableName)
-                            }
+                            onActionSent()
                         }
-                        onActionSent()
                     }
-                }
             }
 
             override fun onServerInaccessible() {
-                onServerInaccessible(tableName)
+                onServerInaccessible(tableName, isFromAction = true)
             }
 
             override fun onNoInternet() {
-                onNoInternet(tableName)
+                onNoInternet(tableName, isFromAction = true)
             }
         })
     }
@@ -395,12 +468,14 @@ class MainActivity :
     override fun uploadImage(
         bodies: Map<String, RequestBody?>,
         tableName: String,
+        isFromAction: Boolean,
+        taskToSendIfOffline: ActionTask?,
         onImageUploaded: (parameterName: String, receivedId: String) -> Unit,
         onAllUploadFinished: () -> Unit
     ) {
         checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
-                entityListViewModelList[0].uploadImage(
+                entityListViewModelList.firstOrNull()?.uploadImage(
                     imagesToUpload = bodies,
                     onImageUploaded = { parameterName, receivedId ->
                         onImageUploaded(parameterName, receivedId)
@@ -411,11 +486,13 @@ class MainActivity :
             }
 
             override fun onServerInaccessible() {
-                onServerInaccessible(tableName)
+                onServerInaccessible(tableName, isFromAction)
+                taskToSendIfOffline?.let { taskViewModel.insert(it) }
             }
 
             override fun onNoInternet() {
-                onNoInternet(tableName)
+                onNoInternet(tableName, isFromAction)
+                taskToSendIfOffline?.let { taskViewModel.insert(it) }
             }
         })
     }
@@ -424,16 +501,16 @@ class MainActivity :
         when (networkState) {
             NetworkState.CONNECTED -> {
                 // Setting the authenticationState to its initial value
-                if (BaseApp.sharedPreferencesHolder.sessionToken.isNotEmpty())
+                if (isAlreadyLoggedIn()) {
                     loginViewModel.setAuthenticationState(AuthenticationState.AUTHENTICATED)
+                    checkPendingTasks()
+                }
 
                 // If guest and not yet logged in, auto login
-                if (BaseApp.sharedPreferencesHolder.sessionToken.isEmpty() &&
-                    BaseApp.runtimeDataHolder.guestLogin &&
-                    authenticationRequested
-                ) {
+                if (!isAlreadyLoggedIn() && BaseApp.runtimeDataHolder.guestLogin && authenticationRequested) {
                     authenticationRequested = false
                     tryAutoLogin()
+                    checkPendingTasks()
                 }
             }
             else -> {}
@@ -443,6 +520,10 @@ class MainActivity :
     // Observe any toast message from Entity Detail
     override fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessage.Holder>>) {
         mainActivityObserver.observeEntityToastMessage(message)
+    }
+
+    override fun getTaskViewModel(): TaskViewModel {
+        return taskViewModel
     }
 
     /**
@@ -500,10 +581,14 @@ class MainActivity :
         currentNavController = controller
     }
 
+    private fun getCurrentFragment(): Fragment? {
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
+        return navHostFragment?.childFragmentManager?.fragments?.get(0)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
-        val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
+        val currentFragment = getCurrentFragment()
 
         if (currentFragment is ActionParametersFragment) {
             fromCameraOrGallery = true
@@ -520,13 +605,21 @@ class MainActivity :
         val requestPermissionCode = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
         requestPermissionMap[requestPermissionCode] = callback
 
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                permission
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
                 MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
                     .setTitle(getString(R.string.permission_dialog_title))
                     .setMessage(rationale)
                     .setPositiveButton(getString(R.string.permission_dialog_positive)) { _, _ ->
-                        ActivityCompat.requestPermissions(this, arrayOf(permission), requestPermissionCode)
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(permission),
+                            requestPermissionCode
+                        )
                     }
                     .setNegativeButton(getString(R.string.permission_dialog_negative)) { dialog, _ -> dialog.cancel() }
                     .show()
@@ -538,7 +631,11 @@ class MainActivity :
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when {
             requestPermissionMap.containsKey(requestCode) -> {
@@ -549,7 +646,51 @@ class MainActivity :
                 }
                 return
             }
-            else -> {}
+            else -> {
+            }
+        }
+    }
+
+    override fun sendPendingTasks() {
+        taskViewModel.pendingTasks.value?.forEach { pendingTask ->
+
+            val actionContent = ActionHelper.getActionContent(
+                tableName = pendingTask.actionInfo.tableName,
+                actionUUID = pendingTask.actionInfo.actionId,
+                itemId = pendingTask.relatedItemId ?: "",
+                parameters = pendingTask.actionInfo.paramsToSubmit,
+                metaData = pendingTask.actionInfo.metaDataToSubmit
+            )
+
+            val images = pendingTask.actionInfo.imagesToUpload
+            if (images.isNullOrEmpty()) {
+
+                sendAction(actionContent, pendingTask, pendingTask.actionInfo.tableName) {
+                    // Nothing to do
+                }
+            } else {
+                val bodies = images.mapValues {
+                    val fileUri = Uri.parse("file://" + it.value)
+                    val stream = contentResolver?.openInputStream(fileUri)
+                    stream?.readBytes()?.toRequestBody(APP_OCTET.toMediaTypeOrNull())
+                }
+
+                uploadImage(
+                    bodies = bodies,
+                    tableName = "PendingTasks", // just for logs
+                    isFromAction = true,
+                    taskToSendIfOffline = null,
+                    onImageUploaded = { parameterName, receivedId ->
+                        pendingTask.actionInfo.paramsToSubmit?.set(parameterName, receivedId)
+                        pendingTask.actionInfo.metaDataToSubmit?.set(parameterName, "uploaded")
+                    },
+                    onAllUploadFinished = {
+                        sendAction(actionContent, pendingTask, pendingTask.actionInfo.tableName) {
+                            // Nothing to do
+                        }
+                    }
+                )
+            }
         }
     }
 

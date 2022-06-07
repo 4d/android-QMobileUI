@@ -25,7 +25,7 @@ class EntityDetailFragmentObserver(
         fragment.delegate.observeEntityToastMessage(entityViewModel.toastMessage.message)
     }
 
-    // Observe entity list
+    // Observe entity
     private fun observeEntity() {
         entityViewModel.entity.observe(
             fragment.viewLifecycleOwner

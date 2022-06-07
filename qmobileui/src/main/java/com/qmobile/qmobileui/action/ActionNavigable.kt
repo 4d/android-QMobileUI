@@ -6,7 +6,11 @@
 
 package com.qmobile.qmobileui.action
 
+import com.qmobile.qmobileui.action.model.Action
+
 interface ActionNavigable : ActionProvider {
 
-    fun navigationToActionForm(action: Action, itemId: String?)
+    fun navigateToActionForm(action: Action, itemId: String?)
+
+    fun navigateToPendingTasks()
 }

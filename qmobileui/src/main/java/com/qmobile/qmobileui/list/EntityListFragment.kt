@@ -34,9 +34,9 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.Action
-import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.action.ActionNavigable
+import com.qmobile.qmobileui.action.model.Action
+import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
@@ -116,7 +116,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             this.setHasOptionsMenu(true)
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-
         _binding = FragmentListBinding.inflate(inflater, container, false).apply {
             viewModel = entityListViewModel
             lifecycleOwner = viewLifecycleOwner
@@ -167,6 +166,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                     viewDataBinding = dataBinding,
                     key = key,
                     query = searchPattern,
+                    sourceTable = if (fromRelation) parentTableName else tableName,
                     destinationTable = if (fromRelation) tableName else "",
                     parentItemId = parentItemId,
                     parentTableName = parentTableName,
@@ -177,7 +177,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 if (hasCurrentRecordActions && !isSwipable) {
                     showDialog { action ->
                         actionActivity.setCurrentEntityModel(currentEntity)
-                        actionActivity.onActionClick(action, this@EntityListFragment, true)
+                        actionActivity.onActionClick(action, this@EntityListFragment)
                     }
                 }
             }
@@ -249,7 +249,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                             val action = if ((i + 1) > MAX_ACTIONS_VISIBLE) null else currentRecordActions[i]
                             val button = createButton(position, action, i) { clickedAction, entity ->
                                 actionActivity.setCurrentEntityModel(entity)
-                                actionActivity.onActionClick(clickedAction, this@EntityListFragment, true)
+                                actionActivity.onActionClick(clickedAction, this@EntityListFragment)
                             }
                             buttons.add(button)
                             if (action == null) break
@@ -338,7 +338,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         if (hasTableActions) {
-            actionActivity.setupActionsMenu(menu, tableActions, this, false)
+            actionActivity.setupActionsMenu(menu, tableActions, this)
         }
     }
 
@@ -396,23 +396,36 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         entityListViewModel.setSearchQuery(formQuery)
     }
 
-    override fun getActionContent(itemId: String?): MutableMap<String, Any> {
+    override fun getActionContent(actionUUID: String, itemId: String?): MutableMap<String, Any> {
         return ActionHelper.getActionContent(
             tableName = tableName,
+            actionUUID = actionUUID,
             itemId = itemId ?: "",
             parentItemId = parentItemId,
             relation = relation
         )
     }
 
-    override fun navigationToActionForm(action: Action, itemId: String?) {
+    override fun navigateToActionForm(action: Action, itemId: String?) {
         BaseApp.genericNavigationResolver.navigateToActionForm(
             viewDataBinding = binding,
             tableName = relation?.source ?: tableName,
             itemId = itemId ?: "",
             relationName = relation?.name ?: "",
             parentItemId = parentItemId,
+            pendingTaskId = "",
+            actionId = action.id,
             navbarTitle = action.getPreferredShortName()
         )
+    }
+
+    override fun navigateToPendingTasks() {
+        activity?.let {
+            BaseApp.genericNavigationResolver.navigateToPendingTasks(
+                fragmentActivity = it,
+                tableName = relation?.source ?: tableName,
+                currentItemId = ""
+            )
+        }
     }
 }

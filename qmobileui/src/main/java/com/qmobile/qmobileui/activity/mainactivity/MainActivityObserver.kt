@@ -14,6 +14,7 @@ import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
@@ -22,7 +23,8 @@ import timber.log.Timber
 
 class MainActivityObserver(
     private val activity: MainActivity,
-    private val entityListViewModelList: List<EntityListViewModel<EntityModel>>
+    private val entityListViewModelList: List<EntityListViewModel<EntityModel>>,
+    private val taskViewModel: TaskViewModel
 ) : BaseObserver {
 
     override fun initObservers() {
@@ -32,6 +34,7 @@ class MainActivityObserver(
             observeJSONRelation(entityListViewModel)
             observeEntityListToastMessage(entityListViewModel)
         }
+        observePendingTasks()
     }
 
     // Observe any toast message from Entity Detail
@@ -112,5 +115,11 @@ class MainActivityObserver(
 //        activity.collectWhenStarted(entityListViewModel.toastMessage.message) { event ->
 //            activity.handleEvent(event)
 //        }
+    }
+
+    private fun observePendingTasks() {
+        taskViewModel.pendingTasks.observe(activity) { pendingTasks ->
+            Timber.d("Pending tasks list updated, size : ${pendingTasks.size}")
+        }
     }
 }

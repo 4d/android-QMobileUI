@@ -1,4 +1,10 @@
-package com.qmobile.qmobileui.action
+/*
+ * Created by qmarciset on 3/6/2022.
+ * 4D SAS
+ * Copyright (c) 2022 qmarciset. All rights reserved.
+ */
+
+package com.qmobile.qmobileui.action.actionparameters
 
 import android.content.Context
 import android.content.Intent
@@ -7,12 +13,19 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileui.action.actionparameters.viewholder.ActionParameterViewHolderFactory
+import com.qmobile.qmobileui.action.viewholder.ActionParameterViewHolder
+import com.qmobile.qmobileui.action.viewholder.ImageViewHolder
+import com.qmobile.qmobileui.action.viewholder.SignatureViewHolder
 import org.json.JSONArray
 import org.json.JSONObject
 
 class ActionsParametersListAdapter(
     context: Context,
     val list: JSONArray,
+    // contains data of the failed action, this data will be used for pre-fill form to edit pending task
+    private val paramsToSubmit: HashMap<String, Any>,
+    private val imagesToUpload: HashMap<String, Uri>,
     private val currentEntity: EntityModel?,
     val onValueChanged: (String, Any?, String?, Boolean) -> Unit,
     val goToScanner: (Int) -> Unit,
@@ -36,15 +49,29 @@ class ActionsParametersListAdapter(
     }
 
     override fun onBindViewHolder(holder: ActionParameterViewHolder, position: Int) {
+        val item = list[position]
+        val paramName = (item as JSONObject).getSafeString("name")
+
+        // Value used to pre-fill offline action edit form
+        val alreadyFilledValue = when (holder) {
+            is ImageViewHolder, is SignatureViewHolder ->
+                // if image or signature we take the uri to pre-fill image/signature preview
+                imagesToUpload[paramName]
+            else ->
+                // for other field we take the value to prefill editText
+                paramsToSubmit[paramName]
+        }
+
         holder.bind(
-            list[position],
+            item,
             currentEntity,
+            alreadyFilledValue,
             { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 onValueChanged(name, value, metaData, isValid)
             }, {
             goToScanner(it)
-        }, { intent: Intent, position: Int, destinationPath ->
-            goToCamera(intent, position, destinationPath)
+        }, { intent: Intent, pos: Int, destinationPath ->
+            goToCamera(intent, pos, destinationPath)
         }, { parameterName: String, uri: Uri? ->
             queueForUpload(parameterName, uri)
         }

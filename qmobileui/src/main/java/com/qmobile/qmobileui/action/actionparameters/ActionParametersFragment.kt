@@ -1,16 +1,21 @@
 /*
- * Created by Quentin Marciset on 7/2/2020.
+ * Created by qmarciset on 3/6/2022.
  * 4D SAS
- * Copyright (c) 2020 Quentin Marciset. All rights reserved.
+ * Copyright (c) 2022 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action
+package com.qmobile.qmobileui.action.actionparameters
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -26,18 +31,37 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.APP_OCTET
+import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobiledatastore.dao.ActionInfo
+import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
+import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.ActionProvider
+import com.qmobile.qmobileui.action.model.Action
+import com.qmobile.qmobileui.action.utils.ActionHelper
+import com.qmobile.qmobileui.action.utils.UriHelper.uriToString
+import com.qmobile.qmobileui.action.utils.createImageFile
+import com.qmobile.qmobileui.action.viewholder.BITMAP_QUALITY
+import com.qmobile.qmobileui.action.viewholder.ORIGIN_POSITION
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
+import timber.log.Timber
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
+import java.util.Date
+import kotlin.collections.HashMap
 
 class ActionParametersFragment : BaseFragment(), ActionProvider {
 
@@ -50,19 +74,21 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     // fragment parameters
     override var tableName = ""
     private var itemId = ""
+    private var actionId = ""
     private var parentItemId = ""
     private var relation: Relation? = null
 
     override lateinit var actionActivity: ActionActivity
 
-    private val paramsToSubmit = HashMap<String, Any>()
+    internal var paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
-    private val validationMap = mutableMapOf<String, Boolean>()
-    private val imagesToUpload = HashMap<String, Uri>()
-//    private var scrollPos = 0
+    internal var validationMap = hashMapOf<String, Boolean>()
+    internal var imagesToUpload = HashMap<String, Uri>()
+
+    //    private var scrollPos = 0
 //    private lateinit var currentPhotoPath: String
-    private lateinit var action: Action
-    private var selectedEntity: RoomEntity? = null
+    internal lateinit var action: Action
+    internal var selectedEntity: RoomEntity? = null
 //    private var actionPosition = -1
 
     // Is set to true if all recyclerView items are seen at lean once
@@ -70,6 +96,13 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private var goToCamera: (() -> Unit)? = null
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     var currentDestinationPath: String? = null
+
+    internal var currentTask: ActionTask? = null
+    internal var taskId: String? = null
+    private var fromPendingTasks = false
+    internal var allParameters = JSONArray()
+
+    internal var entityViewModel: EntityViewModel<EntityModel>? = null
 
     companion object {
         const val BARCODE_FRAGMENT_REQUEST_KEY = "scan_request"
@@ -104,12 +137,21 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("itemId")?.let { itemId = it }
-
+        arguments?.getString("actionId")?.let { actionId = it }
+        arguments?.getString("taskId")?.let {
+            if (it.isNotEmpty()) {
+                taskId = it
+                fromPendingTasks = true
+            }
+        }
         arguments?.getString("relationName")?.let { relationName ->
             if (relationName.isNotEmpty())
                 relation = RelationHelper.getRelation(tableName, relationName)
             arguments?.getString("parentItemId")?.let { parentItemId = it }
         }
+
+        // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
+        entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
 
 //        setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
 //            bundle.getString("barcode_value")?.let {
@@ -117,13 +159,17 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //            }
 //        }
 
+        action = retrieveAction()
+
+        if (!fromPendingTasks)
+            allParameters = action.parameters
+
         _binding = FragmentActionParametersBinding.inflate(
             inflater,
             container,
             false
         ).apply {
             lifecycleOwner = viewLifecycleOwner
-            setupRecycleView(recyclerView)
 //            adapter = ActionsParametersListAdapter(
 //                context = requireContext(),
 //                action = action,
@@ -151,10 +197,39 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         return binding.root
     }
 
-    private fun setupRecycleView(recyclerView: RecyclerView) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupAdapter()
+        setupRecyclerView()
+        ActionParametersFragmentObserver(this).initObservers()
+    }
+
+    private fun setupRecyclerView() {
+        val layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.layoutManager = layoutManager
+        binding.recyclerView.adapter = adapter
+
+        val dividerItemDecoration = DividerItemDecoration(binding.recyclerView.context, layoutManager.orientation)
+        binding.recyclerView.addItemDecoration(dividerItemDecoration)
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+                    areAllItemsSeen = true
+                }
+                super.onScrolled(recyclerView, dx, dy)
+            }
+        })
+        if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+            areAllItemsSeen = true
+        }
+    }
+
+    internal fun setupAdapter() {
         adapter = ActionsParametersListAdapter(
             context = requireContext(),
-            list = action.parameters,
+            list = allParameters,
+            paramsToSubmit = paramsToSubmit,
+            imagesToUpload = imagesToUpload,
             currentEntity = selectedEntity?.__entity as EntityModel?,
             onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 validationMap[name] = isValid
@@ -171,40 +246,22 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
                 (context as Activity).startActivityForResult(
                     intent,
                     // Send position as request code, so we can update image preview only for the selected item
-                    position,
-
+                    position
                 )
             }
-            requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
         }, queueForUpload = { parameterName: String, uri: Uri? ->
             if (uri != null) {
                 imagesToUpload[parameterName] = uri
             } else {
-                // When user signed and then cleared signature pad we should remove last signature from imagesToUpload
+                // When user signed and then cleared signature
+                // pad we should remove last signature from imagesToUpload
+
                 imagesToUpload.remove(parameterName)
             }
         }
         )
-        val layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = adapter
-
-        val dividerItemDecoration = DividerItemDecoration(
-            recyclerView.context,
-            layoutManager.orientation
-        )
-        recyclerView.addItemDecoration(dividerItemDecoration)
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-                    areAllItemsSeen = true
-                }
-                super.onScrolled(recyclerView, dx, dy)
-            }
-        })
-        if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-            areAllItemsSeen = true
-        }
+        binding.recyclerView.adapter = adapter
     }
 
 //    private fun onValueChanged(name: String, value: Any?, metaData: String?, isValid: Boolean) {
@@ -250,17 +307,56 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.validate) {
-            if (isFormValid()) {
-                if (imagesToUpload.isEmpty()) {
-                    sendAction()
-                } else {
-                    uploadImages {
-                        sendAction()
-                    }
-                }
+            if (fromPendingTasks) {
+                // When coming from pending task
+                validatePendingTask()
+            } else {
+                // When coming from actions
+                validateAction()
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun getActionInfo(): ActionInfo = ActionInfo(
+        paramsToSubmit = paramsToSubmit,
+        metaDataToSubmit = metaDataToSubmit,
+        imagesToUpload = imagesToUpload.uriToString(),
+        validationMap = validationMap,
+        allParameters = action.parameters.toString(),
+        actionName = action.name,
+        tableName = tableName,
+        actionId = action.id,
+        isOfflineCompatible = action.isOfflineCompatible(),
+        preferredShortName = action.getPreferredShortName()
+    )
+
+    private fun validatePendingTask() {
+        currentTask?.let { task ->
+            val actionTask = ActionTask(
+                status = ActionTask.Status.PENDING,
+                date = task.date,
+                relatedItemId = task.relatedItemId,
+                label = task.label,
+                actionInfo = getActionInfo()
+            )
+            actionTask.id = task.id
+
+            actionActivity.getTaskViewModel().insert(actionTask)
+        }
+        activity?.onBackPressed()
+    }
+
+    private fun validateAction() {
+        if (isFormValid()) {
+            if (imagesToUpload.isEmpty()) {
+                sendAction()
+            } else {
+                uploadImages {
+                    sendAction()
+                }
+            }
+        }
     }
 
     private fun isFormValid(): Boolean =
@@ -273,8 +369,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         super.onAttach(context)
         if (context is ActionActivity) {
             actionActivity = context
-            action = actionActivity.getSelectedAction()
-            selectedEntity = actionActivity.getSelectedEntity()
+//            action = actionActivity.getSelectedAction()
+//            selectedEntity = actionActivity.getSelectedEntity()
         }
         requestPermissionLauncher =
             registerForActivityResult(
@@ -344,11 +440,33 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //        )
 //    }
 
-    private fun sendAction() {
+    private fun retrieveAction(): Action {
+        val json = if (itemId.isEmpty())
+            BaseApp.runtimeDataHolder.tableActions
+        else
+            BaseApp.runtimeDataHolder.currentRecordActions
+        ActionHelper.getActionObjectList(json, tableName).forEach { action ->
+            if (action.getSafeString("id") == actionId)
+                return ActionHelper.createActionFromJsonObject(action)
+        }
+        throw Action.ActionException("Couldn't find action from table [$tableName], with id [$actionId]")
+    }
 
+    private fun createPendingTask(): ActionTask {
+        return ActionTask(
+            status = ActionTask.Status.PENDING,
+            date = Date(),
+            relatedItemId = (selectedEntity?.__entity as EntityModel?)?.__KEY,
+            label = action.getPreferredName(),
+            actionInfo = getActionInfo()
+        )
+    }
+
+    private fun sendAction() {
+        val pendingTask = createPendingTask()
         actionActivity.sendAction(
-            actionName = action.name,
-            actionContent = getActionContent((selectedEntity?.__entity as EntityModel?)?.__KEY),
+            actionContent = getActionContent(action.id, (selectedEntity?.__entity as EntityModel?)?.__KEY),
+            actionTask = pendingTask,
             tableName = tableName
         ) {
             activity?.onBackPressed()
@@ -364,6 +482,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         actionActivity.uploadImage(
             bodies = bodies,
             tableName = tableName,
+            isFromAction = true,
+            taskToSendIfOffline = if (action.isOfflineCompatible()) createPendingTask() else null,
             onImageUploaded = { parameterName, receivedId ->
                 paramsToSubmit[parameterName] = receivedId
                 metaDataToSubmit[parameterName] = "uploaded"
@@ -373,9 +493,10 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         }
     }
 
-    override fun getActionContent(itemId: String?): MutableMap<String, Any> {
+    override fun getActionContent(actionUUID: String, itemId: String?): MutableMap<String, Any> {
         return ActionHelper.getActionContent(
             tableName = tableName,
+            actionUUID = actionUUID,
             itemId = itemId ?: this.itemId,
             parameters = paramsToSubmit,
             metaData = metaDataToSubmit,
@@ -450,25 +571,48 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 //        BaseApp.genericNavigationResolver.navigateToActionScanner(binding)
 //    }
 
+    @Suppress("NestedBlockDepth")
     fun handleResult(requestCode: Int, data: Intent?) {
         // the request code is te equivalent of position of item in adapter
         // case of image picked from gallery
         val uri = data?.data
         if (uri != null) {
             adapter.getUpdatedImageParameterName(requestCode)?.let {
-                imagesToUpload[it] = uri
+                val bitmap: Bitmap =
+                    MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), uri)
+                try {
+                    val photo: File? = try {
+                        createImageFile(requireContext())
+                    } catch (e: IOException) {
+                        Timber.e("handleResult: ", e.localizedMessage)
+                        null
+                    }
+                    saveBitmapToJPG(bitmap, photo)
+                    imagesToUpload[it] = Uri.fromFile(photo)
+                } catch (e: IOException) {
+                    Timber.e("handleResult IOException : ", e.localizedMessage)
+                }
             }
             adapter.updateImageForPosition(requestCode, uri)
         } else {
             // case of camera capture
-
             currentDestinationPath?.let {
-                val uri = Uri.fromFile(File(it))
+                val currentDestinationPathUri = Uri.fromFile(File(it))
                 adapter.getUpdatedImageParameterName(requestCode)?.let { parameterName ->
-                    imagesToUpload[parameterName] = uri
+                    imagesToUpload[parameterName] = currentDestinationPathUri
                 }
-                adapter.updateImageForPosition(requestCode, uri)
+                adapter.updateImageForPosition(requestCode, currentDestinationPathUri)
             }
         }
+    }
+
+    private fun saveBitmapToJPG(bitmap: Bitmap, photo: File?) {
+        val newBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(newBitmap)
+        canvas.drawColor(Color.WHITE)
+        canvas.drawBitmap(bitmap, ORIGIN_POSITION, ORIGIN_POSITION, null)
+        val stream: OutputStream = FileOutputStream(photo)
+        newBitmap.compress(Bitmap.CompressFormat.JPEG, BITMAP_QUALITY, stream)
+        stream.close()
     }
 }

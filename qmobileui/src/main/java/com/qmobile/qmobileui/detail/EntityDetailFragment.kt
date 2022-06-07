@@ -24,9 +24,9 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.Action
-import com.qmobile.qmobileui.action.ActionHelper
 import com.qmobile.qmobileui.action.ActionNavigable
+import com.qmobile.qmobileui.action.model.Action
+import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.ui.checkIfChildIsWebView
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.webview.MyWebViewClient
@@ -80,6 +80,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
             webView = foundWebView
             webView.webViewClient = MyWebViewClient()
         }
+
         setHasOptionsMenu(::webView.isInitialized || hasActions)
     }
 
@@ -95,7 +96,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
             val currentRecordActions = mutableListOf<Action>()
             ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
             // actionActivity.setCurrentEntityModel() is called in EntityViewPagerFragment#onPageSelected()
-            actionActivity.setupActionsMenu(menu, currentRecordActions, this, true)
+            actionActivity.setupActionsMenu(menu, currentRecordActions, this)
         }
     }
 
@@ -132,19 +133,29 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
         if (context is ActionActivity) {
             actionActivity = context
         }
-
         // Access resources elements
     }
 
-    override fun getActionContent(itemId: String?): MutableMap<String, Any> {
+    override fun navigateToPendingTasks() {
+        activity?.let {
+            BaseApp.genericNavigationResolver.navigateToPendingTasks(
+                fragmentActivity = it,
+                tableName = tableName,
+                currentItemId = itemId
+            )
+        }
+    }
+
+    override fun getActionContent(actionUUID: String, itemId: String?): MutableMap<String, Any> {
         // Event if we are in a N-1 relation, we don't need to provide parent information in the request
         return ActionHelper.getActionContent(
             tableName = tableName,
+            actionUUID = actionUUID,
             itemId = itemId ?: ""
         )
     }
 
-    override fun navigationToActionForm(action: Action, itemId: String?) {
+    override fun navigateToActionForm(action: Action, itemId: String?) {
         // Event if we are in a N-1 relation, we don't need to provide parent information in the request
         BaseApp.genericNavigationResolver.navigateToActionForm(
             viewDataBinding = binding,
@@ -152,6 +163,8 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
             itemId = itemId ?: this.itemId,
             relationName = "",
             parentItemId = "",
+            pendingTaskId = "",
+            actionId = action.id,
             navbarTitle = action.getPreferredShortName()
         )
     }
