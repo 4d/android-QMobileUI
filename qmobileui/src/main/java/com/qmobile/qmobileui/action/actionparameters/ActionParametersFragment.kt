@@ -241,25 +241,25 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             goToScanner = {
                 BaseApp.genericNavigationResolver.navigateToActionScanner(binding, it)
             }, goToCamera = { intent: Intent, position: Int, destinationPath: String ->
-                goToCamera = {
-                    currentDestinationPath = destinationPath
-                    (context as Activity).startActivityForResult(
-                        intent,
-                        // Send position as request code, so we can update image preview only for the selected item
-                        position
-                    )
-                }
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-            }, queueForUpload = { parameterName: String, uri: Uri? ->
-                if (uri != null) {
-                    imagesToUpload[parameterName] = uri
-                } else {
-                    // When user signed and then cleared signature
-                    // pad we should remove last signature from imagesToUpload
-
-                    imagesToUpload.remove(parameterName)
-                }
+            goToCamera = {
+                currentDestinationPath = destinationPath
+                (context as Activity).startActivityForResult(
+                    intent,
+                    // Send position as request code, so we can update image preview only for the selected item
+                    position
+                )
             }
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }, queueForUpload = { parameterName: String, uri: Uri? ->
+            if (uri != null) {
+                imagesToUpload[parameterName] = uri
+            } else {
+                // When user signed and then cleared signature
+                // pad we should remove last signature from imagesToUpload
+
+                imagesToUpload.remove(parameterName)
+            }
+        }
         )
         binding.recyclerView.adapter = adapter
     }

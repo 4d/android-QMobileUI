@@ -146,7 +146,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         hideKeyboard(activity)
         setSearchQuery()
         BaseApp.genericTableFragmentHelper.getCustomEntityListFragment(tableName, binding)
-            ?.onActivityCreated(savedInstanceState)
+            ?.onViewCreated(view, savedInstanceState)
     }
 
     override fun onDestroyView() {
