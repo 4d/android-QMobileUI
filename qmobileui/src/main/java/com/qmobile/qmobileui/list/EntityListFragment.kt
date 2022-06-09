@@ -461,7 +461,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     }
 
     // Used to sort items of current table if a sort action is already applied (and persisted in shared prefs)
-    @Suppress("ComplexMethod")
+    @Suppress("NestedBlockDepth")
     private fun sortListIfNeeded() {
         val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
         parametersToSortWith?.let { it ->
