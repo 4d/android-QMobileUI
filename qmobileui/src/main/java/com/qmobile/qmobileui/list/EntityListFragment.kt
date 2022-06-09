@@ -462,12 +462,16 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
     // Used to sort items of current table if a sort action is already applied (and persisted in shared prefs)
     private fun sortListIfNeeded() {
-        BaseApp.sharedPreferencesHolder.parametersToSortWith?.let { it ->
+        val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
+        parametersToSortWith?.let { it ->
             if (it.isNotEmpty()) {
-                val jsonObject = JSONObject(it) // Json object containing all sort fields : Map<tableName, MapOf<fieldName, order (asc/desc))
+                // Json object containing all sort fields : Map<tableName, MapOf<fieldName, order (asc/desc))
+                val jsonObject = JSONObject(it)
                 jsonObject.getSafeString(tableName)?.let { fieldsToSortCurrentTableJsonString ->
                     val fieldsToSortCurrentTable: HashMap<String, String> = HashMap()
-                    val currentTableFieldsJsonObject = JSONObject(fieldsToSortCurrentTableJsonString) // Json object only current table sort fields :  MapOf<fieldName, order (asc/desc)>
+
+                    // Json object only current table sort fields :  MapOf<fieldName, order (asc/desc)>
+                    val currentTableFieldsJsonObject = JSONObject(fieldsToSortCurrentTableJsonString)
                     // Extracting the json content to a hashmap
                     val keysItr = currentTableFieldsJsonObject.keys()
                     while (keysItr.hasNext()) {
