@@ -96,7 +96,9 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
             val currentRecordActions = mutableListOf<Action>()
             ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
             // actionActivity.setCurrentEntityModel() is called in EntityViewPagerFragment#onPageSelected()
-            actionActivity.setupActionsMenu(menu, currentRecordActions, this)
+            actionActivity.setupActionsMenu(menu, currentRecordActions, this) {
+                // Nothing to do
+            }
         }
     }
 

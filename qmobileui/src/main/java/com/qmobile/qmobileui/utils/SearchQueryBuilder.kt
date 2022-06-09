@@ -23,7 +23,8 @@ object SearchQueryBuilder {
         tableName: String,
         stringBuilder: StringBuilder,
         columnsToFilter: JSONArray,
-        pattern: String
+        pattern: String,
+        sortQuery: String? = null
     ) {
         (0 until columnsToFilter.length()).forEach eachColumn@{ index ->
             val fieldName = columnsToFilter.getSafeString(index)
@@ -46,6 +47,12 @@ object SearchQueryBuilder {
                 stringBuilder.append("T1.$fieldName LIKE \'%$pattern%\' OR ")
                 stringBuilder.append(appendFromFormat(tableName, fieldName, pattern, "T1.$fieldName"))
             }
+        }
+
+        sortQuery?.let { query ->
+            stringBuilder.removeSuffix(" OR ")
+            stringBuilder.append(query)
+
         }
     }
 

@@ -25,7 +25,9 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.JsonObject
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
@@ -45,6 +47,7 @@ import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
 import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
+import org.json.JSONObject
 
 open class EntityListFragment : BaseFragment(), ActionNavigable {
 
@@ -326,6 +329,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 searchPlate.clearFocus()
             }
         }
+        sortListIfNeeded()
         super.onPrepareOptionsMenu(menu)
     }
 
@@ -337,8 +341,19 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     }
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
+        // if only one sort action for this table  => apply it by default and remove it from dropdown actions menu
+        if (tableActions.filter { it1 -> it1.preset == "sort" }.size == 1) {
+            tableActions.find { action -> action.preset == "sort" }?.let { action ->
+                //no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
+                saveSortChoice(action.getSortFields())
+                tableActions.remove(action)
+            }
+        }
+
         if (hasTableActions) {
-            actionActivity.setupActionsMenu(menu, tableActions, this)
+            actionActivity.setupActionsMenu(menu, tableActions, this) {
+                sortItems(it)
+            }
         }
     }
 
@@ -382,7 +397,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         outState.putString(CURRENT_SEARCH_QUERY_KEY, searchPattern)
     }
 
-    private fun setSearchQuery() {
+    private fun setSearchQuery(fieldToSortBy: HashMap<String, String>? = null) {
         val formQuery = if (fromRelation) {
             formQueryBuilder.getRelationQuery(
                 parentItemId = parentItemId,
@@ -391,7 +406,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 path = path
             )
         } else {
-            formQueryBuilder.getQuery(searchPattern)
+            formQueryBuilder.getQuery(searchPattern, fieldToSortBy)
         }
         entityListViewModel.setSearchQuery(formQuery)
     }
@@ -426,6 +441,49 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 tableName = relation?.source ?: tableName,
                 currentItemId = ""
             )
+        }
+    }
+
+    private fun sortItems(action: Action) {
+        val fieldsToSortBy = action.getSortFields()
+        setSearchQuery(fieldsToSortBy)
+        saveSortChoice(fieldsToSortBy)
+    }
+
+    private fun saveSortChoice(fieldsToSortBy: Map<String, String>) {
+        if (!BaseApp.sharedPreferencesHolder.parametersToSortWith.isNullOrEmpty()) {
+            val allTablesJsonObject = JSONObject(BaseApp.sharedPreferencesHolder.parametersToSortWith)
+            allTablesJsonObject.put(tableName, JSONObject(fieldsToSortBy).toString())
+            BaseApp.sharedPreferencesHolder.parametersToSortWith = allTablesJsonObject.toString()
+        } else {
+            BaseApp.sharedPreferencesHolder.parametersToSortWith =
+                JSONObject(mapOf(tableName to JSONObject(fieldsToSortBy).toString())).toString()
+        }
+    }
+
+    // Used to sort items of current table if a sort action is already applied (and persisted in shared prefs)
+    private fun sortListIfNeeded() {
+        BaseApp.sharedPreferencesHolder.parametersToSortWith?.let { it ->
+            if (it.isNotEmpty()) {
+                val jsonObject = JSONObject(it) // Json object containing all sort fields : Map<tableName, MapOf<fieldName, order (asc/desc))
+                jsonObject.getSafeString(tableName)?.let { fieldsToSortCurrentTableJsonString->
+                    val fieldsToSortCurrentTable: HashMap<String, String> = HashMap()
+                    val currentTableFieldsJsonObject = JSONObject(fieldsToSortCurrentTableJsonString) // Json object only current table sort fields :  MapOf<fieldName, order (asc/desc)>
+                    // Extracting the json content to a hashmap
+                    val keysItr = currentTableFieldsJsonObject.keys()
+                    while (keysItr.hasNext()) {
+                        val key = keysItr.next()
+                        currentTableFieldsJsonObject.getSafeString(key)?.let { value ->
+                            fieldsToSortCurrentTable[key] = value
+                        }
+                    }
+
+                    if (fieldsToSortCurrentTable.isNotEmpty()) {
+                        setSearchQuery(fieldsToSortCurrentTable)
+                    }
+                    return
+                }
+            }
         }
     }
 }

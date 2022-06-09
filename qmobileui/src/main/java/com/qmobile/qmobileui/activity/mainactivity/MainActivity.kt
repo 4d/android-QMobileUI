@@ -348,7 +348,8 @@ class MainActivity :
     override fun setupActionsMenu(
         menu: Menu,
         actions: List<Action>,
-        actionNavigable: ActionNavigable
+        actionNavigable: ActionNavigable,
+        onSort: (action: Action) -> Unit
     ) {
         (menu as? MenuBuilder)?.setOptionalIconsVisible(true)
 
@@ -356,13 +357,16 @@ class MainActivity :
         actions.forEach { action ->
             val drawable =
                 if (withIcons) ActionHelper.getActionIconDrawable(this, action) else null
-
             drawable?.setMenuItemColorFilter()
-
             menu.add(action.getPreferredName())
                 .setOnMenuItemClickListener {
-                    onActionClick(action, actionNavigable)
-                    true
+                    if (action.preset == "sort") {
+                        onSort(action)
+                        true
+                    } else {
+                        onActionClick(action, actionNavigable)
+                        true
+                    }
                 }
                 .setIcon(drawable)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
