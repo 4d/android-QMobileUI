@@ -52,7 +52,6 @@ object SearchQueryBuilder {
         sortQuery?.let { query ->
             stringBuilder.removeSuffix(" OR ")
             stringBuilder.append(query)
-
         }
     }
 

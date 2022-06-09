@@ -25,7 +25,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.gson.JsonObject
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
@@ -344,7 +343,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         // if only one sort action for this table  => apply it by default and remove it from dropdown actions menu
         if (tableActions.filter { it1 -> it1.preset == "sort" }.size == 1) {
             tableActions.find { action -> action.preset == "sort" }?.let { action ->
-                //no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
+                // no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
                 saveSortChoice(action.getSortFields())
                 tableActions.remove(action)
             }
@@ -466,7 +465,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         BaseApp.sharedPreferencesHolder.parametersToSortWith?.let { it ->
             if (it.isNotEmpty()) {
                 val jsonObject = JSONObject(it) // Json object containing all sort fields : Map<tableName, MapOf<fieldName, order (asc/desc))
-                jsonObject.getSafeString(tableName)?.let { fieldsToSortCurrentTableJsonString->
+                jsonObject.getSafeString(tableName)?.let { fieldsToSortCurrentTableJsonString ->
                     val fieldsToSortCurrentTable: HashMap<String, String> = HashMap()
                     val currentTableFieldsJsonObject = JSONObject(fieldsToSortCurrentTableJsonString) // Json object only current table sort fields :  MapOf<fieldName, order (asc/desc)>
                     // Extracting the json content to a hashmap

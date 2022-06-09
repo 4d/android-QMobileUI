@@ -59,7 +59,6 @@ class SqlBuilderTest {
         Assert.assertEquals(expectedQueryResult, actualQueryResult)
     }
 
-
     @Test
     fun testSqlSortActionQueryWithMultipleFields() {
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
