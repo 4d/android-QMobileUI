@@ -34,9 +34,7 @@ object TimeFormat {
 
         return when (format) {
             "timeInteger" -> {
-                val newTimeArray = getTimeFromLong(longText).split(":")
-                (newTimeArray[0] + newTimeArray[1].toInt() * INT_60 + newTimeArray[1].toInt() * INT_3600)
-                // TODO :pas convaincu de cette formule
+                "${longText}000"
             }
             "shortTime" -> {
                 formatNameMap[format]?.let {
@@ -78,15 +76,12 @@ object TimeFormat {
     }
 
     private fun getTimeFromString(time: Long): Calendar = Calendar.getInstance().apply {
-        val longTime: String = getTimeFromLong(time)
-        val dateFormat = SimpleDateFormat("hh:mm:ss", Locale.getDefault())
-        dateFormat.safeParse(longTime)?.let { date ->
+        val simpleDateFormat = SimpleDateFormat("hh:mm:ss", Locale.getDefault())
+        val timeString = simpleDateFormat.format(Date(time)).toString()
+        simpleDateFormat.safeParse(timeString)?.let { date ->
             setTime(date)
         }
     }
-
-    private fun getTimeFromLong(timestamp: Long) =
-        SimpleDateFormat("hh:mm:ss", Locale.getDefault()).format(Date(timestamp)).toString()
 
     fun getAmPmFormattedTime(time: Long): String {
         val totalSecs = time / INT_1000
