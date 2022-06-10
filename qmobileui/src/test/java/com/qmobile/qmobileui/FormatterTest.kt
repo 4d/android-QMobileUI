@@ -85,7 +85,7 @@ class FormatterTest {
     @Test
     fun testTimeFormat() {
         val inputTime = "946693832"
-        timeFormatTest(inputTime, "113480208800", "timeInteger")
+        timeFormatTest(inputTime, "946693832000", "timeInteger")
         timeFormatTest(inputTime, "11:58 AM", "shortTime")
         timeFormatTest(inputTime, "262:58:13", "duration")
     }
