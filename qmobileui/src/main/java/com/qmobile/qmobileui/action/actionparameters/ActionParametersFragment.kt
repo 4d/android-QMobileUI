@@ -44,12 +44,12 @@ import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionProvider
+import com.qmobile.qmobileui.action.actionparameters.viewholder.BITMAP_QUALITY
+import com.qmobile.qmobileui.action.actionparameters.viewholder.ORIGIN_POSITION
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.action.utils.UriHelper.uriToString
 import com.qmobile.qmobileui.action.utils.createImageFile
-import com.qmobile.qmobileui.action.viewholder.BITMAP_QUALITY
-import com.qmobile.qmobileui.action.viewholder.ORIGIN_POSITION
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody

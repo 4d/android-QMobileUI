@@ -43,7 +43,7 @@ class ActionHelper private constructor() {
 
             val actionContext = mutableMapOf<String, Any>(
                 "dataClass" to
-                    BaseApp.genericTableHelper.originalTableName(tableName)
+                    (BaseApp.runtimeDataHolder.tableInfo[tableName]?.originalName ?: "")
             )
             // entity
             val entity = HashMap<String, Any>()

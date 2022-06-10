@@ -83,7 +83,7 @@ class DotProgressBar : FrameLayout {
         }
         primaryAnimator?.repeatMode = ValueAnimator.RESTART
         primaryAnimator?.repeatCount = ValueAnimator.INFINITE
-        primaryAnimator?.duration = ANIMATION_DURATION.toLong()
+        primaryAnimator?.duration = ANIMATION_DURATION
         primaryAnimator?.interpolator = LinearInterpolator()
 
         startAnimation()

@@ -13,10 +13,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileui.action.actionparameters.viewholder.ActionParameterViewHolder
 import com.qmobile.qmobileui.action.actionparameters.viewholder.ActionParameterViewHolderFactory
-import com.qmobile.qmobileui.action.viewholder.ActionParameterViewHolder
-import com.qmobile.qmobileui.action.viewholder.ImageViewHolder
-import com.qmobile.qmobileui.action.viewholder.SignatureViewHolder
+import com.qmobile.qmobileui.action.actionparameters.viewholder.ImageViewHolder
+import com.qmobile.qmobileui.action.actionparameters.viewholder.SignatureViewHolder
 import org.json.JSONArray
 import org.json.JSONObject
 

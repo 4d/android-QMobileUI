@@ -4,9 +4,9 @@
  * Copyright (c) 2022 htemanni. All rights reserved.
  */
 
-@file:Suppress("TooGenericExceptionCaught", "SwallowedException", "UnusedPrivateMember")
+@file:Suppress("TooGenericExceptionCaught", "SwallowedException", "UnusedPrivateMember", "NestedBlockDepth")
 
-package com.qmobile.qmobileui.action.viewholder
+package com.qmobile.qmobileui.action.actionparameters.viewholder
 
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -36,13 +36,15 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmobile.qmobileapi.model.entity.EntityHelper
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.model.entity.Photo
+import com.qmobile.qmobileapi.utils.getSafeAny
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileapi.utils.parseToString
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.actionparameters.ActionParameterEnum
 import com.qmobile.qmobileui.action.utils.addSuffix
@@ -214,8 +216,8 @@ class TextViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
-                    editText.text = value
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
+                    editText.text = value.toString()
                     onValueChanged(parameterName, value, null, validate())
                 }
             }
@@ -315,8 +317,8 @@ class TextAreaViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
-                    editText.text = value
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
+                    editText.text = value.toString()
                     onValueChanged(parameterName, value, null, validate())
                 }
             }
@@ -441,22 +443,22 @@ class NumberViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<Float>(it, defaultField)
-                    .also { value ->
-                        val isInteger = (value - value.toInt()) == 0.0F
-                        val formattedValue = if (isInteger) {
-                            value.toInt()
-                        } else {
-                            value
-                        }
-                        editText.text = formattedValue.toString()
-                        onValueChanged(
-                            parameterName,
-                            formattedValue,
-                            null,
-                            validate()
-                        )
-                    }
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
+                    val floatText = value.toString().toFloatOrNull() ?: return
+
+                    val isInteger = (floatText - floatText.toInt()) == 0.0F
+                    val formattedValue = if (isInteger)
+                        floatText.toInt()
+                    else
+                        floatText
+                    editText.text = formattedValue.toString()
+                    onValueChanged(
+                        parameterName,
+                        formattedValue,
+                        null,
+                        validate()
+                    )
+                }
             }
         }
     }
@@ -539,8 +541,8 @@ class SpellOutViewHolder(itemView: View) :
         editText.handleDarkMode()
 
         alreadFilledValue?.let { value ->
-            value.toString().toDoubleOrNull()?.let {
-                SpellOutHelper.convert(it.toLong()).apply {
+            value.toString().toDoubleOrNull()?.toLong()?.let {
+                SpellOutHelper.convert(it).apply {
                     editText.text = this
                 }
             }
@@ -591,8 +593,8 @@ class SpellOutViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
-                    editText.text = value
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
+                    editText.text = value.toString()
                     onValueChanged(
                         parameterName,
                         value,
@@ -732,8 +734,8 @@ class ScientificViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
-                    editText.text = value
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
+                    editText.text = value.toString()
                     onValueChanged(
                         parameterName,
                         it,
@@ -787,16 +789,14 @@ class PercentageViewHolder(itemView: View) :
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 s.toString().replace(PERCENT_KEY, "").let {
                     if (it.isNotEmpty()) {
-                        val percentValue =
-                            "%.2f".format(it.toFloatOrNull()?.times(PERCENT_MULTIPLIER))
-                        if (percentValue != null) {
-                            onValueChanged(
-                                parameterName,
-                                percentValue,
-                                null,
-                                validate(),
-                            )
-                        }
+                        val floatText = it.toFloatOrNull() ?: return
+                        val percentValue = "%.2f".format(floatText.times(PERCENT_MULTIPLIER))
+                        onValueChanged(
+                            parameterName,
+                            percentValue,
+                            null,
+                            validate(),
+                        )
                     }
                 }
             }
@@ -869,8 +869,8 @@ class PercentageViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
-                    editText.text = EntityHelper.readInstanceProperty<String>(value, defaultField)
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
+                    editText.text = value.toString()
                     onValueChanged(
                         parameterName,
                         value,
@@ -933,9 +933,11 @@ class BooleanSwitchViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<Boolean?>(it, defaultField)?.also { value ->
-                    switch.isChecked = value
-                    onValueChanged(parameterName, value, null, true)
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
+                    (value as Boolean?)?.let { bool ->
+                        switch.isChecked = bool
+                        onValueChanged(parameterName, bool, null, true)
+                    }
                 }
             }
         }
@@ -987,13 +989,17 @@ class BooleanCheckMarkViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                checkBox.isChecked = EntityHelper.readInstanceProperty(it, defaultField)
-                onValueChanged(
-                    parameterName,
-                    EntityHelper.readInstanceProperty(it, defaultField),
-                    null,
-                    true
-                )
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
+                    (value as Boolean?)?.let { bool ->
+                        checkBox.isChecked = value
+                        onValueChanged(
+                            parameterName,
+                            bool,
+                            null,
+                            true
+                        )
+                    }
+                }
             }
         }
     }
@@ -1082,11 +1088,11 @@ class ImageViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<Photo>(it, defaultField).also { value ->
-                    if (value != null) {
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
+                    (value as Photo?)?.let { photo ->
                         bindImageFromUrl(
                             imageButton,
-                            value.__deferred?.uri,
+                            photo.__deferred?.uri,
                             null,
                             null,
                             null,
@@ -1094,7 +1100,7 @@ class ImageViewHolder(itemView: View) :
                         )
                         Glide.with(itemView.context)
                             .asBitmap()
-                            .load(value.__deferred?.uri)
+                            .load(photo.__deferred?.uri)
                             .into(object : CustomTarget<Bitmap?>() {
                                 override fun onResourceReady(
                                     p0: Bitmap,
@@ -1279,10 +1285,13 @@ class TimeViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
-                    selectedTime.text = TimeFormat.getAmPmFormattedTime(value)
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
 
-                    val totalSecs = value.toLong() / 1000
+                    val longText = value.toString().toLongOrNull() ?: return
+
+                    selectedTime.text = TimeFormat.getAmPmFormattedTime(longText)
+
+                    val totalSecs = longText / 1000
 
                     val hours = totalSecs / 3600
                     val minutes = (totalSecs % 3600) / 60
@@ -1396,14 +1405,14 @@ class DateViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
                     val formattedDate = FormatterUtils.applyFormat(
                         dateFormat,
                         value
                     )
                     selectedDate.text = formattedDate
                     onValueChanged(parameterName, value, null, validate())
-                    val dateArray = value.split("!").toTypedArray().map { item -> item.toInt() }
+                    val dateArray = value.toString().split("!").toTypedArray().map { item -> item.toInt() }
                     datePickerDialog?.updateDate(dateArray[2], dateArray[1] - 1, dateArray[0])
                 }
             }
@@ -1466,8 +1475,8 @@ class BarCodeViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
-                    scannedValueTextView.text = value
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
+                    scannedValueTextView.text = value.toString()
                     onValueChanged(parameterName, value, null, validate())
                 }
             }
@@ -1577,8 +1586,8 @@ class SignatureViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<Photo>(it, defaultField).also { value ->
-                    if (value != null) {
+                JSONObject(BaseApp.mapper.parseToString(it)).getSafeAny(defaultField)?.let { value ->
+                    (value as Photo?)?.let { photo ->
                         bindImageFromUrl(
                             defaultPreview,
                             value.__deferred?.uri,

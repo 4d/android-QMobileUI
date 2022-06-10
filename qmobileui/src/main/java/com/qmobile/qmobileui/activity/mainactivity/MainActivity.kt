@@ -169,7 +169,7 @@ class MainActivity :
     // Get EntityListViewModel list
     private fun getEntityListViewModelList() {
         entityListViewModelList = mutableListOf()
-        BaseApp.genericTableHelper.tableNames().forEach { tableName ->
+        BaseApp.runtimeDataHolder.tableInfo.keys.forEach { tableName ->
             val clazz = BaseApp.genericTableHelper.entityListViewModelClassFromTable(tableName)
 
             entityListViewModelList.add(

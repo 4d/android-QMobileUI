@@ -16,38 +16,40 @@ object NumberFormat {
     private const val INT_100: Int = 100
 
     fun applyFormat(format: String, baseText: String): String {
+        val doubleText = baseText.toDoubleOrNull() ?: return ""
+
         return when (format) {
             "currencyEuro" -> {
-                DecimalFormat("0.00").format(baseText.toDouble()) + "€"
+                DecimalFormat("0.00").format(doubleText) + "€"
             }
             "currencyYen" -> {
-                "¥ " + baseText.toDouble().toInt()
+                "¥ ${doubleText.toInt()}"
             }
             "currencyDollar" -> {
-                "$" + DecimalFormat("0.00").format(baseText.toDouble())
+                "$" + DecimalFormat("0.00").format(doubleText)
             }
             "percent" -> {
-                (
-                    (
-                        DecimalFormat("0.00").format(baseText.toDouble())
-                            .toDouble()
-                        ) * INT_100
-                    ).toString() + "%"
+                val newDoubleText = DecimalFormat("0.00").format(doubleText).toDoubleOrNull()
+                if (newDoubleText != null)
+                    (newDoubleText * INT_100).toString() + "%"
+                else
+                    ""
             }
             "ordinal" -> {
-                DecimalFormat("0.00").format(baseText.toDouble()) + "th"
+                DecimalFormat("0.00").format(doubleText) + "th"
             }
             "integer" -> {
-                (baseText.toFloat()).toInt().toString()
+                val intText = baseText.toFloatOrNull()?.toInt()
+                intText?.toString() ?: ""
             }
             "real" -> {
                 baseText
             }
             "decimal" -> {
-                baseText.toDouble().round(DECIMAL_DIGITS).toString()
+                doubleText.round(DECIMAL_DIGITS).toString()
             }
             else -> {
-                baseText
+                ""
             }
         }
     }

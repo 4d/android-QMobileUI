@@ -30,22 +30,25 @@ object SpellOutFormat {
     )
 
     fun convertNumberToWord(number: String): String {
-        val string: String
+        val doubleText = number.toDoubleOrNull() ?: return ""
+        var string = ""
         if (number.matches(Regex("^\\d+\\.\\d+"))) {
             val decimalFormat = DecimalFormat("#.##")
             decimalFormat.roundingMode = RoundingMode.CEILING
-            val regex = decimalFormat.format(number.toDouble()).split(".")
-            string = if (regex.size > 1) {
-                "${convertFromDoubleToWord(regex[0].toDouble())} dot ${
-                convertFromDoubleToWord(
-                    regex[1].toDouble()
-                )
-                }"
-            } else {
-                convertFromDoubleToWord(regex[0].toDouble())
+            val regex = decimalFormat.format(doubleText).split(".")
+            if (regex.all { it.toDoubleOrNull() != null }) {
+                string = if (regex.size > 1) {
+                    "${convertFromDoubleToWord(regex[0].toDouble())} dot ${
+                    convertFromDoubleToWord(
+                        regex[1].toDouble()
+                    )
+                    }"
+                } else {
+                    convertFromDoubleToWord(regex[0].toDouble())
+                }
             }
         } else {
-            string = convertFromDoubleToWord(number.toDouble())
+            string = convertFromDoubleToWord(doubleText)
         }
         return string
     }

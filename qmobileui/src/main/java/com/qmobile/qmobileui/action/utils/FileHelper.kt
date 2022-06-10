@@ -11,8 +11,8 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Environment
-import com.qmobile.qmobileui.action.viewholder.BITMAP_QUALITY
-import com.qmobile.qmobileui.action.viewholder.ORIGIN_POSITION
+import com.qmobile.qmobileui.action.actionparameters.viewholder.BITMAP_QUALITY
+import com.qmobile.qmobileui.action.actionparameters.viewholder.ORIGIN_POSITION
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream

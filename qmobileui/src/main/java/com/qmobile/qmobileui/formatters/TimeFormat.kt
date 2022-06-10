@@ -7,8 +7,8 @@
 package com.qmobile.qmobileui.formatters
 
 import com.qmobile.qmobileapi.utils.safeParse
-import com.qmobile.qmobileui.action.viewholder.AM_KEY
-import com.qmobile.qmobileui.action.viewholder.PM_KEY
+import com.qmobile.qmobileui.action.actionparameters.viewholder.AM_KEY
+import com.qmobile.qmobileui.action.actionparameters.viewholder.PM_KEY
 import java.lang.StringBuilder
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -30,29 +30,26 @@ object TimeFormat {
     )
 
     fun applyFormat(format: String, baseText: String): String {
+        val longText = baseText.toLongOrNull() ?: return ""
+
         return when (format) {
             "timeInteger" -> {
-
-                val newTimeArray = getTimeFromLong(baseText.toLong()).split(":")
-                (
-                    newTimeArray[0] + (Integer.parseInt(newTimeArray[1]) * INT_60) + Integer.parseInt(
-                        newTimeArray[1]
-                    ) * INT_3600
-                    )
+                val newTimeArray = getTimeFromLong(longText).split(":")
+                (newTimeArray[0] + newTimeArray[1].toInt() * INT_60 + newTimeArray[1].toInt() * INT_3600)
+                // TODO :pas convaincu de cette formule
             }
             "shortTime" -> {
                 formatNameMap[format]?.let {
                     DateFormat.getTimeInstance(it)
-                        .format(getTimeFromString(baseText).time)
+                        .format(getTimeFromString(longText).time)
                 } ?: ""
             }
             "mediumTime" -> {
-                getAmPmFormattedTime(baseText)
+                getAmPmFormattedTime(longText)
             }
             "duration" -> {
                 formatNameMap[format]?.let {
-                    val currentMillisTime = baseText.toLong()
-                    val totalSeconds: Long = currentMillisTime / INT_1000
+                    val totalSeconds: Long = longText / INT_1000
                     val seconds = totalSeconds.toInt() % INT_60
                     val minutes = (totalSeconds / INT_60).toInt() % INT_60
                     val hours = totalSeconds.toInt() / INT_3600
@@ -75,13 +72,13 @@ object TimeFormat {
                 } ?: ""
             }
             else -> {
-                baseText
+                ""
             }
         }
     }
 
-    private fun getTimeFromString(time: String): Calendar = Calendar.getInstance().apply {
-        val longTime: String = getTimeFromLong(time.toLong())
+    private fun getTimeFromString(time: Long): Calendar = Calendar.getInstance().apply {
+        val longTime: String = getTimeFromLong(time)
         val dateFormat = SimpleDateFormat("hh:mm:ss", Locale.getDefault())
         dateFormat.safeParse(longTime)?.let { date ->
             setTime(date)
@@ -91,8 +88,8 @@ object TimeFormat {
     private fun getTimeFromLong(timestamp: Long) =
         SimpleDateFormat("hh:mm:ss", Locale.getDefault()).format(Date(timestamp)).toString()
 
-    fun getAmPmFormattedTime(baseText: String): String {
-        val totalSecs = baseText.toLong() / INT_1000
+    fun getAmPmFormattedTime(time: Long): String {
+        val totalSecs = time / INT_1000
         val hours = totalSecs / INT_3600
         val minutes = (totalSecs % INT_3600) / INT_60
 
