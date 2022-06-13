@@ -26,6 +26,7 @@ dependencies {
     implementation Libs.androidx_constraintlayout
     implementation Libs.androidx_fragment_ktx
     implementation Libs.androidx_preference_ktx
+    implementation Libs.kotlin_stdlib
     implementation Libs.swiperefreshlayout
     implementation Libs.viewpager2
 
