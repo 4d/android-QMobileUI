@@ -34,7 +34,7 @@ object TimeFormat {
 
         return when (format) {
             "timeInteger" -> {
-                "${longText}000"
+                longText.toString()
             }
             "shortTime" -> {
                 formatNameMap[format]?.let {
