@@ -463,7 +463,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private fun sendAction() {
         val pendingTask = createPendingTask()
         actionActivity.sendAction(
-            actionContent = getActionContent(action.uuid, (selectedEntity?.__entity as EntityModel?)?.__KEY),
+            actionContent = getActionContent(pendingTask.id, (selectedEntity?.__entity as EntityModel?)?.__KEY),
             actionTask = pendingTask,
             tableName = tableName
         ) {

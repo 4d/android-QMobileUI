@@ -411,7 +411,7 @@ class MainActivity :
 
             sendAction(
                 actionContent = actionNavigable
-                    .getActionContent(action.uuid, (currentEntity?.__entity as EntityModel?)?.__KEY),
+                    .getActionContent(task.id, (currentEntity?.__entity as EntityModel?)?.__KEY),
                 actionTask = task,
                 tableName = actionNavigable.tableName
             ) {
@@ -656,7 +656,7 @@ class MainActivity :
 
             val actionContent = ActionHelper.getActionContent(
                 tableName = pendingTask.actionInfo.tableName,
-                actionUUID = pendingTask.actionInfo.actionUUID,
+                actionUUID = pendingTask.id,
                 itemId = pendingTask.relatedItemId ?: "",
                 parameters = pendingTask.actionInfo.paramsToSubmit,
                 metaData = pendingTask.actionInfo.metaDataToSubmit
