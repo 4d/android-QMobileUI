@@ -377,7 +377,7 @@ class MainActivity :
                 actionNavigable.navigateToPendingTasks()
                 true
             }
-            .setIcon(drawable.adjustActionDrawableMargins(this))
+            .setIcon(drawable?.adjustActionDrawableMargins(this))
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
     }
 
