@@ -39,13 +39,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityHelper
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.model.entity.Photo
-import com.qmobile.qmobileapi.utils.getSafeAny
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
-import com.qmobile.qmobileapi.utils.parseToString
-import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.actionparameters.ActionParameterEnum
 import com.qmobile.qmobileui.action.utils.addSuffix
@@ -217,7 +214,7 @@ class TextViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
+                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
                     editText.text = value
                     onValueChanged(parameterName, value, null, validate())
                 }
@@ -318,7 +315,7 @@ class TextAreaViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
+                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
                     editText.text = value
                     onValueChanged(parameterName, value, null, validate())
                 }
@@ -444,7 +441,7 @@ class NumberViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<Float>(it, defaultField).also { value ->
+                EntityHelper.readInstanceProperty<Float?>(it, defaultField)?.also { value ->
 
                     val isInteger = (value - value.toInt()) == 0.0F
                     val formattedValue = if (isInteger)
@@ -593,7 +590,7 @@ class SpellOutViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
+                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
                     editText.text = value
                     onValueChanged(
                         parameterName,
@@ -734,11 +731,11 @@ class ScientificViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
+                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
                     editText.text = value
                     onValueChanged(
                         parameterName,
-                        it,
+                        value,
                         null,
                         validate()
                     )
@@ -869,7 +866,7 @@ class PercentageViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
+                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
                     editText.text = value
                     onValueChanged(
                         parameterName,
