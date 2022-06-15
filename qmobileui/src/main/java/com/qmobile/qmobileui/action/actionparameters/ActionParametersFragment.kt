@@ -444,7 +444,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.tableActions, tableName)
             .plus(ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.currentRecordActions, tableName))
             .forEach { action ->
-                if (action.getSafeString("uuid") == actionUUID)
+                //create id with pattern: $actionName$tableName
+                val actionId = action.getSafeString("name")+tableName
+                if (actionUUID == actionId)
                     return ActionHelper.createActionFromJsonObject(action)
             }
         throw Action.ActionException("Couldn't find action from table [$tableName], with uuid [$actionUUID]")
