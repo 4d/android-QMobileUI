@@ -31,8 +31,11 @@ import java.util.Date
 
 const val MILLISECONDS_IN_SECOND = 1000
 const val SECONDS_IN_MINUTE = 60
+const val SECONDS_IN_HOUR = 3600
 const val MINUTES_IN_HOUR = 60
 const val HOURS_IN_DAY = 24
+const val HOURS_IN_MID_DAY_FORMAT = 12
+
 
 class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
     private var label: TextView = itemView.findViewById(R.id.label)
@@ -80,8 +83,8 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
         date.text = getRelatedDate(item.date)
     }
 
-
-    private fun showItemDetails(item: ActionTask){
+    @Suppress( "NestedBlockDepth")
+    private fun showItemDetails(item: ActionTask) {
         status.visibility = View.VISIBLE
         item.actionInfo.paramsToSubmit?.let { paramsToSubmit ->
             val sb = StringBuilder()
@@ -104,13 +107,13 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
                         }
                         "time" -> {
                             entry.value.toString().toDoubleOrNull()?.let { numberOfSeconds ->
-                                val hours: Int = (numberOfSeconds / 3600).toInt()
-                                val minutes: Int = (numberOfSeconds % 3600 / 60).toInt()
+                                val hours: Int = (numberOfSeconds / SECONDS_IN_HOUR).toInt()
+                                val minutes: Int = (numberOfSeconds % SECONDS_IN_HOUR / SECONDS_IN_MINUTE).toInt()
                                 if (format == "duration") {
                                     "$hours hours $minutes minutes"
                                 } else {
-                                    if (hours >= 12) {
-                                        "${hours - 12}:$minutes $PM_KEY"
+                                    if (hours >= HOURS_IN_MID_DAY_FORMAT) {
+                                        "${hours - HOURS_IN_MID_DAY_FORMAT}:$minutes $PM_KEY"
                                     } else {
                                         "$hours:$minutes $AM_KEY"
                                     }
@@ -138,6 +141,7 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
         }
 
     }
+
     private fun getRelatedDate(date: Date): String {
         val diff: Long = Date().time - date.time
         val seconds = diff / MILLISECONDS_IN_SECOND
@@ -157,14 +161,24 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
     private fun retrieveAction(task: ActionTask): Action {
         val tableName = task.actionInfo.tableName
         val actionUUID = task.actionInfo.actionUUID
-        ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.tableActions, tableName)
-            .plus(ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.currentRecordActions, tableName))
+        ActionHelper.getActionObjectList(
+            BaseApp.runtimeDataHolder.tableActions, tableName
+        )
+            .plus(
+                ActionHelper.getActionObjectList(
+                    BaseApp
+                        .runtimeDataHolder.currentRecordActions, tableName
+                )
+            )
             .forEach { action ->
                 //create id with pattern: $actionName$tableName
                 val actionId = action.getSafeString("name") + tableName
                 if (actionUUID == actionId)
                     return ActionHelper.createActionFromJsonObject(action)
             }
-        throw Action.ActionException("TaskViewHolderCouldn't find action from table [$tableName], with uuid [$actionUUID]")
+        throw Action.ActionException(
+            "TaskViewHolderCouldn't " +
+                    "find action from table [$tableName], with uuid [$actionUUID]"
+        )
     }
 }
