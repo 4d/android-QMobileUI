@@ -46,6 +46,7 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
     private var dotProgressBar: DotProgressBar = itemView.findViewById(R.id.dot_progress_bar)
 
     fun bind(
+        isFromSettings: Boolean,
         item: ActionTask,
         onClick: () -> Unit
     ) {
@@ -53,7 +54,12 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
             onClick()
         }
         label.text = item.label
-        tableName.text = item.actionInfo.tableName
+        if(isFromSettings) {
+            tableName.text = item.actionInfo.tableName
+        } else
+        {
+            tableName.visibility = View.GONE
+        }
 
         when (item.status) {
             ActionTask.Status.SUCCESS -> {

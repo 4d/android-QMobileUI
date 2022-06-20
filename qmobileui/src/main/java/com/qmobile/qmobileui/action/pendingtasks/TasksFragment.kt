@@ -55,7 +55,9 @@ class TasksFragment : BaseFragment(), NetworkChecker {
     ): View {
 
         setHasOptionsMenu(true)
-        arguments?.getString("tableName")?.let { tableName = it }
+        arguments?.getString("tableName")?.let {
+            tableName = it
+        }
         arguments?.getString("currentItemId")?.let { currentItemId = it }
 
         _binding = FragmentActionTasksBinding.inflate(inflater, container, false).apply {
@@ -147,9 +149,10 @@ class TasksFragment : BaseFragment(), NetworkChecker {
     }
 
     fun setupAdapter(pendingTasks: List<ActionTask?>, history: List<ActionTask?>) {
+        val isFromSettings = tableName.isEmpty()
         // The 2 null items used as placeholders for sections titles Pending/History
         val newList = (mutableListOf(null) + pendingTasks + mutableListOf(null) + history) as MutableList<ActionTask?>
-        adapter = TasksListAdapter(
+        adapter = TasksListAdapter(isFromSettings,
             requireContext(), newList, serverStatus
         ) { position ->
             if (position == 0) {
