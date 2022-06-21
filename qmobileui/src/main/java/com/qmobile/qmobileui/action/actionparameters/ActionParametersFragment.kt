@@ -300,6 +300,20 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         }
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        val item = menu.findItem(R.id.validate)
+        if (fromPendingTasks) {
+            currentTask?.isErrorServer()?.let { isErrorServer ->
+                item.title = if (isErrorServer) // error server tasks
+                    getString(R.string.retry_action)
+                else // pending tasks
+                    getString(R.string.validate_action)
+            }
+        } else {
+            item.title = getString(R.string.validate_action)
+        }
+        super.onPrepareOptionsMenu(menu)
+    }
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_actions_parameters, menu)
         super.onCreateOptionsMenu(menu, inflater)
@@ -307,15 +321,25 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.validate) {
-            if (fromPendingTasks) {
-                // When coming from pending task
-                validatePendingTask()
-            } else {
-                // When coming from actions
-                validateAction()
-            }
+            onValidateClick()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun onValidateClick() {
+        if (fromPendingTasks && currentTask?.status == ActionTask.Status.PENDING) {
+            // When coming from pending task
+            validatePendingTask()
+        } else {
+            // When coming from actions or click on error server failed task (in history section)
+            if (currentTask?.status == ActionTask.Status.ERROR_SERVER) {
+                // should delete current failed task to re-store it as new task after sending
+                currentTask?.let {
+                    actionActivity.getTaskViewModel().deleteOne(it.id)
+                }
+            }
+            validateAction()
+        }
     }
 
     private fun getActionInfo(): ActionInfo = ActionInfo(

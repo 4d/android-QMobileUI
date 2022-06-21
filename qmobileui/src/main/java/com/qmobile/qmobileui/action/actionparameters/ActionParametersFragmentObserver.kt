@@ -35,6 +35,7 @@ class ActionParametersFragmentObserver(
                 fragment.imagesToUpload = task.actionInfo.imagesToUpload?.stringToUri() ?: hashMapOf()
                 fragment.allParameters = JSONArray(task.actionInfo.allParameters)
                 fragment.currentTask = task
+                fragment.activity?.invalidateOptionsMenu()
 
                 task.relatedItemId?.let {
                     if (fragment.entityViewModel == null) {

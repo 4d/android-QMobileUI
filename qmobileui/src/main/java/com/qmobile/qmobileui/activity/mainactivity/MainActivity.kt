@@ -308,12 +308,12 @@ class MainActivity :
     }
 
     private fun onNoInternet(tableName: String, isFromAction: Boolean = false) {
-        if (isFromAction)
-            connectivityViewModel.toastMessage
-                .showMessage(noInternetActionString, tableName, ToastMessage.Type.NEUTRAL)
-        else
-            connectivityViewModel.toastMessage
-                .showMessage(noInternetString, tableName, ToastMessage.Type.ERROR)
+        if (isFromAction) {
+            connectivityViewModel.toastMessage.showMessage(noInternetActionString, tableName, ToastMessage.Type.NEUTRAL)
+            onBackPressed()
+        } else {
+            connectivityViewModel.toastMessage.showMessage(noInternetString, tableName, ToastMessage.Type.ERROR)
+        }
     }
 
     override fun handleAuthenticationState(authenticationState: AuthenticationState) {
