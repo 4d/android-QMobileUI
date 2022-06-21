@@ -14,7 +14,6 @@ import android.app.DatePickerDialog.OnDateSetListener
 import android.app.TimePickerDialog
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.provider.MediaStore
 import android.text.Editable
@@ -31,12 +30,10 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityHelper
+import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.model.entity.Photo
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeInt
@@ -49,7 +46,8 @@ import com.qmobile.qmobileui.action.utils.addSuffix
 import com.qmobile.qmobileui.action.utils.createImageFile
 import com.qmobile.qmobileui.action.utils.handleDarkMode
 import com.qmobile.qmobileui.action.utils.saveBitmapToJPG
-import com.qmobile.qmobileui.binding.bindImageFromUrl
+import com.qmobile.qmobileui.binding.ImageHelper
+import com.qmobile.qmobileui.binding.bindImage
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.formatters.TimeFormat
 import com.qmobile.qmobileui.list.SpellOutHelper
@@ -1073,40 +1071,31 @@ class ImageViewHolder(itemView: View) :
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
-        currentEntity?.let {
+        currentEntity?.let { roomEntity ->
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<Photo>(it, defaultField).also { value ->
+                readInstanceProperty<Photo>(roomEntity, defaultField).also { value ->
                     if (value != null) {
-                        bindImageFromUrl(
-                            imageButton,
-                            value.__deferred?.uri,
-                            null,
-                            null,
-                            null,
-                            null
-                        )
-                        Glide.with(itemView.context)
-                            .asBitmap()
-                            .load(value.__deferred?.uri)
-                            .into(object : CustomTarget<Bitmap?>() {
-                                override fun onResourceReady(
-                                    p0: Bitmap,
-                                    p1: Transition<in Bitmap?>?
-                                ) {
-                                    val file = createImageFile(itemView.context)
-                                    saveBitmapToJPG(p0, file)
-                                    queueImageForUploadCallBack?.let { it1 ->
-                                        it1(
-                                            parameterName,
-                                            Uri.fromFile(file)
-                                        )
-                                    }
-                                }
+                        val key: String? = if (defaultField.contains(".")) { // alias
+                            readInstanceProperty<EntityModel>(roomEntity, defaultField.substringBeforeLast("?."))?.__KEY
+                        } else { // not alias
+                            (roomEntity.__entity as EntityModel?)?.__KEY
+                        }
 
-                                override fun onLoadCleared(p0: Drawable?) {
-                                }
-                            })
+                        val image: Any = ImageHelper.getImage(
+                            value.__deferred?.uri,
+                            itemJsonObject.getSafeString("fieldName"),
+                            key,
+                            itemJsonObject.getSafeString("tableName")
+                        )
+                        ImageHelper.bindImageWithBitmapCallback(imageButton, image) { bitmap ->
+
+                            val file = createImageFile(itemView.context)
+                            saveBitmapToJPG(bitmap, file)
+                            queueImageForUploadCallBack?.let { it1 ->
+                                it1(parameterName, Uri.fromFile(file))
+                            }
+                        }
 
                         onValueChanged(parameterName, "", null, validate())
                     }
@@ -1545,14 +1534,7 @@ class SignatureViewHolder(itemView: View) :
         alreadFilledValue?.let {
             if (it is Uri) {
                 defaultPreview.visibility = View.VISIBLE
-                bindImageFromUrl(
-                    defaultPreview,
-                    it.path,
-                    null,
-                    null,
-                    null,
-                    null
-                )
+                bindImage(defaultPreview, it.path, null, null, null)
             }
         }
     }
@@ -1571,18 +1553,23 @@ class SignatureViewHolder(itemView: View) :
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
-        currentEntity?.let {
+        currentEntity?.let { roomEntity ->
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<Photo>(it, defaultField).also { value ->
+                readInstanceProperty<Photo>(roomEntity, defaultField).also { value ->
                     if (value != null) {
-                        bindImageFromUrl(
+                        val key: String? = if (defaultField.contains(".")) { // alias
+                            readInstanceProperty<EntityModel>(roomEntity, defaultField.substringBeforeLast("?."))?.__KEY
+                        } else { // not alias
+                            (roomEntity.__entity as EntityModel?)?.__KEY
+                        }
+
+                        bindImage(
                             defaultPreview,
                             value.__deferred?.uri,
-                            null,
-                            null,
-                            null,
-                            null
+                            itemJsonObject.getSafeString("fieldName"),
+                            key,
+                            itemJsonObject.getSafeString("tableName")
                         )
                         setPreviewVisibility(true)
                         onValueChanged(parameterName, "", null, validate())
