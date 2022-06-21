@@ -13,7 +13,7 @@ import android.webkit.WebViewClient
 
 class MyWebViewClient : WebViewClient() {
 
-    override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         return false
         /*if (Uri.parse(url).host == "www.google.com") {
             // This is my web site, so do not override; let my WebView load the page

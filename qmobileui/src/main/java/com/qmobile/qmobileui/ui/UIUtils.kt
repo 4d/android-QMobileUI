@@ -76,8 +76,8 @@ fun View.clearViewInParent() {
 }
 
 fun View.checkIfChildIsWebView(): WebView? = when (this) {
-    is ViewGroup -> this.checkIfContainsWebView()
     is WebView -> this
+    is ViewGroup -> this.checkIfContainsWebView()
     else -> null
 }
 
