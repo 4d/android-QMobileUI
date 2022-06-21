@@ -444,8 +444,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.tableActions, tableName)
             .plus(ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.currentRecordActions, tableName))
             .forEach { action ->
-                //create id with pattern: $actionName$tableName
-                val actionId = action.getSafeString("name")+tableName
+                // create id with pattern: $actionName$tableName
+                val actionId = action.getSafeString("name") + tableName
                 if (actionUUID == actionId)
                     return ActionHelper.createActionFromJsonObject(action)
             }

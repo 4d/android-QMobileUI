@@ -17,7 +17,7 @@ import com.qmobile.qmobileui.action.pendingtasks.viewholder.TaskItemTypeEnum
 import com.qmobile.qmobileui.action.pendingtasks.viewholder.TaskViewHolder
 
 class TasksListAdapter(
-    private val isFromSettings : Boolean,
+    private val isFromSettings: Boolean,
     private val context: Context,
     var list: MutableList<ActionTask?>,
     var serverStatus: String? = null,
@@ -46,7 +46,7 @@ class TasksListAdapter(
         when (holder) {
             is TaskViewHolder -> {
                 if (item != null)
-                    holder.bind(isFromSettings,item) {
+                    holder.bind(isFromSettings, item) {
                         if (!item.actionInfo.allParameters.isNullOrEmpty() && item.isPending()) {
                             onCLick(position)
                         }

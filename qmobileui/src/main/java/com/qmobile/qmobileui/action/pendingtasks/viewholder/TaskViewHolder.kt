@@ -26,7 +26,6 @@ import com.qmobile.qmobileui.action.utils.getHourWord
 import com.qmobile.qmobileui.action.utils.getMinuteWord
 import com.qmobile.qmobileui.action.utils.getSecondWord
 import com.qmobile.qmobileui.formatters.FormatterUtils
-import com.qmobile.qmobileui.formatters.TimeFormat
 import java.util.Date
 
 const val MILLISECONDS_IN_SECOND = 1000
@@ -36,30 +35,28 @@ const val MINUTES_IN_HOUR = 60
 const val HOURS_IN_DAY = 24
 const val HOURS_IN_MID_DAY_FORMAT = 12
 
-
 class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
-    private var label: TextView = itemView.findViewById(R.id.label)
-    private var status: TextView = itemView.findViewById(R.id.status)
-    private var tableName: TextView = itemView.findViewById(R.id.tableName)
-    private var date: TextView = itemView.findViewById(R.id.date)
-    private var icon: ImageView = itemView.findViewById(R.id.icon_state)
-    private var dotProgressBar: DotProgressBar = itemView.findViewById(R.id.dot_progress_bar)
+
+    private val label: TextView = itemView.findViewById(R.id.label)
+    private val status: TextView = itemView.findViewById(R.id.status)
+    private val tableName: TextView = itemView.findViewById(R.id.tableName)
+    private val date: TextView = itemView.findViewById(R.id.date)
+    private val icon: ImageView = itemView.findViewById(R.id.icon_state)
+    private val dotProgressBar: DotProgressBar = itemView.findViewById(R.id.dot_progress_bar)
 
     fun bind(
         isFromSettings: Boolean,
         item: ActionTask,
         onClick: () -> Unit
     ) {
-        itemView.setOnClickListener {
-            onClick()
-        }
+        itemView.setOnClickListener { onClick() }
+
         label.text = item.label
-        if(isFromSettings) {
+
+        if (isFromSettings)
             tableName.text = item.actionInfo.tableName
-        } else
-        {
+        else
             tableName.visibility = View.GONE
-        }
 
         when (item.status) {
             ActionTask.Status.SUCCESS -> {
@@ -89,7 +86,7 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
         date.text = getRelatedDate(item.date)
     }
 
-    @Suppress( "NestedBlockDepth")
+    @Suppress("NestedBlockDepth")
     private fun showItemDetails(item: ActionTask) {
         status.visibility = View.VISIBLE
         item.actionInfo.paramsToSubmit?.let { paramsToSubmit ->
@@ -106,10 +103,7 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
                 if (format != ActionParameterEnum.TEXT_PASSWORD.format) {
                     val stringToAppend = when (type) {
                         "date" -> {
-                            FormatterUtils.applyFormat(
-                                "shortDate",
-                                entry.value
-                            )
+                            FormatterUtils.applyFormat("shortDate", entry.value)
                         }
                         "time" -> {
                             entry.value.toString().toDoubleOrNull()?.let { numberOfSeconds ->
@@ -118,11 +112,10 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
                                 if (format == "duration") {
                                     "$hours hours $minutes minutes"
                                 } else {
-                                    if (hours >= HOURS_IN_MID_DAY_FORMAT) {
+                                    if (hours >= HOURS_IN_MID_DAY_FORMAT)
                                         "${hours - HOURS_IN_MID_DAY_FORMAT}:$minutes $PM_KEY"
-                                    } else {
+                                    else
                                         "$hours:$minutes $AM_KEY"
-                                    }
                                 }
                             }
                         }
@@ -131,7 +124,7 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
                         }
                     }
                     stringToAppend?.let {
-                        if (!it.isNullOrEmpty())
+                        if (it.isNotEmpty())
                             sb.append("$stringToAppend , ")
                     }
                 }
@@ -145,7 +138,6 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
                 overviewString.append(it.toString())
             }
         }
-
     }
 
     private fun getRelatedDate(date: Date): String {
@@ -167,24 +159,14 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
     private fun retrieveAction(task: ActionTask): Action {
         val tableName = task.actionInfo.tableName
         val actionUUID = task.actionInfo.actionUUID
-        ActionHelper.getActionObjectList(
-            BaseApp.runtimeDataHolder.tableActions, tableName
-        )
-            .plus(
-                ActionHelper.getActionObjectList(
-                    BaseApp
-                        .runtimeDataHolder.currentRecordActions, tableName
-                )
-            )
+        ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.tableActions, tableName)
+            .plus(ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.currentRecordActions, tableName))
             .forEach { action ->
-                //create id with pattern: $actionName$tableName
+                // create id with pattern: $actionName$tableName
                 val actionId = action.getSafeString("name") + tableName
                 if (actionUUID == actionId)
                     return ActionHelper.createActionFromJsonObject(action)
             }
-        throw Action.ActionException(
-            "TaskViewHolderCouldn't " +
-                    "find action from table [$tableName], with uuid [$actionUUID]"
-        )
+        throw Action.ActionException("Couldn't find action from table [$tableName], with uuid [$actionUUID]")
     }
 }
