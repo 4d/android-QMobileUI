@@ -9,7 +9,7 @@ package com.qmobile.qmobileui.action.pendingtasks.viewholder
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import com.qmobile.qmobileapi.utils.getObjectList
+import com.qmobile.qmobileapi.utils.getJSONObjectList
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatasync.app.BaseApp
@@ -92,7 +92,7 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
         item.actionInfo.paramsToSubmit?.let { paramsToSubmit ->
             val sb = StringBuilder()
             // get all parameters for related action of this task to check the type/format of each paramToSubmit
-            val relatedActionParameters = retrieveAction(item).parameters.getObjectList()
+            val relatedActionParameters = retrieveAction(item).parameters.getJSONObjectList()
             paramsToSubmit.entries.forEach { entry ->
                 val relatedParam = relatedActionParameters.find {
                     it.getSafeString("name") == entry.key
