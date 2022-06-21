@@ -132,11 +132,6 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
 
             if (sb.toString().isNotEmpty())
                 status.text = sb.removeSuffix(" , ")
-
-            val overviewString = StringBuilder()
-            item.actionInfo.paramsToSubmit?.values?.toList()?.forEach {
-                overviewString.append(it.toString())
-            }
         }
     }
 
