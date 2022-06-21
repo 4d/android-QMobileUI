@@ -27,8 +27,8 @@ import com.qmobile.qmobileui.action.utils.SwipeToDeleteCallback
 import com.qmobile.qmobileui.databinding.FragmentActionTasksBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
-import java.util.UUID
 import java.util.Date
+import java.util.UUID
 
 class TasksFragment : BaseFragment(), NetworkChecker {
 
@@ -178,18 +178,18 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                             actionActivity.getTaskViewModel().deleteOne(selectedTask.id)
                             // As it's sent as a new action we have to update the date with the current date
                             selectedTask.date = Date()
-                            // UUID.randomUUID() to send action as new fresh action otherwise will be ignored by the server (server don't tread same actions with same id)
+                            // UUID.randomUUID() to send action as new fresh action otherwise will be ignored by the
+                            // server (server doesn't treat same actions with same id)
                             actionActivity.sendAction(
                                 actionContent = getActionContent(selectedTask.id, UUID.randomUUID().toString()),
                                 actionTask = selectedTask,
                                 tableName = tableName
                             ) {
-
+                                // Nothing to do
                             }
                         }
                     }
                 }
-
             }
         }
         binding.fragmentTasksRecyclerView.adapter = adapter

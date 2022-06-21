@@ -2,5 +2,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/validate"
+        android:title=""
         app:showAsAction="always" />
 </menu>
