@@ -152,6 +152,7 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
             hours > 0 -> "$hours ${getHourWord(hours)} ago"
             minutes > 0 -> "$minutes ${getMinuteWord(minutes)} ago"
             seconds > 0 -> "$seconds ${getSecondWord(seconds)} ago"
+            seconds == 0L -> "1 ${getSecondWord(1)} ago"  // case of click on error server task without parameters , show always one second ago(instead of 0)
             else -> ""
         }
     }

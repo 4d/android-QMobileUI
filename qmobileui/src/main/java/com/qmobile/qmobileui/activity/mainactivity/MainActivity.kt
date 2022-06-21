@@ -308,9 +308,11 @@ class MainActivity :
     }
 
     private fun onNoInternet(tableName: String, isFromAction: Boolean = false) {
-        if (isFromAction)
+        if (isFromAction) {
             connectivityViewModel.toastMessage
                 .showMessage(noInternetActionString, tableName, ToastMessage.Type.NEUTRAL)
+            onBackPressed()
+        }
         else
             connectivityViewModel.toastMessage
                 .showMessage(noInternetString, tableName, ToastMessage.Type.ERROR)

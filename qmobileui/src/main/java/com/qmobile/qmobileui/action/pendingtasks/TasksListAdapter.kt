@@ -47,9 +47,7 @@ class TasksListAdapter(
             is TaskViewHolder -> {
                 if (item != null)
                     holder.bind(isFromSettings, item) {
-                        if (!item.actionInfo.allParameters.isNullOrEmpty() && item.isPending()) {
-                            onCLick(position)
-                        }
+                        onCLick(position)
                     }
             }
             is SectionViewHolder -> {
