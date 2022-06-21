@@ -79,6 +79,8 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
         view.checkIfChildIsWebView()?.let { foundWebView ->
             webView = foundWebView
             webView.webViewClient = MyWebViewClient()
+            webView.settings.loadWithOverviewMode = true
+            webView.settings.useWideViewPort = true
         }
 
         setHasOptionsMenu(::webView.isInitialized || hasActions)
