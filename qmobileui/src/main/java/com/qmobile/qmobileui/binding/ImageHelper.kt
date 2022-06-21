@@ -16,6 +16,7 @@ import android.os.Build
 import android.os.Environment
 import android.util.TypedValue
 import android.view.View
+import android.widget.ImageView
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.core.content.FileProvider
@@ -23,8 +24,11 @@ import androidx.core.graphics.ColorUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
+import com.bumptech.glide.request.transition.Transition
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobileui.R
@@ -56,7 +60,24 @@ object ImageHelper {
             .listener(CustomRequestListener())
             .error(R.drawable.alert_circle_outline)
 
-    fun getImage(imageUrl: String?, tableName: String?, key: String?, fieldName: String?): Any =
+    fun bindImageWithBitmapCallback(view: View, data: Any, bitmapCallback: (Bitmap) -> Unit) {
+        Glide.with(view.context.applicationContext)
+            .asBitmap()
+            .load(data)
+            .transition(BitmapTransitionOptions.withCrossFade(factory))
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .error(R.drawable.alert_circle_outline)
+            .into(object : CustomTarget<Bitmap?>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap?>?) {
+                    (view as ImageView?)?.setImageBitmap(resource)
+                    bitmapCallback(resource)
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) {}
+            })
+    }
+
+    fun getImage(imageUrl: String?, fieldName: String?, key: String?, tableName: String?): Any =
         tryImageFromAssets(tableName, key, fieldName)
             ?: if (!imageUrl.isNullOrEmpty()) imageUrl else R.drawable.image_off
 
