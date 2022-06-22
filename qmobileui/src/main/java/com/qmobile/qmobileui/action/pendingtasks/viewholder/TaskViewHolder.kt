@@ -21,6 +21,7 @@ import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.action.utils.DotProgressBar
 import com.qmobile.qmobileui.action.utils.DateTimeHelper
 import com.qmobile.qmobileui.formatters.FormatterUtils
+import org.json.JSONObject
 
 class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
 
@@ -77,22 +78,18 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
     private fun showItemDetails(item: ActionTask) {
         status.visibility = View.VISIBLE
         item.actionInfo.paramsToSubmit?.let { paramsToSubmit ->
-            val sb = StringBuilder()
+            var sb = StringBuilder()
             // get all parameters for related action of this task to check the type/format of each paramToSubmit
             val relatedActionParameters = retrieveAction(item).parameters.getJSONObjectList()
             paramsToSubmit.entries.forEach { entry ->
-                val relatedParam = relatedActionParameters.find {
-                    it.getSafeString("name") == entry.key
-                }
+                val relatedParam = getRelatedParam(relatedActionParameters, entry)
+
                 val type = relatedParam?.getSafeString("type")
                 val format = relatedParam?.getSafeString("format")
                 // We don't display password fields
                 if (format != ActionParameterEnum.TEXT_PASSWORD.format) {
-                    val stringToAppend = getFieldOverView(format, type, entry)
-                    stringToAppend?.let {
-                        if (it.isNotEmpty())
-                            sb.append("$stringToAppend , ")
-                    }
+                    sb = getFieldOverView(format, type, entry, sb)
+
                 }
             }
 
@@ -101,8 +98,22 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
         }
     }
 
-    private fun getFieldOverView(format: String?, type: String?, entry: MutableMap.MutableEntry<String, Any>) : String? {
-        return when (type) {
+    private fun getRelatedParam(
+        relatedActionParameters: List<JSONObject>,
+        entry: MutableMap.MutableEntry<String, Any>
+    ): JSONObject? {
+        return relatedActionParameters.find {
+            it.getSafeString("name") == entry.key
+        }
+
+    }
+    private fun getFieldOverView(
+        format: String?,
+        type: String?,
+        entry: MutableMap.MutableEntry<String, Any>,
+        sb: StringBuilder
+    ) : StringBuilder {
+        val stringToAppend = when (type) {
             "date" -> {
                 FormatterUtils.applyFormat("shortDate", entry.value)
             }
@@ -115,6 +126,13 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
                 entry.value.toString()
             }
         }
+
+        stringToAppend?.let {
+            if (it.isNotEmpty())
+                sb.append("$stringToAppend , ")
+        }
+
+        return sb
     }
 
     private fun retrieveAction(task: ActionTask): Action {
