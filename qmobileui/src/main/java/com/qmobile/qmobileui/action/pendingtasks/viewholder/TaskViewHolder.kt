@@ -71,8 +71,7 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
                 dotProgressBar.visibility = View.VISIBLE
             }
         }
-        date.text = DateTimeHelper.getFormattedDate(
-            item.date)
+        date.text = DateTimeHelper.getFormattedDate(item.date)
     }
 
     private fun showItemDetails(item: ActionTask) {
@@ -80,16 +79,16 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
         item.actionInfo.paramsToSubmit?.let { paramsToSubmit ->
             var sb = StringBuilder()
             // get all parameters for related action of this task to check the type/format of each paramToSubmit
-            val relatedActionParameters = retrieveAction(item).parameters.getJSONObjectList()
+            val relatedActionParameters: List<JSONObject> = retrieveAction(item).parameters.getJSONObjectList()
             paramsToSubmit.entries.forEach { entry ->
-                val relatedParam = getRelatedParam(relatedActionParameters, entry)
 
-                val type = relatedParam?.getSafeString("type")
-                val format = relatedParam?.getSafeString("format")
-                // We don't display password fields
-                if (format != ActionParameterEnum.TEXT_PASSWORD.format) {
-                    sb = getFieldOverView(format, type, entry, sb)
-
+                relatedActionParameters.find { it.getSafeString("name") == entry.key }?.let { relatedParam ->
+                    val type = relatedParam.getSafeString("type")
+                    val format = relatedParam.getSafeString("format")
+                    // We don't display password fields
+                    if (format != ActionParameterEnum.TEXT_PASSWORD.format) {
+                        sb = getFieldOverView(format, type, entry, sb)
+                    }
                 }
             }
 
@@ -98,15 +97,6 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
         }
     }
 
-    private fun getRelatedParam(
-        relatedActionParameters: List<JSONObject>,
-        entry: MutableMap.MutableEntry<String, Any>
-    ): JSONObject? {
-        return relatedActionParameters.find {
-            it.getSafeString("name") == entry.key
-        }
-
-    }
     private fun getFieldOverView(
         format: String?,
         type: String?,
