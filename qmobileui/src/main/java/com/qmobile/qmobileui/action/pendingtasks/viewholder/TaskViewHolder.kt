@@ -118,8 +118,8 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
                 FormatterUtils.applyFormat("shortDate", entry.value)
             }
             "time" -> {
-                entry.value.toString().toDoubleOrNull()?.let { numberOfSeconds ->
-                    DateTimeHelper.getFormattedTime(numberOfSeconds, format)
+                entry.value.toString().toDoubleOrNull()?.let { numberOfMilliSeconds ->
+                    DateTimeHelper.getFormattedTime(numberOfMilliSeconds, format)
                 }
             }
             else -> {

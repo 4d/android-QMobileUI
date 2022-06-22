@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.action.utils
 
 import com.qmobile.qmobileui.action.actionparameters.viewholder.AM_KEY
 import com.qmobile.qmobileui.action.actionparameters.viewholder.PM_KEY
+import com.qmobile.qmobileui.formatters.TimeFormat
 import java.util.Date
 
 const val MILLISECONDS_IN_SECOND = 1000
@@ -20,20 +21,17 @@ const val HOURS_IN_MID_DAY_FORMAT = 12
 
 object DateTimeHelper {
 
-     fun getFormattedTime(numberOfSeconds: Double, format: String?): String{
+    fun getFormattedTime(numberOfSeconds: Double, format: String?): String{
         val hours: Int = (numberOfSeconds / SECONDS_IN_HOUR).toInt()
         val minutes: Int = (numberOfSeconds % SECONDS_IN_HOUR / SECONDS_IN_MINUTE).toInt()
         return if (format == "duration") {
             "$hours hours $minutes minutes"
         } else {
-            if (hours >= HOURS_IN_MID_DAY_FORMAT)
-                "${hours - HOURS_IN_MID_DAY_FORMAT}:$minutes $PM_KEY"
-            else
-                "$hours:$minutes $AM_KEY"
+            TimeFormat.getAmPmFormattedTime(numberOfSeconds.toLong()* TimeFormat.INT_1000)
         }
     }
 
-     fun getFormattedDate(date: Date): String {
+    fun getFormattedDate(date: Date): String {
         val diff: Long = Date().time - date.time
         val seconds = diff / MILLISECONDS_IN_SECOND
         val minutes = seconds / SECONDS_IN_MINUTE

@@ -1234,11 +1234,7 @@ class TimeViewHolder(itemView: View, val format: String) :
                 selectedTime.text = if (is24HourFormat) {
                     "$hours hours $minutes minutes"
                 } else {
-                    if (hours >= 12) {
-                        "${hours - 12}:$minutes $PM_KEY"
-                    } else {
-                        "$hours:$minutes $AM_KEY"
-                    }
+                    TimeFormat.getAmPmFormattedTime(numberOfSeconds.toLong()* TimeFormat.INT_1000)
                 }
             }
         }

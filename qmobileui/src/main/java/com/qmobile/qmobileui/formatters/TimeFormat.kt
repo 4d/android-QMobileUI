@@ -20,7 +20,7 @@ object TimeFormat {
 
     private const val INT_3600 = 3600
     private const val INT_60: Int = 60
-    private const val INT_1000: Int = 1000
+    const val INT_1000: Int = 1000
     private const val INT_12: Int = 12
 
     private val formatNameMap: Map<String, Int> = mapOf(
