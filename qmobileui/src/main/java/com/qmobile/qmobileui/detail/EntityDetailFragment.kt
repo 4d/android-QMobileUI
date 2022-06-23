@@ -27,9 +27,10 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
-import com.qmobile.qmobileui.ui.checkIfChildIsWebView
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.webview.MyWebViewClient
+import com.qmobile.qmobileui.webview.WebViewHelper.adjustSize
+import com.qmobile.qmobileui.webview.WebViewHelper.checkIfChildIsWebView
 
 open class EntityDetailFragment : BaseFragment(), ActionNavigable {
 
@@ -79,8 +80,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
         view.checkIfChildIsWebView()?.let { foundWebView ->
             webView = foundWebView
             webView.webViewClient = MyWebViewClient()
-            webView.settings.loadWithOverviewMode = true
-            webView.settings.useWideViewPort = true
+            webView.adjustSize()
         }
 
         setHasOptionsMenu(::webView.isInitialized || hasActions)
@@ -109,7 +109,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
                 setOnMenuItemClickListener {
                     val sendIntent: Intent = Intent().apply {
                         action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TEXT, "This is my text to send.")
+                        putExtra(Intent.EXTRA_TEXT, "")
                         type = "text/plain"
                     }
 //                    val shareIntent = Intent.createChooser(sendIntent, "Share using")
@@ -123,6 +123,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
             isVisible = ::webView.isInitialized
             if (::webView.isInitialized) {
                 setOnMenuItemClickListener {
+                    webView.adjustSize()
                     webView.reload()
                     true
                 }

@@ -12,7 +12,7 @@ import com.bumptech.glide.load.model.Headers
 import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.load.model.ModelLoader
 import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader
-import com.qmobile.qmobileapi.network.ApiClient
+import com.qmobile.qmobileapi.network.HeaderHelper
 import com.qmobile.qmobiledatasync.app.BaseApp
 import java.io.InputStream
 
@@ -38,27 +38,31 @@ class HeaderLoader(concreteLoader: ModelLoader<GlideUrl, InputStream>) :
 
         // If a token is stored in sharedPreferences, we add it in header
         if (BaseApp.sharedPreferencesHolder.sessionToken.isNotEmpty()) {
-            lazyHeadersBuilder
-                .setHeader(
-                    ApiClient.AUTHORIZATION_HEADER_KEY,
-                    "${ApiClient.AUTHORIZATION_HEADER_VALUE_PREFIX} ${BaseApp.sharedPreferencesHolder.sessionToken}"
-                )
+            lazyHeadersBuilder.setAuthorizationHeader(BaseApp.sharedPreferencesHolder.sessionToken)
         }
 
         // Adding default headers
-        lazyHeadersBuilder.addHeader(
-            ApiClient.CONTENT_TYPE_HEADER_KEY,
-            ApiClient.CONTENT_TYPE_HEADER_VALUE
-        )
-            .addHeader(
-                ApiClient.X_QMOBILE_HEADER_KEY,
-                ApiClient.X_QMOBILE_HEADER_VALUE
-            )
+        lazyHeadersBuilder.addContentTypeHeader().addXQMobileHeader()
 
         return lazyHeadersBuilder.build()
     }
 
     override fun handles(model: String): Boolean {
         return true
+    }
+
+    private fun LazyHeaders.Builder.addContentTypeHeader() = this.apply {
+        addHeader(HeaderHelper.CONTENT_TYPE_HEADER_KEY, HeaderHelper.CONTENT_TYPE_HEADER_VALUE)
+    }
+
+    private fun LazyHeaders.Builder.addXQMobileHeader() = this.apply {
+        addHeader(HeaderHelper.X_QMOBILE_HEADER_KEY, HeaderHelper.X_QMOBILE_HEADER_VALUE)
+    }
+
+    private fun LazyHeaders.Builder.setAuthorizationHeader(token: String) = this.apply {
+        setHeader(
+            HeaderHelper.AUTHORIZATION_HEADER_KEY,
+            "${HeaderHelper.AUTHORIZATION_HEADER_VALUE_PREFIX} $token"
+        )
     }
 }
