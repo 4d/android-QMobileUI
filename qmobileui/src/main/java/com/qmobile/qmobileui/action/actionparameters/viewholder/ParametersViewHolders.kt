@@ -57,6 +57,7 @@ import java.io.File
 import java.io.IOException
 import java.text.DecimalFormat
 import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 // !!!! To refactor ASAP !!!!!////
 abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -1232,11 +1233,7 @@ class TimeViewHolder(itemView: View, val format: String) :
                 selectedTime.text = if (is24HourFormat) {
                     "$hours hours $minutes minutes"
                 } else {
-                    if (hours >= 12) {
-                        "${hours - 12}:$minutes $PM_KEY"
-                    } else {
-                        "$hours:$minutes $AM_KEY"
-                    }
+                    TimeFormat.getAmPmFormattedTime(numberOfSeconds.toLong(), TimeUnit.SECONDS)
                 }
             }
         }
@@ -1264,7 +1261,7 @@ class TimeViewHolder(itemView: View, val format: String) :
 
                     val longText = value.toLongOrNull() ?: return
 
-                    selectedTime.text = TimeFormat.getAmPmFormattedTime(longText)
+                    selectedTime.text = TimeFormat.getAmPmFormattedTime(longText, TimeUnit.MILLISECONDS)
 
                     val totalSecs = longText / 1000
 
