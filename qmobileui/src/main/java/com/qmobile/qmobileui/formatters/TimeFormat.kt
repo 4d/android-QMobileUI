@@ -15,12 +15,13 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 object TimeFormat {
 
     private const val INT_3600 = 3600
     private const val INT_60: Int = 60
-    private const val INT_1000: Int = 1000
+    const val INT_1000: Int = 1000
     private const val INT_12: Int = 12
 
     private val formatNameMap: Map<String, Int> = mapOf(
@@ -43,7 +44,7 @@ object TimeFormat {
                 } ?: ""
             }
             "mediumTime" -> {
-                getAmPmFormattedTime(longText)
+                getAmPmFormattedTime(longText, TimeUnit.MILLISECONDS)
             }
             "duration" -> {
                 formatNameMap[format]?.let {
@@ -83,8 +84,12 @@ object TimeFormat {
         }
     }
 
-    fun getAmPmFormattedTime(time: Long): String {
-        val totalSecs = time / INT_1000
+    fun getAmPmFormattedTime(time: Long, timeUnit: TimeUnit): String {
+        val totalSecs = when (timeUnit) {
+            TimeUnit.SECONDS -> time
+            TimeUnit.MILLISECONDS -> time / INT_1000
+            else -> return ""
+        }
         val hours = totalSecs / INT_3600
         val minutes = (totalSecs % INT_3600) / INT_60
 
