@@ -213,7 +213,7 @@ class TextViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<String>(it, defaultField)?.also { value ->
+                readInstanceProperty<String>(it, defaultField).also { value ->
                     editText.text = value
                     onValueChanged(parameterName, value, null, validate())
                 }
@@ -314,7 +314,7 @@ class TextAreaViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<String>(it, defaultField)?.also { value ->
+                readInstanceProperty<String>(it, defaultField).also { value ->
                     editText.text = value
                     onValueChanged(parameterName, value, null, validate())
                 }
@@ -440,7 +440,7 @@ class NumberViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<Float>(it, defaultField)?.also { value ->
+                readInstanceProperty<Float>(it, defaultField).also { value ->
 
                     val isInteger = (value - value.toInt()) == 0.0F
                     val formattedValue = if (isInteger)
@@ -589,7 +589,7 @@ class SpellOutViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<String>(it, defaultField)?.also { value ->
+                readInstanceProperty<String>(it, defaultField).also { value ->
                     editText.text = value
                     onValueChanged(
                         parameterName,
@@ -730,7 +730,7 @@ class ScientificViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<String>(it, defaultField)?.also { value ->
+                readInstanceProperty<String>(it, defaultField).also { value ->
                     editText.text = value
                     onValueChanged(
                         parameterName,
@@ -865,7 +865,7 @@ class PercentageViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<String>(it, defaultField)?.also { value ->
+                readInstanceProperty<String>(it, defaultField).also { value ->
                     editText.text = value
                     onValueChanged(
                         parameterName,
@@ -929,7 +929,7 @@ class BooleanSwitchViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<Boolean>(it, defaultField)?.also { value ->
+                readInstanceProperty<Boolean>(it, defaultField).also { value ->
                     switch.isChecked = value
                     onValueChanged(parameterName, value, null, true)
                 }
@@ -983,7 +983,7 @@ class BooleanCheckMarkViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<Boolean>(it, defaultField)?.also { value ->
+                readInstanceProperty<Boolean>(it, defaultField).also { value ->
                     checkBox.isChecked = value
                     onValueChanged(parameterName, value, null, true)
                 }
@@ -1076,30 +1076,28 @@ class ImageViewHolder(itemView: View) :
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 readInstanceProperty<Photo>(roomEntity, defaultField).also { value ->
-                    if (value != null) {
-                        val key: String? = if (defaultField.contains(".")) { // alias
-                            readInstanceProperty<EntityModel>(roomEntity, defaultField.substringBeforeLast("?."))?.__KEY
-                        } else { // not alias
-                            (roomEntity.__entity as EntityModel?)?.__KEY
-                        }
-
-                        val image: Any = ImageHelper.getImage(
-                            value.__deferred?.uri,
-                            itemJsonObject.getSafeString("fieldName"),
-                            key,
-                            itemJsonObject.getSafeString("tableName")
-                        )
-                        ImageHelper.bindImageWithBitmapCallback(imageButton, image) { bitmap ->
-
-                            val file = createImageFile(itemView.context)
-                            saveBitmapToJPG(bitmap, file)
-                            queueImageForUploadCallBack?.let { it1 ->
-                                it1(parameterName, Uri.fromFile(file))
-                            }
-                        }
-
-                        onValueChanged(parameterName, "", null, validate())
+                    val key: String? = if (defaultField.contains(".")) { // alias
+                        readInstanceProperty<EntityModel>(roomEntity, defaultField.substringBeforeLast("?.")).__KEY
+                    } else { // not alias
+                        (roomEntity.__entity as EntityModel?)?.__KEY
                     }
+
+                    val image: Any = ImageHelper.getImage(
+                        value.__deferred?.uri,
+                        itemJsonObject.getSafeString("fieldName"),
+                        key,
+                        itemJsonObject.getSafeString("tableName")
+                    )
+                    ImageHelper.bindImageWithBitmapCallback(imageButton, image) { bitmap ->
+
+                        val file = createImageFile(itemView.context)
+                        saveBitmapToJPG(bitmap, file)
+                        queueImageForUploadCallBack?.let { it1 ->
+                            it1(parameterName, Uri.fromFile(file))
+                        }
+                    }
+
+                    onValueChanged(parameterName, "", null, validate())
                 }
             }
         }
@@ -1259,7 +1257,7 @@ class TimeViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<String>(it, defaultField)?.also { value ->
+                readInstanceProperty<String>(it, defaultField).also { value ->
 
                     val longText = value.toLongOrNull() ?: return
 
@@ -1379,7 +1377,7 @@ class DateViewHolder(itemView: View, val format: String) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<String>(it, defaultField)?.also { value ->
+                readInstanceProperty<String>(it, defaultField).also { value ->
                     val formattedDate = FormatterUtils.applyFormat(
                         dateFormat,
                         value
@@ -1449,7 +1447,7 @@ class BarCodeViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<String>(it, defaultField)?.also { value ->
+                readInstanceProperty<String>(it, defaultField).also { value ->
                     scannedValueTextView.text = value
                     onValueChanged(parameterName, value, null, validate())
                 }
@@ -1554,23 +1552,21 @@ class SignatureViewHolder(itemView: View) :
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 readInstanceProperty<Photo>(roomEntity, defaultField).also { value ->
-                    if (value != null) {
-                        val key: String? = if (defaultField.contains(".")) { // alias
-                            readInstanceProperty<EntityModel>(roomEntity, defaultField.substringBeforeLast("?."))?.__KEY
-                        } else { // not alias
-                            (roomEntity.__entity as EntityModel?)?.__KEY
-                        }
-
-                        bindImage(
-                            defaultPreview,
-                            value.__deferred?.uri,
-                            itemJsonObject.getSafeString("fieldName"),
-                            key,
-                            itemJsonObject.getSafeString("tableName")
-                        )
-                        setPreviewVisibility(true)
-                        onValueChanged(parameterName, "", null, validate())
+                    val key: String? = if (defaultField.contains(".")) { // alias
+                        readInstanceProperty<EntityModel>(roomEntity, defaultField.substringBeforeLast("?.")).__KEY
+                    } else { // not alias
+                        (roomEntity.__entity as EntityModel?)?.__KEY
                     }
+
+                    bindImage(
+                        defaultPreview,
+                        value.__deferred?.uri,
+                        itemJsonObject.getSafeString("fieldName"),
+                        key,
+                        itemJsonObject.getSafeString("tableName")
+                    )
+                    setPreviewVisibility(true)
+                    onValueChanged(parameterName, "", null, validate())
                 }
             }
         }
@@ -1604,13 +1600,13 @@ class SignatureViewHolder(itemView: View) :
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun <R> readInstanceProperty(instance: RoomEntity, propertyName: String): R? {
+private fun <R> readInstanceProperty(instance: RoomEntity, propertyName: String): R {
     return if (propertyName.contains(".")) {
         var tmpInstance: Any = instance
         propertyName.split("?.").forEach { part ->
-            tmpInstance = EntityHelper.readInstanceProperty(tmpInstance, part) ?: return null
+            tmpInstance = EntityHelper.readInstanceProperty(tmpInstance, part)
         }
-        tmpInstance as R?
+        tmpInstance as R
     } else {
         EntityHelper.readInstanceProperty(instance.__entity, propertyName)
     }
