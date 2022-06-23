@@ -115,12 +115,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
 
         // Login button
         binding.loginButtonAuth.setOnSingleClickListener {
-            if (connectivityViewModel.isConnected()) {
-                binding.loginButtonAuth.isEnabled = false
-                loginViewModel.login(email = binding.loginEmailInput.text.toString()) { }
-            } else {
-                ToastHelper.show(this, getString(R.string.no_internet), ToastMessage.Type.WARNING)
-            }
+            login()
         }
 
         // Define a shake animation for when input is not valid
@@ -131,6 +126,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
                 if (binding.loginEmailInput.text.toString().isEmailValid()) {
                     loginViewModel.setEmailValidState(true)
                     binding.loginEmailContainer.error = null
+                    login()
                 } else {
                     binding.loginEmailInput.startAnimation(shakeAnimation)
                     binding.loginEmailContainer.error = getString(R.string.login_invalid_email)
@@ -157,6 +153,15 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         binding.loginLogo.setOnVeryLongClickListener {
             checkNetwork(this)
             showRemoteUrlDisplayDialog()
+        }
+    }
+
+    private fun login() {
+        if (connectivityViewModel.isConnected()) {
+            binding.loginButtonAuth.isEnabled = false
+            loginViewModel.login(email = binding.loginEmailInput.text.toString()) { }
+        } else {
+            ToastHelper.show(this, getString(R.string.no_internet), ToastMessage.Type.WARNING)
         }
     }
 
