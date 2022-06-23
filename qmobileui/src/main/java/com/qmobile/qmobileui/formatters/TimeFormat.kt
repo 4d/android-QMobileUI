@@ -10,7 +10,6 @@ import com.qmobile.qmobileapi.utils.safeParse
 import com.qmobile.qmobileui.action.actionparameters.viewholder.AM_KEY
 import com.qmobile.qmobileui.action.actionparameters.viewholder.PM_KEY
 import java.lang.StringBuilder
-import java.sql.Time
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar

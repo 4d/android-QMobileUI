@@ -18,8 +18,8 @@ import com.qmobile.qmobileui.action.actionparameters.ActionParameterEnum
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.pendingtasks.TaskListViewHolder
 import com.qmobile.qmobileui.action.utils.ActionHelper
-import com.qmobile.qmobileui.action.utils.DotProgressBar
 import com.qmobile.qmobileui.action.utils.DateTimeHelper
+import com.qmobile.qmobileui.action.utils.DotProgressBar
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import org.json.JSONObject
 
@@ -76,19 +76,16 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
 
     private fun showItemDetails(item: ActionTask) {
         status.visibility = View.VISIBLE
-        item.actionInfo.paramsToSubmit?.let { paramsToSubmit ->
-            var sb = StringBuilder()
-            // get all parameters for related action of this task to check the type/format of each paramToSubmit
-            val relatedActionParameters: List<JSONObject> = retrieveAction(item).parameters.getJSONObjectList()
-            paramsToSubmit.entries.forEach { entry ->
-
-                relatedActionParameters.find { it.getSafeString("name") == entry.key }?.let { relatedParam ->
-                    val type = relatedParam.getSafeString("type")
-                    val format = relatedParam.getSafeString("format")
-                    // We don't display password fields
-                    if (format != ActionParameterEnum.TEXT_PASSWORD.format) {
-                        sb = getFieldOverview(format, type, entry.value, sb)
-                    }
+        var sb = StringBuilder()
+        // get all parameters for related action of this task to check the type/format of each paramToSubmit
+        val relatedActionParameters: List<JSONObject> = retrieveAction(item).parameters.getJSONObjectList()
+        item.actionInfo.paramsToSubmit?.entries?.forEach { entry ->
+            relatedActionParameters.find { it.getSafeString("name") == entry.key }?.let { relatedParam ->
+                val type = relatedParam.getSafeString("type")
+                val format = relatedParam.getSafeString("format")
+                // We don't display password fields
+                if (format != ActionParameterEnum.TEXT_PASSWORD.format) {
+                    sb = getFieldOverview(format, type, entry.value, sb)
                 }
             }
 
@@ -102,7 +99,7 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
         type: String?,
         value: Any,
         sb: StringBuilder
-    ) : StringBuilder {
+    ): StringBuilder {
         val stringToAppend = when (type) {
             "date" -> {
                 FormatterUtils.applyFormat("shortDate", value)

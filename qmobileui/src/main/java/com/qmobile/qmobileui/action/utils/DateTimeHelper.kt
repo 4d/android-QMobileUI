@@ -6,8 +6,6 @@
 
 package com.qmobile.qmobileui.action.utils
 
-import com.qmobile.qmobileui.action.actionparameters.viewholder.AM_KEY
-import com.qmobile.qmobileui.action.actionparameters.viewholder.PM_KEY
 import com.qmobile.qmobileui.formatters.TimeFormat
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -19,10 +17,9 @@ const val MINUTES_IN_HOUR = 60
 const val HOURS_IN_DAY = 24
 const val HOURS_IN_MID_DAY_FORMAT = 12
 
-
 object DateTimeHelper {
 
-    fun getFormattedTime(numberOfSeconds: Double, format: String?): String{
+    fun getFormattedTime(numberOfSeconds: Double, format: String?): String {
         val hours: Int = (numberOfSeconds / SECONDS_IN_HOUR).toInt()
         val minutes: Int = (numberOfSeconds % SECONDS_IN_HOUR / SECONDS_IN_MINUTE).toInt()
         return if (format == "duration") {
