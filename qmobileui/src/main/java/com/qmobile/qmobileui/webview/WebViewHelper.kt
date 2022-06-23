@@ -2,10 +2,8 @@ package com.qmobile.qmobileui.webview
 
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.CookieManager
 import android.webkit.WebView
 import androidx.core.view.children
-import com.qmobile.qmobiledatasync.app.BaseApp
 
 object WebViewHelper {
 
@@ -13,16 +11,17 @@ object WebViewHelper {
 
     fun loadUrl(view: WebView, url: String?) {
         if (url.isNullOrEmpty()) return
-        val cookieList = BaseApp.sharedPreferencesHolder.cookies.split(";")
-        if (cookieList.isNotEmpty()) {
-            val cookieManager = CookieManager.getInstance()
+//        val cookieList = BaseApp.sharedPreferencesHolder.cookies.split(";")
+//        if (cookieList.isNotEmpty()) {
+//            val cookieManager = CookieManager.getInstance()
 //            cookieManager.acceptCookie()
 //            cookieManager.setAcceptThirdPartyCookies(view, true)
 //            cookieManager.setCookie(url, "${HeaderHelper.COOKIE_HEADER_KEY}=$cookie")
-            cookieList.forEach { cookie ->
-                cookieManager.setCookie(url, cookie)
-            }
-        }
+
+//            cookieList.forEach { cookie ->
+//                cookieManager.setCookie(url, cookie)
+//            }
+//        }
         view.loadUrl(url)
     }
 
