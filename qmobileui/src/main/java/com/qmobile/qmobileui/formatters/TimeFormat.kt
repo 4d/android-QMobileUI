@@ -10,11 +10,13 @@ import com.qmobile.qmobileapi.utils.safeParse
 import com.qmobile.qmobileui.action.actionparameters.viewholder.AM_KEY
 import com.qmobile.qmobileui.action.actionparameters.viewholder.PM_KEY
 import java.lang.StringBuilder
+import java.sql.Time
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 object TimeFormat {
 
@@ -43,7 +45,7 @@ object TimeFormat {
                 } ?: ""
             }
             "mediumTime" -> {
-                getAmPmFormattedTime(longText)
+                getAmPmFormattedTime(longText, TimeUnit.MILLISECONDS)
             }
             "duration" -> {
                 formatNameMap[format]?.let {
@@ -83,8 +85,12 @@ object TimeFormat {
         }
     }
 
-    fun getAmPmFormattedTime(time: Long): String {
-        val totalSecs = time / INT_1000
+    fun getAmPmFormattedTime(time: Long, timeUnit: TimeUnit): String {
+        val totalSecs = when (timeUnit) {
+            TimeUnit.SECONDS -> time
+            TimeUnit.MILLISECONDS -> time / INT_1000
+            else -> return ""
+        }
         val hours = totalSecs / INT_3600
         val minutes = (totalSecs % INT_3600) / INT_60
 

@@ -10,6 +10,7 @@ import com.qmobile.qmobileui.action.actionparameters.viewholder.AM_KEY
 import com.qmobile.qmobileui.action.actionparameters.viewholder.PM_KEY
 import com.qmobile.qmobileui.formatters.TimeFormat
 import java.util.Date
+import java.util.concurrent.TimeUnit
 
 const val MILLISECONDS_IN_SECOND = 1000
 const val SECONDS_IN_MINUTE = 60
@@ -27,7 +28,7 @@ object DateTimeHelper {
         return if (format == "duration") {
             "$hours hours $minutes minutes"
         } else {
-            TimeFormat.getAmPmFormattedTime(numberOfSeconds.toLong()* TimeFormat.INT_1000)
+            TimeFormat.getAmPmFormattedTime(numberOfSeconds.toLong(), TimeUnit.SECONDS)
         }
     }
 
@@ -49,4 +50,8 @@ object DateTimeHelper {
         }
     }
 
+    fun getDayWord(days: Long): String = if (days <= 1) "day" else "days"
+    fun getHourWord(hours: Long): String = if (hours <= 1) "hour" else "hours"
+    fun getMinuteWord(minutes: Long): String = if (minutes <= 1) "minute" else "minutes"
+    fun getSecondWord(seconds: Long): String = if (seconds <= 1) "seconds" else "seconds"
 }

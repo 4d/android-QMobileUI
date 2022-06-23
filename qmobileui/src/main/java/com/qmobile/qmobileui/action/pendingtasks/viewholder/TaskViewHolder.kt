@@ -87,7 +87,7 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
                     val format = relatedParam.getSafeString("format")
                     // We don't display password fields
                     if (format != ActionParameterEnum.TEXT_PASSWORD.format) {
-                        sb = getFieldOverView(format, type, entry, sb)
+                        sb = getFieldOverview(format, type, entry.value, sb)
                     }
                 }
             }
@@ -97,30 +97,28 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
         }
     }
 
-    private fun getFieldOverView(
+    private fun getFieldOverview(
         format: String?,
         type: String?,
-        entry: MutableMap.MutableEntry<String, Any>,
+        value: Any,
         sb: StringBuilder
     ) : StringBuilder {
         val stringToAppend = when (type) {
             "date" -> {
-                FormatterUtils.applyFormat("shortDate", entry.value)
+                FormatterUtils.applyFormat("shortDate", value)
             }
             "time" -> {
-                entry.value.toString().toDoubleOrNull()?.let { numberOfMilliSeconds ->
+                value.toString().toDoubleOrNull()?.let { numberOfMilliSeconds ->
                     DateTimeHelper.getFormattedTime(numberOfMilliSeconds, format)
-                }
+                } ?: ""
             }
             else -> {
-                entry.value.toString()
+                value.toString()
             }
         }
 
-        stringToAppend?.let {
-            if (it.isNotEmpty())
-                sb.append("$stringToAppend , ")
-        }
+        if (stringToAppend.isNotEmpty())
+            sb.append("$stringToAppend , ")
 
         return sb
     }
