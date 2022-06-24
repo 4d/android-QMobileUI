@@ -299,12 +299,14 @@ class MainActivity :
     }
 
     private fun onServerInaccessible(tableName: String, isFromAction: Boolean = false) {
-        if (isFromAction)
+        if (isFromAction) {
             connectivityViewModel.toastMessage
                 .showMessage(serverNotAccessibleActionString, tableName, ToastMessage.Type.NEUTRAL)
-        else
+            onBackPressed()
+        } else {
             connectivityViewModel.toastMessage
                 .showMessage(serverNotAccessibleString, tableName, ToastMessage.Type.ERROR)
+        }
     }
 
     private fun onNoInternet(tableName: String, isFromAction: Boolean = false) {
