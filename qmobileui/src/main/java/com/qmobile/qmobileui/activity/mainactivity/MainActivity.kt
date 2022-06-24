@@ -299,9 +299,12 @@ class MainActivity :
     }
 
     private fun onServerInaccessible(tableName: String, isFromAction: Boolean = false) {
-        if (isFromAction)
+        if (isFromAction) {
             connectivityViewModel.toastMessage
                 .showMessage(serverNotAccessibleActionString, tableName, ToastMessage.Type.NEUTRAL)
+            onBackPressed()
+        }
+
         else
             connectivityViewModel.toastMessage
                 .showMessage(serverNotAccessibleString, tableName, ToastMessage.Type.ERROR)
