@@ -534,6 +534,7 @@ class SpellOutViewHolder(itemView: View) :
                 }
             }
         }
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
         editText.handleDarkMode()
 
         alreadFilledValue?.let { value ->
@@ -589,8 +590,10 @@ class SpellOutViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<String>(it, defaultField).also { value ->
-                    editText.text = value
+                readInstanceProperty<Int>(it, defaultField).also { value ->
+                    SpellOutHelper.convert(value.toLong()).apply {
+                        editText.text = this
+                    }
                     onValueChanged(
                         parameterName,
                         value,
@@ -865,8 +868,9 @@ class PercentageViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                readInstanceProperty<String>(it, defaultField).also { value ->
-                    editText.text = value
+
+                readInstanceProperty<Float>(it, defaultField).also { value ->
+                    editText.text = value.toInt().toString()
                     onValueChanged(
                         parameterName,
                         value,
