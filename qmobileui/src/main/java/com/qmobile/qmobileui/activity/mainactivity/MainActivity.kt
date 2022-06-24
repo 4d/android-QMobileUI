@@ -303,11 +303,10 @@ class MainActivity :
             connectivityViewModel.toastMessage
                 .showMessage(serverNotAccessibleActionString, tableName, ToastMessage.Type.NEUTRAL)
             onBackPressed()
-        }
-
-        else
+        } else {
             connectivityViewModel.toastMessage
                 .showMessage(serverNotAccessibleString, tableName, ToastMessage.Type.ERROR)
+        }
     }
 
     private fun onNoInternet(tableName: String, isFromAction: Boolean = false) {
