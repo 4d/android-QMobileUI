@@ -34,7 +34,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
 
     private var _binding: FragmentActionTasksBinding? = null
     val binding get() = _binding!!
-    private lateinit var adapter: TasksListAdapter
+    private var adapter: TasksListAdapter? = null
 
     private lateinit var activitySettingsInterface: ActivitySettingsInterface
     internal lateinit var actionActivity: ActionActivity
@@ -107,17 +107,21 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                 actionState: Int,
                 isCurrentlyActive: Boolean
             ) {
-                if (adapter.isItemDeletable(viewHolder.bindingAdapterPosition)) {
-                    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                adapter?.let {
+                    if (it.isItemDeletable(viewHolder.bindingAdapterPosition)) {
+                        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                    }
                 }
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                if (adapter.isItemDeletable(viewHolder.bindingAdapterPosition)) {
-                    adapter.getItemByPosition(viewHolder.absoluteAdapterPosition)?.let {
-                        actionActivity.getTaskViewModel().deleteOne(it.id)
+                adapter?.let {
+                    if (it.isItemDeletable(viewHolder.bindingAdapterPosition)) {
+                        it.getItemByPosition(viewHolder.absoluteAdapterPosition)?.let {
+                            actionActivity.getTaskViewModel().deleteOne(it.id)
+                        }
+                        it.removeAt(viewHolder.absoluteAdapterPosition)
                     }
-                    adapter.removeAt(viewHolder.absoluteAdapterPosition)
                 }
             }
         }
@@ -197,13 +201,16 @@ class TasksFragment : BaseFragment(), NetworkChecker {
 
     override fun onServerAccessible() {
         serverStatus = serverAccessibleString
+        adapter?.setStatus(serverStatus)
     }
 
     override fun onServerInaccessible() {
         serverStatus = serverNotAccessibleString
+        adapter?.setStatus(serverStatus)
     }
 
     override fun onNoInternet() {
         serverStatus = noInternetString
+        adapter?.setStatus(serverStatus)
     }
 }
