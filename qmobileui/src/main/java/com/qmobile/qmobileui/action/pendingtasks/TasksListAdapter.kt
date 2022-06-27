@@ -84,4 +84,9 @@ class TasksListAdapter(
     fun isItemDeletable(position: Int): Boolean {
         return (position > -1) && list[position]?.status == ActionTask.Status.PENDING
     }
+
+    fun setStatus(status: String){
+        serverStatus = status
+        notifyItemChanged(0)
+    }
 }
