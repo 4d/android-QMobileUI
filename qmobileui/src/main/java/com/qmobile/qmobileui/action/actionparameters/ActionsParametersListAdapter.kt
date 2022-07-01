@@ -30,7 +30,8 @@ class ActionsParametersListAdapter(
     val onValueChanged: (String, Any?, String?, Boolean) -> Unit,
     val goToScanner: (Int) -> Unit,
     val goToCamera: (Intent, Int, String) -> Unit,
-    val queueForUpload: (String, Uri?) -> Unit
+    val queueForUpload: (String, Uri?) -> Unit,
+    val paramsError: HashMap<String, String>
 ) :
     RecyclerView.Adapter<ActionParameterViewHolder>() {
 
@@ -62,6 +63,9 @@ class ActionsParametersListAdapter(
                 paramsToSubmit[paramName]
         }
 
+        // Error returned from server for this specific param
+        val errorText = paramsError[paramName]
+
         holder.bind(
             item,
             currentEntity,
@@ -74,7 +78,8 @@ class ActionsParametersListAdapter(
             goToCamera(intent, pos, destinationPath)
         }, { parameterName: String, uri: Uri? ->
             queueForUpload(parameterName, uri)
-        }
+        },
+            errorText
         )
     }
 

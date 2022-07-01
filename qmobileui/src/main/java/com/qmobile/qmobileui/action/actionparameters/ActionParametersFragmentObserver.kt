@@ -32,6 +32,7 @@ class ActionParametersFragmentObserver(
             fragment.actionActivity.getTaskViewModel().getTask(id).observeOnce(fragment.viewLifecycleOwner) { task ->
                 task.actionInfo.validationMap?.let { map -> fragment.validationMap = map }
                 task.actionInfo.paramsToSubmit?.let { params -> fragment.paramsToSubmit = params }
+                task.actionInfo.errors?.let { params -> fragment.errorsByParameter.putAll(params) }
                 fragment.imagesToUpload = task.actionInfo.imagesToUpload?.stringToUri() ?: hashMapOf()
                 fragment.allParameters = JSONArray(task.actionInfo.allParameters)
                 fragment.currentTask = task
