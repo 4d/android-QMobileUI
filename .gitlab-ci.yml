@@ -8,8 +8,12 @@ before_script:
   - chmod +x ./gradlew
 
 cache:
+  key:
+    files:
+      - gradle/wrapper/gradle-wrapper.properties
   paths:
     - .gradle/wrapper
+    - .gradle/notifications
     - .gradle/caches
 
 .prepare_sdk: &prepare_sdk |
@@ -25,7 +29,7 @@ lint:
   stage: lint
   script:
     - *prepare_sdk
-    - rm -fr .gradle/caches
+#    - rm -fr .gradle/caches
 #    - rm -fr build
     - ./gradlew ktlintFormat --console=rich
     - ./gradlew detekt --console=rich
