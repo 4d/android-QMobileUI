@@ -15,7 +15,11 @@ dependencies {
     if (System.getenv('CI_DEPS_TO_BE_FETCHED')) {
         implementation(QMobileAPI) { changing = true }
         implementation(QMobileDataStore) { changing = true }
-        implementation(QMobileDataSync) { changing = true }
+        implementation(QMobileDataSync) {
+            exclude group: "com.qmobile.qmobileapi"
+            exclude group: "com.qmobile.qmobiledatastore"
+            changing = true
+        }
     } else {
         implementation project(':qmobileapi')
         implementation project(':qmobiledatastore')

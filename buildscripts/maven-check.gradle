@@ -28,8 +28,14 @@ static def getBase64EncodedCredentials() {
 }
 
 static def currentGitBranch() {
+  println("CI_COMMIT_REF_NAME " + System.getenv('CI_COMMIT_REF_NAME'))
+  println("CI_MERGE_REQUEST_SOURCE_BRANCH_NAME " + System.getenv('CI_MERGE_REQUEST_SOURCE_BRANCH_NAME'))
+  println("CI_COMMIT_BRANCH " + System.getenv('CI_COMMIT_BRANCH'))
   def branch = ""
   branch = System.getenv('CI_COMMIT_REF_NAME')
+  if (branch == null) {
+    branch = System.getenv('CI_MERGE_REQUEST_SOURCE_BRANCH_NAME')
+  }
   if (branch == null) {
     def proc = "git rev-parse --abbrev-ref HEAD".execute()
     proc.in.eachLine { line -> branch = line }
