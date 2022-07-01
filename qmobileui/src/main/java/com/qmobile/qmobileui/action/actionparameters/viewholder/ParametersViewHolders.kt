@@ -65,6 +65,7 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
     var label: TextView = itemView.findViewById(R.id.label)
     private var errorLabel: TextView = itemView.findViewById(R.id.error_label)
     lateinit var parameterName: String
+    var errorServer: String? = null
 
     open fun bind(
         item: Any,
@@ -73,7 +74,8 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
     ) {
         itemJsonObject = item as JSONObject
         parameterName = itemJsonObject.getSafeString("name") ?: ""
@@ -84,6 +86,7 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
         } else {
             label.text = parameterLabel
         }
+        errorServer = errorText
     }
 
     abstract fun setDefaultFieldIfNeeded(
@@ -129,6 +132,16 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
         errorLabel.setText(text)
     }
 
+    fun showServerErrorIfNeeded() {
+        if (!errorServer.isNullOrEmpty()) {
+            errorLabel.visibility = View.VISIBLE
+            errorLabel.text = errorServer
+            // error server should be displayed only once,
+            // so once displayed we reset this value to null
+            errorServer = null
+        }
+    }
+
     fun dismissErrorIfNeeded() {
         errorLabel.visibility = View.GONE
     }
@@ -150,7 +163,9 @@ class TextViewHolder(itemView: View, val format: String) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
@@ -159,7 +174,8 @@ class TextViewHolder(itemView: View, val format: String) :
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         editText.inputType = when (format) {
             ActionParameterEnum.TEXT_DEFAULT.format -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
@@ -203,6 +219,7 @@ class TextViewHolder(itemView: View, val format: String) :
                 editText.text = it
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun setDefaultFieldIfNeeded(
@@ -259,7 +276,9 @@ class TextAreaViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
@@ -268,7 +287,8 @@ class TextAreaViewHolder(itemView: View) :
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         editText.hint = itemJsonObject.getSafeString("placeholder")
         itemJsonObject.getSafeString("default")?.let {
@@ -295,6 +315,7 @@ class TextAreaViewHolder(itemView: View) :
                 editText.text = it
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -339,7 +360,9 @@ class NumberViewHolder(itemView: View, val format: String) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
@@ -348,7 +371,8 @@ class NumberViewHolder(itemView: View, val format: String) :
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         editText.hint = itemJsonObject.getSafeString("placeholder")
 
@@ -394,6 +418,7 @@ class NumberViewHolder(itemView: View, val format: String) :
                 editText.text = it.toString()
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -473,7 +498,8 @@ class SpellOutViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
     ) {
         super.bind(
             item,
@@ -482,7 +508,8 @@ class SpellOutViewHolder(itemView: View) :
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         itemJsonObject.getSafeString("default")?.let {
             editText.text = it
@@ -544,6 +571,7 @@ class SpellOutViewHolder(itemView: View) :
                 }
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -620,7 +648,8 @@ class ScientificViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
     ) {
         super.bind(
             item,
@@ -629,7 +658,8 @@ class ScientificViewHolder(itemView: View) :
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         itemJsonObject.getSafeString("default")?.let {
             editText.text = it
@@ -762,7 +792,8 @@ class PercentageViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
     ) {
         super.bind(
             item,
@@ -771,7 +802,8 @@ class PercentageViewHolder(itemView: View) :
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
 
         editText.hint = itemJsonObject.getSafeString("placeholder")
@@ -821,6 +853,7 @@ class PercentageViewHolder(itemView: View) :
                 editText.text = "%.2f".format(it / PERCENT_MULTIPLIER)
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -899,7 +932,9 @@ class BooleanSwitchViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
@@ -908,7 +943,8 @@ class BooleanSwitchViewHolder(itemView: View) :
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         switch.setOnCheckedChangeListener { _, checked ->
             onValueChanged(parameterName, checked, null, true)
@@ -917,6 +953,7 @@ class BooleanSwitchViewHolder(itemView: View) :
         alreadFilledValue?.let {
             switch.isChecked = it as Boolean
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -955,7 +992,9 @@ class BooleanCheckMarkViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
@@ -964,7 +1003,8 @@ class BooleanCheckMarkViewHolder(itemView: View) :
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         checkBox.setOnCheckedChangeListener { _, b ->
             onValueChanged(parameterName, b, null, true)
@@ -973,6 +1013,7 @@ class BooleanCheckMarkViewHolder(itemView: View) :
         alreadFilledValue?.let {
             checkBox.isChecked = it as Boolean
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -1014,7 +1055,9 @@ class ImageViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
@@ -1023,7 +1066,8 @@ class ImageViewHolder(itemView: View) :
             onValueChanged,
             null,
             goToCamera,
-            null
+            null,
+            errorText
         )
         container.setOnClickListener {
             // setup the alert builder
@@ -1053,6 +1097,7 @@ class ImageViewHolder(itemView: View) :
                 imageButton.setImageURI(it)
             }
         }
+        showServerErrorIfNeeded()
     }
 
     private fun displaySelectedImageIfNeed() {
@@ -1169,7 +1214,9 @@ class TimeViewHolder(itemView: View, val format: String) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
@@ -1178,7 +1225,8 @@ class TimeViewHolder(itemView: View, val format: String) :
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
 
         val calendar = Calendar.getInstance()
@@ -1241,6 +1289,7 @@ class TimeViewHolder(itemView: View, val format: String) :
                 }
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -1305,7 +1354,9 @@ class DateViewHolder(itemView: View, val format: String) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
@@ -1314,7 +1365,8 @@ class DateViewHolder(itemView: View, val format: String) :
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         itemJsonObject.getSafeString("placeholder")?.let {
             selectedDate.hint = it
@@ -1362,6 +1414,7 @@ class DateViewHolder(itemView: View, val format: String) :
             selectedDate.text = formattedDate
         }
         setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -1412,7 +1465,9 @@ class BarCodeViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
@@ -1421,7 +1476,8 @@ class BarCodeViewHolder(itemView: View) :
             onValueChanged,
             goToScanner,
             goToCamera,
-            null
+            null,
+            errorText
         )
         container.setOnClickListener {
             goToScanner?.let { it1 -> it1(bindingAdapterPosition) }
@@ -1433,6 +1489,7 @@ class BarCodeViewHolder(itemView: View) :
             }
         }
         scannedValueTextView.handleDarkMode()
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -1491,7 +1548,9 @@ class SignatureViewHolder(itemView: View) :
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
@@ -1500,7 +1559,8 @@ class SignatureViewHolder(itemView: View) :
             onValueChanged,
             goToScanner,
             goToCamera,
-            null
+            null,
+            errorText
         )
         signaturePad?.let {
             it.setOnSignedListener(object : SignaturePad.OnSignedListener {
@@ -1536,6 +1596,7 @@ class SignatureViewHolder(itemView: View) :
                 bindImage(defaultPreview, it.path, null, null, null)
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {

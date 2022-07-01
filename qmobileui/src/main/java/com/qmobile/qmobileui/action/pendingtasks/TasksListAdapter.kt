@@ -85,7 +85,7 @@ class TasksListAdapter(
         return (position > -1) && list[position]?.status == ActionTask.Status.PENDING
     }
 
-    fun setStatus(status: String){
+    fun setStatus(status: String) {
         serverStatus = status
         notifyItemChanged(0)
     }

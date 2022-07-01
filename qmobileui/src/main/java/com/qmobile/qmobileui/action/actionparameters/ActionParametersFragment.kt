@@ -80,6 +80,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     override lateinit var actionActivity: ActionActivity
 
+    internal var errorsByParameter = HashMap<String, String>()
     internal var paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
     internal var validationMap = hashMapOf<String, Boolean>()
@@ -229,6 +230,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             context = requireContext(),
             list = allParameters,
             paramsToSubmit = paramsToSubmit,
+            paramsError = errorsByParameter,
             imagesToUpload = imagesToUpload,
             currentEntity = selectedEntity,
             onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
