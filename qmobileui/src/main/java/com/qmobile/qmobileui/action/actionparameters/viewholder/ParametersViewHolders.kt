@@ -414,8 +414,8 @@ class NumberViewHolder(itemView: View, val format: String) :
         setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
         editText.handleDarkMode()
         alreadFilledValue?.let {
-            if (!(it.toString()).isNullOrEmpty()) {
-                editText.text = it.toString()
+            if (it is Number) {
+                editText.text = removeDecimalsIfNeeded(it).toString()
             }
         }
         showServerErrorIfNeeded()
@@ -457,6 +457,15 @@ class NumberViewHolder(itemView: View, val format: String) :
         return true
     }
 
+    private fun removeDecimalsIfNeeded(value: Number): Number {
+        val floatValue = value.toFloat()
+        val isInteger = (floatValue - value.toInt()) == 0.0F
+        //if the value don't contains decimals remove the ,00
+        return if (isInteger)
+            value.toInt()
+        else
+            value
+    }
     override fun setDefaultFieldIfNeeded(
         currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
@@ -466,15 +475,9 @@ class NumberViewHolder(itemView: View, val format: String) :
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 readInstanceProperty<Number>(it, defaultField).also { value ->
-                    if(value != null){
+                    if (value != null) {
                         // get the value with decimals
-                        val floatValue = value.toFloat()
-                        val isInteger = (floatValue - value.toInt()) == 0.0F
-                        //if the value don't contains decimals remove the ,00
-                        val formattedValue = if (isInteger)
-                            value.toInt()
-                        else
-                            value
+                        val formattedValue = removeDecimalsIfNeeded(value)
                         editText.text = formattedValue.toString()
                         onValueChanged(
                             parameterName,
@@ -861,7 +864,8 @@ class PercentageViewHolder(itemView: View) :
 
         alreadFilledValue?.let { value ->
             (value.toString().toFloatOrNull())?.let {
-                editText.text = "%.2f".format(it / PERCENT_MULTIPLIER)
+                val formattedValue = " "+(it / PERCENT_MULTIPLIER).toInt()
+                editText.text = formattedValue
             }
         }
         showServerErrorIfNeeded()

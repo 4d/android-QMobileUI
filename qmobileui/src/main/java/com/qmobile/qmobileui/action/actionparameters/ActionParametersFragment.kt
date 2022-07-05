@@ -242,6 +242,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             },
             goToScanner = {
                 BaseApp.genericNavigationResolver.navigateToActionScanner(binding, it)
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
             }, goToCamera = { intent: Intent, position: Int, destinationPath: String ->
             goToCamera = {
                 currentDestinationPath = destinationPath
