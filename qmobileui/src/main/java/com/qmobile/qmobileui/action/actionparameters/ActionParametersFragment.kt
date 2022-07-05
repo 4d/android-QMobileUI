@@ -359,19 +359,22 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     )
 
     private fun validatePendingTask() {
-        currentTask?.let { task ->
-            val actionTask = ActionTask(
-                status = ActionTask.Status.PENDING,
-                date = task.date,
-                relatedItemId = task.relatedItemId,
-                label = task.label,
-                actionInfo = getActionInfo()
-            )
-            actionTask.id = task.id
 
-            actionActivity.getTaskViewModel().insert(actionTask)
+        if (isFormValid()) {
+            currentTask?.let { task ->
+                val actionTask = ActionTask(
+                    status = ActionTask.Status.PENDING,
+                    date = task.date,
+                    relatedItemId = task.relatedItemId,
+                    label = task.label,
+                    actionInfo = getActionInfo()
+                )
+                actionTask.id = task.id
+
+                actionActivity.getTaskViewModel().insert(actionTask)
+            }
+            activity?.onBackPressed()
         }
-        activity?.onBackPressed()
     }
 
     private fun validateAction() {
