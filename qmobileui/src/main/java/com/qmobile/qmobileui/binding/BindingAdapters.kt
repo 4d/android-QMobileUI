@@ -21,7 +21,7 @@ import com.qmobile.qmobileui.R
     value = ["imageUrl", "imageFieldName", "imageKey", "imageTableName", "imageTransform"],
     requireAll = false
 )
-fun bindImageFromUrl(
+fun bindImage(
     view: ImageView,
     imageUrl: String?,
     fieldName: String?,
@@ -29,7 +29,7 @@ fun bindImageFromUrl(
     tableName: String?,
     transform: String? = null
 ) {
-    val image: Any = ImageHelper.getImage(imageUrl, tableName, key, fieldName)
+    val image: Any = ImageHelper.getImage(imageUrl, fieldName, key, tableName)
     val glideRequest = ImageHelper.getGlideRequest(view, image)
 
     Transformations.getTransformation(

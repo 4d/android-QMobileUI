@@ -16,11 +16,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.webkit.WebView
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.view.children
 import com.qmobile.qmobileui.R
 
 object UIConstants {
@@ -73,26 +71,6 @@ fun View.setOnVeryLongClickListener(listener: () -> Unit) {
 fun View.clearViewInParent() {
     if (this.parent != null)
         (this.parent as ViewGroup).removeView(this)
-}
-
-fun View.checkIfChildIsWebView(): WebView? = when (this) {
-    is ViewGroup -> this.checkIfContainsWebView()
-    is WebView -> this
-    else -> null
-}
-
-@Suppress("ReturnCount")
-fun ViewGroup.checkIfContainsWebView(): WebView? {
-    var childContainsWebView: WebView? = null
-    this.children.forEach { child ->
-        if (child is WebView) return child
-        if (child is ViewGroup) {
-            childContainsWebView = child.checkIfContainsWebView()
-            if (childContainsWebView != null)
-                return childContainsWebView
-        }
-    }
-    return childContainsWebView
 }
 
 fun View.disableLink() {

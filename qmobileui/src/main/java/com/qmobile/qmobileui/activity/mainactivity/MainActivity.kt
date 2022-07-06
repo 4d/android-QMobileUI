@@ -169,7 +169,7 @@ class MainActivity :
     // Get EntityListViewModel list
     private fun getEntityListViewModelList() {
         entityListViewModelList = mutableListOf()
-        BaseApp.genericTableHelper.tableNames().forEach { tableName ->
+        BaseApp.runtimeDataHolder.tableInfo.keys.forEach { tableName ->
             val clazz = BaseApp.genericTableHelper.entityListViewModelClassFromTable(tableName)
 
             entityListViewModelList.add(
@@ -299,21 +299,23 @@ class MainActivity :
     }
 
     private fun onServerInaccessible(tableName: String, isFromAction: Boolean = false) {
-        if (isFromAction)
+        if (isFromAction) {
             connectivityViewModel.toastMessage
                 .showMessage(serverNotAccessibleActionString, tableName, ToastMessage.Type.NEUTRAL)
-        else
+            onBackPressed()
+        } else {
             connectivityViewModel.toastMessage
                 .showMessage(serverNotAccessibleString, tableName, ToastMessage.Type.ERROR)
+        }
     }
 
     private fun onNoInternet(tableName: String, isFromAction: Boolean = false) {
-        if (isFromAction)
-            connectivityViewModel.toastMessage
-                .showMessage(noInternetActionString, tableName, ToastMessage.Type.NEUTRAL)
-        else
-            connectivityViewModel.toastMessage
-                .showMessage(noInternetString, tableName, ToastMessage.Type.ERROR)
+        if (isFromAction) {
+            connectivityViewModel.toastMessage.showMessage(noInternetActionString, tableName, ToastMessage.Type.NEUTRAL)
+            onBackPressed()
+        } else {
+            connectivityViewModel.toastMessage.showMessage(noInternetString, tableName, ToastMessage.Type.ERROR)
+        }
     }
 
     override fun handleAuthenticationState(authenticationState: AuthenticationState) {
@@ -381,7 +383,7 @@ class MainActivity :
                 actionNavigable.navigateToPendingTasks()
                 true
             }
-            .setIcon(drawable.adjustActionDrawableMargins(this))
+            .setIcon(drawable?.adjustActionDrawableMargins(this))
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
     }
 
@@ -415,7 +417,7 @@ class MainActivity :
 
             sendAction(
                 actionContent = actionNavigable
-                    .getActionContent(action.uuid, (currentEntity?.__entity as EntityModel?)?.__KEY),
+                    .getActionContent(task.id, (currentEntity?.__entity as EntityModel?)?.__KEY),
                 actionTask = task,
                 tableName = actionNavigable.tableName
             ) {
@@ -450,7 +452,8 @@ class MainActivity :
                                 ActionTask.Status.ERROR_SERVER
 
                             actionTask.message = actionResponse.statusText
-
+                            actionTask.actionInfo.errors =
+                                actionResponse.errors.associateBy({ it.parameter }, { it.message })
                             taskViewModel.insert(actionTask)
                             if (actionResponse.dataSynchro == true)
                                 requestDataSync(tableName)
@@ -660,7 +663,7 @@ class MainActivity :
 
             val actionContent = ActionHelper.getActionContent(
                 tableName = pendingTask.actionInfo.tableName,
-                actionUUID = pendingTask.actionInfo.actionUUID,
+                actionUUID = pendingTask.id,
                 itemId = pendingTask.relatedItemId ?: "",
                 parameters = pendingTask.actionInfo.paramsToSubmit,
                 metaData = pendingTask.actionInfo.metaDataToSubmit

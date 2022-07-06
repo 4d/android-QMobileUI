@@ -4,9 +4,9 @@
  * Copyright (c) 2022 htemanni. All rights reserved.
  */
 
-@file:Suppress("TooGenericExceptionCaught", "SwallowedException", "UnusedPrivateMember")
+@file:Suppress("TooGenericExceptionCaught", "SwallowedException", "UnusedPrivateMember", "NestedBlockDepth")
 
-package com.qmobile.qmobileui.action.viewholder
+package com.qmobile.qmobileui.action.actionparameters.viewholder
 
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -14,7 +14,6 @@ import android.app.DatePickerDialog.OnDateSetListener
 import android.app.TimePickerDialog
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.provider.MediaStore
 import android.text.Editable
@@ -31,9 +30,6 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityHelper
@@ -43,13 +39,15 @@ import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.actionparameters.ActionParameterEnum
 import com.qmobile.qmobileui.action.utils.addSuffix
 import com.qmobile.qmobileui.action.utils.createImageFile
 import com.qmobile.qmobileui.action.utils.handleDarkMode
 import com.qmobile.qmobileui.action.utils.saveBitmapToJPG
-import com.qmobile.qmobileui.binding.bindImageFromUrl
+import com.qmobile.qmobileui.binding.ImageHelper
+import com.qmobile.qmobileui.binding.bindImage
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.formatters.TimeFormat
 import com.qmobile.qmobileui.list.SpellOutHelper
@@ -59,6 +57,7 @@ import java.io.File
 import java.io.IOException
 import java.text.DecimalFormat
 import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 // !!!! To refactor ASAP !!!!!////
 abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -66,15 +65,17 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
     var label: TextView = itemView.findViewById(R.id.label)
     private var errorLabel: TextView = itemView.findViewById(R.id.error_label)
     lateinit var parameterName: String
+    var errorServer: String? = null
 
     open fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadyFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
     ) {
         itemJsonObject = item as JSONObject
         parameterName = itemJsonObject.getSafeString("name") ?: ""
@@ -85,10 +86,11 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
         } else {
             label.text = parameterLabel
         }
+        errorServer = errorText
     }
 
     abstract fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, isValid: Boolean) -> Unit
     )
@@ -130,6 +132,16 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
         errorLabel.setText(text)
     }
 
+    fun showServerErrorIfNeeded() {
+        if (!errorServer.isNullOrEmpty()) {
+            errorLabel.visibility = View.VISIBLE
+            errorLabel.text = errorServer
+            // error server should be displayed only once,
+            // so once displayed we reset this value to null
+            errorServer = null
+        }
+    }
+
     fun dismissErrorIfNeeded() {
         errorLabel.visibility = View.GONE
     }
@@ -146,21 +158,24 @@ class TextViewHolder(itemView: View, val format: String) :
     @Suppress("MaxLineLength")
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         editText.inputType = when (format) {
             ActionParameterEnum.TEXT_DEFAULT.format -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
@@ -196,7 +211,7 @@ class TextViewHolder(itemView: View, val format: String) :
             }
         })
 
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
         editText.handleDarkMode()
 
         alreadFilledValue?.let {
@@ -204,19 +219,20 @@ class TextViewHolder(itemView: View, val format: String) :
                 editText.text = it
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
+                readInstanceProperty<String>(it, defaultField).also { value ->
                     editText.text = value
-                    onValueChanged(parameterName, value, null, validate())
+                    value?.let { it1 -> onValueChanged(parameterName, it1, null, validate()) }
                 }
             }
         }
@@ -255,21 +271,24 @@ class TextAreaViewHolder(itemView: View) :
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         editText.hint = itemJsonObject.getSafeString("placeholder")
         itemJsonObject.getSafeString("default")?.let {
@@ -288,7 +307,7 @@ class TextAreaViewHolder(itemView: View) :
                 s?.let { onValueChanged(parameterName, s.toString(), null, validate()) }
             }
         })
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
         editText.handleDarkMode()
 
         alreadFilledValue?.let {
@@ -296,6 +315,7 @@ class TextAreaViewHolder(itemView: View) :
                 editText.text = it
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -308,16 +328,16 @@ class TextAreaViewHolder(itemView: View) :
     }
 
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
+                readInstanceProperty<String>(it, defaultField).also { value ->
                     editText.text = value
-                    onValueChanged(parameterName, value, null, validate())
+                    value?.let { it1 -> onValueChanged(parameterName, it1, null, validate()) }
                 }
             }
         }
@@ -335,21 +355,24 @@ class NumberViewHolder(itemView: View, val format: String) :
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         editText.hint = itemJsonObject.getSafeString("placeholder")
 
@@ -388,13 +411,14 @@ class NumberViewHolder(itemView: View, val format: String) :
                 }
             }
         })
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
         editText.handleDarkMode()
         alreadFilledValue?.let {
-            if (!(it.toString()).isNullOrEmpty()) {
-                editText.text = it.toString()
+            if (it is Number) {
+                editText.text = removeDecimalsIfNeeded(it).toString()
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -433,22 +457,27 @@ class NumberViewHolder(itemView: View, val format: String) :
         return true
     }
 
+    private fun removeDecimalsIfNeeded(value: Number): Number {
+        val floatValue = value.toFloat()
+        val isInteger = (floatValue - value.toInt()) == 0.0F
+        //if the value don't contains decimals remove the ,00
+        return if (isInteger)
+            value.toInt()
+        else
+            value
+    }
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<Float>(it, defaultField)
-                    .also { value ->
-                        val isInteger = (value - value.toInt()) == 0.0F
-                        val formattedValue = if (isInteger) {
-                            value.toInt()
-                        } else {
-                            value
-                        }
+                readInstanceProperty<Number>(it, defaultField).also { value ->
+                    if (value != null) {
+                        // get the value with decimals
+                        val formattedValue = removeDecimalsIfNeeded(value)
                         editText.text = formattedValue.toString()
                         onValueChanged(
                             parameterName,
@@ -457,6 +486,7 @@ class NumberViewHolder(itemView: View, val format: String) :
                             validate()
                         )
                     }
+                }
             }
         }
     }
@@ -470,21 +500,23 @@ class SpellOutViewHolder(itemView: View) :
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         itemJsonObject.getSafeString("default")?.let {
             editText.text = it
@@ -536,15 +568,17 @@ class SpellOutViewHolder(itemView: View) :
                 }
             }
         }
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
         editText.handleDarkMode()
 
         alreadFilledValue?.let { value ->
-            value.toString().toDoubleOrNull()?.let {
-                SpellOutHelper.convert(it.toLong()).apply {
+            value.toString().toDoubleOrNull()?.toLong()?.let {
+                SpellOutHelper.convert(it).apply {
                     editText.text = this
                 }
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -584,21 +618,28 @@ class SpellOutViewHolder(itemView: View) :
     }
 
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
-                    editText.text = value
-                    onValueChanged(
-                        parameterName,
-                        value,
-                        null,
-                        validate()
-                    )
+                readInstanceProperty<Int>(it, defaultField).also { value ->
+                    if(value != null){
+                        SpellOutHelper.convert(value.toLong()).apply {
+                            editText.text = this
+                        }
+                        value?.let { it1 ->
+                            onValueChanged(
+                                parameterName,
+                                it1,
+                                null,
+                                validate()
+                            )
+                        }
+                    }
+
                 }
             }
         }
@@ -614,21 +655,23 @@ class ScientificViewHolder(itemView: View) :
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         itemJsonObject.getSafeString("default")?.let {
             editText.text = it
@@ -681,7 +724,7 @@ class ScientificViewHolder(itemView: View) :
                 }
             }
         }
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
         editText.handleDarkMode()
 
         alreadFilledValue?.let { value ->
@@ -725,21 +768,23 @@ class ScientificViewHolder(itemView: View) :
     }
 
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
-                    editText.text = value
-                    onValueChanged(
-                        parameterName,
-                        it,
-                        null,
-                        validate()
-                    )
+                readInstanceProperty<Number>(it, defaultField).also { value ->
+                    if(value != null){
+                        editText.text = value.toString()
+                        onValueChanged(
+                            parameterName,
+                            value,
+                            null,
+                            validate()
+                        )
+                    }
                 }
             }
         }
@@ -756,21 +801,23 @@ class PercentageViewHolder(itemView: View) :
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
 
         editText.hint = itemJsonObject.getSafeString("placeholder")
@@ -787,16 +834,14 @@ class PercentageViewHolder(itemView: View) :
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 s.toString().replace(PERCENT_KEY, "").let {
                     if (it.isNotEmpty()) {
-                        val percentValue =
-                            "%.2f".format(it.toFloatOrNull()?.times(PERCENT_MULTIPLIER))
-                        if (percentValue != null) {
-                            onValueChanged(
-                                parameterName,
-                                percentValue,
-                                null,
-                                validate(),
-                            )
-                        }
+                        val floatText = it.toFloatOrNull() ?: return
+                        val percentValue = "%.2f".format(floatText.times(PERCENT_MULTIPLIER))
+                        onValueChanged(
+                            parameterName,
+                            percentValue,
+                            null,
+                            validate(),
+                        )
                     }
                 }
             }
@@ -814,14 +859,16 @@ class PercentageViewHolder(itemView: View) :
                 // Nothing to do
             }
         })
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
         editText.handleDarkMode()
 
         alreadFilledValue?.let { value ->
             (value.toString().toFloatOrNull())?.let {
-                editText.text = "%.2f".format(it / PERCENT_MULTIPLIER)
+                val formattedValue = " "+(it / PERCENT_MULTIPLIER).toInt()
+                editText.text = formattedValue
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -862,21 +909,24 @@ class PercentageViewHolder(itemView: View) :
     }
 
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String>(it, defaultField).also { value ->
-                    editText.text = EntityHelper.readInstanceProperty<String>(value, defaultField)
-                    onValueChanged(
-                        parameterName,
-                        value,
-                        null,
-                        validate()
-                    )
+
+                readInstanceProperty<Number>(it, defaultField).also { value ->
+                    if(value != null){
+                        editText.text = value.toInt().toString()
+                        onValueChanged(
+                            parameterName,
+                            value,
+                            null,
+                            validate()
+                        )
+                    }
                 }
             }
         }
@@ -894,29 +944,33 @@ class BooleanSwitchViewHolder(itemView: View) :
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         switch.setOnCheckedChangeListener { _, checked ->
             onValueChanged(parameterName, checked, null, true)
         }
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
         alreadFilledValue?.let {
             switch.isChecked = it as Boolean
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -924,7 +978,7 @@ class BooleanSwitchViewHolder(itemView: View) :
     }
 
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
@@ -933,9 +987,11 @@ class BooleanSwitchViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<Boolean?>(it, defaultField)?.also { value ->
-                    switch.isChecked = value
-                    onValueChanged(parameterName, value, null, true)
+                readInstanceProperty<Boolean>(it, defaultField).also { value ->
+                    if(value != null) {
+                        switch.isChecked = value
+                        onValueChanged(parameterName, value, null, true)
+                    }
                 }
             }
         }
@@ -950,29 +1006,33 @@ class BooleanCheckMarkViewHolder(itemView: View) :
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         checkBox.setOnCheckedChangeListener { _, b ->
             onValueChanged(parameterName, b, null, true)
         }
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
         alreadFilledValue?.let {
             checkBox.isChecked = it as Boolean
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -980,20 +1040,19 @@ class BooleanCheckMarkViewHolder(itemView: View) :
     }
 
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                checkBox.isChecked = EntityHelper.readInstanceProperty(it, defaultField)
-                onValueChanged(
-                    parameterName,
-                    EntityHelper.readInstanceProperty(it, defaultField),
-                    null,
-                    true
-                )
+                readInstanceProperty<Boolean>(it, defaultField).also { value ->
+                    if(value != null){
+                        checkBox.isChecked = value
+                        onValueChanged(parameterName, value, null, true)
+                    }
+                }
             }
         }
     }
@@ -1012,21 +1071,24 @@ class ImageViewHolder(itemView: View) :
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             null,
             goToCamera,
-            null
+            null,
+            errorText
         )
         container.setOnClickListener {
             // setup the alert builder
@@ -1048,7 +1110,7 @@ class ImageViewHolder(itemView: View) :
             dialog.show()
         }
         queueImageForUploadCallBack = queueForUpload
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
         displaySelectedImageIfNeed()
 
         alreadFilledValue?.let {
@@ -1056,6 +1118,7 @@ class ImageViewHolder(itemView: View) :
                 imageButton.setImageURI(it)
             }
         }
+        showServerErrorIfNeeded()
     }
 
     private fun displaySelectedImageIfNeed() {
@@ -1075,44 +1138,40 @@ class ImageViewHolder(itemView: View) :
     }
 
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
-        currentEntity?.let {
+        currentEntity?.let { roomEntity ->
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<Photo>(it, defaultField).also { value ->
-                    if (value != null) {
-                        bindImageFromUrl(
-                            imageButton,
-                            value.__deferred?.uri,
-                            null,
-                            null,
-                            null,
-                            null
-                        )
-                        Glide.with(itemView.context)
-                            .asBitmap()
-                            .load(value.__deferred?.uri)
-                            .into(object : CustomTarget<Bitmap?>() {
-                                override fun onResourceReady(
-                                    p0: Bitmap,
-                                    p1: Transition<in Bitmap?>?
-                                ) {
-                                    val file = createImageFile(itemView.context)
-                                    saveBitmapToJPG(p0, file)
-                                    queueImageForUploadCallBack?.let { it1 ->
-                                        it1(
-                                            parameterName,
-                                            Uri.fromFile(file)
-                                        )
-                                    }
-                                }
+                readInstanceProperty<Photo>(roomEntity, defaultField).also { value ->
+                    if(value != null) {
 
-                                override fun onLoadCleared(p0: Drawable?) {
-                                }
-                            })
+
+                        val key: String? = if (defaultField.contains(".")) { // alias
+                            readInstanceProperty<EntityModel>(
+                                roomEntity,
+                                defaultField.substringBeforeLast("?.")
+                            )?.__KEY
+                        } else { // not alias
+                            (roomEntity.__entity as EntityModel?)?.__KEY
+                        }
+
+                        val image: Any = ImageHelper.getImage(
+                            value.__deferred?.uri,
+                            itemJsonObject.getSafeString("fieldName"),
+                            key,
+                            itemJsonObject.getSafeString("tableName")
+                        )
+                        ImageHelper.bindImageWithBitmapCallback(imageButton, image) { bitmap ->
+
+                            val file = createImageFile(itemView.context)
+                            saveBitmapToJPG(bitmap, file)
+                            queueImageForUploadCallBack?.let { it1 ->
+                                it1(parameterName, Uri.fromFile(file))
+                            }
+                        }
 
                         onValueChanged(parameterName, "", null, validate())
                     }
@@ -1178,21 +1237,24 @@ class TimeViewHolder(itemView: View, val format: String) :
     private lateinit var timePickerDialog: TimePickerDialog
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
 
         val calendar = Calendar.getInstance()
@@ -1242,7 +1304,7 @@ class TimeViewHolder(itemView: View, val format: String) :
         }
 
         selectedTime.handleDarkMode()
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
 
         alreadFilledValue?.let {
             (it.toString().toDoubleOrNull())?.let { numberOfSeconds ->
@@ -1251,14 +1313,11 @@ class TimeViewHolder(itemView: View, val format: String) :
                 selectedTime.text = if (is24HourFormat) {
                     "$hours hours $minutes minutes"
                 } else {
-                    if (hours >= 12) {
-                        "${hours - 12}:$minutes $PM_KEY"
-                    } else {
-                        "$hours:$minutes $AM_KEY"
-                    }
+                    TimeFormat.getAmPmFormattedTime(numberOfSeconds.toLong(), TimeUnit.SECONDS)
                 }
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -1272,23 +1331,28 @@ class TimeViewHolder(itemView: View, val format: String) :
     }
 
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
-                    selectedTime.text = TimeFormat.getAmPmFormattedTime(value)
+                readInstanceProperty<String>(it, defaultField).also { value ->
+                    if (value != null) {
+                        val longText = value.toLongOrNull() ?: return
 
-                    val totalSecs = value.toLong() / 1000
+                        selectedTime.text =
+                            TimeFormat.getAmPmFormattedTime(longText, TimeUnit.MILLISECONDS)
 
-                    val hours = totalSecs / 3600
-                    val minutes = (totalSecs % 3600) / 60
+                        val totalSecs = longText / 1000
 
-                    onValueChanged(parameterName, totalSecs, null, validate())
-                    timePickerDialog.updateTime(hours.toInt(), minutes.toInt())
+                        val hours = totalSecs / 3600
+                        val minutes = (totalSecs % 3600) / 60
+
+                        onValueChanged(parameterName, totalSecs, null, validate())
+                        timePickerDialog.updateTime(hours.toInt(), minutes.toInt())
+                    }
                 }
             }
         }
@@ -1315,21 +1379,24 @@ class DateViewHolder(itemView: View, val format: String) :
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             null,
             null,
-            null
+            null,
+            errorText
         )
         itemJsonObject.getSafeString("placeholder")?.let {
             selectedDate.hint = it
@@ -1376,7 +1443,8 @@ class DateViewHolder(itemView: View, val format: String) :
 
             selectedDate.text = formattedDate
         }
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -1389,22 +1457,25 @@ class DateViewHolder(itemView: View, val format: String) :
     }
 
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
-                    val formattedDate = FormatterUtils.applyFormat(
-                        dateFormat,
-                        value
-                    )
-                    selectedDate.text = formattedDate
-                    onValueChanged(parameterName, value, null, validate())
-                    val dateArray = value.split("!").toTypedArray().map { item -> item.toInt() }
-                    datePickerDialog?.updateDate(dateArray[2], dateArray[1] - 1, dateArray[0])
+                readInstanceProperty<String>(it, defaultField).also { value ->
+                    if (value != null) {
+
+                        val formattedDate = FormatterUtils.applyFormat(
+                            dateFormat,
+                            value
+                        )
+                        selectedDate.text = formattedDate
+                        onValueChanged(parameterName, value, null, validate())
+                        val dateArray = value.split("!").toTypedArray().map { item -> item.toInt() }
+                        datePickerDialog?.updateDate(dateArray[2], dateArray[1] - 1, dateArray[0])
+                    }
                 }
             }
         }
@@ -1422,21 +1493,24 @@ class BarCodeViewHolder(itemView: View) :
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             goToScanner,
             goToCamera,
-            null
+            null,
+            errorText
         )
         container.setOnClickListener {
             goToScanner?.let { it1 -> it1(bindingAdapterPosition) }
@@ -1448,6 +1522,7 @@ class BarCodeViewHolder(itemView: View) :
             }
         }
         scannedValueTextView.handleDarkMode()
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -1459,16 +1534,18 @@ class BarCodeViewHolder(itemView: View) :
     }
 
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<String?>(it, defaultField)?.also { value ->
-                    scannedValueTextView.text = value
-                    onValueChanged(parameterName, value, null, validate())
+                readInstanceProperty<String>(it, defaultField).also { value ->
+                    if(value != null) {
+                        scannedValueTextView.text = value
+                        onValueChanged(parameterName, value, null, validate())
+                    }
                 }
             }
         }
@@ -1501,21 +1578,24 @@ class SignatureViewHolder(itemView: View) :
 
     override fun bind(
         item: Any,
-        currentEntityJsonObject: EntityModel?,
+        currentEntity: RoomEntity?,
         alreadFilledValue: Any?,
         onValueChanged: (String, Any, String?, Boolean) -> Unit,
         goToScanner: ((Int) -> Unit)?,
         goToCamera: ((Intent, Int, String) -> Unit)?,
-        queueForUpload: ((String, Uri?) -> Unit)?
+        queueForUpload: ((String, Uri?) -> Unit)?,
+        errorText: String?
+
     ) {
         super.bind(
             item,
-            currentEntityJsonObject,
+            currentEntity,
             alreadFilledValue,
             onValueChanged,
             goToScanner,
             goToCamera,
-            null
+            null,
+            errorText
         )
         signaturePad?.let {
             it.setOnSignedListener(object : SignaturePad.OnSignedListener {
@@ -1543,21 +1623,15 @@ class SignatureViewHolder(itemView: View) :
         closeButton?.setOnClickListener {
             signaturePad?.clear()
         }
-        setDefaultFieldIfNeeded(currentEntityJsonObject, itemJsonObject, onValueChanged)
+        setDefaultFieldIfNeeded(currentEntity, itemJsonObject, onValueChanged)
 
         alreadFilledValue?.let {
             if (it is Uri) {
                 defaultPreview.visibility = View.VISIBLE
-                bindImageFromUrl(
-                    defaultPreview,
-                    it.path,
-                    null,
-                    null,
-                    null,
-                    null
-                )
+                bindImage(defaultPreview, it.path, null, null, null)
             }
         }
+        showServerErrorIfNeeded()
     }
 
     override fun validate(): Boolean {
@@ -1570,22 +1644,31 @@ class SignatureViewHolder(itemView: View) :
     }
 
     override fun setDefaultFieldIfNeeded(
-        currentEntity: EntityModel?,
+        currentEntity: RoomEntity?,
         itemJsonObject: JSONObject,
         onValueChanged: (String, Any, String?, Boolean) -> Unit
     ) {
-        currentEntity?.let {
+        currentEntity?.let { roomEntity ->
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-                EntityHelper.readInstanceProperty<Photo>(it, defaultField).also { value ->
+                readInstanceProperty<Photo>(roomEntity, defaultField).also { value ->
                     if (value != null) {
-                        bindImageFromUrl(
+
+                        val key: String? = if (defaultField.contains(".")) { // alias
+                            readInstanceProperty<EntityModel>(
+                                roomEntity,
+                                defaultField.substringBeforeLast("?.")
+                            )?.__KEY
+                        } else { // not alias
+                            (roomEntity.__entity as EntityModel?)?.__KEY
+                        }
+
+                        bindImage(
                             defaultPreview,
                             value.__deferred?.uri,
-                            null,
-                            null,
-                            null,
-                            null
+                            itemJsonObject.getSafeString("fieldName"),
+                            key,
+                            itemJsonObject.getSafeString("tableName")
                         )
                         setPreviewVisibility(true)
                         onValueChanged(parameterName, "", null, validate())
@@ -1619,5 +1702,18 @@ class SignatureViewHolder(itemView: View) :
             Timber.e("SignatureViewHolder IOException : ", e.localizedMessage)
         }
         return null
+    }
+}
+
+@Suppress("UNCHECKED_CAST")
+private fun <R> readInstanceProperty(instance: RoomEntity, propertyName: String): R? {
+    return if (propertyName.contains(".")) {
+        var tmpInstance: Any? = instance
+        propertyName.split("?.").forEach { part ->
+            tmpInstance = EntityHelper.readInstanceProperty(tmpInstance, part)
+        }
+        tmpInstance as R
+    } else {
+        EntityHelper.readInstanceProperty(instance.__entity, propertyName)
     }
 }

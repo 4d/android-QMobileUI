@@ -8,8 +8,12 @@ before_script:
   - chmod +x ./gradlew
 
 cache:
+  key:
+    files:
+      - gradle/wrapper/gradle-wrapper.properties
   paths:
     - .gradle/wrapper
+    - .gradle/notifications
     - .gradle/caches
 
 .prepare_sdk: &prepare_sdk |

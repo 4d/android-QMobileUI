@@ -22,16 +22,19 @@ import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.utils.ActionHelper.Companion.getActionContent
 import com.qmobile.qmobileui.action.utils.SwipeToDeleteCallback
 import com.qmobile.qmobileui.databinding.FragmentActionTasksBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
+import java.util.Date
+import java.util.UUID
 
 class TasksFragment : BaseFragment(), NetworkChecker {
 
     private var _binding: FragmentActionTasksBinding? = null
     val binding get() = _binding!!
-    private lateinit var adapter: TasksListAdapter
+    private var adapter: TasksListAdapter? = null
 
     private lateinit var activitySettingsInterface: ActivitySettingsInterface
     internal lateinit var actionActivity: ActionActivity
@@ -104,17 +107,21 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                 actionState: Int,
                 isCurrentlyActive: Boolean
             ) {
-                if (adapter.isItemDeletable(viewHolder.bindingAdapterPosition)) {
-                    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                adapter?.let {
+                    if (it.isItemDeletable(viewHolder.bindingAdapterPosition)) {
+                        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                    }
                 }
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                if (adapter.isItemDeletable(viewHolder.bindingAdapterPosition)) {
-                    adapter.getItemByPosition(viewHolder.absoluteAdapterPosition)?.let {
-                        actionActivity.getTaskViewModel().deleteOne(it.id)
+                adapter?.let {
+                    if (it.isItemDeletable(viewHolder.bindingAdapterPosition)) {
+                        it.getItemByPosition(viewHolder.absoluteAdapterPosition)?.let {
+                            actionActivity.getTaskViewModel().deleteOne(it.id)
+                        }
+                        it.removeAt(viewHolder.absoluteAdapterPosition)
                     }
-                    adapter.removeAt(viewHolder.absoluteAdapterPosition)
                 }
             }
         }
@@ -147,25 +154,45 @@ class TasksFragment : BaseFragment(), NetworkChecker {
     }
 
     fun setupAdapter(pendingTasks: List<ActionTask?>, history: List<ActionTask?>) {
+        val isFromSettings = tableName.isEmpty()
         // The 2 null items used as placeholders for sections titles Pending/History
         val newList = (mutableListOf(null) + pendingTasks + mutableListOf(null) + history) as MutableList<ActionTask?>
-        adapter = TasksListAdapter(
-            requireContext(), newList, serverStatus
-        ) { position ->
+        adapter = TasksListAdapter(isFromSettings, requireContext(), newList, serverStatus) { position ->
             if (position == 0) {
                 actionActivity.sendPendingTasks()
             } else {
-                newList[position]?.let { task ->
-                    BaseApp.genericNavigationResolver.navigateToActionForm(
-                        viewDataBinding = binding,
-                        tableName = task.actionInfo.tableName,
-                        itemId = "",
-                        relationName = "",
-                        parentItemId = "",
-                        pendingTaskId = task.id,
-                        actionUUID = task.actionInfo.actionUUID,
-                        navbarTitle = task.actionInfo.preferredShortName
-                    )
+                newList[position]?.let { selectedTask ->
+                    val shouldNavigateToActionForm =
+                        selectedTask.actionInfo.allParameters?.isNotEmpty() ?: false && !selectedTask.isSuccess()
+                    if (shouldNavigateToActionForm) {
+                        selectedTask.let { task ->
+                            BaseApp.genericNavigationResolver.navigateToActionForm(
+                                viewDataBinding = binding,
+                                tableName = task.actionInfo.tableName,
+                                itemId = "",
+                                relationName = "",
+                                parentItemId = "",
+                                pendingTaskId = task.id,
+                                actionUUID = task.actionInfo.actionUUID,
+                                navbarTitle = task.actionInfo.preferredShortName
+                            )
+                        }
+                    } else {
+                        if (selectedTask.isErrorServer()) {
+                            actionActivity.getTaskViewModel().deleteOne(selectedTask.id)
+                            // As it's sent as a new action we have to update the date with the current date
+                            selectedTask.date = Date()
+                            // UUID.randomUUID() to send action as new fresh action otherwise will be ignored by the
+                            // server (server doesn't treat same actions with same id)
+                            actionActivity.sendAction(
+                                actionContent = getActionContent(selectedTask.id, UUID.randomUUID().toString()),
+                                actionTask = selectedTask,
+                                tableName = tableName
+                            ) {
+                                // Nothing to do
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -174,13 +201,16 @@ class TasksFragment : BaseFragment(), NetworkChecker {
 
     override fun onServerAccessible() {
         serverStatus = serverAccessibleString
+        adapter?.setStatus(serverStatus)
     }
 
     override fun onServerInaccessible() {
         serverStatus = serverNotAccessibleString
+        adapter?.setStatus(serverStatus)
     }
 
     override fun onNoInternet() {
         serverStatus = noInternetString
+        adapter?.setStatus(serverStatus)
     }
 }

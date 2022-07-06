@@ -11,12 +11,12 @@ import android.content.Intent
 import android.net.Uri
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobiledatastore.data.RoomEntity
+import com.qmobile.qmobileui.action.actionparameters.viewholder.ActionParameterViewHolder
 import com.qmobile.qmobileui.action.actionparameters.viewholder.ActionParameterViewHolderFactory
-import com.qmobile.qmobileui.action.viewholder.ActionParameterViewHolder
-import com.qmobile.qmobileui.action.viewholder.ImageViewHolder
-import com.qmobile.qmobileui.action.viewholder.SignatureViewHolder
+import com.qmobile.qmobileui.action.actionparameters.viewholder.ImageViewHolder
+import com.qmobile.qmobileui.action.actionparameters.viewholder.SignatureViewHolder
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -26,11 +26,12 @@ class ActionsParametersListAdapter(
     // contains data of the failed action, this data will be used for pre-fill form to edit pending task
     private val paramsToSubmit: HashMap<String, Any>,
     private val imagesToUpload: HashMap<String, Uri>,
-    private val currentEntity: EntityModel?,
+    private val currentEntity: RoomEntity?,
     val onValueChanged: (String, Any?, String?, Boolean) -> Unit,
     val goToScanner: (Int) -> Unit,
     val goToCamera: (Intent, Int, String) -> Unit,
-    val queueForUpload: (String, Uri?) -> Unit
+    val queueForUpload: (String, Uri?) -> Unit,
+    val paramsError: HashMap<String, String>
 ) :
     RecyclerView.Adapter<ActionParameterViewHolder>() {
 
@@ -62,6 +63,9 @@ class ActionsParametersListAdapter(
                 paramsToSubmit[paramName]
         }
 
+        // Error returned from server for this specific param
+        val errorText = paramsError[paramName]
+
         holder.bind(
             item,
             currentEntity,
@@ -74,7 +78,8 @@ class ActionsParametersListAdapter(
             goToCamera(intent, pos, destinationPath)
         }, { parameterName: String, uri: Uri? ->
             queueForUpload(parameterName, uri)
-        }
+        },
+            errorText
         )
     }
 

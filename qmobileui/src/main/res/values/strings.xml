@@ -77,6 +77,7 @@
     <!-- Actions -->
     <string name="action_send_no_internet">Check your connexion, your action will be executed later</string>
     <string name="action_send_server_not_accessible">The server is not available, your action will be executed later</string>
+    <string name="retry_action">Retry</string>
     <string name="validate_action">Validate</string>
     <string name="action_list_title">Actions</string>
     <string name="action_item_image_content_description">Action item image</string>

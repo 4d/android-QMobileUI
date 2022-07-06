@@ -115,12 +115,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
 
         // Login button
         binding.loginButtonAuth.setOnSingleClickListener {
-            if (connectivityViewModel.isConnected()) {
-                binding.loginButtonAuth.isEnabled = false
-                loginViewModel.login(email = binding.loginEmailInput.text.toString()) { }
-            } else {
-                ToastHelper.show(this, getString(R.string.no_internet), ToastMessage.Type.WARNING)
-            }
+            login()
         }
 
         // Define a shake animation for when input is not valid
@@ -128,25 +123,20 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
 
         binding.loginEmailInput.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                if (binding.loginEmailInput.text.toString().isEmailValid()) {
-                    loginViewModel.setEmailValidState(true)
-                    binding.loginEmailContainer.error = null
-                } else {
-                    binding.loginEmailInput.startAnimation(shakeAnimation)
-                    binding.loginEmailContainer.error = getString(R.string.login_invalid_email)
-                    loginViewModel.setEmailValidState(false)
-                }
+                validateText()
             } else {
                 binding.loginEmailContainer.error = null
             }
         }
 
         binding.loginEmailInput.setOnEditorActionListener { textView, actionId, keyEvent ->
-            if ((keyEvent != null && (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER)) ||
-                (actionId == EditorInfo.IME_ACTION_DONE)
+            if ((keyEvent?.keyCode == KeyEvent.KEYCODE_ENTER && keyEvent.action == KeyEvent.ACTION_UP) ||
+                actionId == EditorInfo.IME_ACTION_DONE
             ) {
                 hideKeyboard(this)
                 textView.clearFocus()
+                if (validateText())
+                    login()
             }
             true
         }
@@ -157,6 +147,27 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         binding.loginLogo.setOnVeryLongClickListener {
             checkNetwork(this)
             showRemoteUrlDisplayDialog()
+        }
+    }
+
+    private fun validateText(): Boolean =
+        if (binding.loginEmailInput.text.toString().isEmailValid()) {
+            loginViewModel.setEmailValidState(true)
+            binding.loginEmailContainer.error = null
+            true
+        } else {
+            binding.loginEmailInput.startAnimation(shakeAnimation)
+            binding.loginEmailContainer.error = getString(R.string.login_invalid_email)
+            loginViewModel.setEmailValidState(false)
+            false
+        }
+
+    private fun login() {
+        if (connectivityViewModel.isConnected()) {
+            binding.loginButtonAuth.isEnabled = false
+            loginViewModel.login(email = binding.loginEmailInput.text.toString()) { }
+        } else {
+            ToastHelper.show(this, getString(R.string.no_internet), ToastMessage.Type.WARNING)
         }
     }
 

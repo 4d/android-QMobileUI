@@ -44,12 +44,12 @@ import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionProvider
+import com.qmobile.qmobileui.action.actionparameters.viewholder.BITMAP_QUALITY
+import com.qmobile.qmobileui.action.actionparameters.viewholder.ORIGIN_POSITION
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.action.utils.UriHelper.uriToString
 import com.qmobile.qmobileui.action.utils.createImageFile
-import com.qmobile.qmobileui.action.viewholder.BITMAP_QUALITY
-import com.qmobile.qmobileui.action.viewholder.ORIGIN_POSITION
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
@@ -80,6 +80,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     override lateinit var actionActivity: ActionActivity
 
+    internal var errorsByParameter = HashMap<String, String>()
     internal var paramsToSubmit = HashMap<String, Any>()
     private val metaDataToSubmit = HashMap<String, String>()
     internal var validationMap = hashMapOf<String, Boolean>()
@@ -229,8 +230,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             context = requireContext(),
             list = allParameters,
             paramsToSubmit = paramsToSubmit,
+            paramsError = errorsByParameter,
             imagesToUpload = imagesToUpload,
-            currentEntity = selectedEntity?.__entity as EntityModel?,
+            currentEntity = selectedEntity,
             onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 validationMap[name] = isValid
                 paramsToSubmit[name] = value ?: ""
@@ -240,6 +242,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             },
             goToScanner = {
                 BaseApp.genericNavigationResolver.navigateToActionScanner(binding, it)
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
             }, goToCamera = { intent: Intent, position: Int, destinationPath: String ->
             goToCamera = {
                 currentDestinationPath = destinationPath
@@ -300,6 +303,20 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         }
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        val item = menu.findItem(R.id.validate)
+        if (fromPendingTasks) {
+            currentTask?.isErrorServer()?.let { isErrorServer ->
+                item.title = if (isErrorServer) // error server tasks
+                    getString(R.string.retry_action)
+                else // pending tasks
+                    getString(R.string.validate_action)
+            }
+        } else {
+            item.title = getString(R.string.validate_action)
+        }
+        super.onPrepareOptionsMenu(menu)
+    }
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_actions_parameters, menu)
         super.onCreateOptionsMenu(menu, inflater)
@@ -307,15 +324,25 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.validate) {
-            if (fromPendingTasks) {
-                // When coming from pending task
-                validatePendingTask()
-            } else {
-                // When coming from actions
-                validateAction()
-            }
+            onValidateClick()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun onValidateClick() {
+        if (fromPendingTasks && currentTask?.status == ActionTask.Status.PENDING) {
+            // When coming from pending task
+            validatePendingTask()
+        } else {
+            // When coming from actions or click on error server failed task (in history section)
+            if (currentTask?.status == ActionTask.Status.ERROR_SERVER) {
+                // should delete current failed task to re-store it as new task after sending
+                currentTask?.let {
+                    actionActivity.getTaskViewModel().deleteOne(it.id)
+                }
+            }
+            validateAction()
+        }
     }
 
     private fun getActionInfo(): ActionInfo = ActionInfo(
@@ -332,19 +359,22 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     )
 
     private fun validatePendingTask() {
-        currentTask?.let { task ->
-            val actionTask = ActionTask(
-                status = ActionTask.Status.PENDING,
-                date = task.date,
-                relatedItemId = task.relatedItemId,
-                label = task.label,
-                actionInfo = getActionInfo()
-            )
-            actionTask.id = task.id
 
-            actionActivity.getTaskViewModel().insert(actionTask)
+        if (isFormValid()) {
+            currentTask?.let { task ->
+                val actionTask = ActionTask(
+                    status = ActionTask.Status.PENDING,
+                    date = task.date,
+                    relatedItemId = task.relatedItemId,
+                    label = task.label,
+                    actionInfo = getActionInfo()
+                )
+                actionTask.id = task.id
+
+                actionActivity.getTaskViewModel().insert(actionTask)
+            }
+            activity?.onBackPressed()
         }
-        activity?.onBackPressed()
     }
 
     private fun validateAction() {
@@ -444,7 +474,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.tableActions, tableName)
             .plus(ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.currentRecordActions, tableName))
             .forEach { action ->
-                if (action.getSafeString("uuid") == actionUUID)
+                // create id with pattern: $actionName$tableName
+                val actionId = action.getSafeString("name") + tableName
+                if (actionUUID == actionId)
                     return ActionHelper.createActionFromJsonObject(action)
             }
         throw Action.ActionException("Couldn't find action from table [$tableName], with uuid [$actionUUID]")
@@ -463,7 +495,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private fun sendAction() {
         val pendingTask = createPendingTask()
         actionActivity.sendAction(
-            actionContent = getActionContent(action.uuid, (selectedEntity?.__entity as EntityModel?)?.__KEY),
+            actionContent = getActionContent(pendingTask.id, (selectedEntity?.__entity as EntityModel?)?.__KEY),
             actionTask = pendingTask,
             tableName = tableName
         ) {

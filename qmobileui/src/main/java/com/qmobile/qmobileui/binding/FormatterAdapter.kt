@@ -16,6 +16,7 @@ import com.qmobile.qmobiledatasync.utils.fieldAdjustment
 import com.qmobile.qmobiledatasync.utils.tableNameAdjustment
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.formatters.ImageNamed
+import com.qmobile.qmobileui.webview.WebViewHelper
 
 @BindingAdapter(
     value = ["text", "format", "tableName", "fieldName", "imageWidth", "imageHeight"],
@@ -33,7 +34,7 @@ fun applyFormatter(
     if (text == null || text.toString().isEmpty())
         return
     if (view is WebView) {
-        WebViewAdapter.loadUrl(view, text.toString())
+        WebViewHelper.loadUrl(view, text.toString())
         return
     }
     if (view is TextView) {

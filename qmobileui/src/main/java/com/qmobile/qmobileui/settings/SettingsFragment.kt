@@ -172,6 +172,7 @@ class SettingsFragment :
             .setPositiveButton(logoutDialogPositive) { _, _ ->
                 logout()
             }
+            .show()
     }
 
     /**

@@ -11,20 +11,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.actionparameters.ActionParameterEnum
-import com.qmobile.qmobileui.action.viewholder.ActionParameterViewHolder
-import com.qmobile.qmobileui.action.viewholder.BarCodeViewHolder
-import com.qmobile.qmobileui.action.viewholder.BooleanCheckMarkViewHolder
-import com.qmobile.qmobileui.action.viewholder.BooleanSwitchViewHolder
-import com.qmobile.qmobileui.action.viewholder.DateViewHolder
-import com.qmobile.qmobileui.action.viewholder.ImageViewHolder
-import com.qmobile.qmobileui.action.viewholder.NumberViewHolder
-import com.qmobile.qmobileui.action.viewholder.PercentageViewHolder
-import com.qmobile.qmobileui.action.viewholder.ScientificViewHolder
-import com.qmobile.qmobileui.action.viewholder.SignatureViewHolder
-import com.qmobile.qmobileui.action.viewholder.SpellOutViewHolder
-import com.qmobile.qmobileui.action.viewholder.TextAreaViewHolder
-import com.qmobile.qmobileui.action.viewholder.TextViewHolder
-import com.qmobile.qmobileui.action.viewholder.TimeViewHolder
 
 @Suppress("LongMethod")
 class ActionParameterViewHolderFactory private constructor() {
