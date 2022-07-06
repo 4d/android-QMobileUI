@@ -460,7 +460,7 @@ class NumberViewHolder(itemView: View, val format: String) :
     private fun removeDecimalsIfNeeded(value: Number): Number {
         val floatValue = value.toFloat()
         val isInteger = (floatValue - value.toInt()) == 0.0F
-        //if the value don't contains decimals remove the ,00
+        // if the value don't contains decimals remove the ,00
         return if (isInteger)
             value.toInt()
         else
@@ -626,7 +626,7 @@ class SpellOutViewHolder(itemView: View) :
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 readInstanceProperty<Int>(it, defaultField).also { value ->
-                    if(value != null){
+                    if (value != null) {
                         SpellOutHelper.convert(value.toLong()).apply {
                             editText.text = this
                         }
@@ -639,7 +639,6 @@ class SpellOutViewHolder(itemView: View) :
                             )
                         }
                     }
-
                 }
             }
         }
@@ -776,7 +775,7 @@ class ScientificViewHolder(itemView: View) :
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 readInstanceProperty<Number>(it, defaultField).also { value ->
-                    if(value != null){
+                    if (value != null) {
                         editText.text = value.toString()
                         onValueChanged(
                             parameterName,
@@ -864,7 +863,7 @@ class PercentageViewHolder(itemView: View) :
 
         alreadFilledValue?.let { value ->
             (value.toString().toFloatOrNull())?.let {
-                val formattedValue = " "+(it / PERCENT_MULTIPLIER).toInt()
+                val formattedValue = " " + (it / PERCENT_MULTIPLIER).toInt()
                 editText.text = formattedValue
             }
         }
@@ -918,7 +917,7 @@ class PercentageViewHolder(itemView: View) :
             if (defaultField != null) {
 
                 readInstanceProperty<Number>(it, defaultField).also { value ->
-                    if(value != null){
+                    if (value != null) {
                         editText.text = value.toInt().toString()
                         onValueChanged(
                             parameterName,
@@ -988,7 +987,7 @@ class BooleanSwitchViewHolder(itemView: View) :
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 readInstanceProperty<Boolean>(it, defaultField).also { value ->
-                    if(value != null) {
+                    if (value != null) {
                         switch.isChecked = value
                         onValueChanged(parameterName, value, null, true)
                     }
@@ -1048,7 +1047,7 @@ class BooleanCheckMarkViewHolder(itemView: View) :
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 readInstanceProperty<Boolean>(it, defaultField).also { value ->
-                    if(value != null){
+                    if (value != null) {
                         checkBox.isChecked = value
                         onValueChanged(parameterName, value, null, true)
                     }
@@ -1146,8 +1145,7 @@ class ImageViewHolder(itemView: View) :
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 readInstanceProperty<Photo>(roomEntity, defaultField).also { value ->
-                    if(value != null) {
-
+                    if (value != null) {
 
                         val key: String? = if (defaultField.contains(".")) { // alias
                             readInstanceProperty<EntityModel>(
@@ -1542,7 +1540,7 @@ class BarCodeViewHolder(itemView: View) :
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
                 readInstanceProperty<String>(it, defaultField).also { value ->
-                    if(value != null) {
+                    if (value != null) {
                         scannedValueTextView.text = value
                         onValueChanged(parameterName, value, null, validate())
                     }

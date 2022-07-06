@@ -10,7 +10,6 @@ import com.qmobile.qmobileapi.utils.getJSONObjectList
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import org.json.JSONArray
-import org.json.JSONObject
 import java.util.Locale
 
 open class Action(
@@ -60,7 +59,7 @@ open class Action(
         val fieldsToSortBy: Map<String, String>
         fieldsToSortBy = HashMap()
         parameters.getJSONObjectList().forEach {
-            var format =it.getSafeString("format")
+            var format = it.getSafeString("format")
             format = when (format) {
                 "ascending" -> "ASC"
                 "descending" -> "DESC"
@@ -69,8 +68,8 @@ open class Action(
                 }
             }
             val attribute =
-              it.getSafeString("name")?.lowercase()
-                    ?.filter {value -> !value.isWhitespace() }
+                it.getSafeString("name")?.lowercase()
+                    ?.filter { value -> !value.isWhitespace() }
 
             if ((!format.isNullOrEmpty()) && (!attribute.isNullOrEmpty())) {
                 fieldsToSortBy[attribute] = format
