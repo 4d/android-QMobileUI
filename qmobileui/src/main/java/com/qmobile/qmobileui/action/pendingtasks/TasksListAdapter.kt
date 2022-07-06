@@ -45,29 +45,31 @@ class TasksListAdapter(
 
         when (holder) {
             is TaskViewHolder -> {
-                if (item != null)
+                if (item != null) {
                     holder.bind(isFromSettings, item) {
                         onCLick(position)
                     }
+                }
             }
             is SectionViewHolder -> {
-                if (position == 0)
+                if (position == 0) {
                     holder.bind(TaskItemTypeEnum.HEADER_PENDING, serverStatus.orEmpty()) {
                         onCLick(position)
                     }
-                else
+                } else {
                     holder.bind(TaskItemTypeEnum.HEADER_HISTORY, serverStatus.orEmpty())
+                }
             }
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-
         if (list[position] == null) {
-            return if (position == 0) // header pending
+            return if (position == 0) { // header pending
                 TaskItemTypeEnum.HEADER_PENDING.ordinal
-            else // header history
+            } else { // header history
                 TaskItemTypeEnum.HEADER_HISTORY.ordinal
+            }
         }
         return TaskItemTypeEnum.TASK.ordinal
     }

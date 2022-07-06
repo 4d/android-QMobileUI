@@ -38,12 +38,6 @@ class EntityListFragmentObserver(
                     "Table : ${entityListViewModel.getAssociatedTableName()}] "
             )
         }
-//        fragment.collectWhenStarted(entityListViewModel.dataSynchronized) { dataSyncState ->
-//            Timber.d(
-//                "[DataSyncState : $dataSyncState, " +
-//                    "Table : ${entityListViewModel.getAssociatedTableName()}] "
-//            )
-//        }
     }
 
     private fun observeScheduleRefresh() {
@@ -56,15 +50,6 @@ class EntityListFragmentObserver(
                 fragment.adapter.notifyItemRangeChanged(firstVisible, childCount)
             }
         }
-//        fragment.collectWhenStarted(entityListViewModel.scheduleRefresh) { scheduleRefresh ->
-//            if (scheduleRefresh == ScheduleRefreshEnum.PERFORM) {
-//                entityListViewModel.setScheduleRefreshState(ScheduleRefreshEnum.NO)
-//                val layoutManager = fragment.binding.fragmentListRecyclerView.layoutManager as LinearLayoutManager
-//                val firstVisible = layoutManager.findFirstVisibleItemPosition()
-//                val childCount = fragment.binding.fragmentListRecyclerView.childCount
-//                fragment.adapter.notifyItemRangeChanged(firstVisible, childCount)
-//            }
-//        }
     }
 
     private fun observeEntityList() {

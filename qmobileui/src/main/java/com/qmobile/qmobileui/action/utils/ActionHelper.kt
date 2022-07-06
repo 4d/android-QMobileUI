@@ -40,7 +40,6 @@ class ActionHelper private constructor() {
             parentItemId: String = "",
             relation: Relation? = null
         ): MutableMap<String, Any> {
-
             val actionContext = mutableMapOf<String, Any>(
                 "dataClass" to
                     (BaseApp.runtimeDataHolder.tableInfo[tableName]?.originalName ?: "")
@@ -48,14 +47,17 @@ class ActionHelper private constructor() {
             // entity
             val entity = HashMap<String, Any>()
 
-            if (itemId.isNotEmpty())
+            if (itemId.isNotEmpty()) {
                 entity["primaryKey"] = itemId
+            }
 
-            if (relation != null)
+            if (relation != null) {
                 entity["relationName"] = relation.name
+            }
 
-            if (entity.isNotEmpty())
+            if (entity.isNotEmpty()) {
                 actionContext["entity"] = entity
+            }
 
             // parent
             if (relation != null) {
@@ -66,8 +68,9 @@ class ActionHelper private constructor() {
                 parent["relationName"] = relation.inverseAliasPath()
                 parent["dataClass"] = relation.source
 
-                if (parent.isNotEmpty())
+                if (parent.isNotEmpty()) {
                     actionContext["parent"] = parent
+                }
             }
 
             val map: MutableMap<String, Any> = mutableMapOf()
@@ -98,12 +101,14 @@ class ActionHelper private constructor() {
             val iconDrawablePath = action.getIconDrawablePath()
             iconDrawablePath?.let { icon ->
                 val resId = context.resources.getIdentifier(icon, "drawable", context.packageName)
-                if (resId != 0)
+                if (resId != 0) {
                     drawable = ContextCompat.getDrawable(context, resId)
+                }
             }
 
-            if (drawable == null)
+            if (drawable == null) {
                 drawable = ContextCompat.getDrawable(context, R.drawable.empty_action)
+            }
 
             return drawable.adjustActionDrawableMargins(context)
         }
@@ -130,13 +135,11 @@ class ActionHelper private constructor() {
         }
 
         fun getActionArrayAdapter(context: Context, actionList: List<Action>): ArrayAdapter<Action> {
-
             val withIcons = actionList.firstOrNull { it.getIconDrawablePath() != null } != null
 
             return object :
                 ArrayAdapter<Action>(context, android.R.layout.select_dialog_item, android.R.id.text1, actionList) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-
                     val itemView = super.getView(position, convertView, parent)
                     val textView = itemView.findViewById<View>(android.R.id.text1) as TextView
                     val action = actionList[position]

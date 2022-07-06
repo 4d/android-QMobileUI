@@ -56,7 +56,6 @@ class TasksFragment : BaseFragment(), NetworkChecker {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("currentItemId")?.let { currentItemId = it }
@@ -95,7 +94,6 @@ class TasksFragment : BaseFragment(), NetworkChecker {
      * Initialize Swipe to delete
      */
     private fun initCellSwipe() {
-
         val swipeHandler = object : SwipeToDeleteCallback(requireContext()) {
 
             override fun onChildDraw(

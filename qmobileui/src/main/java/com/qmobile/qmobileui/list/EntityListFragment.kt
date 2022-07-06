@@ -112,8 +112,9 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         hasCurrentRecordActions = currentRecordActionsJsonObject.has(tableName)
         isSwipable = BaseApp.genericTableFragmentHelper.isSwipeAllowed(tableName)
 
-        if (hasSearch || hasTableActions)
+        if (hasSearch || hasTableActions) {
             this.setHasOptionsMenu(true)
+        }
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
         _binding = FragmentListBinding.inflate(inflater, container, false).apply {
@@ -160,7 +161,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
      */
     private fun initRecyclerView() {
         adapter = EntityListAdapter(
-            tableName = tableName, lifecycleOwner = viewLifecycleOwner,
+            tableName = tableName,
+            lifecycleOwner = viewLifecycleOwner,
             onItemClick = { dataBinding, key ->
                 BaseApp.genericNavigationResolver.navigateFromListToViewPager(
                     viewDataBinding = dataBinding,
@@ -237,7 +239,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
      * Initialize Swipe to delete
      */
     private fun initCellSwipe() {
-
         if (hasCurrentRecordActions && isSwipable) {
             currentRecordActionsListAdapter = ActionHelper.getActionArrayAdapter(requireContext(), currentRecordActions)
 
@@ -285,7 +286,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                     adapter.getSelectedItem(position)?.let { entity ->
                         if (action == null) { // the case of "..." button
                             showDialog { clickedAction ->
-
                                 onActionClick(clickedAction, entity)
                             }
                         } else {
@@ -364,8 +364,9 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 ) {
                     hideKeyboard(activity)
                     textView.clearFocus()
-                    if (textView.text.isEmpty())
+                    if (textView.text.isEmpty()) {
                         searchView.onActionViewCollapsed()
+                    }
                 }
                 true
             }

@@ -78,8 +78,9 @@ class DotProgressBar : FrameLayout {
         primaryAnimator?.cancel()
         primaryAnimator = ValueAnimator.ofInt(0, NUMBER_OF_DOTS)
         primaryAnimator?.addUpdateListener {
-            if (it.animatedValue != NUMBER_OF_DOTS)
+            if (it.animatedValue != NUMBER_OF_DOTS) {
                 animators[it.animatedValue as Int].start()
+            }
         }
         primaryAnimator?.repeatMode = ValueAnimator.RESTART
         primaryAnimator?.repeatCount = ValueAnimator.INFINITE
@@ -90,8 +91,9 @@ class DotProgressBar : FrameLayout {
     }
 
     private fun getScaleAnimator(view: View): Animator {
-        if (dotAnimator != null)
+        if (dotAnimator != null) {
             return dotAnimator as ValueAnimator
+        }
         val animator = ValueAnimator.ofFloat(MIN_SCALE, MAX_SCALE)
         animator.addUpdateListener {
             view.scaleX = it.animatedValue as Float

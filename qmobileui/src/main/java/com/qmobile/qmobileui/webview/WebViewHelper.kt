@@ -35,8 +35,9 @@ object WebViewHelper {
             if (child is WebView) return child
             if (child is ViewGroup) {
                 childContainsWebView = child.checkIfContainsWebView()
-                if (childContainsWebView != null)
+                if (childContainsWebView != null) {
                     return childContainsWebView
+                }
             }
         }
         return childContainsWebView

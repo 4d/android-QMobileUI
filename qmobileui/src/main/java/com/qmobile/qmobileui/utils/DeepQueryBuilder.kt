@@ -14,7 +14,6 @@ import java.lang.StringBuilder
 object DeepQueryBuilder {
 
     fun createQuery(relation: Relation, parentItemId: String): String {
-
         val path = relation.path.ifEmpty { relation.name }
         val newPath = RelationHelper.unAliasPath(path, relation.source)
         Timber.d("newPath: $newPath")
@@ -38,7 +37,6 @@ object DeepQueryBuilder {
     }
 
     private fun depthRelation(parent: Relation, path: List<String>, depth: Int, parentItemId: String): String {
-
         val source = if (depth == 0) parent.source else parent.dest
         val relation = RelationHelper.getRelation(source, path[depth])
 
@@ -67,18 +65,20 @@ object DeepQueryBuilder {
     }
 
     private fun partQuery(relation: Relation, depth: Int): String {
-        return if (relation.type == Relation.Type.MANY_TO_ONE)
+        return if (relation.type == Relation.Type.MANY_TO_ONE) {
             "SELECT * FROM ${relation.source} AS T${depth + 1} " +
                 "WHERE T$depth.__KEY = T${depth + 1}.__${relation.name}Key"
-        else
+        } else {
             "SELECT * FROM ${relation.source} AS T${depth + 1} " +
                 "WHERE T$depth.__${relation.inverse}Key = T${depth + 1}.__KEY"
+        }
     }
 
     private fun endCondition(relation: Relation, parentItemId: String, depth: Int): String {
-        return if (relation.type == Relation.Type.ONE_TO_MANY)
+        return if (relation.type == Relation.Type.ONE_TO_MANY) {
             "T$depth.__${relation.inverse}Key = $parentItemId"
-        else
+        } else {
             "T${depth + 1}.__KEY = $parentItemId"
+        }
     }
 }

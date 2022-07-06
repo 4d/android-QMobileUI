@@ -34,10 +34,6 @@ class BaseActivityObserver(
             Timber.i("[AuthenticationState : $authenticationState]")
             activity.handleAuthenticationState(authenticationState)
         }
-//        activity.collectWhenStarted(loginViewModel.authenticationState) { authenticationState ->
-//            Timber.i("[AuthenticationState : $authenticationState]")
-//            activity.handleAuthenticationState(authenticationState)
-//        }
     }
 
     // Observe network status
@@ -54,17 +50,11 @@ class BaseActivityObserver(
         connectivityViewModel.toastMessage.message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
             activity.handleEvent(event)
         }
-//        activity.collectWhenStarted(connectivityViewModel.toastMessage.message) { event ->
-//            activity.handleEvent(event)
-//        }
     }
 
     private fun observeLoginToastMessage() {
         loginViewModel.toastMessage.message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
             activity.handleEvent(event)
         }
-//        activity.collectWhenStarted(loginViewModel.toastMessage.message) { event ->
-//            activity.handleEvent(event)
-//        }
     }
 }

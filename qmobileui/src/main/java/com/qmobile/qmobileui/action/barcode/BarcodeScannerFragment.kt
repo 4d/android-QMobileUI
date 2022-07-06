@@ -46,7 +46,6 @@ class BarcodeScannerFragment : BaseFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         _binding = FragmentBarcodeBinding.inflate(inflater, container, false).apply {
@@ -123,8 +122,9 @@ class BarcodeScannerFragment : BaseFragment() {
                                     arguments?.getInt("position")?.let { putInt("position", it) }
                                     putString("barcode_value", value)
                                 }
-                                if (isAdded)
+                                if (isAdded) {
                                     parentFragmentManager.setFragmentResult(BARCODE_FRAGMENT_REQUEST_KEY, result)
+                                }
                                 activity?.onBackPressed()
                             }, PROGRESS_DELAY)
                         } ?: run {

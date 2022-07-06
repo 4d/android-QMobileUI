@@ -27,7 +27,7 @@ object TimeFormat {
     private val formatNameMap: Map<String, Int> = mapOf(
         "shortTime" to DateFormat.SHORT,
         "mediumTime" to DateFormat.MEDIUM,
-        "duration" to DateFormat.MEDIUM,
+        "duration" to DateFormat.MEDIUM
     )
 
     fun applyFormat(format: String, baseText: String): String {

@@ -74,7 +74,6 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         if (isAlreadyLoggedIn() || BaseApp.runtimeDataHolder.guestLogin) {
             startMainActivity(true)
         } else {
-
             // Init system services in onCreate()
             connectivityManager =
                 getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -106,7 +105,6 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
      * Initializes layout components
      */
     private fun initLayout() {
-
         bindImageFromDrawable(binding.loginLogo, BaseApp.loginLogoDrawable)
 
         if (loggedOut) {
@@ -135,8 +133,9 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
             ) {
                 hideKeyboard(this)
                 textView.clearFocus()
-                if (validateText())
+                if (validateText()) {
                     login()
+                }
             }
             true
         }
@@ -207,8 +206,9 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
     private fun startMainActivity(skipAnimation: Boolean, loginStatusText: String = "") {
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra(LOGIN_STATUS_TEXT, loginStatusText)
-        if (skipAnimation)
+        if (skipAnimation) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+        }
         startActivity(intent)
         finish()
     }

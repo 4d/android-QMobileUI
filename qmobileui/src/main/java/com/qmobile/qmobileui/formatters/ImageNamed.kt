@@ -34,28 +34,32 @@ object ImageNamed {
     }
 
     private fun Chip.setChipDrawable(drawableResPair: Pair<Int, Int>, tintable: Boolean?) {
-        if (BaseApp.nightMode() && drawableResPair.second != 0)
+        if (BaseApp.nightMode() && drawableResPair.second != 0) {
             this.chipIcon =
                 ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.second)
-        else
+        } else {
             this.chipIcon =
                 ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
+        }
 
-        if (tintable == true)
+        if (tintable == true) {
             this.chipIconTint = this.textColors
+        }
     }
 
     private fun TextView.setTextViewDrawableWithoutSize(
         drawableResPair: Pair<Int, Int>,
         tintable: Boolean?
     ) {
-        if (BaseApp.nightMode() && drawableResPair.second != 0)
+        if (BaseApp.nightMode() && drawableResPair.second != 0) {
             this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.second, 0, 0, 0)
-        else
+        } else {
             this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.first, 0, 0, 0)
+        }
 
-        if (tintable == true)
+        if (tintable == true) {
             TextViewCompat.setCompoundDrawableTintList(this, this.textColors)
+        }
     }
 
     private fun TextView.setTextViewDrawableWithSize(
@@ -64,14 +68,16 @@ object ImageNamed {
         imageWidth: Int,
         imageHeight: Int
     ) {
-        val drawable = if (BaseApp.nightMode() && drawableResPair.second != 0)
+        val drawable = if (BaseApp.nightMode() && drawableResPair.second != 0) {
             ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.second)
-        else
+        } else {
             ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
+        }
 
         drawable?.let {
-            if (tintable == true)
+            if (tintable == true) {
                 drawable.setTint(this.currentTextColor)
+            }
             drawable.setBounds(0, 0, imageWidth, imageHeight)
             this.setCompoundDrawables(drawable, null, null, null)
         }

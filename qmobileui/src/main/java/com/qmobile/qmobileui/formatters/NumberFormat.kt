@@ -30,10 +30,11 @@ object NumberFormat {
             }
             "percent" -> {
                 val newDoubleText = DecimalFormat("0.00").format(doubleText).toDoubleOrNull()
-                if (newDoubleText != null)
+                if (newDoubleText != null) {
                     (newDoubleText * INT_100).toString() + "%"
-                else
+                } else {
                     ""
+                }
             }
             "ordinal" -> {
                 DecimalFormat("0.00").format(doubleText) + "th"

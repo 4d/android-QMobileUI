@@ -9,7 +9,6 @@ package com.qmobile.qmobileui.list
 import java.text.DecimalFormat
 
 @Suppress("MagicNumber")
-
 object SpellOutHelper {
     private val tensNames = arrayOf(
         "",
