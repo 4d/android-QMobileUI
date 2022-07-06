@@ -61,13 +61,15 @@ object SearchQueryBuilder {
         val depth = fieldName.count { it == '.' }
         val endFieldName = fieldName.substringAfterLast(".")
         val appendFromFormat = appendFromFormat(tableName, fieldName, pattern, "T${depth + 1}.$endFieldName")
-        if (appendFromFormat.isNotEmpty())
+        if (appendFromFormat.isNotEmpty()) {
             stringBuilder.append("( ")
+        }
         stringBuilder.append("T${depth + 1}.$endFieldName LIKE \'%$pattern%\' OR ")
         stringBuilder.append(appendFromFormat)
         stringBuilder.removeSuffix(" OR ")
-        if (appendFromFormat.isNotEmpty())
+        if (appendFromFormat.isNotEmpty()) {
             stringBuilder.append(" )")
+        }
         repeat(baseQuery.count { it == '(' }) {
             stringBuilder.append(" )")
         }
@@ -84,7 +86,6 @@ object SearchQueryBuilder {
         BaseApp.runtimeDataHolder.customFormatters[tableName.tableNameAdjustment()]?.get(fieldName.fieldAdjustment())
             ?.let { fieldMapping ->
                 if (fieldMapping.binding == "localizedText") {
-
                     val choiceList = fieldMapping.choiceList
                     appendice = when (choiceList) {
                         is Map<*, *> -> {
@@ -137,8 +138,9 @@ object SearchQueryBuilder {
     }
 
     private fun StringBuilder.removeSuffix(suffix: String) {
-        if (this.endsWith(suffix))
+        if (this.endsWith(suffix)) {
             this.replace(this.length - (suffix.length), this.length, "")
+        }
     }
 
     private fun getBaseQuery(relation: Relation): String {
@@ -151,7 +153,6 @@ object SearchQueryBuilder {
     }
 
     private fun depthRelation(parent: Relation, path: List<String>, depth: Int): String {
-
         val source = if (depth == 0) parent.source else parent.dest
         val relation = RelationHelper.getRelation(source, path[depth])
 
@@ -181,9 +182,10 @@ object SearchQueryBuilder {
     }
 
     private fun partQuery(relation: Relation, depth: Int): String {
-        return if (relation.type == Relation.Type.MANY_TO_ONE)
+        return if (relation.type == Relation.Type.MANY_TO_ONE) {
             "SELECT * FROM ${relation.dest} AS T${depth + 1} WHERE T${depth + 1}.__KEY = T$depth.__${relation.name}Key"
-        else
+        } else {
             "SELECT * FROM ${relation.source} AS T$depth WHERE T${depth + 1}.__${relation.inverse}Key = T$depth.__KEY"
+        }
     }
 }

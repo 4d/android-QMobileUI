@@ -21,8 +21,9 @@ class FormQueryBuilder(
     private val baseQuery = "SELECT * FROM $tableName"
 
     fun getQuery(pattern: String = ""): SimpleSQLiteQuery {
-        if (pattern.isEmpty())
+        if (pattern.isEmpty()) {
             return SimpleSQLiteQuery(baseQuery)
+        }
 
         val stringBuilder = StringBuilder("SELECT * FROM $tableName AS T1 WHERE ")
         searchField.getSafeArray(tableName)?.let { columnsToFilter ->
@@ -37,18 +38,17 @@ class FormQueryBuilder(
         parentTableName: String,
         path: String
     ): SimpleSQLiteQuery {
-
-        val relation = if (path.contains("."))
+        val relation = if (path.contains(".")) {
             RelationHelper.getRelations(parentTableName).find { it.path == path }
-        else
+        } else {
             RelationHelper.getRelations(parentTableName).find { it.name == path }
+        }
 
         relation?.let {
             val query = DeepQueryBuilder.createQuery(relation, parentItemId)
             return if (pattern.isEmpty()) {
                 SimpleSQLiteQuery(query)
             } else {
-
                 val stringBuilder = StringBuilder("$query AND ( ")
                 searchField.getSafeArray(tableName)?.let { columnsToFilter ->
                     SearchQueryBuilder.appendPredicate(tableName, stringBuilder, columnsToFilter, pattern)

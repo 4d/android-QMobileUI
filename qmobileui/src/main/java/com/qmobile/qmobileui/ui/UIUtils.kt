@@ -69,8 +69,9 @@ fun View.setOnVeryLongClickListener(listener: () -> Unit) {
 }
 
 fun View.clearViewInParent() {
-    if (this.parent != null)
+    if (this.parent != null) {
         (this.parent as ViewGroup).removeView(this)
+    }
 }
 
 fun View.disableLink() {

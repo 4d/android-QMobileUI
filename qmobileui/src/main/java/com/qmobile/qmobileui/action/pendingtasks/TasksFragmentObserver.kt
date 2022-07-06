@@ -20,12 +20,12 @@ class TasksFragmentObserver(
     }
 
     private fun observeAllTasks() {
-
         fragment.actionActivity.getTaskViewModel().allTasks.observe(fragment.viewLifecycleOwner) { allTasks ->
             Timber.d("Tasks list updated, size : ${allTasks.size}")
 
-            if (fragment.tableName.isNotEmpty())
+            if (fragment.tableName.isNotEmpty()) {
                 cleanObsoleteHistory(allTasks)
+            }
 
             val filteredList = allTasks
                 .filter { it.filterTableTasks(fragment.tableName) }

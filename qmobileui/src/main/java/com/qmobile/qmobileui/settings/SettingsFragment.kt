@@ -9,6 +9,7 @@ package com.qmobile.qmobileui.settings
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
@@ -93,9 +94,8 @@ class SettingsFragment :
         logoutDialogNegative = resources.getString(R.string.logout_dialog_negative)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         loginViewModel = getLoginViewModel(activity, activitySettingsInterface.loginApiService)
 
         connectivityViewModel = getConnectivityViewModel(
@@ -114,8 +114,9 @@ class SettingsFragment :
     private fun initLayout() {
         this.remoteUrl = BaseApp.sharedPreferencesHolder.remoteUrl
 
-        if (!BaseApp.runtimeDataHolder.guestLogin)
+        if (!BaseApp.runtimeDataHolder.guestLogin) {
             findPreference<PreferenceCategory>(accountCategoryKey)?.isVisible = true
+        }
         findPreference<Preference>(logoutPrefKey)?.onPreferenceClickListener = this
         remoteUrlPref = findPreference(remoteUrlPrefKey)
         remoteUrlPref?.onPreferenceClickListener = this
@@ -124,35 +125,32 @@ class SettingsFragment :
         pendingTaskPref?.onPreferenceClickListener = this
     }
 
-    override fun onPreferenceClick(preference: Preference?): Boolean {
-        preference?.let {
-            return when (preference.key) {
-                remoteUrlPrefKey -> {
-                    activitySettingsInterface.showRemoteUrlEditDialog(remoteUrl, this)
-                    true
+    override fun onPreferenceClick(preference: Preference): Boolean {
+        return when (preference.key) {
+            remoteUrlPrefKey -> {
+                activitySettingsInterface.showRemoteUrlEditDialog(remoteUrl, this)
+                true
+            }
+            logoutPrefKey -> {
+                // When Logout button is clicked, pop up a confirmation dialog
+                showLogoutDialog()
+                true
+            }
+            pendingTaskPrefKey -> {
+                activity?.let {
+                    BaseApp.genericNavigationResolver.navigateToPendingTasks(
+                        fragmentActivity = it,
+                        tableName = "",
+                        currentItemId = ""
+                    )
                 }
-                logoutPrefKey -> {
-                    // When Logout button is clicked, pop up a confirmation dialog
-                    showLogoutDialog()
-                    true
-                }
-                pendingTaskPrefKey -> {
-                    activity?.let {
-                        BaseApp.genericNavigationResolver.navigateToPendingTasks(
-                            fragmentActivity = it,
-                            tableName = "",
-                            currentItemId = ""
-                        )
-                    }
-                    true
-                }
+                true
+            }
 
-                else -> {
-                    false
-                }
+            else -> {
+                false
             }
         }
-        return false
     }
 
     /**

@@ -23,8 +23,9 @@ object ColorHelper {
         val themeColor = context.getColorFromAttr(R.attr.colorPrimary)
         val themeColorLuminance = ColorUtils.calculateLuminance(themeColor)
 
-        if (horizontalIndex == 0)
+        if (horizontalIndex == 0) {
             return themeColor
+        }
 
         return when {
             // dark

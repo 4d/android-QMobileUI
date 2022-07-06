@@ -29,7 +29,6 @@ fun BottomNavigationView.setupWithNavController(
     containerId: Int,
     intent: Intent
 ): LiveData<NavController> {
-
     // Map of tags
     val graphIdToTagMap = SparseArray<String>()
     // Result. Mutable live data with the selected controlled
@@ -91,14 +90,13 @@ fun BottomNavigationView.setupWithNavController(
         } else {
             val newlySelectedItemTag = graphIdToTagMap[item.itemId]
             if (selectedItemTag != newlySelectedItemTag) {
-
                 // When clicking on an item, go back to first level
                 val previousSelectedFragment = fragmentManager.findFragmentByTag(selectedItemTag)
                     as NavHostFragment
                 val previousNavController = previousSelectedFragment.navController
                 // Pop the back stack to the start destination of the current navController graph
                 previousNavController.popBackStack(
-                    previousNavController.graph.startDestination,
+                    previousNavController.graph.startDestinationId,
                     false
                 )
 
@@ -206,7 +204,7 @@ private fun BottomNavigationView.setupItemReselected(
         val navController = selectedFragment.navController
         // Pop the back stack to the start destination of the current navController graph
         navController.popBackStack(
-            navController.graph.startDestination,
+            navController.graph.startDestinationId,
             false
         )
     }

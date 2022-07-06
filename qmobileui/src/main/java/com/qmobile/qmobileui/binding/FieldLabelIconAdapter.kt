@@ -14,8 +14,9 @@ import androidx.databinding.BindingAdapter
 
 @BindingAdapter("icon")
 fun bindFieldLabelIcon(view: TextView, icon: String?) {
-    if (icon.isNullOrEmpty())
+    if (icon.isNullOrEmpty()) {
         return
+    }
 
     val resId = view.resources.getIdentifier(icon, "drawable", view.context.packageName)
     if (resId > 0) {

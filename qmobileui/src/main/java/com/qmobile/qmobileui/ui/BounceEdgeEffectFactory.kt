@@ -24,7 +24,6 @@ private const val FLING_TRANSLATION_MAGNITUDE = 0.5f
 class BounceEdgeEffectFactory : RecyclerView.EdgeEffectFactory() {
 
     override fun createEdgeEffect(recyclerView: RecyclerView, direction: Int): EdgeEffect {
-
         return object : EdgeEffect(recyclerView.context) {
 
             // A reference to the [SpringAnimation] for this RecyclerView used to bring the item

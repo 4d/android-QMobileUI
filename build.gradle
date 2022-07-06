@@ -14,7 +14,7 @@ buildscript {
 }
 
 plugins {
-    id "com.github.ben-manes.versions" version "0.39.0"
+    id "com.github.ben-manes.versions" version "0.42.0"
 }
 
 allprojects {
@@ -57,10 +57,6 @@ subprojects {
                 }
 
                 buildTypes {
-
-                    debug {
-                        testCoverageEnabled true
-                    }
 
                     release {
                         // Enables code shrinking, obfuscation, and optimization for only

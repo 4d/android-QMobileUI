@@ -23,7 +23,6 @@ object DateFormat {
 
     fun applyFormat(format: String, baseText: String): String {
         return when (format) {
-
             "fullDate" -> {
                 formatNameMap[format]?.let {
                     DateFormat.getDateInstance(it, Locale.getDefault())

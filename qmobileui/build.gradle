@@ -27,23 +27,15 @@ dependencies {
     }
 
     // Common
-    implementation Libs.androidx_constraintlayout
     implementation Libs.androidx_fragment_ktx
     implementation Libs.androidx_preference_ktx
-    implementation Libs.kotlin_stdlib
+    implementation Libs.kotlin_reflect
     implementation Libs.swiperefreshlayout
-    implementation Libs.viewpager2
 
-    // Lifecycle
-    implementation Libs.lifecycle_process
-    implementation Libs.lifecycle_runtime
-    kapt Libs.lifecycle_compiler
 
     // Room
-    implementation Libs.androidx_room
     implementation Libs.androidx_room_runtime
     kapt Libs.androidx_room_compiler
-    implementation Libs.room_paging
 
     // Jackson
     implementation Libs.jackson
@@ -61,19 +53,14 @@ dependencies {
     implementation Libs.glide_transformations
     kapt Libs.glide_compiler
 
-    // Rx
-    implementation Libs.rxjava
-
     // CameraX
-    implementation Libs.androidx_camera2
     implementation Libs.androidx_camera_lifecycle
     implementation Libs.androidx_camera_view
     implementation Libs.barcode_scanning
 
     // Utils
     implementation Libs.dynamic_toasts
-    implementation Libs.material
-    implementation Libs.retrofit_converter_gson
+    implementation Libs.retrofit
     implementation Libs.signature_pad
     implementation Libs.timber
 

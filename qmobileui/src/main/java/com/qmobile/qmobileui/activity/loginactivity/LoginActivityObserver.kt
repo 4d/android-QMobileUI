@@ -28,9 +28,6 @@ class LoginActivityObserver(
         loginViewModel.emailValid.launchAndCollectIn(activity, Lifecycle.State.STARTED) { emailValid ->
             activity.binding.loginButtonAuth.isEnabled = emailValid
         }
-//        activity.collectWhenStarted(loginViewModel.emailValid) { emailValid ->
-//            activity.binding.loginButtonAuth.isEnabled = emailValid
-//        }
     }
 
     // Observe if login request in progress
@@ -39,9 +36,5 @@ class LoginActivityObserver(
             activity.binding.loginProgressbar.visibility =
                 if (dataLoading) View.VISIBLE else View.GONE
         }
-//        activity.collectWhenStarted(loginViewModel.dataLoading) { dataLoading ->
-//            activity.binding.loginProgressbar.visibility =
-//                if (dataLoading) View.VISIBLE else View.GONE
-//        }
     }
 }

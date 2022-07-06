@@ -41,10 +41,11 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
 
         label.text = item.label
 
-        if (isFromSettings)
+        if (isFromSettings) {
             tableName.text = item.actionInfo.tableName
-        else
+        } else {
             tableName.visibility = View.GONE
+        }
 
         when (item.status) {
             ActionTask.Status.SUCCESS -> {
@@ -89,8 +90,9 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
                 }
             }
 
-            if (sb.toString().isNotEmpty())
+            if (sb.toString().isNotEmpty()) {
                 status.text = sb.removeSuffix(" , ")
+            }
         }
     }
 
@@ -114,8 +116,9 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
             }
         }
 
-        if (stringToAppend.isNotEmpty())
+        if (stringToAppend.isNotEmpty()) {
             sb.append("$stringToAppend , ")
+        }
 
         return sb
     }
@@ -128,8 +131,9 @@ class TaskViewHolder(itemView: View) : TaskListViewHolder(itemView) {
             .forEach { action ->
                 // create id with pattern: $actionName$tableName
                 val actionId = action.getSafeString("name") + tableName
-                if (actionUUID == actionId)
+                if (actionUUID == actionId) {
                     return ActionHelper.createActionFromJsonObject(action)
+                }
             }
         throw Action.ActionException("Couldn't find action from table [$tableName], with uuid [$actionUUID]")
     }

@@ -33,7 +33,6 @@ class HeaderLoader(concreteLoader: ModelLoader<GlideUrl, InputStream>) :
     }
 
     override fun getHeaders(model: String?, width: Int, height: Int, options: Options?): Headers? {
-
         val lazyHeadersBuilder = LazyHeaders.Builder()
 
         // If a token is stored in sharedPreferences, we add it in header
