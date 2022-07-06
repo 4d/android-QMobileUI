@@ -364,11 +364,10 @@ class MainActivity :
                 .setOnMenuItemClickListener {
                     if (action.preset == "sort") {
                         onSort(action)
-                        true
                     } else {
                         onActionClick(action, actionNavigable)
-                        true
                     }
+                    true
                 }
                 .setIcon(drawable)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
