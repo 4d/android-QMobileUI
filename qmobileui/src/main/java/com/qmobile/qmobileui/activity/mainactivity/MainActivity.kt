@@ -452,7 +452,7 @@ class MainActivity :
 
                             actionTask.message = actionResponse.statusText
                             actionTask.actionInfo.errors =
-                                actionResponse.errors.associateBy({ it.parameter }, { it.message })
+                                actionResponse.errors?.associateBy({ it.parameter }, { it.message })
                             taskViewModel.insert(actionTask)
                             if (actionResponse.dataSynchro == true) {
                                 requestDataSync(tableName)
