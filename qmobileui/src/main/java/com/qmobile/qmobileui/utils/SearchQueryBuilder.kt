@@ -41,7 +41,7 @@ object SearchQueryBuilder {
                 }
 
                 relation?.let { rel ->
-                    appendRelationQuery(tableName, stringBuilder, fieldName, pattern, rel)
+                    appendRelationQuery(tableName, stringBuilder, fieldName, pattern, rel, sortQuery)
                 }
             } else {
                 stringBuilder.append("T1.$fieldName LIKE \'%$pattern%\' OR ")
@@ -60,7 +60,8 @@ object SearchQueryBuilder {
         stringBuilder: StringBuilder,
         fieldName: String,
         pattern: String,
-        relation: Relation
+        relation: Relation,
+        sortQuery: String? = null
     ) {
         val baseQuery = getBaseQuery(relation)
         stringBuilder.append(baseQuery)
@@ -78,6 +79,11 @@ object SearchQueryBuilder {
             stringBuilder.append(" )")
         }
         stringBuilder.append(" OR ")
+
+        sortQuery?.let { query ->
+            stringBuilder.removeSuffix(" OR ")
+            stringBuilder.append(query)
+        }
     }
 
     private fun appendFromFormat(
