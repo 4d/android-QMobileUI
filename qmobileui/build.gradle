@@ -54,6 +54,7 @@ dependencies {
     kapt Libs.glide_compiler
 
     // CameraX
+    implementation Libs.androidx_camera2
     implementation Libs.androidx_camera_lifecycle
     implementation Libs.androidx_camera_view
     implementation Libs.barcode_scanning
