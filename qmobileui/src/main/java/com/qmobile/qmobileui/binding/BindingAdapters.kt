@@ -47,8 +47,9 @@ fun bindImage(
  */
 @BindingAdapter("imageDrawable")
 fun bindImageFromDrawable(view: ImageView, imageDrawable: Int?) {
-    if (imageDrawable == null)
+    if (imageDrawable == null) {
         return
+    }
 
     ImageHelper.getGlideRequest(view, imageDrawable).into(view)
 }

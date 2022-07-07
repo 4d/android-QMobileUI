@@ -72,13 +72,16 @@ class ActionsParametersListAdapter(
             alreadyFilledValue,
             { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 onValueChanged(name, value, metaData, isValid)
-            }, {
-            goToScanner(it)
-        }, { intent: Intent, pos: Int, destinationPath ->
-            goToCamera(intent, pos, destinationPath)
-        }, { parameterName: String, uri: Uri? ->
-            queueForUpload(parameterName, uri)
-        },
+            },
+            {
+                goToScanner(it)
+            },
+            { intent: Intent, pos: Int, destinationPath ->
+                goToCamera(intent, pos, destinationPath)
+            },
+            { parameterName: String, uri: Uri? ->
+                queueForUpload(parameterName, uri)
+            },
             errorText
         )
     }

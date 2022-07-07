@@ -27,21 +27,23 @@ open class Action(
         ResourcesHelper.correctIconPath(icon)
 
     fun getPreferredName(): String {
-        return if (!label.isNullOrEmpty())
+        return if (!label.isNullOrEmpty()) {
             label
-        else if (!shortLabel.isNullOrEmpty())
+        } else if (!shortLabel.isNullOrEmpty()) {
             shortLabel
-        else
+        } else {
             name
+        }
     }
 
     fun getPreferredShortName(): String {
-        return if (!shortLabel.isNullOrEmpty())
+        return if (!shortLabel.isNullOrEmpty()) {
             shortLabel
-        else if (!label.isNullOrEmpty())
+        } else if (!label.isNullOrEmpty()) {
             label
-        else
+        } else {
             name
+        }
     }
 
     fun isOfflineCompatible() = preset?.lowercase(Locale.getDefault()) != "share"

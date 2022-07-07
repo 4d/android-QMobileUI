@@ -28,8 +28,9 @@ class EntityViewPagerFragment : BaseFragment() {
 
     // views
     internal var viewPager: ViewPager2? = null
-    internal lateinit var adapter: ViewPagerAdapter
-    //    lateinit var adapter: ViewPagerAdapter2
+    lateinit var adapter: ViewPagerAdapter
+
+//    lateinit var adapter: ViewPagerAdapter2
     private lateinit var actionPrevious: MenuItem
     private lateinit var actionNext: MenuItem
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
@@ -94,6 +95,11 @@ class EntityViewPagerFragment : BaseFragment() {
                     key = (roomEntity.__entity as EntityModel?)?.__KEY ?: ""
                     arguments?.putString("key", key)
                 }
+//                adapter.getSelectedItem(position)?.let { roomEntity ->
+//                    actionActivity.setCurrentEntityModel(roomEntity)
+//                    key = (roomEntity.__entity as EntityModel?)?.__KEY ?: ""
+//                    arguments?.putString("key", key)
+//                }
                 handleActionPreviousEnability(position)
                 handleActionNextEnability(position)
             }
@@ -151,10 +157,11 @@ class EntityViewPagerFragment : BaseFragment() {
     }
 
     private fun shadowDisabledButton(menuItem: MenuItem) {
-        menuItem.icon.alpha = if (!menuItem.isEnabled)
+        menuItem.icon.alpha = if (!menuItem.isEnabled) {
             ColorHelper.ARGB_HALF_VALUE
-        else
+        } else {
             ColorHelper.ARGB_MAX_VALUE
+        }
     }
 
     private fun setSearchQuery() {

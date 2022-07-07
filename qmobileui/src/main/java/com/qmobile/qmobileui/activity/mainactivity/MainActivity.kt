@@ -193,8 +193,9 @@ class MainActivity :
 
         // Interceptor notifies the MainActivity that we need to go to login page. First, stop syncing
         val loginRequiredCallbackForInterceptor: LoginRequiredCallback = {
-            if (!BaseApp.runtimeDataHolder.guestLogin)
+            if (!BaseApp.runtimeDataHolder.guestLogin) {
                 mainActivityDataSync.dataSync.loginRequired.set(true)
+            }
         }
         apiService = ApiClient.getApiService(
             loginApiService = loginApiService,
@@ -272,10 +273,11 @@ class MainActivity :
                             job?.cancel()
                             job = lifecycleScope.launch {
                                 entityListViewModel.getEntities { shouldSyncData ->
-                                    if (shouldSyncData)
+                                    if (shouldSyncData) {
                                         mainActivityDataSync.shouldDataSync(currentTableName)
-                                    else
+                                    } else {
                                         Timber.d("GlobalStamp unchanged, no synchronization is required")
+                                    }
                                 }
                             }
                         }
@@ -331,8 +333,9 @@ class MainActivity :
             }
             AuthenticationState.LOGOUT -> {
                 // Logout performed
-                if (!BaseApp.runtimeDataHolder.guestLogin)
+                if (!BaseApp.runtimeDataHolder.guestLogin) {
                     startLoginActivity()
+                }
             }
             else -> {
             }
@@ -395,11 +398,11 @@ class MainActivity :
 
     override fun onActionClick(action: Action, actionNavigable: ActionNavigable) {
         if (action.parameters.length() > 0) {
-            if (action.scope == Action.Scope.TABLE)
+            if (action.scope == Action.Scope.TABLE) {
                 currentEntity = null
+            }
             actionNavigable.navigateToActionForm(action, (currentEntity?.__entity as EntityModel?)?.__KEY)
         } else {
-
             val task = ActionTask(
                 status = ActionTask.Status.PENDING,
                 date = Date(),
@@ -435,27 +438,28 @@ class MainActivity :
         tableName: String,
         onActionSent: () -> Unit
     ) {
-
-        if (actionTask.actionInfo.isOfflineCompatible)
+        if (actionTask.actionInfo.isOfflineCompatible) {
             taskViewModel.insert(actionTask)
+        }
 
         checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
                 entityListViewModelList.firstOrNull()
                     ?.sendAction(actionTask.actionInfo.actionName, actionContent) { actionResponse ->
                         actionResponse?.let {
-
-                            actionTask.status = if (actionResponse.success)
+                            actionTask.status = if (actionResponse.success) {
                                 ActionTask.Status.SUCCESS
-                            else
+                            } else {
                                 ActionTask.Status.ERROR_SERVER
+                            }
 
                             actionTask.message = actionResponse.statusText
                             actionTask.actionInfo.errors =
-                                actionResponse.errors.associateBy({ it.parameter }, { it.message })
+                                actionResponse.errors?.associateBy({ it.parameter }, { it.message })
                             taskViewModel.insert(actionTask)
-                            if (actionResponse.dataSynchro == true)
+                            if (actionResponse.dataSynchro == true) {
                                 requestDataSync(tableName)
+                            }
                             onActionSent()
                         }
                     }
@@ -670,7 +674,6 @@ class MainActivity :
 
             val images = pendingTask.actionInfo.imagesToUpload
             if (images.isNullOrEmpty()) {
-
                 sendAction(actionContent, pendingTask, pendingTask.actionInfo.tableName) {
                     // Nothing to do
                 }

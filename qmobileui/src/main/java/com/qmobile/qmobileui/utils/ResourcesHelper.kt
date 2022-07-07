@@ -49,8 +49,9 @@ object ResourcesHelper {
     }
 
     fun correctIconPath(iconPath: String?): String? {
-        if (iconPath.isNullOrEmpty())
+        if (iconPath.isNullOrEmpty()) {
             return null
+        }
         return try {
             iconPath
                 .substring(0, iconPath.lastIndexOf('.')) // removes extension

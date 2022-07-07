@@ -9,7 +9,6 @@ package com.qmobile.qmobileui.formatters
 object FormatterUtils {
 
     fun applyFormat(format: String, baseText: Any): String {
-
         return when (format) {
             "noOrYes", "falseOrTrue", "boolInteger" -> {
                 BooleanFormat.applyFormat(format, baseText.toString())

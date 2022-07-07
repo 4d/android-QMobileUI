@@ -31,8 +31,9 @@ fun applyFormatter(
     imageWidth: Int?,
     imageHeight: Int?
 ) {
-    if (text == null || text.toString().isEmpty())
+    if (text == null || text.toString().isEmpty()) {
         return
+    }
     if (view is WebView) {
         WebViewHelper.loadUrl(view, text.toString())
         return
@@ -83,7 +84,6 @@ private fun applyCustomFormat(
     imageHeight: Int?
 ): Boolean {
     if (tableName != null && fieldName != null) {
-
         BaseApp.runtimeDataHolder.customFormatters[tableName.tableNameAdjustment()]?.get(
             fieldName.fieldAdjustment()
         )

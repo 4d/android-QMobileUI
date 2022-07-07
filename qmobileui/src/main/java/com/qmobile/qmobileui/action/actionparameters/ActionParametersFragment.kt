@@ -134,7 +134,6 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         setHasOptionsMenu(true)
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("itemId")?.let { itemId = it }
@@ -146,8 +145,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             }
         }
         arguments?.getString("relationName")?.let { relationName ->
-            if (relationName.isNotEmpty())
+            if (relationName.isNotEmpty()) {
                 relation = RelationHelper.getRelation(tableName, relationName)
+            }
             arguments?.getString("parentItemId")?.let { parentItemId = it }
         }
 
@@ -244,25 +244,25 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
                 BaseApp.genericNavigationResolver.navigateToActionScanner(binding, it)
                 requestPermissionLauncher.launch(Manifest.permission.CAMERA)
             }, goToCamera = { intent: Intent, position: Int, destinationPath: String ->
-            goToCamera = {
-                currentDestinationPath = destinationPath
-                (context as Activity).startActivityForResult(
-                    intent,
-                    // Send position as request code, so we can update image preview only for the selected item
-                    position
-                )
-            }
-            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-        }, queueForUpload = { parameterName: String, uri: Uri? ->
-            if (uri != null) {
-                imagesToUpload[parameterName] = uri
-            } else {
-                // When user signed and then cleared signature
-                // pad we should remove last signature from imagesToUpload
+                goToCamera = {
+                    currentDestinationPath = destinationPath
+                    (context as Activity).startActivityForResult(
+                        intent,
+                        // Send position as request code, so we can update image preview only for the selected item
+                        position
+                    )
+                }
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }, queueForUpload = { parameterName: String, uri: Uri? ->
+                if (uri != null) {
+                    imagesToUpload[parameterName] = uri
+                } else {
+                    // When user signed and then cleared signature
+                    // pad we should remove last signature from imagesToUpload
 
-                imagesToUpload.remove(parameterName)
+                    imagesToUpload.remove(parameterName)
+                }
             }
-        }
         )
         binding.recyclerView.adapter = adapter
     }
@@ -307,10 +307,11 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         val item = menu.findItem(R.id.validate)
         if (fromPendingTasks) {
             currentTask?.isErrorServer()?.let { isErrorServer ->
-                item.title = if (isErrorServer) // error server tasks
+                item.title = if (isErrorServer) { // error server tasks
                     getString(R.string.retry_action)
-                else // pending tasks
+                } else { // pending tasks
                     getString(R.string.validate_action)
+                }
             }
         } else {
             item.title = getString(R.string.validate_action)
@@ -390,10 +391,11 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     }
 
     private fun isFormValid(): Boolean =
-        if (!areAllItemsSeen)
+        if (!areAllItemsSeen) {
             false
-        else
+        } else {
             validationMap.values.firstOrNull { !it } == null
+        }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -476,8 +478,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             .forEach { action ->
                 // create id with pattern: $actionName$tableName
                 val actionId = action.getSafeString("name") + tableName
-                if (actionUUID == actionId)
+                if (actionUUID == actionId) {
                     return ActionHelper.createActionFromJsonObject(action)
+                }
             }
         throw Action.ActionException("Couldn't find action from table [$tableName], with uuid [$actionUUID]")
     }

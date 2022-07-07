@@ -32,15 +32,16 @@ import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmobile.qmobileapi.model.entity.EntityHelper
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.model.entity.Photo
+import com.qmobile.qmobileapi.utils.getSafeAny
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeInt
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.ReflectionUtils
 import com.qmobile.qmobileui.action.actionparameters.ActionParameterEnum
 import com.qmobile.qmobileui.action.utils.addSuffix
 import com.qmobile.qmobileui.action.utils.createImageFile
@@ -104,7 +105,6 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
     fun getMin(): Int? {
         itemJsonObject.getSafeArray("rules")?.let { jsonArray ->
             for (i in 0 until jsonArray.length()) {
-
                 val rule = jsonArray.getSafeObject(i)
                 rule?.getSafeInt("min")?.let {
                     return it
@@ -117,7 +117,6 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
     fun getMax(): Int? {
         itemJsonObject.getSafeArray("rules")?.let { jsonArray ->
             for (i in 0 until jsonArray.length()) {
-
                 val rule = jsonArray.getSafeObject(i)
                 rule?.getSafeInt("max")?.let {
                     return it
@@ -129,7 +128,7 @@ abstract class ActionParameterViewHolder(itemView: View) : RecyclerView.ViewHold
 
     fun showError(text: String) {
         errorLabel.visibility = View.VISIBLE
-        errorLabel.setText(text)
+        errorLabel.text = text
     }
 
     fun showServerErrorIfNeeded() {
@@ -215,7 +214,7 @@ class TextViewHolder(itemView: View, val format: String) :
         editText.handleDarkMode()
 
         alreadFilledValue?.let {
-            if (!(it as String).isNullOrEmpty()) {
+            if ((it as String).isNotEmpty()) {
                 editText.text = it
             }
         }
@@ -311,7 +310,7 @@ class TextAreaViewHolder(itemView: View) :
         editText.handleDarkMode()
 
         alreadFilledValue?.let {
-            if (!(it as String).isNullOrEmpty()) {
+            if ((it as String).isNotEmpty()) {
                 editText.text = it
             }
         }
@@ -549,8 +548,9 @@ class SpellOutViewHolder(itemView: View) :
         })
         editText.inputType = InputType.TYPE_CLASS_NUMBER
         editText.setOnFocusChangeListener { view, hasFocus ->
-            if (editText.text.isEmpty())
+            if (editText.text.isEmpty()) {
                 return@setOnFocusChangeListener
+            }
 
             if (hasFocus && (numericValue != null)) {
                 editText.text = numericValue.toString()
@@ -704,13 +704,13 @@ class ScientificViewHolder(itemView: View) :
             }
         })
         editText.setOnFocusChangeListener { view, hasFocus ->
-            if (editText.text.isEmpty())
+            if (editText.text.isEmpty()) {
                 return@setOnFocusChangeListener
+            }
 
             if (hasFocus && (numericValue != null)) {
                 editText.text = numericValue.toString()
             } else {
-
                 numericValue?.let {
                     onValueChanged(
                         parameterName,
@@ -839,7 +839,7 @@ class PercentageViewHolder(itemView: View) :
                             parameterName,
                             percentValue,
                             null,
-                            validate(),
+                            validate()
                         )
                     }
                 }
@@ -915,7 +915,6 @@ class PercentageViewHolder(itemView: View) :
         currentEntity?.let {
             val defaultField = itemJsonObject.getSafeString("defaultField")
             if (defaultField != null) {
-
                 readInstanceProperty<Number>(it, defaultField).also { value ->
                     if (value != null) {
                         editText.text = value.toInt().toString()
@@ -998,7 +997,6 @@ class BooleanSwitchViewHolder(itemView: View) :
 }
 
 @Suppress("ComplexMethod", "LongMethod", "MagicNumber", "ReturnCount")
-
 class BooleanCheckMarkViewHolder(itemView: View) :
     ActionParameterViewHolder(itemView) {
     private var checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
@@ -1122,8 +1120,8 @@ class ImageViewHolder(itemView: View) :
 
     private fun displaySelectedImageIfNeed() {
         try {
-            if (itemJsonObject.get("uri") != null) {
-                val uri = itemJsonObject.get("uri") as Uri
+            if (itemJsonObject.getSafeAny("uri") != null) {
+                val uri = itemJsonObject.getSafeAny("uri") as Uri
                 imageButton.setImageURI(uri)
                 itemJsonObject.remove("uri")
             }
@@ -1146,7 +1144,6 @@ class ImageViewHolder(itemView: View) :
             if (defaultField != null) {
                 readInstanceProperty<Photo>(roomEntity, defaultField).also { value ->
                     if (value != null) {
-
                         val key: String? = if (defaultField.contains(".")) { // alias
                             readInstanceProperty<EntityModel>(
                                 roomEntity,
@@ -1289,7 +1286,8 @@ class TimeViewHolder(itemView: View, val format: String) :
             itemView.context,
             android.R.style.Theme_Holo_Light_Dialog_NoActionBar,
             timeSetListener,
-            selectedHour, selectedMinute,
+            selectedHour,
+            selectedMinute,
             is24HourFormat
         )
 
@@ -1421,7 +1419,10 @@ class DateViewHolder(itemView: View, val format: String) :
         datePickerDialog = DatePickerDialog(
             itemView.context,
             android.R.style.Theme_Holo_Light_Dialog_NoActionBar,
-            dateSetListener, currentYear, currentMonth, currentDay
+            dateSetListener,
+            currentYear,
+            currentMonth,
+            currentDay
         )
 
         itemView.setOnClickListener {
@@ -1464,7 +1465,6 @@ class DateViewHolder(itemView: View, val format: String) :
             if (defaultField != null) {
                 readInstanceProperty<String>(it, defaultField).also { value ->
                     if (value != null) {
-
                         val formattedDate = FormatterUtils.applyFormat(
                             dateFormat,
                             value
@@ -1515,7 +1515,7 @@ class BarCodeViewHolder(itemView: View) :
         }
         showScannedValueIfNeeded(onValueChanged)
         alreadFilledValue?.let {
-            if (!(it as String).isNullOrEmpty()) {
+            if ((it as String).isNotEmpty()) {
                 scannedValueTextView.text = it
             }
         }
@@ -1651,7 +1651,6 @@ class SignatureViewHolder(itemView: View) :
             if (defaultField != null) {
                 readInstanceProperty<Photo>(roomEntity, defaultField).also { value ->
                     if (value != null) {
-
                         val key: String? = if (defaultField.contains(".")) { // alias
                             readInstanceProperty<EntityModel>(
                                 roomEntity,
@@ -1708,10 +1707,10 @@ private fun <R> readInstanceProperty(instance: RoomEntity, propertyName: String)
     return if (propertyName.contains(".")) {
         var tmpInstance: Any? = instance
         propertyName.split("?.").forEach { part ->
-            tmpInstance = EntityHelper.readInstanceProperty(tmpInstance, part)
+            tmpInstance = ReflectionUtils.readInstanceProperty(tmpInstance, part)
         }
         tmpInstance as R
     } else {
-        EntityHelper.readInstanceProperty(instance.__entity, propertyName)
+        ReflectionUtils.readInstanceProperty(instance.__entity, propertyName)
     }
 }

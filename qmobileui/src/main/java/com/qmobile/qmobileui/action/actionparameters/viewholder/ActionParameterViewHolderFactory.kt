@@ -20,7 +20,6 @@ class ActionParameterViewHolderFactory private constructor() {
             parent: ViewGroup,
             context: Context
         ): ActionParameterViewHolder {
-
             return when (val itemType = ActionParameterEnum.values()[viewType]) {
                 // Text
                 ActionParameterEnum.TEXT_DEFAULT,

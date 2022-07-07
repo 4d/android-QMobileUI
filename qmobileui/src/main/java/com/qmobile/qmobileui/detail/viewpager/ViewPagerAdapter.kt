@@ -45,20 +45,21 @@ class ViewPagerAdapter2 internal constructor(
     private val tableName: String,
     private val lifecycleOwner: LifecycleOwner
 ) :
-    PagingDataAdapter<EntityModel, ViewPagerAdapter2.BaseViewHolder2>(DIFF_CALLBACK) {
+    PagingDataAdapter<RoomEntity, ViewPagerAdapter2.BaseViewHolder2>(DIFF_CALLBACK) {
 
     companion object {
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<EntityModel>() {
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<RoomEntity>() {
             // The ID property identifies when items are the same.
-            override fun areItemsTheSame(oldItem: EntityModel, newItem: EntityModel) =
-                oldItem.__KEY == newItem.__KEY
+            override fun areItemsTheSame(oldItem: RoomEntity, newItem: RoomEntity) =
+                (oldItem.__entity as EntityModel?)?.__KEY == (newItem.__entity as EntityModel?)?.__KEY
 
             // If you use the "==" operator, make sure that the object implements
             // .equals(). Alternatively, write custom data comparison logic here.
             override fun areContentsTheSame(
-                oldItem: EntityModel,
-                newItem: EntityModel
-            ) = oldItem.__STAMP == newItem.__STAMP
+                oldItem: RoomEntity,
+                newItem: RoomEntity
+            ) = (oldItem.__entity as EntityModel?)?.__STAMP == (newItem.__entity as EntityModel?)?.__STAMP &&
+                BaseApp.genericRelationHelper.relationsEquals(oldItem, newItem)
         }
     }
 
@@ -85,7 +86,7 @@ class ViewPagerAdapter2 internal constructor(
         RecyclerView.ViewHolder(dataBinding.root) {
 
         // Applies DataBinding
-        fun bind(entity: EntityModel?) {
+        fun bind(entity: RoomEntity?) {
             entity?.let {
                 dataBinding.setVariable(BR.entityData, entity)
                 dataBinding.executePendingBindings()

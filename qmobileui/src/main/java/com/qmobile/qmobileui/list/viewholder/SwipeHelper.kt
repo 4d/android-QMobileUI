@@ -149,6 +149,7 @@ abstract class SwipeHelper(
         companion object {
             private const val ACTION_BUTTON_RADIUS = 20F
             private const val TRUNCATE_FACTOR = 5
+
             // Use as margin bottom from the center for icon and as margin top from the center for title
             private const val VERTICAL_MARGIN = 70F
             private const val HORIZONTAL_PADDING = 50.0F
@@ -227,17 +228,19 @@ abstract class SwipeHelper(
         }
 
         fun handle(event: MotionEvent) {
-            if (clickableRegion?.contains(event.x, event.y) == true)
+            if (clickableRegion?.contains(event.x, event.y) == true) {
                 clickListener.onClick()
+            }
         }
 
         private fun ellipsize(input: String, paint: Paint, maxWidth: Float): String {
             val titleBounds = Rect()
             paint.getTextBounds(input, 0, input.length, titleBounds)
-            return if (titleBounds.width() < maxWidth || input.length < TRUNCATE_FACTOR)
+            return if (titleBounds.width() < maxWidth || input.length < TRUNCATE_FACTOR) {
                 input
-            else
+            } else {
                 ellipsize(input.substring(0, input.length - TRUNCATE_FACTOR) + "...", paint, maxWidth)
+            }
         }
     }
 }

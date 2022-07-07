@@ -42,14 +42,10 @@ class MainActivityObserver(
         message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
             activity.handleEvent(event)
         }
-//        activity.collectWhenStarted(message) { event ->
-//            activity.handleEvent(event)
-//        }
     }
 
     // Observe when data are synchronized
     private fun observeDataSynchronized(entityListViewModel: EntityListViewModel<EntityModel>) {
-
         var job: Job? = null
 
         entityListViewModel.dataSynchronized.launchAndCollectIn(activity, Lifecycle.State.STARTED) { dataSyncState ->
@@ -72,27 +68,6 @@ class MainActivityObserver(
                 else -> {}
             }
         }
-
-//        activity.collectWhenStarted(entityListViewModel.dataSynchronized) { dataSyncState ->
-//            Timber.d(
-//                "[DataSyncState : $dataSyncState, " +
-//                    "Table : ${entityListViewModel.getAssociatedTableName()}, " +
-//                    "Instance : $entityListViewModel]"
-//            )
-//            when (dataSyncState) {
-//                DataSyncStateEnum.SYNCHRONIZING, DataSyncStateEnum.RESYNC -> {
-//                    if (entityListViewModel.isToSync.getAndSet(false)) {
-//                        job?.cancel()
-//                        job = activity.lifecycleScope.launch {
-//                            entityListViewModel.getEntities {
-//                                Timber.v("Requested data for ${entityListViewModel.getAssociatedTableName()}")
-//                            }
-//                        }
-//                    }
-//                }
-//                else -> {}
-//            }
-//        }
     }
 
     // Observe when there is a new relation to be inserted in a dao
@@ -101,10 +76,6 @@ class MainActivityObserver(
             entityListViewModelList.find { it.getAssociatedTableName() == jsonRelation.getDestinationTable() }
                 ?.insertRelation(jsonRelation)
         }
-//        activity.collectWhenStarted(entityListViewModel.jsonRelation) { jsonRelation ->
-//            entityListViewModelList.find { it.getAssociatedTableName() == jsonRelation.getDestinationTable() }
-//                ?.insertRelation(jsonRelation)
-//        }
     }
 
     // Observe any toast message from EntityList
@@ -112,9 +83,6 @@ class MainActivityObserver(
         entityListViewModel.toastMessage.message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
             activity.handleEvent(event)
         }
-//        activity.collectWhenStarted(entityListViewModel.toastMessage.message) { event ->
-//            activity.handleEvent(event)
-//        }
     }
 
     private fun observePendingTasks() {
