@@ -232,6 +232,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         }
         if (hasCurrentRecordActions) {
             ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
+            currentRecordActionsListAdapter = ActionHelper.getActionArrayAdapter(requireContext(), currentRecordActions)
         }
     }
 
@@ -240,7 +241,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
      */
     private fun initCellSwipe() {
         if (hasCurrentRecordActions && isSwipable) {
-            currentRecordActionsListAdapter = ActionHelper.getActionArrayAdapter(requireContext(), currentRecordActions)
 
             val itemTouchHelper =
                 ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
