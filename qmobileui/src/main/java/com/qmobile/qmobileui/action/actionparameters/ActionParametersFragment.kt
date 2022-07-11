@@ -78,6 +78,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     private var parentItemId = ""
     private var relation: Relation? = null
 
+    private var shouldInitObservers = true
+
     override lateinit var actionActivity: ActionActivity
 
     internal var errorsByParameter = HashMap<String, String>()
@@ -202,7 +204,11 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
             allParameters = action.parameters
         }
-        ActionParametersFragmentObserver(this).initObservers()
+
+        if (shouldInitObservers) {
+            ActionParametersFragmentObserver(this).initObservers()
+            shouldInitObservers = false
+        }
     }
 
     private fun setupRecyclerView() {
@@ -298,8 +304,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         super.onCreate(savedInstanceState)
         setFragmentResultListener("scan_request") { _: String, bundle: Bundle ->
             val value = bundle.getString("barcode_value")
-            val position = bundle.getInt("position")
-            value?.let { adapter.updateBarcodeForPosition(position, it) }
+            value?.let {
+                paramsToSubmit["barcode"] = it
+            }
         }
     }
 
