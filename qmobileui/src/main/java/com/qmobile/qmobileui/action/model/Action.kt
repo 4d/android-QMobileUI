@@ -56,10 +56,9 @@ open class Action(
         TABLE, CURRENT_RECORD
     }
 
-    fun getSortFields(): HashMap<String, String> {
+    fun getSortFields(): LinkedHashMap<String, String> {
 
-        val fieldsToSortBy: Map<String, String>
-        fieldsToSortBy = HashMap()
+        val fieldsToSortBy: LinkedHashMap<String, String> = LinkedHashMap()
         parameters.getJSONObjectList().forEach {
             var format = it.getSafeString("format")
             format = when (format) {

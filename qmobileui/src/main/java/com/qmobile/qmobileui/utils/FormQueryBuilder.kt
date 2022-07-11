@@ -20,8 +20,8 @@ class FormQueryBuilder(
 
     private val baseQuery = "SELECT * FROM $tableName"
 
-    fun getQuery(pattern: String = "", fields: HashMap<String, String>? = null): SimpleSQLiteQuery {
-        val sortQuery = fields?.let { getSortQueryFromFieldList(it) } ?: ""
+    fun getQuery(pattern: String = "", sortFields: HashMap<String, String>? = null): SimpleSQLiteQuery {
+        val sortQuery = sortFields?.let { getSortQueryFromFieldList(it) } ?: ""
 
         if (pattern.isEmpty())
             return SimpleSQLiteQuery(baseQuery + sortQuery)
