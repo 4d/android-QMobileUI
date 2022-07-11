@@ -104,9 +104,4 @@ class ActionsParametersListAdapter(
     fun getUpdatedImageParameterName(position: Int): String? {
         return (list[position] as JSONObject).getSafeString("name")
     }
-
-    fun updateBarcodeForPosition(position: Int, value: String) {
-        (list[position] as JSONObject).put("scanned", value)
-        notifyItemChanged(position)
-    }
 }
