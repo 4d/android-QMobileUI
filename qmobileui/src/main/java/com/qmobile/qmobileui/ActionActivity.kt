@@ -16,7 +16,12 @@ import okhttp3.RequestBody
 
 interface ActionActivity {
 
-    fun setupActionsMenu(menu: Menu, actions: List<Action>, actionNavigable: ActionNavigable)
+    fun setupActionsMenu(
+        menu: Menu,
+        actions: List<Action>,
+        actionNavigable: ActionNavigable,
+        onSort: (action: Action) -> Unit
+    )
 
     fun onActionClick(action: Action, actionNavigable: ActionNavigable)
 

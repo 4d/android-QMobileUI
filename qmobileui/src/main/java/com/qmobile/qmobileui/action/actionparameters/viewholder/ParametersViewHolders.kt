@@ -459,7 +459,7 @@ class NumberViewHolder(itemView: View, val format: String) :
     private fun removeDecimalsIfNeeded(value: Number): Number {
         val floatValue = value.toFloat()
         val isInteger = (floatValue - value.toInt()) == 0.0F
-        //if the value don't contains decimals remove the ,00
+        // if the value don't contains decimals remove the ,00
         return if (isInteger)
             value.toInt()
         else
@@ -863,7 +863,7 @@ class PercentageViewHolder(itemView: View) :
 
         alreadFilledValue?.let { value ->
             (value.toString().toFloatOrNull())?.let {
-                val formattedValue = " "+(it / PERCENT_MULTIPLIER).toInt()
+                val formattedValue = " " + (it / PERCENT_MULTIPLIER).toInt()
                 editText.text = formattedValue
             }
         }

@@ -20,14 +20,16 @@ class FormQueryBuilder(
 
     private val baseQuery = "SELECT * FROM $tableName"
 
-    fun getQuery(pattern: String = ""): SimpleSQLiteQuery {
-        if (pattern.isEmpty()) {
-            return SimpleSQLiteQuery(baseQuery)
-        }
+    fun getQuery(pattern: String = "", sortFields: HashMap<String, String>? = null): SimpleSQLiteQuery {
+        val sortQuery = sortFields?.let { getSortQueryFromFieldList(it) } ?: ""
+
+        if (pattern.isEmpty())
+            return SimpleSQLiteQuery(baseQuery + sortQuery)
 
         val stringBuilder = StringBuilder("SELECT * FROM $tableName AS T1 WHERE ")
         searchField.getSafeArray(tableName)?.let { columnsToFilter ->
-            SearchQueryBuilder.appendPredicate(tableName, stringBuilder, columnsToFilter, pattern)
+            SearchQueryBuilder
+                .appendPredicate(tableName, stringBuilder, columnsToFilter, pattern, sortQuery)
         }
         return SimpleSQLiteQuery(stringBuilder.toString().removeSuffix(" OR "))
     }
@@ -59,5 +61,22 @@ class FormQueryBuilder(
             Timber.e("Missing relation with path [$path] from table [$tableName]")
             return SimpleSQLiteQuery("$baseQuery WHERE __KEY = -1")
         }
+    }
+
+    private fun getSortQueryFromFieldList(fields: HashMap<String, String>): String? {
+        val sortStringBuffer = StringBuffer()
+
+        if (fields.isEmpty()) {
+            return null
+        } else {
+            fields.entries.forEach {
+                if (sortStringBuffer.isEmpty()) {
+                    sortStringBuffer.append(" order by ${it.key} ${it.value}")
+                } else {
+                    sortStringBuffer.append(", ${it.key} ${it.value}")
+                }
+            }
+        }
+        return sortStringBuffer.toString()
     }
 }

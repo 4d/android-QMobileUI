@@ -23,7 +23,8 @@ object SearchQueryBuilder {
         tableName: String,
         stringBuilder: StringBuilder,
         columnsToFilter: JSONArray,
-        pattern: String
+        pattern: String,
+        sortQuery: String? = null
     ) {
         (0 until columnsToFilter.length()).forEach eachColumn@{ index ->
             val fieldName = columnsToFilter.getSafeString(index)
@@ -40,12 +41,17 @@ object SearchQueryBuilder {
                 }
 
                 relation?.let { rel ->
-                    appendRelationQuery(tableName, stringBuilder, fieldName, pattern, rel)
+                    appendRelationQuery(tableName, stringBuilder, fieldName, pattern, rel, sortQuery)
                 }
             } else {
                 stringBuilder.append("T1.$fieldName LIKE \'%$pattern%\' OR ")
                 stringBuilder.append(appendFromFormat(tableName, fieldName, pattern, "T1.$fieldName"))
             }
+        }
+
+        sortQuery?.let { query ->
+            stringBuilder.removeSuffix(" OR ")
+            stringBuilder.append(query)
         }
     }
 
@@ -54,7 +60,8 @@ object SearchQueryBuilder {
         stringBuilder: StringBuilder,
         fieldName: String,
         pattern: String,
-        relation: Relation
+        relation: Relation,
+        sortQuery: String? = null
     ) {
         val baseQuery = getBaseQuery(relation)
         stringBuilder.append(baseQuery)
@@ -74,6 +81,11 @@ object SearchQueryBuilder {
             stringBuilder.append(" )")
         }
         stringBuilder.append(" OR ")
+
+        sortQuery?.let { query ->
+            stringBuilder.removeSuffix(" OR ")
+            stringBuilder.append(query)
+        }
     }
 
     private fun appendFromFormat(

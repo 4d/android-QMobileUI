@@ -6,11 +6,13 @@
 
 package com.qmobile.qmobileui.action.model
 
+import com.qmobile.qmobileapi.utils.getJSONObjectList
+import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import org.json.JSONArray
 import java.util.Locale
 
-class Action(
+open class Action(
     val name: String = "",
     val shortLabel: String? = null,
     val label: String? = null,
@@ -52,6 +54,30 @@ class Action(
 
     enum class Scope {
         TABLE, CURRENT_RECORD
+    }
+
+    fun getSortFields(): LinkedHashMap<String, String> {
+
+        val fieldsToSortBy: LinkedHashMap<String, String> = LinkedHashMap()
+        parameters.getJSONObjectList().forEach {
+            var format = it.getSafeString("format")
+            format = when (format) {
+                "ascending" -> "ASC"
+                "descending" -> "DESC"
+                else -> {
+                    ""
+                }
+            }
+            val attribute =
+                it.getSafeString("name")?.lowercase()
+                    ?.filter { value -> !value.isWhitespace() }
+
+            if ((!format.isNullOrEmpty()) && (!attribute.isNullOrEmpty())) {
+                fieldsToSortBy[attribute] = format
+            }
+        }
+
+        return fieldsToSortBy
     }
 
     class ActionException(message: String) : Exception(message)

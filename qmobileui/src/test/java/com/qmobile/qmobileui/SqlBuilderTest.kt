@@ -60,6 +60,34 @@ class SqlBuilderTest {
     }
 
     @Test
+    fun testSqlSortActionQueryWithMultipleFields() {
+        val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
+        mockRuntimeDataHolder.customFormatters = mapOf()
+        BaseApp.runtimeDataHolder = mockRuntimeDataHolder
+
+        val formQueryBuilder =
+            FormQueryBuilder(tableName = "Employee", searchField = searchFieldsJson)
+        val actualQueryResult =
+            formQueryBuilder.getQuery("abc", sortFields = linkedMapOf( "name" to "DESC", "id" to "DESC", "age" to "ASC")).sql
+        val expectedQueryResult =
+            SimpleSQLiteQuery("SELECT * FROM Employee AS T1 WHERE T1.LastName LIKE '%abc%' OR T1.FirstName LIKE '%abc%' order by name DESC, id DESC, age ASC").sql
+        Assert.assertEquals(expectedQueryResult, actualQueryResult)
+    }
+
+    @Test
+    fun testSqlSortActionQueryWithOneField() {
+        val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
+        mockRuntimeDataHolder.customFormatters = mapOf()
+        BaseApp.runtimeDataHolder = mockRuntimeDataHolder
+        val formQueryBuilder =
+            FormQueryBuilder(tableName = "Service", searchField = searchFieldsJson)
+        val actualQueryResult = formQueryBuilder.getQuery("abc", hashMapOf("name" to "DESC")).sql
+        val expectedQueryResult =
+            SimpleSQLiteQuery("SELECT * FROM Service AS T1 WHERE T1.name LIKE '%abc%' OR T1.employeeNumber LIKE '%abc%' order by name DESC").sql
+        Assert.assertEquals(expectedQueryResult, actualQueryResult)
+    }
+
+    @Test
     fun testSqlSortQueryWithRelation() {
         val searchFields: JSONObject = JSONObject().apply {
             put("Table_3", listOf("LastName", "relation4.field_x"))
