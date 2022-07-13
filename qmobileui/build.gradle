@@ -61,6 +61,7 @@ dependencies {
 
     // Utils
     implementation Libs.dynamic_toasts
+    implementation Libs.okhttp_jvm
     implementation Libs.retrofit
     implementation Libs.signature_pad
     implementation Libs.timber

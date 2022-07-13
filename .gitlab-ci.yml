@@ -41,9 +41,6 @@ lint:
     - qmobileui/build/reports/
   tags:
     - osx
-  retry:
-    max: 1
-    when: unknown_failure
 
 build:
   stage: build
@@ -57,9 +54,6 @@ build:
   artifacts:
     paths:
      - qmobileui/build/outputs/aar/
-  retry:
-    max: 1
-    when: unknown_failure
 
 unitTests:
   stage: test
@@ -69,6 +63,3 @@ unitTests:
     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print 100*covered/instructions, "% covered" }' qmobileui/build/reports/jacoco/jacocoTestReport/jacocoTestReport.csv
   tags:
     - osx
-  retry:
-    max: 1
-    when: unknown_failure
