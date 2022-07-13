@@ -13,7 +13,7 @@ def currentGitBranch() {
 
 def currentGitHash() {
   def hash = ""
-  def proc = "git rev-parse --short HEAD".execute()
+  def proc = "git -c core.abbrev=8 rev-parse --short HEAD".execute()
   proc.in.eachLine { line -> hash = line }
   proc.err.eachLine { line -> println line }
   proc.waitFor()
