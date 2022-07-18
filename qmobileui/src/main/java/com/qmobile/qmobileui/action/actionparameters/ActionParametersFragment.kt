@@ -107,6 +107,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     internal var entityViewModel: EntityViewModel<EntityModel>? = null
 
+    var scanned :String? = null
+    var position :Int? = null
+
     companion object {
         const val BARCODE_FRAGMENT_REQUEST_KEY = "scan_request"
     }
@@ -199,7 +202,6 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
         setupAdapter()
         setupRecyclerView()
-
         if (!fromPendingTasks) {
             entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
             allParameters = action.parameters
@@ -208,6 +210,11 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         if (shouldInitObservers) {
             ActionParametersFragmentObserver(this).initObservers()
             shouldInitObservers = false
+            if ((position != null) && (scanned != null)) {
+                adapter.updateBarcodeForPosition(position!!, scanned!!)
+                scanned = null
+                position = null
+            }
         }
     }
 
@@ -306,7 +313,12 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             val value = bundle.getString("barcode_value")
             value?.let {
                 paramsToSubmit["barcode"] = it
+                scanned = it
+                position = bundle.getInt("position")
+                value?.let { adapter.updateBarcodeForPosition(position!!, it) }
             }
+
+
         }
     }
 
