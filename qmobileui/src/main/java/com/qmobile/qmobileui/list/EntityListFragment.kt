@@ -347,6 +347,10 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 saveSortChoice(action.getSortFields())
                 tableActions.remove(action)
             }
+        } else {
+            // if more than one action we apply by default the first one
+            val defaultSort = tableActions.firstOrNull { it1 -> it1.preset == "sort" }?.getSortFields()
+            defaultSort?.let { saveSortChoice(it) }
         }
 
         if (hasTableActions) {
