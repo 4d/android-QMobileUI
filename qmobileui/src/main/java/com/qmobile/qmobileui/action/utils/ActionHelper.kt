@@ -118,7 +118,12 @@ class ActionHelper private constructor() {
 
         fun fillActionList(json: JSONObject, tableName: String, actionList: MutableList<Action>) {
             getActionObjectList(json, tableName).forEach {
-                actionList.add(createActionFromJsonObject(it))
+                val action = createActionFromJsonObject(it)
+                // Action having preset "sort" without any parameter should be discarded
+                val shouldBeRemoved = (action.preset == "sort" && action.parameters.length() == 0)
+                if (!shouldBeRemoved) {
+                    actionList.add(action)
+                }
             }
         }
 
