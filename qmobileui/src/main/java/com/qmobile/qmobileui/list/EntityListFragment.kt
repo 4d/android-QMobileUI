@@ -19,6 +19,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ListAdapter
 import androidx.appcompat.widget.SearchView
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -26,7 +27,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileapi.utils.getStringList
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
@@ -339,18 +342,43 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
+    @Suppress("NestedBlockDepth")
     private fun setupActionsMenuIfNeeded(menu: Menu) {
-        // if only one sort action for this table  => apply it by default and remove it from dropdown actions menu
-        if (tableActions.filter { it1 -> it1.preset == "sort" }.size == 1) {
-            tableActions.find { action -> action.preset == "sort" }?.let { action ->
-                // no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
-                saveSortChoice(action.getSortFields())
-                tableActions.remove(action)
+        val sortActions = tableActions.filter { it1 -> it1.preset == "sort" }
+        when (sortActions.size) {
+            0 -> {
+                // if no sort actions, sort by the first search  fields
+                if (hasSearch) {
+                    searchableFields.getSafeArray(tableName)?.let {
+                        if (it.length() > 0) {
+                            saveSortChoice(mapOf(it.get(0).toString() to "ASC"))
+                        }
+                    }
+                } else {
+                    // and if no search fields for this table , used default  sort field field  (the first item in the model)
+                    val defaultFieldToSortWith = BaseApp.runtimeDataHolder.defaultSortFields.getSafeString(tableName)
+                    if (defaultFieldToSortWith != null) {
+                        saveSortChoice(mapOf(defaultFieldToSortWith to "ASC"))
+                    } else {
+                        // if no default sort field find for this table, use the id as sort field
+                        saveSortChoice(mapOf("id" to "ASC"))
+                    }
+                }
+
             }
-        } else {
-            // if more than one action we apply by default the first one
-            val defaultSort = tableActions.firstOrNull { it1 -> it1.preset == "sort" }?.getSortFields()
-            defaultSort?.let { saveSortChoice(it) }
+
+            1 -> {
+                sortActions.first().let { action ->
+                    // no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
+                    saveSortChoice(action.getSortFields())
+                    tableActions.remove(action)
+                }
+            }
+            else -> {
+                // if more than one action we apply by default the first one
+                val defaultSort = sortActions.firstOrNull()?.getSortFields()
+                defaultSort?.let { saveSortChoice(it) }
+            }
         }
 
         if (hasTableActions) {

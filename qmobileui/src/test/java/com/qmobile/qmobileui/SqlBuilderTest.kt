@@ -186,7 +186,8 @@ class SqlBuilderTest {
             customFormatters = mapOf(),
             embeddedFiles = mutableListOf(),
             tableActions = JSONObject(),
-            currentRecordActions = JSONObject()
+            currentRecordActions = JSONObject(),
+            defaultSortFields = JSONObject()
         )
         Assert.assertEquals(searchFieldsJson, BaseApp.runtimeDataHolder.searchField)
     }
