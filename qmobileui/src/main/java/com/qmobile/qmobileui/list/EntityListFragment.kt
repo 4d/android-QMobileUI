@@ -19,7 +19,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ListAdapter
 import androidx.appcompat.widget.SearchView
-import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -29,7 +28,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
-import com.qmobile.qmobileapi.utils.getStringList
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
@@ -246,7 +244,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
      */
     private fun initCellSwipe() {
         if (hasCurrentRecordActions && isSwipable) {
-
             val itemTouchHelper =
                 ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
                     override fun instantiateUnderlayButton(position: Int): List<ItemActionButton> {
@@ -364,7 +361,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                         saveSortChoice(mapOf("id" to "ASC"))
                     }
                 }
-
             }
 
             1 -> {

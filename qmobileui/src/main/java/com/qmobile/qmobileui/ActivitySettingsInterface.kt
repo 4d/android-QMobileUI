@@ -27,4 +27,6 @@ interface ActivitySettingsInterface {
     fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChanger: RemoteUrlChanger)
 
     fun checkNetwork(networkChecker: NetworkChecker)
+
+    fun logout()
 }

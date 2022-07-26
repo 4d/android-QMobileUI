@@ -107,8 +107,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     internal var entityViewModel: EntityViewModel<EntityModel>? = null
 
-    var scanned :String? = null
-    var position :Int? = null
+    var scanned: String? = null
+    var position: Int? = null
 
     companion object {
         const val BARCODE_FRAGMENT_REQUEST_KEY = "scan_request"
@@ -317,8 +317,6 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
                 position = bundle.getInt("position")
                 value?.let { adapter.updateBarcodeForPosition(position!!, it) }
             }
-
-
         }
     }
 
@@ -379,7 +377,6 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
     )
 
     private fun validatePendingTask() {
-
         if (isFormValid()) {
             currentTask?.let { task ->
                 val actionTask = ActionTask(

@@ -68,7 +68,7 @@ class SqlBuilderTest {
         val formQueryBuilder =
             FormQueryBuilder(tableName = "Employee", searchField = searchFieldsJson)
         val actualQueryResult =
-            formQueryBuilder.getQuery("abc", sortFields = linkedMapOf( "name" to "DESC", "id" to "DESC", "age" to "ASC")).sql
+            formQueryBuilder.getQuery("abc", sortFields = linkedMapOf("name" to "DESC", "id" to "DESC", "age" to "ASC")).sql
         val expectedQueryResult =
             SimpleSQLiteQuery("SELECT * FROM Employee AS T1 WHERE T1.LastName LIKE '%abc%' OR T1.FirstName LIKE '%abc%' order by name DESC, id DESC, age ASC").sql
         Assert.assertEquals(expectedQueryResult, actualQueryResult)

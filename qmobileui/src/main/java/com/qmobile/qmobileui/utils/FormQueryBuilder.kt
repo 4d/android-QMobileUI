@@ -23,8 +23,9 @@ class FormQueryBuilder(
     fun getQuery(pattern: String = "", sortFields: HashMap<String, String>? = null): SimpleSQLiteQuery {
         val sortQuery = sortFields?.let { getSortQueryFromFieldList(it) } ?: ""
 
-        if (pattern.isEmpty())
+        if (pattern.isEmpty()) {
             return SimpleSQLiteQuery(baseQuery + sortQuery)
+        }
 
         val stringBuilder = StringBuilder("SELECT * FROM $tableName AS T1 WHERE ")
         searchField.getSafeArray(tableName)?.let { columnsToFilter ->

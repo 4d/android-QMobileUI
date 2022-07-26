@@ -52,6 +52,7 @@ import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.utils.ScheduleRefresh
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
+import com.qmobile.qmobiledatasync.viewmodel.deleteAll
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.getTaskViewModel
 import com.qmobile.qmobileui.ActionActivity
@@ -544,7 +545,7 @@ class MainActivity :
         intent.putExtra(LOGGED_OUT, true)
         intent.addFlags(
             Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                Intent.FLAG_ACTIVITY_NEW_TASK
+                    Intent.FLAG_ACTIVITY_NEW_TASK
         )
         startActivity(intent)
         finish()
@@ -716,5 +717,20 @@ class MainActivity :
     override fun onBackPressed() {
         super.onBackPressed()
         setFullScreenMode(false)
+    }
+
+    override fun logout() {
+        // delete data of table that has user specific queries
+        entityListViewModelList.forEach { entityListViewModel ->
+            val hasUserQuery =
+                BaseApp.runtimeDataHolder.tableInfo[entityListViewModel.getAssociatedTableName()]?.hasUserQuery()
+                    ?: false
+            if (hasUserQuery) {
+                entityListViewModel.deleteAll()
+                entityListViewModel.resetGlobalStamp()
+            }
+        }
+        taskViewModel.deleteAll()
+        loginViewModel.disconnectUser {}
     }
 }

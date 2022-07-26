@@ -460,10 +460,11 @@ class NumberViewHolder(itemView: View, val format: String) :
         val floatValue = value.toFloat()
         val isInteger = (floatValue - value.toInt()) == 0.0F
         // if the value don't contains decimals remove the ,00
-        return if (isInteger)
+        return if (isInteger) {
             value.toInt()
-        else
+        } else {
             value
+        }
     }
     override fun setDefaultFieldIfNeeded(
         currentEntity: RoomEntity?,
@@ -918,8 +919,7 @@ class PercentageViewHolder(itemView: View) :
                 readInstanceProperty<Number>(it, defaultField).also { value ->
                     if (value != null) {
                         editText.text = value.toInt().toString()
-                        val percentValue = (value.toFloat() * PERCENT_MULTIPLIER) 
-                        onValueChanged(
+                        val percentValue = (value.toFloat() * PERCENT_MULTIPLIER) onValueChanged(
                             parameterName,
                             percentValue,
                             null,

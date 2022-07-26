@@ -57,7 +57,6 @@ open class Action(
     }
 
     fun getSortFields(): LinkedHashMap<String, String> {
-
         val fieldsToSortBy: LinkedHashMap<String, String> = LinkedHashMap()
         parameters.getJSONObjectList().forEach {
             var format = it.getSafeString("format")

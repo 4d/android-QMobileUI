@@ -178,8 +178,7 @@ class SettingsFragment :
      */
     private fun logout() {
         if (isReady()) {
-            loginViewModel.disconnectUser {}
-            actionActivity.getTaskViewModel().deleteAll()
+            activitySettingsInterface.logout()
         } else {
             if (!connectivityViewModel.isConnected()) {
                 activity?.let {
