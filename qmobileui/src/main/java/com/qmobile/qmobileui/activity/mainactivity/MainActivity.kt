@@ -29,7 +29,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -71,9 +70,7 @@ import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.setupWithNavController
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -99,7 +96,6 @@ class MainActivity :
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
-    private var job: Job? = null
 
     // FragmentCommunication
     override lateinit var apiService: ApiService
@@ -271,14 +267,11 @@ class MainActivity :
                     when (entityListViewModel?.dataSynchronized?.value) {
                         DataSync.State.UNSYNCHRONIZED -> mainActivityDataSync.dataSync()
                         DataSync.State.SYNCHRONIZED -> {
-                            job?.cancel()
-                            job = lifecycleScope.launch {
-                                entityListViewModel.getEntities { shouldSyncData ->
-                                    if (shouldSyncData) {
-                                        mainActivityDataSync.shouldDataSync(currentTableName)
-                                    } else {
-                                        Timber.d("GlobalStamp unchanged, no synchronization is required")
-                                    }
+                            entityListViewModel.getEntities { shouldSyncData ->
+                                if (shouldSyncData) {
+                                    mainActivityDataSync.shouldDataSync(currentTableName)
+                                } else {
+                                    Timber.d("GlobalStamp unchanged, no synchronization is required")
                                 }
                             }
                         }
@@ -545,7 +538,7 @@ class MainActivity :
         intent.putExtra(LOGGED_OUT, true)
         intent.addFlags(
             Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    Intent.FLAG_ACTIVITY_NEW_TASK
+                Intent.FLAG_ACTIVITY_NEW_TASK
         )
         startActivity(intent)
         finish()

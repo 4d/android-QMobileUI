@@ -919,7 +919,8 @@ class PercentageViewHolder(itemView: View) :
                 readInstanceProperty<Number>(it, defaultField).also { value ->
                     if (value != null) {
                         editText.text = value.toInt().toString()
-                        val percentValue = (value.toFloat() * PERCENT_MULTIPLIER) onValueChanged(
+                        val percentValue = value.toFloat() * PERCENT_MULTIPLIER
+                        onValueChanged(
                             parameterName,
                             percentValue,
                             null,

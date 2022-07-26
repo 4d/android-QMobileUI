@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.activity.mainactivity
 
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.toast.Event
@@ -16,9 +15,7 @@ import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class MainActivityObserver(
@@ -46,8 +43,6 @@ class MainActivityObserver(
 
     // Observe when data are synchronized
     private fun observeDataSynchronized(entityListViewModel: EntityListViewModel<EntityModel>) {
-        var job: Job? = null
-
         entityListViewModel.dataSynchronized.launchAndCollectIn(activity, Lifecycle.State.STARTED) { dataSyncState ->
             Timber.d(
                 "[DataSyncState : $dataSyncState, " +
@@ -57,11 +52,8 @@ class MainActivityObserver(
             when (dataSyncState) {
                 DataSync.State.SYNCHRONIZING, DataSync.State.RESYNC -> {
                     if (entityListViewModel.isToSync.getAndSet(false)) {
-                        job?.cancel()
-                        job = activity.lifecycleScope.launch {
-                            entityListViewModel.getEntities {
-                                Timber.v("Requested data for ${entityListViewModel.getAssociatedTableName()}")
-                            }
+                        entityListViewModel.getEntities {
+                            Timber.v("Requested data for ${entityListViewModel.getAssociatedTableName()}")
                         }
                     }
                 }
