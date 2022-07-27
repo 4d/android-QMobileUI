@@ -50,7 +50,6 @@ fun bindImageFromDrawable(view: ImageView, imageDrawable: Int?) {
     if (imageDrawable == null) {
         return
     }
-
     ImageHelper.getGlideRequest(view, imageDrawable).into(view)
 }
 

@@ -29,7 +29,6 @@ dependencies {
     // Common
     implementation Libs.androidx_fragment_ktx
     implementation Libs.androidx_preference_ktx
-    implementation Libs.kotlin_reflect
     implementation Libs.swiperefreshlayout
 
 
@@ -61,6 +60,8 @@ dependencies {
 
     // Utils
     implementation Libs.dynamic_toasts
+    implementation Libs.insetter
+    implementation Libs.material
     implementation Libs.okhttp_jvm
     implementation Libs.retrofit
     implementation Libs.signature_pad

@@ -1,91 +1,55 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by Quentin Marciset on 13/2/2020.
+  ~ 4D SAS
+  ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_marginHorizontal="@dimen/large_margin"
+    android:layout_marginVertical="@dimen/smallest_margin">
 
     <TextView
         android:id="@+id/label"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_marginStart="7dp"
-        android:layout_marginTop="7dp"
-        android:text="TextView:"
-        />
+        android:layout_marginEnd="@dimen/small_margin"
+        android:alpha="0.6"
+        android:scrollbars="none"
+        android:singleLine="true"
+        android:textColor="?colorOnSurface"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/compoundButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Label" />
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="@dimen/param_item_min_height"
-        android:theme="@style/parameter_item_theme"
-        android:layout_marginTop="7dp"
-        >
-
-        <Switch
-            android:layout_centerVertical="true"
-            android:id="@+id/switchButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginEnd="7dp"
-            android:checked="true"
-            android:switchMinWidth="56dp"
-            android:thumbTint="#009688"
-            android:trackTint="#A19C9C"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
-    </RelativeLayout>
     <TextView
-        tools:visibility="visible"
+        android:id="@+id/error"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/small_margin"
+        android:scrollbars="none"
+        android:singleLine="true"
+        android:textAlignment="viewStart"
+        android:textColor="?colorError"
         android:visibility="gone"
-        android:textSize="@dimen/error_label_text_size"
-        android:id="@+id/error_label"
+        app:layout_constraintEnd_toStartOf="@+id/compoundButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/label"
+        tools:text="Label" />
+
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/compoundButton"
+        style="@style/Widget.Material3.CompoundButton.MaterialSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_marginStart="7dp"
-        android:layout_marginTop="7dp"
-        tools:text="@string/action_parameter_mandatory_error"
-        android:textColor="@color/error_light" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/label"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</LinearLayout>
-
-
-    <!--<?xml version="1.0" encoding="utf-8"?>&lt;!&ndash;-->
-<!--  ~ Created by Quentin Marciset on 13/2/2020.-->
-<!--  ~ 4D SAS-->
-<!--  ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.-->
-<!--  &ndash;&gt;-->
-
-<!--<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
-<!--    xmlns:tools="http://schemas.android.com/tools"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:layout_marginHorizontal="@dimen/large_margin"-->
-<!--    android:layout_marginVertical="@dimen/smallest_margin">-->
-
-<!--    <TextView-->
-<!--        android:id="@+id/label"-->
-<!--        style="@style/Widget.MaterialComponents.TextView"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginEnd="@dimen/small_margin"-->
-<!--        android:alpha="0.6"-->
-<!--        android:scrollbars="none"-->
-<!--        android:singleLine="true"-->
-<!--        android:textColor="?colorOnSurface"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        tools:text="Label" />-->
-
-<!--    <androidx.appcompat.widget.SwitchCompat-->
-<!--        android:id="@+id/compoundButton"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
-
-<!--</androidx.constraintlayout.widget.ConstraintLayout>-->
+</androidx.constraintlayout.widget.ConstraintLayout>

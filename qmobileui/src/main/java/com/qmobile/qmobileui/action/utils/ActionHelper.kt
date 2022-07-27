@@ -120,8 +120,7 @@ class ActionHelper private constructor() {
             getActionObjectList(json, tableName).forEach {
                 val action = createActionFromJsonObject(it)
                 // Action having preset "sort" without any parameter should be discarded
-                val shouldBeRemoved = (action.preset == "sort" && action.parameters.length() == 0)
-                if (!shouldBeRemoved) {
+                if (!(action.isSortAction() && action.parameters.length() == 0)) {
                     actionList.add(action)
                 }
             }
@@ -143,7 +142,7 @@ class ActionHelper private constructor() {
             val withIcons = actionList.firstOrNull { it.getIconDrawablePath() != null } != null
 
             return object :
-                ArrayAdapter<Action>(context, android.R.layout.select_dialog_item, android.R.id.text1, actionList) {
+                ArrayAdapter<Action>(context, R.layout.material_select_dialog_item, android.R.id.text1, actionList) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                     val itemView = super.getView(position, convertView, parent)
                     val textView = itemView.findViewById<View>(android.R.id.text1) as TextView

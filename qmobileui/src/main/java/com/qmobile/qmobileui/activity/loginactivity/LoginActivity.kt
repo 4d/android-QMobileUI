@@ -38,10 +38,10 @@ import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.binding.bindImageFromDrawable
 import com.qmobile.qmobileui.databinding.ActivityLoginBinding
 import com.qmobile.qmobileui.network.RemoteUrlChanger
+import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.clearViewInParent
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.ui.setOnVeryLongClickListener
-import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.hideKeyboard
 
 class LoginActivity : BaseActivity(), RemoteUrlChanger {
@@ -108,7 +108,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         bindImageFromDrawable(binding.loginLogo, BaseApp.loginLogoDrawable)
 
         if (loggedOut) {
-            ToastHelper.show(this, getString(R.string.login_logged_out), ToastMessage.Type.SUCCESS)
+            SnackbarHelper.show(this, getString(R.string.login_logged_out), ToastMessage.Type.SUCCESS)
         }
 
         // Login button
@@ -166,14 +166,14 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
             binding.loginButtonAuth.isEnabled = false
             loginViewModel.login(email = binding.loginEmailInput.text.toString()) { }
         } else {
-            ToastHelper.show(this, getString(R.string.no_internet), ToastMessage.Type.WARNING)
+            SnackbarHelper.show(this, getString(R.string.no_internet), ToastMessage.Type.WARNING)
         }
     }
 
     private fun showRemoteUrlDisplayDialog() {
         remoteUrlDisplayDialog.clearViewInParent()
 
-        MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
+        MaterialAlertDialogBuilder(this)
             .setView(remoteUrlDisplayDialog)
             .setTitle(getString(R.string.pref_remote_url_title))
             .setPositiveButton(getString(R.string.remote_url_dialog_edit)) { _, _ ->

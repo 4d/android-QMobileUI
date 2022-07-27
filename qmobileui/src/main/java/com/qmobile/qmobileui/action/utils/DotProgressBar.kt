@@ -10,7 +10,6 @@ import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
-import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.View
 import android.view.animation.LinearInterpolator
@@ -18,17 +17,21 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import com.qmobile.qmobileui.R
-
-const val NUMBER_OF_DOTS = 3
-const val ANIMATION_DURATION = 1000L
-const val MIN_SCALE = 0.1f
-const val MAX_SCALE = 0.7f
-const val MARGIN = 0.1f
-const val RADIUS = 2f
+import com.qmobile.qmobileui.binding.px
 
 class DotProgressBar : FrameLayout {
-    private var margin: Int = convertDpToPixel(MARGIN, context)
-    private var dotRadius: Int = convertDpToPixel(RADIUS, context)
+
+    companion object {
+        private const val NUMBER_OF_DOTS = 3
+        private const val ANIMATION_DURATION = 1000L
+        private const val MIN_SCALE = 0.3f
+        private const val MAX_SCALE = 0.5f
+        private const val MARGIN: Int = 0
+        private const val RADIUS: Int = 3
+    }
+
+    private var margin: Int = MARGIN.px
+    private var dotRadius: Int = RADIUS.px
     private val animators = mutableListOf<Animator>()
     private var primaryAnimator: ValueAnimator? = null
     private lateinit var progressBar: LinearLayout
@@ -51,7 +54,6 @@ class DotProgressBar : FrameLayout {
 
     private fun init() {
         background = ContextCompat.getDrawable(context, R.drawable.circle_bg)
-
         clipChildren = false
         clipToPadding = false
         progressBar = LinearLayout(context)
@@ -112,10 +114,6 @@ class DotProgressBar : FrameLayout {
 
     private fun startAnimation() {
         primaryAnimator?.start()
-    }
-
-    fun isAnimationRunning(): Boolean {
-        return primaryAnimator?.isRunning ?: false
     }
 
     override fun setVisibility(visibility: Int) {
@@ -189,15 +187,4 @@ class DotProgressBar : FrameLayout {
         }
     }
 */
-
-    companion object {
-        fun convertDpToPixel(dp: Float, context: Context): Int {
-            return (
-                dp * (
-                    context.resources.displayMetrics
-                        .densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT
-                    )
-                ).toInt()
-        }
-    }
 }

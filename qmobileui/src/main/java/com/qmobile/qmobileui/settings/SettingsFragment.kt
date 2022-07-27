@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
@@ -24,9 +25,11 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
+import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.network.RemoteUrlChanger
-import com.qmobile.qmobileui.utils.ToastHelper
+import com.qmobile.qmobileui.ui.SnackbarHelper
+import com.qmobile.qmobileui.ui.setupToolbarTitle
 import timber.log.Timber
 
 class SettingsFragment :
@@ -50,8 +53,9 @@ class SettingsFragment :
     private lateinit var logoutPrefKey: String
     private lateinit var remoteUrl: String
 
-    internal lateinit var activitySettingsInterface: ActivitySettingsInterface
+    private lateinit var activitySettingsInterface: ActivitySettingsInterface
     internal lateinit var actionActivity: ActionActivity
+    internal lateinit var delegate: FragmentCommunication
 
     // UI strings
     private lateinit var noInternetString: String
@@ -70,6 +74,9 @@ class SettingsFragment :
         super.onAttach(context)
         if (context is ActivitySettingsInterface) {
             activitySettingsInterface = context
+        }
+        if (context is FragmentCommunication) {
+            delegate = context
         }
         if (context is ActionActivity) {
             actionActivity = context
@@ -96,6 +103,7 @@ class SettingsFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        activity?.setupToolbarTitle("Settings")
         loginViewModel = getLoginViewModel(activity, activitySettingsInterface.loginApiService)
 
         connectivityViewModel = getConnectivityViewModel(
@@ -163,7 +171,7 @@ class SettingsFragment :
         } else {
             logoutDialogTitle
         }
-        MaterialAlertDialogBuilder(requireContext(), R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
+        MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_QMobile_MaterialAlertDialog_FullWidthButtons)
             .setTitle(title)
             .setMessage(logoutDialogMessage)
             .setNegativeButton(logoutDialogNegative, null)
@@ -177,15 +185,15 @@ class SettingsFragment :
      * Tries to logout if user is authenticated and connected to Internet
      */
     private fun logout() {
-        if (isReady()) {
-            activitySettingsInterface.logout()
-        } else {
-            if (!connectivityViewModel.isConnected()) {
-                activity?.let {
-                    ToastHelper.show(it, it.getString(R.string.no_internet), ToastMessage.Type.WARNING)
-                }
+        when {
+            isReady() -> {
+                activitySettingsInterface.logout()
+            }
+            !connectivityViewModel.isConnected() -> {
+                SnackbarHelper.show(activity, activity?.getString(R.string.no_internet), ToastMessage.Type.WARNING)
                 Timber.d("No Internet connection")
-            } else if (loginViewModel.authenticationState.value != AuthenticationState.AUTHENTICATED) {
+            }
+            loginViewModel.authenticationState.value != AuthenticationState.AUTHENTICATED -> {
                 Timber.d("Not authenticated yet")
             }
         }

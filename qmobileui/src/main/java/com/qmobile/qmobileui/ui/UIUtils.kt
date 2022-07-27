@@ -19,11 +19,19 @@ import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.qmobile.qmobileui.R
 
 object UIConstants {
     const val longClickDuration = 1500L
     const val clickDebounceTime = 600L
+}
+
+fun FragmentActivity?.setupToolbarTitle(title: String) {
+    this?.findViewById<CollapsingToolbarLayout>(R.id.collapsing_toolbar)?.let { collapsingToolbarLayout ->
+        collapsingToolbarLayout.title = title
+    }
 }
 
 fun getShakeAnimation(context: Context): Animation = AnimationUtils.loadAnimation(context, R.anim.shake)
@@ -51,17 +59,20 @@ fun View.setOnVeryLongClickListener(listener: () -> Unit) {
         private val handler = Handler(Looper.getMainLooper())
 
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-            if (event?.action == MotionEvent.ACTION_DOWN) {
-                handler.postDelayed(
-                    {
-                        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                        listener.invoke()
-                    },
-                    UIConstants.longClickDuration
-                )
-            } else if (event?.action == MotionEvent.ACTION_UP) {
-                handler.removeCallbacksAndMessages(null)
-                v?.performClick()
+            when (event?.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    handler.postDelayed(
+                        {
+                            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                            listener.invoke()
+                        },
+                        UIConstants.longClickDuration
+                    )
+                }
+                MotionEvent.ACTION_UP -> {
+                    handler.removeCallbacksAndMessages(null)
+                    v?.performClick()
+                }
             }
             return true
         }

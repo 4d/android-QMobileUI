@@ -11,14 +11,17 @@
         <item name="android:textSize">12sp</item>
     </style>
 
-    <style name="TitleThemeOverlay.MaterialComponents.MaterialAlertDialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
-        <item name="materialAlertDialogTitleTextStyle">
-            @style/TitleMaterialAlertDialog.MaterialComponents.Title.Text
-        </item>
+    <style name="Widget.QMobile.Button.TextButton.Dialog.FullWidth" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:maxWidth">@null</item>
     </style>
 
-    <style name="TitleMaterialAlertDialog.MaterialComponents.Title.Text" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
-        <item name="android:textStyle">bold</item>
+    <!-- A theme overlay for dialogs with buttons that span the width of the dialog. -->
+    <style name="ThemeOverlay.QMobile.MaterialAlertDialog.FullWidthButtons" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="materialAlertDialogButtonSpacerVisibility">2</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.QMobile.Button.TextButton.Dialog.FullWidth</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.QMobile.Button.TextButton.Dialog.FullWidth</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.QMobile.Button.TextButton.Dialog.FullWidth</item>
     </style>
-
 </resources>

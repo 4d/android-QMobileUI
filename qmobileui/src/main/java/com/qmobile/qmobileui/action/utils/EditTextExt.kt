@@ -22,20 +22,24 @@ fun EditText.addSuffix(suffix: String) {
     this.addTextChangedListener(object : TextWatcher {
         override fun afterTextChanged(editable: Editable?) {
             val newText = editable.toString()
-
-            if (isSuffixModified) {
-                // user tried to modify suffix
-                isSuffixModified = false
-                setEditText()
-            } else if (text.isNotEmpty() && newText.length < text.length && !newText.contains(formattedSuffix)) {
-                // user tried to delete suffix
-                setEditText()
-            } else if (!newText.contains(formattedSuffix)) {
-                // new input, add suffix
-                text = "$newText$formattedSuffix"
-                setEditText()
-            } else {
-                text = newText
+            when {
+                isSuffixModified -> {
+                    // user tried to modify suffix
+                    isSuffixModified = false
+                    setEditText()
+                }
+                text.isNotEmpty() && newText.length < text.length && !newText.contains(formattedSuffix) -> {
+                    // user tried to delete suffix
+                    setEditText()
+                }
+                !newText.contains(formattedSuffix) -> {
+                    // new input, add suffix
+                    text = "$newText$formattedSuffix"
+                    setEditText()
+                }
+                else -> {
+                    text = newText
+                }
             }
         }
 

@@ -7,41 +7,49 @@
 package com.qmobile.qmobileui.action.actionparameters
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
+import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.textfield.TextInputEditText
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
-import com.qmobile.qmobileui.action.actionparameters.viewholder.ActionParameterViewHolder
-import com.qmobile.qmobileui.action.actionparameters.viewholder.ActionParameterViewHolderFactory
-import com.qmobile.qmobileui.action.actionparameters.viewholder.ImageViewHolder
-import com.qmobile.qmobileui.action.actionparameters.viewholder.SignatureViewHolder
+import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.actionparameters.viewholders.ActionParameterViewHolderFactory
+import com.qmobile.qmobileui.action.actionparameters.viewholders.BaseViewHolder
+import com.qmobile.qmobileui.action.actionparameters.viewholders.ImageViewHolder
+import com.qmobile.qmobileui.action.actionparameters.viewholders.SignatureViewHolder
+import com.qmobile.qmobileui.action.model.Action
+import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import org.json.JSONArray
 import org.json.JSONObject
+import timber.log.Timber
 
 class ActionsParametersListAdapter(
-    context: Context,
+    private val context: Context,
     val list: JSONArray,
     // contains data of the failed action, this data will be used for pre-fill form to edit pending task
     private val paramsToSubmit: HashMap<String, Any>,
     private val imagesToUpload: HashMap<String, Uri>,
+    private val paramsError: HashMap<String, String>,
     private val currentEntity: RoomEntity?,
-    val onValueChanged: (String, Any?, String?, Boolean) -> Unit,
-    val goToScanner: (Int) -> Unit,
-    val goToCamera: (Intent, Int, String) -> Unit,
-    val queueForUpload: (String, Uri?) -> Unit,
-    val paramsError: HashMap<String, String>
+    private val fragmentManager: FragmentManager?,
+    private val hideKeyboardCallback: () -> Unit,
+    private val focusNextCallback: (position: Int, onlyScroll: Boolean) -> Unit,
+    private val actionTypesCallback: (actionTypes: Action.Type, position: Int) -> Unit,
+    private val onValueChanged: (String, Any?, String?, Boolean) -> Unit
 ) :
-    RecyclerView.Adapter<ActionParameterViewHolder>() {
+    RecyclerView.Adapter<BaseViewHolder>() {
 
-    private val context: Context = context
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ActionParameterViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         return ActionParameterViewHolderFactory.createViewHolderFromViewType(
             viewType,
             parent,
-            context
+            context,
+            fragmentManager,
+            actionTypesCallback
         )
     }
 
@@ -49,7 +57,7 @@ class ActionsParametersListAdapter(
         return list.length()
     }
 
-    override fun onBindViewHolder(holder: ActionParameterViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         val item = list[position]
         val paramName = (item as JSONObject).getSafeString("name")
 
@@ -67,46 +75,62 @@ class ActionsParametersListAdapter(
         val errorText = paramsError[paramName]
 
         holder.bind(
-            item,
-            currentEntity,
-            alreadyFilledValue,
-            { name: String, value: Any?, metaData: String?, isValid: Boolean ->
-                onValueChanged(name, value, metaData, isValid)
-            },
-            {
-                goToScanner(it)
-            },
-            { intent: Intent, pos: Int, destinationPath ->
-                goToCamera(intent, pos, destinationPath)
-            },
-            { parameterName: String, uri: Uri? ->
-                queueForUpload(parameterName, uri)
-            },
-            errorText
-        )
+            item = item,
+            currentEntity = currentEntity,
+            isLastParameter = position == list.length(),
+            alreadyFilledValue = alreadyFilledValue,
+            serverError = errorText
+        ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+            onValueChanged(name, value, metaData, isValid)
+        }
+
+        // When clicking outside an EditText we want to hide the keyboard
+        holder.itemView.setOnSingleClickListener {
+            hideKeyboardCallback()
+        }
+
+        // Handle IME_ACTION_NEXT as issue will occur due to not rendered views
+        holder.itemView.findViewById<TextInputEditText>(R.id.input)?.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_NEXT) {
+                focusNextCallback(holder.bindingAdapterPosition, false)
+                true
+            } else {
+                // Make sure to return false to let default behavior for other event such as IME_ACTION_DONE
+                // or KeyEvent.KEYCODE_ENTER
+                focusNextCallback(holder.bindingAdapterPosition, true)
+                false
+            }
+        }
+
+        // Adding another OnFocusChangeListener because we can lose the focus with ime 'actionNext' not finding the next
+        // focusable EditText as the view might be recycled. In this case, it's the view that get the focus.
+        holder.itemView.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                holder.itemView.findViewById<TextInputEditText>(R.id.input)
+                    ?.requestFocus()
+                    ?: kotlin.run {
+                        Timber.d("itemView ${holder.bindingAdapterPosition} has focus but no input, hiding keyboard")
+                        hideKeyboardCallback()
+                    }
+            }
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
         val itemJsonObject = list[position] as JSONObject
         val type = itemJsonObject.getSafeString("type")
         val format = itemJsonObject.getSafeString("format") ?: "default"
-        return ActionParameterEnum.values().find { it.type == type && it.format == format }?.ordinal
+        return ActionParameter.values().find { it.type == type && it.format == format }?.ordinal
             ?: 0
     }
 
-    fun updateImageForPosition(position: Int, data: Any) {
-        if (data is Uri) {
-            (list[position] as JSONObject).put("uri", data)
-        }
+    fun updateImageForPosition(position: Int, data: Uri) {
+        (list[position] as JSONObject).put("image_uri", data)
         notifyItemChanged(position)
     }
 
-    fun getUpdatedImageParameterName(position: Int): String? {
-        return (list[position] as JSONObject).getSafeString("name")
-    }
-
     fun updateBarcodeForPosition(position: Int, value: String) {
-        (list[position] as JSONObject).put("scanned", value)
+        (list[position] as JSONObject).put("barcode_value", value)
         notifyItemChanged(position)
     }
 }

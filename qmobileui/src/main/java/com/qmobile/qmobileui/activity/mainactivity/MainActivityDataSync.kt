@@ -13,7 +13,7 @@ import com.qmobile.qmobiledatasync.sync.notifyDataUnSynced
 import com.qmobile.qmobiledatasync.sync.syncDeletedRecords
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.utils.ToastHelper
+import com.qmobile.qmobileui.ui.SnackbarHelper
 import timber.log.Timber
 
 class MainActivityDataSync(private val activity: MainActivity) {
@@ -43,7 +43,7 @@ class MainActivityDataSync(private val activity: MainActivity) {
                 } // else : Nothing to do, errors already provided in isServerConnectionOk
             }
         } else {
-            ToastHelper.show(activity, activity.getString(R.string.no_internet), ToastMessage.Type.WARNING)
+            SnackbarHelper.show(activity, activity.getString(R.string.no_internet), ToastMessage.Type.WARNING)
         }
     }
 

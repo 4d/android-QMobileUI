@@ -14,8 +14,8 @@
     <dimen name="list_margin_medium">24dp</dimen>
 
     <!--    Grid -->
-    <integer name="simple_collection_columns">2</integer>
-    <dimen name="simple_collection_spacing">4dp</dimen>
+    <integer name="grid_span_count">2</integer>
+    <dimen name="grid_divider_size">1dp</dimen>
 
     <!--    Error Fragment -->
     <dimen name="fragment_error_text_vertical_padding">24dp</dimen>
@@ -33,11 +33,4 @@
     <dimen name="top_action_bar_padding_horizontal">8dp</dimen>
     <dimen name="top_action_bar_height">64dp</dimen>
     <dimen name="top_action_button_padding">12dp</dimen>
-
-
-    <!-- Action parameters item -->
-    <dimen name="param_item_min_height">40dp</dimen>
-    <dimen name="error_label_text_size">12sp</dimen>
-    <dimen name="param_edit_text_padding_left">7sp</dimen>
-
 </resources>

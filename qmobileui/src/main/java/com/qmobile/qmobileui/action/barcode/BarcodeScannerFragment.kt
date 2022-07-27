@@ -27,6 +27,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_FRAGMENT_REQUEST_KEY
 import com.qmobile.qmobileui.databinding.FragmentBarcodeBinding
+import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import timber.log.Timber
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -52,7 +53,7 @@ class BarcodeScannerFragment : BaseFragment() {
             lifecycleOwner = viewLifecycleOwner
         }
 
-        binding.topActionBarInLiveCamera.closeButton.setOnClickListener {
+        binding.topActionBarInLiveCamera.closeButton.setOnSingleClickListener {
             delegate.setFullScreenMode(false)
             activity?.onBackPressed()
         }
@@ -119,7 +120,6 @@ class BarcodeScannerFragment : BaseFragment() {
                                 binding.progress.visibility = View.GONE
 
                                 val result = Bundle().apply {
-                                    arguments?.getInt("position")?.let { putInt("position", it) }
                                     putString("barcode_value", value)
                                 }
                                 if (isAdded) {

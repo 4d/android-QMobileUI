@@ -47,3 +47,14 @@ class CenterLayoutManager : LinearLayoutManager {
         ): Int = (boxStart + (boxEnd - boxStart) / 2) - (viewStart + (viewEnd - viewStart) / 2)
     }
 }
+//
+// class CenterSmoothScroller(context: Context) : LinearSmoothScroller(context) {
+//
+//    override fun calculateDtToFit(
+//        viewStart: Int,
+//        viewEnd: Int,
+//        boxStart: Int,
+//        boxEnd: Int,
+//        snapPreference: Int
+//    ): Int = (boxStart + (boxEnd - boxStart) / 2) - (viewStart + (viewEnd - viewStart) / 2)
+// }

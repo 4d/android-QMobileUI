@@ -31,11 +31,11 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.network.RemoteUrlChanger
+import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.clearViewInParent
 import com.qmobile.qmobileui.ui.getShakeAnimation
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.utils.ResourcesHelper
-import com.qmobile.qmobileui.utils.ToastHelper
 
 /**
  * Base AppCompatActivity for activities
@@ -48,13 +48,6 @@ abstract class BaseActivity : AppCompatActivity() {
 
         // Constant used when going to MainActivity after a successful login from LoginActivity
         const val LOGIN_STATUS_TEXT = "loginStatusText"
-    }
-
-    fun handleEvent(event: Event<ToastMessage.Holder>) {
-        event.getContentIfNotHandled()?.let { toastMessageHolder: ToastMessage.Holder ->
-            val message = ResourcesHelper.fetchResourceString(this.baseContext, toastMessageHolder.message)
-            ToastHelper.show(this, message, toastMessageHolder.type)
-        }
     }
 
     lateinit var loginViewModel: LoginViewModel
@@ -106,7 +99,7 @@ abstract class BaseActivity : AppCompatActivity() {
         remoteUrlEditLayout.editText?.setText(remoteUrl)
         remoteUrlEditLayout.error = null
 
-        MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
+        MaterialAlertDialogBuilder(this)
             .setView(remoteUrlEditDialog)
             .setTitle(getString(R.string.pref_remote_url_title))
             .setPositiveButton(getString(R.string.remote_url_dialog_positive), null)
@@ -146,4 +139,11 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     fun isAlreadyLoggedIn() = BaseApp.sharedPreferencesHolder.sessionToken.isNotEmpty()
+
+    fun handleEvent(event: Event<ToastMessage.Holder>) {
+        event.getContentIfNotHandled()?.let { toastMessageHolder: ToastMessage.Holder ->
+            val message = ResourcesHelper.fetchResourceString(this.baseContext, toastMessageHolder.message)
+            SnackbarHelper.show(this, message, toastMessageHolder.type)
+        }
+    }
 }
