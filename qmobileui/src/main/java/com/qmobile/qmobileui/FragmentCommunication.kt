@@ -9,6 +9,7 @@ package com.qmobile.qmobileui
 import com.qmobile.qmobileapi.network.ApiService
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessage
+import com.qmobile.qmobileui.network.NetworkChecker
 import kotlinx.coroutines.flow.SharedFlow
 
 /**
@@ -17,6 +18,8 @@ import kotlinx.coroutines.flow.SharedFlow
 interface FragmentCommunication {
 
     val apiService: ApiService // list, viewpager, detail
+
+    fun checkNetwork(networkChecker: NetworkChecker)
 
     fun requestDataSync(currentTableName: String) // list
 

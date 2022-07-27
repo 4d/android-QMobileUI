@@ -6,97 +6,126 @@
 
 package com.qmobile.qmobileui.formatters
 
-import com.qmobile.qmobileapi.utils.safeParse
-import com.qmobile.qmobileui.action.actionparameters.viewholder.AM_KEY
-import com.qmobile.qmobileui.action.actionparameters.viewholder.PM_KEY
-import java.lang.StringBuilder
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.TimeUnit
 
+@Suppress("MagicNumber")
 object TimeFormat {
-
-    private const val INT_3600 = 3600
-    private const val INT_60: Int = 60
-    const val INT_1000: Int = 1000
-    private const val INT_12: Int = 12
-
-    private val formatNameMap: Map<String, Int> = mapOf(
-        "shortTime" to DateFormat.SHORT,
-        "mediumTime" to DateFormat.MEDIUM,
-        "duration" to DateFormat.MEDIUM
-    )
 
     fun applyFormat(format: String, baseText: String): String {
         val longText = baseText.toLongOrNull() ?: return ""
 
         return when (format) {
-            "timeInteger" -> {
-                longText.toString()
-            }
-            "shortTime" -> {
-                formatNameMap[format]?.let {
-                    DateFormat.getTimeInstance(it)
-                        .format(getTimeFromString(longText).time)
-                } ?: ""
-            }
-            "mediumTime" -> {
-                getAmPmFormattedTime(longText, TimeUnit.MILLISECONDS)
-            }
-            "duration" -> {
-                formatNameMap[format]?.let {
-                    val totalSeconds: Long = longText / INT_1000
-                    val seconds = totalSeconds.toInt() % INT_60
-                    val minutes = (totalSeconds / INT_60).toInt() % INT_60
-                    val hours = totalSeconds.toInt() / INT_3600
-//                    val days = totalSeconds.toInt() / (INT_24 * INT_3600)
-
-                    val builder = StringBuilder()
-                    val minutesSeconds = String.format(
-                        locale = Locale.getDefault(),
-                        format = "%02d:%02d:%02d",
-                        hours,
-                        minutes,
-                        seconds
-                    )
-                    /*if (days > 0) {
-                        val daysStr = String.format("%02d", days)
-                        builder.append(daysStr).append(":")
-                    }*/
-                    builder.append(minutesSeconds)
-                    builder.toString()
-                } ?: ""
-            }
-            else -> {
-                ""
-            }
+            "timeInteger" -> longText.toString()
+            "shortTime" -> getShortAMPMTimeFromMillis(longText)
+            "mediumTime" -> getLongAMPMTimeFromMillis(longText)
+            "duration" -> millisToShortDuration(longText)
+            else -> ""
         }
     }
 
-    private fun getTimeFromString(time: Long): Calendar = Calendar.getInstance().apply {
-        val simpleDateFormat = SimpleDateFormat("hh:mm:ss", Locale.getDefault())
-        val timeString = simpleDateFormat.format(Date(time)).toString()
-        simpleDateFormat.safeParse(timeString)?.let { date ->
-            setTime(date)
+    fun getShortAMPMTimeFromMillis(millis: Long): String {
+        val totalSecs = millis / 1000
+        return getShortAMPMTimeFromSeconds(totalSecs)
+    }
+
+    fun getShortAMPMTimeFromSeconds(totalSecs: Long): String {
+        val days = TimeUnit.SECONDS.toDays(totalSecs).toInt()
+        val hours = (TimeUnit.SECONDS.toHours(totalSecs) - days * 24).toInt()
+        val minutes = (TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60).toInt()
+        val timeString = when {
+            usesAmPm() && hours >= 12 -> "${hours - 12}:${getMinutes(minutes)} PM"
+            usesAmPm() -> "$hours:${getMinutes(minutes)} AM"
+            else -> "$hours:${getMinutes(minutes)}"
+        }
+        return timeString
+    }
+
+    fun getLongAMPMTimeFromMillis(millis: Long): String {
+        val totalSecs = millis / 1000
+        return getLongAMPMTimeFromSeconds(totalSecs)
+    }
+
+    fun getLongAMPMTimeFromSeconds(totalSecs: Long): String {
+        val days = TimeUnit.SECONDS.toDays(totalSecs).toInt()
+        val hours = (TimeUnit.SECONDS.toHours(totalSecs) - days * 24).toInt()
+        val minutes = (TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60).toInt()
+        val seconds = (TimeUnit.SECONDS.toSeconds(totalSecs) - TimeUnit.SECONDS.toMinutes(totalSecs) * 60).toInt()
+        val timeString = when {
+            usesAmPm() && hours >= 12 -> "${hours - 12}:${getMinutes(minutes)}:${getSeconds(seconds)} PM"
+            usesAmPm() -> "$hours:${getMinutes(minutes)}:${getSeconds(seconds)} AM"
+            else -> "$hours:${getMinutes(minutes)}:${getSeconds(seconds)}"
+        }
+        return timeString
+    }
+
+    fun secondsToVerboseDuration(totalSecs: Long): String {
+        val days = TimeUnit.SECONDS.toDays(totalSecs).toInt()
+        val hours = (TimeUnit.SECONDS.toHours(totalSecs) - days * 24).toInt()
+        val minutes = (TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60).toInt()
+
+        val timeString = when {
+            days > 0 -> "$days ${getDayWord(days)} $hours ${getHourWord(hours)} ${getMinutes(minutes)} ${
+            getMinuteWord(
+                minutes
+            )
+            }"
+            hours > 0 -> "$hours ${getHourWord(hours)} ${getMinutes(minutes)} ${getMinuteWord(minutes)}"
+            else -> "${getMinutes(minutes)} ${getMinuteWord(minutes)}"
+        }
+        return timeString
+    }
+
+    fun millisToShortDuration(millis: Long): String {
+        val totalSecs = millis / 1000
+        return secondsToShortDuration(totalSecs)
+    }
+
+    fun secondsToShortDuration(totalSecs: Long): String {
+        val hours = TimeUnit.SECONDS.toHours(totalSecs)
+        val minutes = TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60
+        val seconds = TimeUnit.SECONDS.toSeconds(totalSecs) - TimeUnit.SECONDS.toMinutes(totalSecs) * 60
+        val timeString = String.format(
+            locale = Locale.getDefault(),
+            format = "%02d:%02d:%02d",
+            hours,
+            minutes,
+            seconds
+        )
+        return timeString
+    }
+
+    fun convertToSeconds(hour: Int, minute: Int): Int = hour * 3600 + minute * 60
+
+    fun getElapsedTime(date: Date): String {
+        val diff: Long = Date().time - date.time
+        val totalSecs = diff / 1000
+        val days = TimeUnit.SECONDS.toDays(totalSecs).toInt()
+        val hours = TimeUnit.SECONDS.toHours(totalSecs).toInt()
+        val minutes = TimeUnit.SECONDS.toMinutes(totalSecs).toInt()
+        val seconds = TimeUnit.SECONDS.toSeconds(totalSecs).toInt()
+
+        return when {
+            days > 0 -> "$days ${getDayWord(days)} ago"
+            hours > 0 -> "$hours ${getHourWord(hours)} ago"
+            minutes > 0 -> "$minutes ${getMinuteWord(minutes)} ago"
+            seconds > 0 -> "$seconds ${getSecondWord(seconds)} ago"
+            seconds == 0 -> "1 ${getSecondWord(1)} ago"
+            else -> ""
         }
     }
 
-    fun getAmPmFormattedTime(time: Long, timeUnit: TimeUnit): String {
-        val totalSecs = when (timeUnit) {
-            TimeUnit.SECONDS -> time
-            TimeUnit.MILLISECONDS -> time / INT_1000
-            else -> return ""
-        }
-        val hours = totalSecs / INT_3600
-        val minutes = (totalSecs % INT_3600) / INT_60
+    private fun getDayWord(days: Int): String = if (days <= 1) "day" else "days"
+    private fun getHourWord(hours: Int): String = if (hours <= 1) "hour" else "hours"
+    private fun getMinuteWord(minutes: Int): String = if (minutes <= 1) "minute" else "minutes"
+    private fun getSecondWord(seconds: Int): String = if (seconds <= 1) "second" else "seconds"
+    private fun getMinutes(minutes: Int): String = if (minutes < 10) "0$minutes" else "$minutes"
+    private fun getSeconds(seconds: Int): String = if (seconds < 10) "0$seconds" else "$seconds"
 
-        return if (hours >= INT_12) {
-            "${hours - INT_12}:$minutes $PM_KEY"
-        } else {
-            "$hours:$minutes $AM_KEY"
-        }
+    private fun usesAmPm(): Boolean {
+        val df: DateFormat = DateFormat.getTimeInstance(DateFormat.FULL, Locale.getDefault())
+        return df is SimpleDateFormat && df.toPattern().contains("a")
     }
 }

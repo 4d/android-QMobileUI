@@ -1,124 +1,71 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by Quentin Marciset on 13/2/2020.
+  ~ 4D SAS
+  ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
+  -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_marginHorizontal="@dimen/large_margin"
+    android:layout_marginVertical="@dimen/smallest_margin">
 
     <TextView
         android:id="@+id/label"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_marginStart="7dp"
-        android:layout_marginTop="7dp"
-        android:text="TextView:"
-        />
-
-    <LinearLayout
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="7dp"
-        android:theme="@style/parameter_item_theme"
-        android:gravity="right|center_vertical"
-        android:minHeight="@dimen/param_item_min_height"
-        android:orientation="horizontal"
-        android:paddingLeft="@dimen/param_edit_text_padding_left"
-        android:paddingEnd="7dp">
-
-        <ImageView
-            android:id="@+id/image_button"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/ic_upload_image_grey"
-            android:textColor="#000" />
-    </LinearLayout>
+        android:layout_marginEnd="@dimen/small_margin"
+        android:alpha="0.6"
+        android:scrollbars="none"
+        android:singleLine="true"
+        android:textAlignment="viewStart"
+        android:textColor="?colorOnSurface"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/image_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Label" />
 
     <TextView
-        android:id="@+id/error_label"
-        android:layout_width="wrap_content"
+        android:id="@+id/error"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_marginStart="7dp"
-        android:layout_marginTop="7dp"
-        android:textColor="@color/error_light"
-        android:textSize="@dimen/error_label_text_size"
+        android:layout_marginEnd="@dimen/small_margin"
+        android:scrollbars="none"
+        android:singleLine="true"
+        android:textAlignment="viewStart"
+        android:textColor="?colorError"
         android:visibility="gone"
-        tools:text="@string/action_parameter_mandatory_error"
-        tools:visibility="visible" />
-</LinearLayout>
+        app:layout_constraintEnd_toStartOf="@+id/image_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/label"
+        tools:text="Label" />
 
+    <ImageView
+        android:id="@+id/image_view"
+        android:layout_width="@dimen/image_action_size"
+        android:layout_height="@dimen/image_action_size"
+        android:alpha="0.6"
+        android:contentDescription="@string/action_item_image_content_description"
+        android:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/item_remove"
+        app:layout_constraintHeight_max="120dp"
+        app:layout_constraintStart_toEndOf="@+id/label"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!--<?xml version="1.0" encoding="utf-8"?>&lt;!&ndash;-->
-<!--  ~ Created by Quentin Marciset on 13/2/2020.-->
-<!--  ~ 4D SAS-->
-<!--  ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.-->
-<!--  &ndash;&gt;-->
-<!--<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
-<!--    xmlns:tools="http://schemas.android.com/tools"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:layout_marginHorizontal="@dimen/large_margin"-->
-<!--    android:layout_marginVertical="@dimen/smallest_margin">-->
+    <ImageView
+        android:id="@+id/item_remove"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:alpha="0.6"
+        android:contentDescription="@string/action_remove_item_image_content_description"
+        android:src="@drawable/close_circle_outline"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/image_view"
+        app:layout_constraintTop_toTopOf="@id/image_view"
+        app:tint="?colorOnSurface" />
 
-<!--    <TextView-->
-<!--        android:id="@+id/label"-->
-<!--        style="@style/Widget.MaterialComponents.TextView"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginEnd="@dimen/small_margin"-->
-<!--        android:alpha="0.6"-->
-<!--        android:scrollbars="none"-->
-<!--        android:singleLine="true"-->
-<!--        android:textAlignment="viewStart"-->
-<!--        android:textColor="?colorOnSurface"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toStartOf="@+id/image_view"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        tools:text="Label" />-->
-
-<!--    <TextView-->
-<!--        android:id="@+id/error"-->
-<!--        style="@style/Widget.MaterialComponents.TextView"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginEnd="@dimen/small_margin"-->
-<!--        android:scrollbars="none"-->
-<!--        android:singleLine="true"-->
-<!--        android:textAlignment="viewStart"-->
-<!--        android:textColor="?colorError"-->
-<!--        android:visibility="gone"-->
-<!--        app:layout_constraintEnd_toStartOf="@+id/image_view"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toBottomOf="@+id/label"-->
-<!--        tools:text="Label" />-->
-
-<!--    <ImageView-->
-<!--        android:id="@+id/image_view"-->
-<!--        android:layout_width="@dimen/image_action_size"-->
-<!--        android:layout_height="@dimen/image_action_size"-->
-<!--        android:alpha="0.6"-->
-<!--        android:contentDescription="@string/action_item_image_content_description"-->
-<!--        android:elevation="4dp"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toStartOf="@+id/item_remove"-->
-<!--        app:layout_constraintHeight_max="120dp"-->
-<!--        app:layout_constraintStart_toEndOf="@+id/label"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
-
-<!--    <ImageView-->
-<!--        android:id="@+id/item_remove"-->
-<!--        android:layout_width="24dp"-->
-<!--        android:layout_height="24dp"-->
-<!--        android:alpha="0.6"-->
-<!--        android:contentDescription="@string/action_remove_item_image_content_description"-->
-<!--        android:src="@drawable/close_circle_outline"-->
-<!--        android:visibility="invisible"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toEndOf="@id/image_view"-->
-<!--        app:layout_constraintTop_toTopOf="@id/image_view"-->
-<!--        app:tint="?colorOnSurface" />-->
-
-<!--</androidx.constraintlayout.widget.ConstraintLayout>-->
+</androidx.constraintlayout.widget.ConstraintLayout>

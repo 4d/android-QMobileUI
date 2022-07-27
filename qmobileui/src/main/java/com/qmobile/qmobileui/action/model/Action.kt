@@ -26,24 +26,16 @@ open class Action(
     fun getIconDrawablePath(): String? =
         ResourcesHelper.correctIconPath(icon)
 
-    fun getPreferredName(): String {
-        return if (!label.isNullOrEmpty()) {
-            label
-        } else if (!shortLabel.isNullOrEmpty()) {
-            shortLabel
-        } else {
-            name
-        }
+    fun getPreferredName(): String = when {
+        !label.isNullOrEmpty() -> label
+        !shortLabel.isNullOrEmpty() -> shortLabel
+        else -> name
     }
 
-    fun getPreferredShortName(): String {
-        return if (!shortLabel.isNullOrEmpty()) {
-            shortLabel
-        } else if (!label.isNullOrEmpty()) {
-            label
-        } else {
-            name
-        }
+    fun getPreferredShortName(): String = when {
+        !shortLabel.isNullOrEmpty() -> shortLabel
+        !label.isNullOrEmpty() -> label
+        else -> name
     }
 
     fun isOfflineCompatible() = preset?.lowercase(Locale.getDefault()) != "share"
@@ -58,26 +50,23 @@ open class Action(
 
     fun getSortFields(): LinkedHashMap<String, String> {
         val fieldsToSortBy: LinkedHashMap<String, String> = LinkedHashMap()
-        parameters.getJSONObjectList().forEach {
-            var format = it.getSafeString("format")
-            format = when (format) {
+        parameters.getJSONObjectList().forEach { parameter ->
+            val format = when (parameter.getSafeString("format")) {
                 "ascending" -> "ASC"
                 "descending" -> "DESC"
-                else -> {
-                    ""
+                else -> ""
+            }
+
+            parameter.getSafeString("name")?.lowercase()?.filter { !it.isWhitespace() }?.let { name ->
+                if (format.isNotEmpty()) {
+                    fieldsToSortBy[name] = format
                 }
             }
-            val attribute =
-                it.getSafeString("name")?.lowercase()
-                    ?.filter { value -> !value.isWhitespace() }
-
-            if ((!format.isNullOrEmpty()) && (!attribute.isNullOrEmpty())) {
-                fieldsToSortBy[attribute] = format
-            }
         }
-
         return fieldsToSortBy
     }
+
+    fun isSortAction() = preset == "sort"
 
     class ActionException(message: String) : Exception(message)
 }

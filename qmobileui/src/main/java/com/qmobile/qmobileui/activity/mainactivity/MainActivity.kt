@@ -11,7 +11,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -22,23 +21,23 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
-import com.qmobile.qmobileapi.utils.APP_OCTET
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
+import com.qmobile.qmobileapi.utils.UploadHelper.UPLOADED_METADATA_STRING
+import com.qmobile.qmobileapi.utils.UploadHelper.getBodies
 import com.qmobile.qmobiledatastore.dao.ActionInfo
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.data.RoomEntity
@@ -52,7 +51,7 @@ import com.qmobile.qmobiledatasync.utils.ScheduleRefresh
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobiledatasync.viewmodel.deleteAll
-import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
+import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getTaskViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
@@ -66,16 +65,16 @@ import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
 import com.qmobile.qmobileui.binding.getColorFromAttr
+import com.qmobile.qmobileui.databinding.ActivityMainBinding
 import com.qmobile.qmobileui.network.NetworkChecker
+import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.utils.PermissionChecker
-import com.qmobile.qmobileui.utils.ToastHelper
 import com.qmobile.qmobileui.utils.setupWithNavController
+import dev.chrisbanes.insetter.applyInsetter
 import kotlinx.coroutines.flow.SharedFlow
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
-import java.util.Date
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 const val BASE_PERMISSION_REQUEST_CODE = 1000
@@ -93,7 +92,7 @@ class MainActivity :
     private var authenticationRequested = true
     private var shouldDelayOnForegroundEvent = AtomicBoolean(false)
     private var currentNavController: LiveData<NavController>? = null
-    private lateinit var bottomNav: BottomNavigationView
+    private lateinit var binding: ActivityMainBinding
     private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
 
@@ -107,8 +106,6 @@ class MainActivity :
     private var noInternetActionString = ""
     private var pendingTaskString = ""
 
-    private var fromCameraOrGallery = false
-
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
@@ -116,7 +113,18 @@ class MainActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setSupportActionBar(binding.toolbar)
+
+        binding.appbar.applyInsetter {
+            type(statusBars = true) {
+                padding(animated = true)
+            }
+//            type(navigationBars = true)}
+        }
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         serverNotAccessibleString = getString(R.string.server_not_accessible)
         serverNotAccessibleActionString = getString(R.string.action_send_server_not_accessible)
@@ -167,17 +175,8 @@ class MainActivity :
     private fun getEntityListViewModelList() {
         entityListViewModelList = mutableListOf()
         BaseApp.runtimeDataHolder.tableInfo.keys.forEach { tableName ->
-            val clazz = BaseApp.genericTableHelper.entityListViewModelClassFromTable(tableName)
-
-            entityListViewModelList.add(
-                ViewModelProvider(
-                    this,
-                    EntityListViewModelFactory(
-                        tableName,
-                        apiService
-                    )
-                )[clazz]
-            )
+            val entityListViewModel = getEntityListViewModel(this, tableName, apiService)
+            entityListViewModelList.add(entityListViewModel)
         }
     }
 
@@ -227,11 +226,6 @@ class MainActivity :
     }
 
     private fun applyOnForegroundEvent() {
-        if (fromCameraOrGallery) {
-            fromCameraOrGallery = false
-            return
-        }
-
         Timber.d("applyOnForegroundEvent")
         if (onLaunch) {
             Timber.d("applyOnForegroundEvent on Launch")
@@ -318,7 +312,7 @@ class MainActivity :
         when (authenticationState) {
             AuthenticationState.AUTHENTICATED -> {
                 if (loginStatusText.isNotEmpty()) {
-                    ToastHelper.show(this, loginStatusText, ToastMessage.Type.SUCCESS)
+                    SnackbarHelper.show(this, loginStatusText, ToastMessage.Type.SUCCESS)
                     loginStatusText = ""
                 }
                 if (shouldDelayOnForegroundEvent.getAndSet(false)) {
@@ -353,13 +347,16 @@ class MainActivity :
         (menu as? MenuBuilder)?.setOptionalIconsVisible(true)
 
         val withIcons = actions.firstOrNull { it.getIconDrawablePath() != null } != null
+        var order = 0
         actions.forEach { action ->
             val drawable =
                 if (withIcons) ActionHelper.getActionIconDrawable(this, action) else null
             drawable?.setMenuItemColorFilter()
-            menu.add(action.getPreferredName())
+
+            // not giving a simple string because we want a divider before pending tasks
+            menu.add(0, action.hashCode(), order, action.getPreferredName())
                 .setOnMenuItemClickListener {
-                    if (action.preset == "sort") {
+                    if (action.isSortAction()) {
                         onSort(action)
                     } else {
                         onActionClick(action, actionNavigable)
@@ -368,19 +365,25 @@ class MainActivity :
                 }
                 .setIcon(drawable)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+
+            order++
         }
 
         // Add pendingTasks menu item at the end
         val drawable =
             if (withIcons) ContextCompat.getDrawable(this, R.drawable.dots_horizontal_circle_outline) else null
         drawable?.setMenuItemColorFilter()
-        menu.add(pendingTaskString)
+
+        // not giving a simple string because we want a divider before pending tasks
+        menu.add(1, Random().nextInt(), order, pendingTaskString)
             .setOnMenuItemClickListener {
                 actionNavigable.navigateToPendingTasks()
                 true
             }
             .setIcon(drawable?.adjustActionDrawableMargins(this))
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+
+        menu.setGroupDividerEnabled(true)
     }
 
     private fun Drawable?.setMenuItemColorFilter() {
@@ -553,7 +556,7 @@ class MainActivity :
         } else {
             authenticationRequested = true
             Timber.d("No Internet connection, authenticationRequested")
-            ToastHelper.show(this, getString(R.string.no_internet_auto_login), ToastMessage.Type.WARNING)
+            SnackbarHelper.show(this, getString(R.string.no_internet_auto_login), ToastMessage.Type.WARNING)
         }
     }
 
@@ -561,21 +564,22 @@ class MainActivity :
      * Called on first creation and when restoring state.
      */
     private fun setupBottomNavigationBar() {
-        bottomNav = this.findViewById(R.id.bottom_nav)
-        bottomNav.menu.clear() // clear old inflated items.
+        binding.bottomNav.menu.clear() // clear old inflated items.
         BaseApp.bottomNavigationMenu?.let {
-            bottomNav.inflateMenu(it)
+            binding.bottomNav.inflateMenu(it)
         }
 
         val navGraphIds = BaseApp.navGraphIds
 
         // Setup the bottom navigation view with a list of navigation graphs
-        val controller = bottomNav.setupWithNavController(
+        val controller = binding.bottomNav.setupWithNavController(
             navGraphIds = navGraphIds,
             fragmentManager = supportFragmentManager,
             containerId = R.id.nav_host_container,
             intent = intent
-        )
+        ) {
+            binding.appbar.setExpanded(true, true)
+        }
         // Whenever the selected controller changes, setup the action bar.
         controller.observe(
             this
@@ -588,16 +592,6 @@ class MainActivity :
     private fun getCurrentFragment(): Fragment? {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
         return navHostFragment?.childFragmentManager?.fragments?.get(0)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        val currentFragment = getCurrentFragment()
-
-        if (currentFragment is ActionParametersFragment) {
-            fromCameraOrGallery = true
-            currentFragment.handleResult(requestCode, data)
-        }
     }
 
     private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()
@@ -615,7 +609,7 @@ class MainActivity :
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-                MaterialAlertDialogBuilder(this, R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
+                MaterialAlertDialogBuilder(this)
                     .setTitle(getString(R.string.permission_dialog_title))
                     .setMessage(rationale)
                     .setPositiveButton(getString(R.string.permission_dialog_positive)) { _, _ ->
@@ -656,49 +650,60 @@ class MainActivity :
     }
 
     override fun sendPendingTasks() {
-        taskViewModel.pendingTasks.value?.forEach { pendingTask ->
-
-            val actionContent = ActionHelper.getActionContent(
-                tableName = pendingTask.actionInfo.tableName,
-                actionUUID = pendingTask.id,
-                itemId = pendingTask.relatedItemId ?: "",
-                parameters = pendingTask.actionInfo.paramsToSubmit,
-                metaData = pendingTask.actionInfo.metaDataToSubmit
-            )
-
-            val images = pendingTask.actionInfo.imagesToUpload
-            if (images.isNullOrEmpty()) {
-                sendAction(actionContent, pendingTask, pendingTask.actionInfo.tableName) {
-                    // Nothing to do
+        checkNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                taskViewModel.pendingTasks.value?.forEach { pendingTask ->
+                    sendSinglePendingTask(pendingTask)
                 }
-            } else {
-                val bodies = images.mapValues {
-                    val fileUri = Uri.parse("file://" + it.value)
-                    val stream = contentResolver?.openInputStream(fileUri)
-                    stream?.readBytes()?.toRequestBody(APP_OCTET.toMediaTypeOrNull())
-                }
-
-                uploadImage(
-                    bodies = bodies,
-                    tableName = "PendingTasks", // just for logs
-                    isFromAction = true,
-                    taskToSendIfOffline = null,
-                    onImageUploaded = { parameterName, receivedId ->
-                        pendingTask.actionInfo.paramsToSubmit?.set(parameterName, receivedId)
-                        pendingTask.actionInfo.metaDataToSubmit?.set(parameterName, "uploaded")
-                    },
-                    onAllUploadFinished = {
-                        sendAction(actionContent, pendingTask, pendingTask.actionInfo.tableName) {
-                            // Nothing to do
-                        }
-                    }
-                )
             }
+
+            override fun onServerInaccessible() {
+                onServerInaccessible("")
+            }
+
+            override fun onNoInternet() {
+                onNoInternet("")
+            }
+        })
+    }
+
+    private fun sendSinglePendingTask(pendingTask: ActionTask) {
+        val actionContent = ActionHelper.getActionContent(
+            tableName = pendingTask.actionInfo.tableName,
+            actionUUID = pendingTask.id,
+            itemId = pendingTask.relatedItemId ?: "",
+            parameters = pendingTask.actionInfo.paramsToSubmit,
+            metaData = pendingTask.actionInfo.metaDataToSubmit
+        )
+
+        val images = pendingTask.actionInfo.imagesToUpload
+        if (images.isNullOrEmpty()) {
+            sendAction(actionContent, pendingTask, pendingTask.actionInfo.tableName) {
+                // Nothing to do
+            }
+        } else {
+            val bodies = images.getBodies(this)
+
+            uploadImage(
+                bodies = bodies,
+                tableName = "PendingTasks", // just for logs
+                isFromAction = true,
+                taskToSendIfOffline = null,
+                onImageUploaded = { parameterName, receivedId ->
+                    pendingTask.actionInfo.paramsToSubmit?.set(parameterName, receivedId)
+                    pendingTask.actionInfo.metaDataToSubmit?.set(parameterName, UPLOADED_METADATA_STRING)
+                },
+                onAllUploadFinished = {
+                    sendAction(actionContent, pendingTask, pendingTask.actionInfo.tableName) {
+                        // Nothing to do
+                    }
+                }
+            )
         }
     }
 
     override fun setFullScreenMode(isFullScreen: Boolean) {
-        bottomNav.visibility = if (isFullScreen) {
+        binding.bottomNav.visibility = if (isFullScreen) {
             supportActionBar?.hide()
             View.GONE
         } else {

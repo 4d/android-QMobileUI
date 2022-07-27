@@ -40,7 +40,8 @@ class TasksFragmentObserver(
                 .takeLast(MAX_PENDING_TASKS)
                 .sortedByDescending { it.date }
 
-            fragment.setupAdapter(pendingTasks, history)
+            fragment.pendingAdapter.updateItems(pendingTasks)
+            fragment.completedAdapter.updateItems(history)
         }
     }
 

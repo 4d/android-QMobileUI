@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.list
 
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -19,6 +18,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ListAdapter
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -31,6 +31,7 @@ import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
+import com.qmobile.qmobiledatasync.utils.LayoutType
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
@@ -39,12 +40,12 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
-import com.qmobile.qmobileui.binding.getColorFromAttr
-import com.qmobile.qmobileui.binding.isDarkColor
 import com.qmobile.qmobileui.databinding.FragmentListBinding
-import com.qmobile.qmobileui.list.viewholder.SwipeHelper
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
-import com.qmobile.qmobileui.ui.ItemDecorationSimpleCollection
+import com.qmobile.qmobileui.ui.GridDividerDecoration
+import com.qmobile.qmobileui.ui.setupToolbarTitle
+import com.qmobile.qmobileui.ui.swipe.ItemActionButton
+import com.qmobile.qmobileui.ui.swipe.SwipeHelper
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
 import org.json.JSONObject
@@ -92,6 +93,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        activity?.setupToolbarTitle(this.tableName)
+
         // Base entity list fragment
         arguments?.getString("tableName")?.let {
             tableName = it
@@ -188,29 +191,25 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             }
         )
 
-        binding.fragmentListRecyclerView.layoutManager =
-            when (BaseApp.genericTableFragmentHelper.layoutType(tableName)) {
-                "GRID" -> {
-                    binding.fragmentListRecyclerView.addItemDecoration(
-                        ItemDecorationSimpleCollection(
-                            resources.getDimensionPixelSize(
-                                R.dimen.simple_collection_spacing
-                            ),
-                            resources.getInteger(R.integer.simple_collection_columns)
-                        )
-                    )
-                    GridLayoutManager(activity, 2, GridLayoutManager.VERTICAL, false)
-                }
-                else -> {
-                    binding.fragmentListRecyclerView.addItemDecoration(
-                        DividerItemDecoration(
-                            activity,
-                            RecyclerView.VERTICAL
-                        )
-                    )
-                    LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
-                }
+        when (BaseApp.genericTableFragmentHelper.layoutType(tableName)) {
+            LayoutType.GRID -> {
+                val gridSpanCount = resources.getInteger(R.integer.grid_span_count)
+                binding.fragmentListRecyclerView.layoutManager =
+                    GridLayoutManager(activity, gridSpanCount, GridLayoutManager.VERTICAL, false)
+                val divider = GridDividerDecoration(
+                    resources.getDimensionPixelSize(R.dimen.grid_divider_size),
+                    ContextCompat.getColor(requireContext(), R.color.divider_color),
+                    gridSpanCount
+                )
+                binding.fragmentListRecyclerView.addItemDecoration(divider)
             }
+            else -> {
+                binding.fragmentListRecyclerView.layoutManager =
+                    LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
+                val divider = DividerItemDecoration(activity, LinearLayoutManager.VERTICAL)
+                binding.fragmentListRecyclerView.addItemDecoration(divider)
+            }
+        }
 
         binding.fragmentListRecyclerView.adapter = adapter
         binding.fragmentListRecyclerView.edgeEffectFactory = BounceEdgeEffectFactory()
@@ -240,24 +239,24 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     }
 
     /**
-     * Initialize Swipe to delete
+     * Initialize Swipe to actions
      */
     private fun initCellSwipe() {
         if (hasCurrentRecordActions && isSwipable) {
             val itemTouchHelper =
                 ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
                     override fun instantiateUnderlayButton(position: Int): List<ItemActionButton> {
-                        val buttons = mutableListOf<ItemActionButton>()
+                        val swipeButtons = mutableListOf<ItemActionButton>()
                         for (i in 0 until (currentRecordActions.size)) {
                             val action = if ((i + 1) > MAX_ACTIONS_VISIBLE) null else currentRecordActions[i]
-                            val button = createButton(position, action, i) { clickedAction, entity ->
+                            val swipeButton = createSwipeButton(position, action, i) { clickedAction, entity ->
                                 actionActivity.setCurrentEntityModel(entity)
                                 actionActivity.onActionClick(clickedAction, this@EntityListFragment)
                             }
-                            buttons.add(button)
+                            swipeButtons.add(swipeButton)
                             if (action == null) break
                         }
-                        return buttons
+                        return swipeButtons
                     }
                 })
             itemTouchHelper.attachToRecyclerView(binding.fragmentListRecyclerView)
@@ -265,7 +264,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     }
 
     private fun showDialog(onClick: (action: Action) -> Unit) {
-        MaterialAlertDialogBuilder(requireContext(), R.style.TitleThemeOverlay_MaterialComponents_MaterialAlertDialog)
+        MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_Material3_MaterialAlertDialog)
             .setTitle(requireContext().getString(R.string.action_list_title))
             .setAdapter(currentRecordActionsListAdapter) { _, position ->
                 onClick(currentRecordActions[position])
@@ -273,13 +272,13 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             .show()
     }
 
-    private fun createButton(
+    private fun createSwipeButton(
         position: Int,
         action: Action?,
         horizontalIndex: Int,
         onActionClick: (action: Action, roomEntity: RoomEntity) -> Unit
-    ): SwipeHelper.ItemActionButton {
-        return SwipeHelper.ItemActionButton(
+    ): ItemActionButton {
+        return ItemActionButton(
             requireContext(),
             action,
             horizontalIndex,
@@ -391,14 +390,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             searchPlate =
                 searchView.findViewById(androidx.appcompat.R.id.search_src_text) as EditText
             searchPlate.hint = ""
-            searchPlate.setBackgroundResource(R.drawable.searchview_rounded)
-            context?.getColorFromAttr(android.R.attr.colorPrimary)?.let {
-                if (isDarkColor(it)) {
-                    searchPlate.setTextColor(Color.BLACK)
-                } else {
-                    searchPlate.setTextColor(Color.WHITE)
-                }
-            }
 
             searchPlate.setOnEditorActionListener { textView, actionId, keyEvent ->
                 if ((keyEvent != null && (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER)) ||
@@ -479,13 +470,13 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     }
 
     private fun saveSortChoice(fieldsToSortBy: Map<String, String>) {
-        if (!BaseApp.sharedPreferencesHolder.parametersToSortWith.isNullOrEmpty()) {
-            val allTablesJsonObject = JSONObject(BaseApp.sharedPreferencesHolder.parametersToSortWith)
+        val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
+        BaseApp.sharedPreferencesHolder.parametersToSortWith = if (parametersToSortWith.isNotEmpty()) {
+            val allTablesJsonObject = JSONObject(parametersToSortWith)
             allTablesJsonObject.put(tableName, JSONObject(fieldsToSortBy).toString())
-            BaseApp.sharedPreferencesHolder.parametersToSortWith = allTablesJsonObject.toString()
+            allTablesJsonObject.toString()
         } else {
-            BaseApp.sharedPreferencesHolder.parametersToSortWith =
-                JSONObject(mapOf(tableName to JSONObject(fieldsToSortBy).toString())).toString()
+            JSONObject(mapOf(tableName to JSONObject(fieldsToSortBy).toString())).toString()
         }
     }
 
@@ -493,29 +484,27 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     @Suppress("NestedBlockDepth")
     private fun sortListIfNeeded() {
         val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
-        parametersToSortWith?.let { it ->
-            if (it.isNotEmpty()) {
-                // Json object containing all sort fields : Map<tableName, MapOf<fieldName, order (asc/desc))
-                val jsonObject = JSONObject(it)
-                jsonObject.getSafeString(tableName)?.let { fieldsToSortCurrentTableJsonString ->
-                    val fieldsToSortCurrentTable: HashMap<String, String> = HashMap()
+        if (parametersToSortWith.isNotEmpty()) {
+            // Json object containing all sort fields : Map<tableName, MapOf<fieldName, order (asc/desc))>>
+            val jsonObject = JSONObject(parametersToSortWith)
+            jsonObject.getSafeString(tableName)?.let { fieldsToSortCurrentTableJsonString ->
+                val fieldsToSortCurrentTable: HashMap<String, String> = HashMap()
 
-                    // Json object only current table sort fields :  MapOf<fieldName, order (asc/desc)>
-                    val currentTableFieldsJsonObject = JSONObject(fieldsToSortCurrentTableJsonString)
-                    // Extracting the json content to a hashmap
-                    val keysItr = currentTableFieldsJsonObject.keys()
-                    while (keysItr.hasNext()) {
-                        val key = keysItr.next()
-                        currentTableFieldsJsonObject.getSafeString(key)?.let { value ->
-                            fieldsToSortCurrentTable[key] = value
-                        }
+                // Json object only current table sort fields :  MapOf<fieldName, order (asc/desc)>
+                val currentTableFieldsJsonObject = JSONObject(fieldsToSortCurrentTableJsonString)
+                // Extracting the json content to a hashmap
+                val keysItr = currentTableFieldsJsonObject.keys()
+                while (keysItr.hasNext()) {
+                    val key = keysItr.next()
+                    currentTableFieldsJsonObject.getSafeString(key)?.let { value ->
+                        fieldsToSortCurrentTable[key] = value
                     }
-
-                    if (fieldsToSortCurrentTable.isNotEmpty()) {
-                        setSearchQuery(fieldsToSortCurrentTable)
-                    }
-                    return
                 }
+
+                if (fieldsToSortCurrentTable.isNotEmpty()) {
+                    setSearchQuery(fieldsToSortCurrentTable)
+                }
+                return
             }
         }
     }

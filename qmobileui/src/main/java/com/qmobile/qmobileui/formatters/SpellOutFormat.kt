@@ -9,15 +9,8 @@ package com.qmobile.qmobileui.formatters
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
+@Suppress("MagicNumber")
 object SpellOutFormat {
-
-    private const val INT_10: Int = 10
-    private const val INT_20: Int = 20
-    private const val INT_3: Int = 3
-    private const val INT_6: Int = 6
-    private const val INT_9: Int = 9
-    private const val INT_12: Int = 12
-    private const val INT_100: Int = 100
 
     private val tensNames: List<String> = listOf(
         "", " ten", " twenty", " thirty", " forty",
@@ -59,10 +52,10 @@ object SpellOutFormat {
         val mask = "000000000000"
         val df = DecimalFormat(mask)
         val sNumber = df.format(number)
-        val billions = sNumber.substring(0, INT_3).toInt()
-        val millions = sNumber.substring(INT_3, INT_6).toInt()
-        val hundredThousands = sNumber.substring(INT_6, INT_9).toInt()
-        val thousands = sNumber.substring(INT_9, INT_12).toInt()
+        val billions = sNumber.substring(0, 3).toInt()
+        val millions = sNumber.substring(3, 6).toInt()
+        val hundredThousands = sNumber.substring(6, 9).toInt()
+        val thousands = sNumber.substring(9, 12).toInt()
         val tradBillions: String = when (billions) {
             0 -> ""
             1 -> convertLessThanOneThousand(billions) + " billion "
@@ -91,15 +84,15 @@ object SpellOutFormat {
         var pnumber: Int = nb
         var soFar: String
         when {
-            (pnumber % INT_100 < INT_20) -> {
-                soFar = numNames[pnumber % INT_100]
-                pnumber /= INT_100
+            (pnumber % 100 < 20) -> {
+                soFar = numNames[pnumber % 100]
+                pnumber /= 100
             }
             else -> {
-                soFar = numNames[pnumber % INT_10]
-                pnumber /= INT_10
-                soFar = tensNames[pnumber % INT_10] + soFar
-                pnumber /= INT_10
+                soFar = numNames[pnumber % 10]
+                pnumber /= 10
+                soFar = tensNames[pnumber % 10] + soFar
+                pnumber /= 10
             }
         }
         return if (pnumber == 0) soFar else numNames[pnumber] + " hundred" + soFar

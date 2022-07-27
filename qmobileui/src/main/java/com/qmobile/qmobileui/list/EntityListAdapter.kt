@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.DiffUtil
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobileui.list.viewholder.BaseViewHolder
+import com.qmobile.qmobileui.list.viewholder.ListItemViewHolder
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
 class EntityListAdapter internal constructor(
@@ -25,7 +25,7 @@ class EntityListAdapter internal constructor(
     private val onItemClick: (ViewDataBinding, String) -> Unit,
     private val onItemLongClick: (RoomEntity) -> Unit
 ) :
-    PagingDataAdapter<RoomEntity, BaseViewHolder>(DIFF_CALLBACK) {
+    PagingDataAdapter<RoomEntity, ListItemViewHolder>(DIFF_CALLBACK) {
 
     companion object {
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<RoomEntity>() {
@@ -43,7 +43,7 @@ class EntityListAdapter internal constructor(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListItemViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val dataBinding: ViewDataBinding =
             DataBindingUtil.inflate(
@@ -53,10 +53,10 @@ class EntityListAdapter internal constructor(
                 false
             )
         dataBinding.lifecycleOwner = this@EntityListAdapter.lifecycleOwner
-        return BaseViewHolder(dataBinding, tableName, onItemClick, onItemLongClick)
+        return ListItemViewHolder(dataBinding, tableName, onItemClick, onItemLongClick)
     }
 
-    override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ListItemViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 

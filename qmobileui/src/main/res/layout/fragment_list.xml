@@ -30,7 +30,6 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.5" />
 
-
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -44,9 +43,9 @@
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/fragment_list_swipe_to_refresh"
-            android:layout_width="wrap_content"
-            android:layout_height="0px"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -56,12 +55,8 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/fragment_list_recycler_view"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 tools:listitem="@layout/recyclerview_item_stub" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

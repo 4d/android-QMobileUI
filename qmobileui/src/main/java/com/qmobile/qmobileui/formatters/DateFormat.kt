@@ -14,38 +14,23 @@ import java.util.Locale
 
 object DateFormat {
 
-    private val formatNameMap: Map<String, Int> = mapOf(
-        "shortDate" to DateFormat.SHORT,
-        "mediumDate" to DateFormat.MEDIUM,
-        "longDate" to DateFormat.LONG,
-        "fullDate" to DateFormat.FULL
-    )
+    private const val nullDate = "0!0!0"
 
     fun applyFormat(format: String, baseText: String): String {
+        if (baseText == nullDate) return ""
+        val calendar = getDateFromString(baseText).time
         return when (format) {
             "fullDate" -> {
-                formatNameMap[format]?.let {
-                    DateFormat.getDateInstance(it, Locale.getDefault())
-                        .format(getDateFromString(baseText).time)
-                } ?: ""
+                DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault()).format(calendar)
             }
             "longDate" -> {
-                formatNameMap[format]?.let {
-                    DateFormat.getDateInstance(it, Locale.getDefault())
-                        .format(getDateFromString(baseText).time)
-                } ?: ""
+                DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault()).format(calendar)
             }
             "mediumDate" -> {
-                formatNameMap[format]?.let {
-                    DateFormat.getDateInstance(it, Locale.getDefault())
-                        .format(getDateFromString(baseText).time)
-                } ?: ""
+                DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault()).format(calendar)
             }
             "shortDate" -> {
-                formatNameMap[format]?.let {
-                    DateFormat.getDateInstance(it, Locale.getDefault())
-                        .format(getDateFromString(baseText).time)
-                } ?: ""
+                DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(calendar)
             }
             else -> {
                 baseText

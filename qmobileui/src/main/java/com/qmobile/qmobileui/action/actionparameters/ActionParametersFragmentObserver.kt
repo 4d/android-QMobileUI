@@ -8,7 +8,6 @@ package com.qmobile.qmobileui.action.actionparameters
 
 import com.qmobile.qmobileapi.utils.parseToString
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.utils.observeOnce
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityViewModel
 import com.qmobile.qmobileui.action.utils.UriHelper.stringToUri
 import com.qmobile.qmobileui.activity.BaseObserver
@@ -27,9 +26,7 @@ class ActionParametersFragmentObserver(
     private fun observeTask() {
         // If from pendingTasks
         fragment.taskId?.let { id ->
-            // ObserveOnce is used here to prevent the tasks observation done in TasksFragment from triggering events on
-            // a fragment not displayed
-            fragment.actionActivity.getTaskViewModel().getTask(id).observeOnce(fragment.viewLifecycleOwner) { task ->
+            fragment.actionActivity.getTaskViewModel().getTask(id).observe(fragment.viewLifecycleOwner) { task ->
                 task.actionInfo.validationMap?.let { map -> fragment.validationMap = map }
                 task.actionInfo.paramsToSubmit?.let { params -> fragment.paramsToSubmit = params }
                 task.actionInfo.errors?.let { params -> fragment.errorsByParameter.putAll(params) }

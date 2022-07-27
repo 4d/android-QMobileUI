@@ -16,24 +16,21 @@ import android.os.Build
 import android.os.Environment
 import android.util.TypedValue
 import android.view.View
-import android.widget.ImageView
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.core.content.FileProvider
 import androidx.core.graphics.ColorUtils
+import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
-import com.bumptech.glide.request.transition.Transition
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
-import com.qmobile.qmobileui.utils.ToastHelper
+import com.qmobile.qmobileui.ui.SnackbarHelper
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -59,23 +56,6 @@ object ImageHelper {
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .listener(CustomRequestListener())
             .error(R.drawable.alert_circle_outline)
-
-    fun bindImageWithBitmapCallback(view: View, data: Any, bitmapCallback: (Bitmap) -> Unit) {
-        Glide.with(view.context.applicationContext)
-            .asBitmap()
-            .load(data)
-            .transition(BitmapTransitionOptions.withCrossFade(factory))
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .error(R.drawable.alert_circle_outline)
-            .into(object : CustomTarget<Bitmap?>() {
-                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap?>?) {
-                    (view as ImageView?)?.setImageBitmap(resource)
-                    bitmapCallback(resource)
-                }
-
-                override fun onLoadCleared(placeholder: Drawable?) {}
-            })
-    }
 
     fun getImage(imageUrl: String?, fieldName: String?, key: String?, tableName: String?): Any =
         tryImageFromAssets(tableName, key, fieldName)
@@ -112,31 +92,31 @@ object ImageHelper {
     }
 
     fun getTempImageFile(
-        context: Context,
+        activity: FragmentActivity,
         format: Bitmap.CompressFormat,
         callback: (uri: Uri, photoFilePath: String) -> Unit
     ) {
         val photoFile: File? = try {
-            createTempImageFile(context, format)
+            createTempImageFile(activity, format)
         } catch (ex: IOException) {
             Timber.e(ex.message.orEmpty())
-            ToastHelper.show(context, "Could not create temporary file", ToastMessage.Type.ERROR)
+            SnackbarHelper.show(activity, "Could not create temporary file", ToastMessage.Type.ERROR)
             null
         }
         photoFile?.let {
             try {
-                val photoURI: Uri = FileProvider.getUriForFile(context, context.packageName + ".provider", it)
+                val photoURI: Uri = FileProvider.getUriForFile(activity, activity.packageName + ".provider", it)
                 callback(photoURI, it.absolutePath)
             } catch (e: IllegalArgumentException) {
                 Timber.e(e.message.orEmpty())
-                ToastHelper.show(context, "Could not create temporary file", ToastMessage.Type.ERROR)
+                SnackbarHelper.show(activity, "Could not create temporary file", ToastMessage.Type.ERROR)
             }
         }
     }
 
-    private fun createTempImageFile(context: Context, format: Bitmap.CompressFormat): File {
+    private fun createTempImageFile(activity: FragmentActivity, format: Bitmap.CompressFormat): File {
         val timeStamp = Calendar.getInstance().timeInMillis
-        val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val storageDir: File? = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return when (format) {
             Bitmap.CompressFormat.PNG -> File.createTempFile("PNG_${timeStamp}_", ".png", storageDir)
             else -> File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)

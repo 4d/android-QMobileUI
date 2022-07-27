@@ -1,5 +1,4 @@
 <resources>
-
     <style name="Theme.QMobileApp.Card.Background" parent="Theme.QMobileApp">
         <item name="cardBackgroundColor">@android:color/black</item>
     </style>
@@ -39,11 +38,4 @@
     <style name="Theme.QMobileApp.Text.Color" parent="Theme.QMobileApp">
         <item name="android:textColor">@android:color/white</item>
     </style>
-
-
-    <style name="parameter_item_theme">
-        <item name="android:background">@color/grey_dark_4</item>
-
-    </style>
-
 </resources>

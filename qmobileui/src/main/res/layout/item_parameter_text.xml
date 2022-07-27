@@ -1,82 +1,35 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by Quentin Marciset on 13/2/2020.
+  ~ 4D SAS
+  ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_marginVertical="@dimen/smallest_margin">
 
-    <TextView
-        android:id="@+id/label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_marginStart="7dp"
-        android:layout_marginTop="7dp"
-        android:text="TextView:"
-        />
-
-    <EditText
-        android:id="@+id/editText"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="7dp"
-        android:gravity="left|center_vertical"
-        android:imeOptions="flagNavigateNext"
-        android:minHeight="@dimen/param_item_min_height"
-        android:paddingLeft="@dimen/param_edit_text_padding_left"
-        android:paddingEnd="7dp"
-        tools:text="totot" />
+        android:layout_marginStart="@dimen/medium_plus_margin"
+        android:layout_marginTop="@dimen/small_margin"
+        android:layout_marginEnd="@dimen/medium_plus_margin"
+        app:errorEnabled="true"
+        app:helperTextEnabled="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/error_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_marginStart="7dp"
-        android:layout_marginTop="7dp"
-        android:textColor="@color/error_light"
-        android:textSize="@dimen/error_label_text_size"
-        android:visibility="gone"
-        tools:text="@string/action_parameter_mandatory_error"
-        tools:visibility="visible" />
-</LinearLayout>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:singleLine="true" />
 
+    </com.google.android.material.textfield.TextInputLayout>
 
-
-<!--    <?xml version="1.0" encoding="utf-8"?>&lt;!&ndash;-->
-<!--  ~ Created by Quentin Marciset on 13/2/2020.-->
-<!--  ~ 4D SAS-->
-<!--  ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.-->
-<!--  &ndash;&gt;-->
-
-<!--<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:layout_marginVertical="@dimen/smallest_margin">-->
-
-<!--    <com.google.android.material.textfield.TextInputLayout-->
-<!--        android:id="@+id/container"-->
-<!--        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginStart="@dimen/medium_plus_margin"-->
-<!--        android:layout_marginTop="@dimen/small_margin"-->
-<!--        android:layout_marginEnd="@dimen/medium_plus_margin"-->
-<!--        android:textColorHint="@android:color/darker_gray"-->
-<!--        app:errorEnabled="true"-->
-<!--        app:errorTextAppearance="@style/ErrorTextAppearance"-->
-<!--        app:helperTextEnabled="true"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent">-->
-
-<!--        <com.google.android.material.textfield.TextInputEditText-->
-<!--            android:id="@+id/input"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:inputType="text"-->
-<!--            android:singleLine="true" />-->
-
-<!--    </com.google.android.material.textfield.TextInputLayout>-->
-
-<!--</androidx.constraintlayout.widget.ConstraintLayout>-->
+</androidx.constraintlayout.widget.ConstraintLayout>
