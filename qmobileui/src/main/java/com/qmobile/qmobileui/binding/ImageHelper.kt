@@ -55,11 +55,11 @@ object ImageHelper {
             .transition(DrawableTransitionOptions.withCrossFade(factory))
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .listener(CustomRequestListener())
-            .error(R.drawable.alert_circle_outline)
+            .error(R.drawable.image_not_supported)
 
     fun getImage(imageUrl: String?, fieldName: String?, key: String?, tableName: String?): Any =
         tryImageFromAssets(tableName, key, fieldName)
-            ?: if (!imageUrl.isNullOrEmpty()) imageUrl else R.drawable.image_off
+            ?: if (!imageUrl.isNullOrEmpty()) imageUrl else R.drawable.image_not_supported
 
     private fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Uri? {
         BaseApp.runtimeDataHolder.embeddedFiles.find {

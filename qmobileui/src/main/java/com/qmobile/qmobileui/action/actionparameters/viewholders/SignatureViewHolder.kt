@@ -16,7 +16,7 @@ class SignatureViewHolder(
     private val actionTypesCallback: (actionTypes: Action.Type, position: Int) -> Unit
 ) : BaseImageViewHolder(itemView, format) {
 
-    override fun getPlaceholderRes(): Int = R.drawable.file_sign
+    override fun getPlaceholderRes(): Int = R.drawable.draw
 
     override fun onImageClick() {
         actionTypesCallback(Action.Type.SIGN, bindingAdapterPosition)

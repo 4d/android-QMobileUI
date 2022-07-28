@@ -27,7 +27,7 @@ class CompletedTaskViewHolder(
                 binding.iconState.setImageResource(R.drawable.check_circle)
             }
             ActionTask.Status.ERROR_SERVER -> {
-                binding.iconState.setImageResource(R.drawable.alert_circle)
+                binding.iconState.setImageResource(R.drawable.error)
             }
             else -> {}
         }

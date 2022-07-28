@@ -19,7 +19,7 @@ class ImageViewHolder(
     private val actionTypesCallback: (actionTypes: Action.Type, position: Int) -> Unit
 ) : BaseImageViewHolder(itemView, format) {
 
-    override fun getPlaceholderRes(): Int = R.drawable.image_plus
+    override fun getPlaceholderRes(): Int = R.drawable.add_photo_alternate
 
     override fun onImageClick() {
         MaterialAlertDialogBuilder(itemView.context)

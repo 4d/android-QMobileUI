@@ -371,7 +371,7 @@ class MainActivity :
 
         // Add pendingTasks menu item at the end
         val drawable =
-            if (withIcons) ContextCompat.getDrawable(this, R.drawable.dots_horizontal_circle_outline) else null
+            if (withIcons) ContextCompat.getDrawable(this, R.drawable.pending_actions) else null
         drawable?.setMenuItemColorFilter()
 
         // not giving a simple string because we want a divider before pending tasks

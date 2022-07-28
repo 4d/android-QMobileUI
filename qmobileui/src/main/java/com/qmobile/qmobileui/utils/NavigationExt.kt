@@ -16,6 +16,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.transition.MaterialFadeThrough
+import com.qmobile.qmobileui.R
 
 /**
  * Manages the various graphs needed for a [BottomNavigationView].
@@ -116,7 +117,9 @@ fun BottomNavigationView.setupWithNavController(
                     // Commit a transaction that cleans the back stack and adds the first fragment
                     // to it, creating the fixed started destination.
 
-                    selectedFragment.enterTransition = MaterialFadeThrough()
+                    selectedFragment.enterTransition = MaterialFadeThrough().apply {
+                        duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+                    }
 
                     fragmentManager.beginTransaction()
 //                        .setCustomAnimations(

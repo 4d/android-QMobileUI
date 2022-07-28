@@ -213,17 +213,17 @@ class TasksFragment : BaseFragment(), NetworkChecker {
 
     override fun onServerAccessible() {
         binding.serverStatus.text = serverAccessibleString
-        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.server)
+        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.domain)
     }
 
     override fun onServerInaccessible() {
         binding.serverStatus.text = serverNotAccessibleString
-        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.server_off)
+        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.domain_disabled)
     }
 
     override fun onNoInternet() {
         binding.serverStatus.text = noInternetString
-        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.wifi_off)
+        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.signal_disconnected)
     }
 
     private fun onServerStatusClick() {

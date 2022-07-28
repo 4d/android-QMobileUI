@@ -35,7 +35,7 @@ class DotProgressBar : FrameLayout {
     private val animators = mutableListOf<Animator>()
     private var primaryAnimator: ValueAnimator? = null
     private lateinit var progressBar: LinearLayout
-    private var dotBackground = R.drawable.ic_dot
+    private var dotBackground = R.drawable.pending_action_anim_dot
     private var dotAnimator: ValueAnimator? = null
 
     constructor(context: Context) : super(context)
