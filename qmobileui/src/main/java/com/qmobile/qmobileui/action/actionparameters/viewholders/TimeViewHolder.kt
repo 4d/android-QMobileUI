@@ -37,7 +37,7 @@ class TimeViewHolder(
     ) {
         super.bind(item, currentEntity, isLastParameter, alreadyFilledValue, serverError, onValueChanged)
 
-        container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.calendar_clock)
+        container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.schedule)
 
         val clockFormat = if (isDuration) TimeFormat.CLOCK_24H else TimeFormat.CLOCK_12H
 

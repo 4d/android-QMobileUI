@@ -19,7 +19,8 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 class EntityViewPagerAdapter(
     fragment: Fragment,
     private val tableName: String,
-    val list: List<Any?> // we can have a list here because the pages were already loaded from the previous list form
+    private val list: List<Any?> // we can have a list here because the pages were already loaded from the previous
+    // list form
 ) : FragmentStateAdapter(fragment) {
 
     override fun getItemCount(): Int {

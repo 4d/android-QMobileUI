@@ -31,7 +31,7 @@ class BarcodeViewHolder(
     ) {
         super.bind(item, currentEntity, isLastParameter, alreadyFilledValue, serverError, onValueChanged)
 
-        container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.barcode_scan)
+        container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.qr_code_scanner)
 
         itemJsonObject.getSafeString("barcode_value")?.let {
             input.setText(it)

@@ -61,7 +61,7 @@
         android:layout_height="24dp"
         android:alpha="0.6"
         android:contentDescription="@string/action_remove_item_image_content_description"
-        android:src="@drawable/close_circle_outline"
+        android:src="@drawable/cancel"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/image_view"

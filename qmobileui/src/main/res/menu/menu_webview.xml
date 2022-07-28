@@ -18,7 +18,7 @@
 
     <item
         android:id="@+id/action_web_view_share"
-        android:icon="@drawable/share_variant"
+        android:icon="@drawable/share"
         android:title="@string/web_view_share"
         android:visible="false"
         app:showAsAction="always" />

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by qmarciset on 28/7/2022.
+  ~ 4D SAS
+  ~ Copyright (c) 2022 qmarciset. All rights reserved.
+  -->
+
+<resources>
+
+    <integer name="reply_motion_duration_large">300</integer>
+</resources>
