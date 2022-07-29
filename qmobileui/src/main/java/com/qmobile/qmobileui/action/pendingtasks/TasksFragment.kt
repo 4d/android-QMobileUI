@@ -26,10 +26,10 @@ import com.qmobile.qmobileui.binding.px
 import com.qmobile.qmobileui.databinding.FragmentActionTasksBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
+import com.qmobile.qmobileui.ui.SnackbarHelper.UNDO_ACTION_DURATION
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.ui.setupToolbarTitle
-import com.qmobile.qmobileui.ui.swipe.ItemDeleteButton
-import com.qmobile.qmobileui.ui.swipe.SwipeHelper
+import com.qmobile.qmobileui.ui.swipe.SwipeToDeleteCallback
 import java.util.*
 
 class TasksFragment : BaseFragment(), NetworkChecker {
@@ -78,7 +78,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initCellSwipe()
+        initSwipeToDelete()
         setupAdapters()
         initRecyclerViews()
         initOnRefreshListener()
@@ -107,18 +107,15 @@ class TasksFragment : BaseFragment(), NetworkChecker {
     /**
      * Initialize Swipe to delete
      */
-    private fun initCellSwipe() {
-        val itemTouchHelper =
-            ItemTouchHelper(object : SwipeHelper(binding.pendingRv) {
-                override fun instantiateUnderlayButton(position: Int): List<ItemDeleteButton> {
-                    val swipeButtons = mutableListOf<ItemDeleteButton>()
-                    val swipeButton = createSwipeButton(position) { actionTask ->
-                        removeTask(actionTask)
-                    }
-                    swipeButtons.add(swipeButton)
-                    return swipeButtons
+    private fun initSwipeToDelete() {
+        val swipeHandler = object : SwipeToDeleteCallback(requireContext()) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                pendingAdapter.getItemByPosition(viewHolder.bindingAdapterPosition)?.let { actionTask ->
+                    removeTask(actionTask)
                 }
-            })
+            }
+        }
+        val itemTouchHelper = ItemTouchHelper(swipeHandler)
         itemTouchHelper.attachToRecyclerView(binding.pendingRv)
     }
 
@@ -132,25 +129,10 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                 actionText = resources.getString(R.string.pending_task_cancelled_undo),
                 onActionClick = {
                     actionActivity.getTaskViewModel().insert(actionTask)
-                }
+                },
+                duration = UNDO_ACTION_DURATION
             )
         }
-    }
-
-    private fun createSwipeButton(
-        position: Int,
-        onDelete: (actionTask: ActionTask) -> Unit
-    ): ItemDeleteButton {
-        return ItemDeleteButton(
-            requireContext(),
-            object : SwipeHelper.UnderlayButtonClickListener {
-                override fun onClick() {
-                    pendingAdapter.getItemByPosition(position)?.let { actionTask ->
-                        onDelete(actionTask)
-                    }
-                }
-            }
-        )
     }
 
     override fun onAttach(context: Context) {

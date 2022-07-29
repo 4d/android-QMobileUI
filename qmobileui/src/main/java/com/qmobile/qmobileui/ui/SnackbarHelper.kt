@@ -18,8 +18,15 @@ import com.qmobile.qmobileui.binding.getColorFromAttr
 
 object SnackbarHelper {
 
-    fun show(activity: FragmentActivity?, message: String?, type: ToastMessage.Type = ToastMessage.Type.NEUTRAL) {
-        build(activity, message, type)?.showSnackbar()
+    const val UNDO_ACTION_DURATION = 5000
+
+    fun show(
+        activity: FragmentActivity?,
+        message: String?,
+        type: ToastMessage.Type = ToastMessage.Type.NEUTRAL,
+        duration: Int? = null
+    ) {
+        build(activity, message, type, duration)?.showSnackbar()
     }
 
     fun showAction(
@@ -27,9 +34,10 @@ object SnackbarHelper {
         message: String?,
         actionText: String,
         onActionClick: () -> Unit,
-        type: ToastMessage.Type = ToastMessage.Type.NEUTRAL
+        type: ToastMessage.Type = ToastMessage.Type.NEUTRAL,
+        duration: Int? = null
     ) {
-        build(activity, message, type)?.apply {
+        build(activity, message, type, duration)?.apply {
             setAction(actionText) {
                 onActionClick()
             }
@@ -40,7 +48,8 @@ object SnackbarHelper {
     private fun build(
         activity: FragmentActivity?,
         message: String?,
-        type: ToastMessage.Type = ToastMessage.Type.NEUTRAL
+        type: ToastMessage.Type = ToastMessage.Type.NEUTRAL,
+        duration: Int?
     ): Snackbar? {
         if (!message.isNullOrEmpty()) {
             activity?.apply {
@@ -52,6 +61,9 @@ object SnackbarHelper {
                     snackbar.setNightModeColors(this, type)
                 } else {
                     snackbar.setLightModeColors(this, type)
+                }
+                duration?.let {
+                    snackbar.setDuration(duration)
                 }
                 return snackbar
             }
