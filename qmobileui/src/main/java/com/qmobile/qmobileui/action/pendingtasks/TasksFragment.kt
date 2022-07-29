@@ -53,16 +53,19 @@ class TasksFragment : BaseFragment(), NetworkChecker {
         private const val DIVIDER_INSET_START = 56
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        activity?.setupToolbarTitle("Pending tasks")
+        arguments?.getString("tableName")?.let { tableName = it }
+        arguments?.getString("currentItemId")?.let { currentItemId = it }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         setHasOptionsMenu(true)
-        arguments?.getString("tableName")?.let { tableName = it }
-        arguments?.getString("currentItemId")?.let { currentItemId = it }
-
-        activity?.setupToolbarTitle("Pending tasks")
 
         _binding = FragmentActionTasksBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner

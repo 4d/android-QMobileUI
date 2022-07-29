@@ -88,29 +88,34 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     private var searchPattern = "" // search area
     private var relation: Relation? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        activity?.setupToolbarTitle(this.tableName)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        savedInstanceState?.getString(CURRENT_SEARCH_QUERY_KEY, "")?.let { searchPattern = it }
 
+        activity?.setupToolbarTitle(this.tableName)
         // Base entity list fragment
         arguments?.getString("tableName")?.let {
             tableName = it
         }
         // Entity list fragment from relation
-        arguments?.getString("destinationTable")?.let {
-            if (it.isNotEmpty()) {
-                tableName = it
+        arguments?.getString("destinationTable")?.let { dest ->
+            if (dest.isNotEmpty()) {
+                tableName = dest
                 fromRelation = true
+                arguments?.getString("navbarTitle")?.let { activity?.setupToolbarTitle(it) }
             }
         }
 
         arguments?.getString("parentItemId")?.let { parentItemId = it }
         arguments?.getString("parentTableName")?.let { parentTableName = it }
         arguments?.getString("path")?.let { path = it }
+    }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         formQueryBuilder = FormQueryBuilder(tableName)
 
         hasSearch = searchableFields.has(tableName)
@@ -136,11 +141,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             actionActivity = context
         }
         // Access resources elements
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        savedInstanceState?.getString(CURRENT_SEARCH_QUERY_KEY, "")?.let { searchPattern = it }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

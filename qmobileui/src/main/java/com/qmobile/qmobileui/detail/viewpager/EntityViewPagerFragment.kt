@@ -47,12 +47,8 @@ class EntityViewPagerFragment : BaseFragment() {
     private lateinit var formQueryBuilder: FormQueryBuilder
     private lateinit var actionActivity: ActionActivity
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        viewPager = inflater.inflate(R.layout.fragment_pager, container, false) as ViewPager2
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         arguments?.getString("key")?.let { key = it }
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("searchQueryPattern")?.let { searchQueryPattern = it }
@@ -66,6 +62,14 @@ class EntityViewPagerFragment : BaseFragment() {
         arguments?.getString("parentItemId")?.let { parentItemId = it }
         arguments?.getString("parentTableName")?.let { parentTableName = it }
         arguments?.getString("path")?.let { path = it }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        viewPager = inflater.inflate(R.layout.fragment_pager, container, false) as ViewPager2
 
         formQueryBuilder = FormQueryBuilder(tableName)
 

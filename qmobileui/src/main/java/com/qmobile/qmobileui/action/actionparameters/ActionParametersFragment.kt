@@ -50,6 +50,7 @@ import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.ui.CenterLayoutManager
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
+import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.hideKeyboard
 import okhttp3.RequestBody
 import org.json.JSONArray
@@ -121,12 +122,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        setHasOptionsMenu(true)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.getString("navbarTitle")?.let { activity?.setupToolbarTitle(it) }
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("itemId")?.let { itemId = it }
         arguments?.getString("actionUUID")?.let { actionUUID = it }
@@ -142,6 +140,14 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
             }
             arguments?.getString("parentItemId")?.let { parentItemId = it }
         }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        setHasOptionsMenu(true)
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
             bundle.getString("barcode_value")?.let {

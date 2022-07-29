@@ -27,6 +27,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
+import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.webview.MyWebViewClient
 import com.qmobile.qmobileui.webview.WebViewHelper.adjustSize
@@ -48,14 +49,18 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
     private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
     private var hasActions = false
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.getString("navbarTitle")?.let { activity?.setupToolbarTitle(it) }
+        arguments?.getString("itemId")?.let { itemId = it }
+        arguments?.getString("tableName")?.let { tableName = it }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        arguments?.getString("itemId")?.let { itemId = it }
-        arguments?.getString("tableName")?.let { tableName = it }
-
         // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
         entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
 
