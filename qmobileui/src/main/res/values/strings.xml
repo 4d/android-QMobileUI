@@ -88,7 +88,7 @@
     <string name="pending_task_cancelled">Pending task deleted</string>
     <string name="pending_task_cancelled_undo">Undo</string>
     <string name="item_action_button_ellipsize">…</string>
-
+    <string name="item_delete_button_title">Delete</string>
 
     <!-- Permissions -->
     <string name="permission_dialog_title">Permission required</string>
