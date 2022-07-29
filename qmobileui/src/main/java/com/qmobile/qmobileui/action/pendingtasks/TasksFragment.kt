@@ -55,7 +55,6 @@ class TasksFragment : BaseFragment(), NetworkChecker {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        activity?.setupToolbarTitle("Pending tasks")
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("currentItemId")?.let { currentItemId = it }
     }
@@ -66,6 +65,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
         savedInstanceState: Bundle?
     ): View {
         setHasOptionsMenu(true)
+        activity?.setupToolbarTitle(resources.getString(R.string.pending_task_navbar_title))
 
         _binding = FragmentActionTasksBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner
@@ -113,25 +113,28 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                 override fun instantiateUnderlayButton(position: Int): List<ItemDeleteButton> {
                     val swipeButtons = mutableListOf<ItemDeleteButton>()
                     val swipeButton = createSwipeButton(position) { actionTask ->
-
-                        activity?.let {
-                            actionActivity.getTaskViewModel().deleteOne(actionTask.id)
-
-                            SnackbarHelper.showAction(
-                                activity = it,
-                                message = resources.getString(R.string.pending_task_cancelled),
-                                actionText = resources.getString(R.string.pending_task_cancelled_undo),
-                                onActionClick = {
-                                    actionActivity.getTaskViewModel().insert(actionTask)
-                                }
-                            )
-                        }
+                        removeTask(actionTask)
                     }
                     swipeButtons.add(swipeButton)
                     return swipeButtons
                 }
             })
         itemTouchHelper.attachToRecyclerView(binding.pendingRv)
+    }
+
+    private fun removeTask(actionTask: ActionTask) {
+        activity?.let {
+            actionActivity.getTaskViewModel().deleteOne(actionTask.id)
+
+            SnackbarHelper.showAction(
+                activity = it,
+                message = resources.getString(R.string.pending_task_cancelled),
+                actionText = resources.getString(R.string.pending_task_cancelled_undo),
+                onActionClick = {
+                    actionActivity.getTaskViewModel().insert(actionTask)
+                }
+            )
+        }
     }
 
     private fun createSwipeButton(

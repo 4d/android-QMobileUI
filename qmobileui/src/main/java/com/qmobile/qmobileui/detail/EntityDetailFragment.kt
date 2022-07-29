@@ -51,7 +51,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.getString("navbarTitle")?.let { activity?.setupToolbarTitle(it) }
+        arguments?.getString("navbarTitle")?.let { navbarTitle = it }
         arguments?.getString("itemId")?.let { itemId = it }
         arguments?.getString("tableName")?.let { tableName = it }
     }
@@ -61,6 +61,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        activity?.setupToolbarTitle(navbarTitle)
         // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
         entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
 

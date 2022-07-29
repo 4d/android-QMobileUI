@@ -103,7 +103,7 @@ class SettingsFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        activity?.setupToolbarTitle("Settings")
+        activity?.setupToolbarTitle(resources.getString(R.string.settings_navbar_title))
         loginViewModel = getLoginViewModel(activity, activitySettingsInterface.loginApiService)
 
         connectivityViewModel = getConnectivityViewModel(

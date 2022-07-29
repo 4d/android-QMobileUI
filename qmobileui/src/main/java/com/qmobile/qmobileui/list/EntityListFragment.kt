@@ -92,17 +92,17 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         super.onCreate(savedInstanceState)
         savedInstanceState?.getString(CURRENT_SEARCH_QUERY_KEY, "")?.let { searchPattern = it }
 
-        activity?.setupToolbarTitle(this.tableName)
         // Base entity list fragment
         arguments?.getString("tableName")?.let {
             tableName = it
+            navbarTitle = it
         }
         // Entity list fragment from relation
         arguments?.getString("destinationTable")?.let { dest ->
             if (dest.isNotEmpty()) {
                 tableName = dest
                 fromRelation = true
-                arguments?.getString("navbarTitle")?.let { activity?.setupToolbarTitle(it) }
+                arguments?.getString("navbarTitle")?.let { navbarTitle = it }
             }
         }
 
@@ -116,6 +116,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        activity?.setupToolbarTitle(navbarTitle)
         formQueryBuilder = FormQueryBuilder(tableName)
 
         hasSearch = searchableFields.has(tableName)

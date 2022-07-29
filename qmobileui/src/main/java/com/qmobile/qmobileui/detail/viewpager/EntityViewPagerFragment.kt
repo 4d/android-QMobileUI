@@ -21,6 +21,7 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.ColorHelper
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 
@@ -69,6 +70,7 @@ class EntityViewPagerFragment : BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        activity?.setupToolbarTitle(tableName)
         viewPager = inflater.inflate(R.layout.fragment_pager, container, false) as ViewPager2
 
         formQueryBuilder = FormQueryBuilder(tableName)

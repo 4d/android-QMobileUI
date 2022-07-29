@@ -13,6 +13,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
 import androidx.core.widget.TextViewCompat
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
@@ -24,6 +26,8 @@ import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.model.ActionMetaData
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
+import com.qmobile.qmobileui.binding.getColorFromAttr
+import com.qmobile.qmobileui.binding.px
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.collections.HashMap
@@ -113,6 +117,18 @@ class ActionHelper private constructor() {
             return drawable.adjustActionDrawableMargins(context)
         }
 
+        fun Drawable.setMenuActionDrawable(context: Context) {
+            this.setMenuItemColorFilter(context)
+            this.setBounds(0, 0, ImageHelper.drawableStartWidth.px, ImageHelper.drawableStartHeight.px)
+        }
+
+        private fun Drawable.setMenuItemColorFilter(context: Context) {
+            this.colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                context.getColorFromAttr(R.attr.colorOnSurface),
+                BlendModeCompat.SRC_ATOP
+            )
+        }
+
         private fun getActionDrawablePadding(context: Context): Int =
             (ImageHelper.ICON_MARGIN * context.resources.displayMetrics.density).toInt()
 
@@ -153,8 +169,7 @@ class ActionHelper private constructor() {
                         textView.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
                         TextViewCompat.setCompoundDrawableTintList(textView, textView.textColors)
                         // Add margin between image and text (support various screen densities)
-                        textView.compoundDrawablePadding =
-                            getActionDrawablePadding(context)
+                        textView.compoundDrawablePadding = getActionDrawablePadding(context)
                     }
 
                     textView.text = action.getPreferredName()

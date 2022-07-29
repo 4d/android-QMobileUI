@@ -19,6 +19,8 @@ abstract class BaseFragment : Fragment() {
 
     internal lateinit var delegate: FragmentCommunication
 
+    internal var navbarTitle = ""
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is FragmentCommunication) {

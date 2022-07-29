@@ -4,7 +4,7 @@
   ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
   -->
 
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="qmobileui_app_name">QMobileUI</string>
 
     <!--    Placeholders -->
@@ -33,6 +33,7 @@
     <string name="logout_dialog_title">Are you sure you want to Logout ?</string>
     <string name="logout_dialog_message">You will need to log in again</string>
     <string name="logout_dialog_message_if_pending_task">Pending tasks will be deleted. Are you sure you want to log out?</string>
+    <string name="settings_navbar_title">Settings</string>
 
     <!--    Network -->
     <string name="no_internet">No Internet connection</string>
@@ -79,14 +80,14 @@
     <string name="action_parameter_image_dialog_photo">Take photo</string>
     <string name="action_parameter_image_dialog_gallery">Choose from Gallery</string>
     <string name="pending_task_menu_item">Pending Tasks</string>
+    <string name="pending_task_navbar_title">Pending Tasks</string>
     <string name="scroll_to_not_seen">Scrolling to unseen parameters</string>
     <string name="icon_state_content_description">Completed action icon state</string>
     <string name="completed_tasks_title">Completed tasks</string>
     <string name="server_status_icon">Server status icon</string>
     <string name="pending_task_cancelled">Pending task deleted</string>
     <string name="pending_task_cancelled_undo">Undo</string>
-    <string name="item_action_button_ellipsize" tools:ignore="TypographyEllipsis">...</string>
-    <string name="item_delete_button_title">Delete</string>
+    <string name="item_action_button_ellipsize">…</string>
 
 
     <!-- Permissions -->

@@ -53,8 +53,13 @@ object ResourcesHelper {
             return null
         }
         return try {
-            iconPath
-                .substring(0, iconPath.lastIndexOf('.')) // removes extension
+            // removes extension
+            val withoutExt = if (iconPath.contains(".")) {
+                iconPath.substring(0, iconPath.lastIndexOf('.'))
+            } else {
+                iconPath
+            }
+            withoutExt
                 .replace(".+/".toRegex(), "")
                 .removePrefix(File.separator)
                 .lowercase()

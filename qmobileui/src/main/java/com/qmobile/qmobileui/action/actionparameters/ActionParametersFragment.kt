@@ -124,7 +124,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.getString("navbarTitle")?.let { activity?.setupToolbarTitle(it) }
+        arguments?.getString("navbarTitle")?.let { navbarTitle = it }
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("itemId")?.let { itemId = it }
         arguments?.getString("actionUUID")?.let { actionUUID = it }
@@ -148,6 +148,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         savedInstanceState: Bundle?
     ): View {
         setHasOptionsMenu(true)
+        activity?.setupToolbarTitle(navbarTitle)
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
             bundle.getString("barcode_value")?.let {
