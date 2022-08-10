@@ -365,20 +365,23 @@ class MainActivity :
             order++
         }
 
-        // Add pendingTasks menu item at the end
-        val drawable =
-            if (withIcons) ContextCompat.getDrawable(this, R.drawable.pending_actions) else null
-        drawable?.setMenuActionDrawable(this)
+        // Should display pending task button only when actions are not empty
+        // Ps: if we have only one action and having (preset = sort) it should be applied by default and already deleted from actions list)
+        if (actions.isNotEmpty()) {
+            // Add pendingTasks menu item at the end
+            val drawable =
+                if (withIcons) ContextCompat.getDrawable(this, R.drawable.pending_actions) else null
+            drawable?.setMenuActionDrawable(this)
 
-        // not giving a simple string because we want a divider before pending tasks
-        menu.add(1, Random().nextInt(), order, pendingTaskString)
-            .setOnMenuItemClickListener {
-                actionNavigable.navigateToPendingTasks()
-                true
-            }
-            .setIcon(drawable?.adjustActionDrawableMargins(this))
-            .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-
+            // not giving a simple string because we want a divider before pending tasks
+            menu.add(1, Random().nextInt(), order, pendingTaskString)
+                .setOnMenuItemClickListener {
+                    actionNavigable.navigateToPendingTasks()
+                    true
+                }
+                .setIcon(drawable?.adjustActionDrawableMargins(this))
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+        }
         menu.setGroupDividerEnabled(true)
     }
 
