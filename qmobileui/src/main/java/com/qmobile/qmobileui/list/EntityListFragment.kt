@@ -341,41 +341,48 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
     @Suppress("NestedBlockDepth")
     private fun setupActionsMenuIfNeeded(menu: Menu) {
-        val sortActions = tableActions.filter { it1 -> it1.preset == "sort" }
-        when (sortActions.size) {
-            0 -> {
-                // if no sort actions, sort by the first search  fields
-                if (hasSearch) {
-                    searchableFields.getSafeArray(tableName)?.let {
-                        if (it.length() > 0) {
-                            saveSortChoice(mapOf(it.get(0).toString() to "ASC"))
+        val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
+        // If user already applied a sort, we need no more to apply default sort
+            if (parametersToSortWith.isEmpty() || !JSONObject(parametersToSortWith).has(tableName)) {
+                val sortActions = tableActions.filter { it1 -> it1.preset == "sort" }
+                when (sortActions.size) {
+                    0 -> {
+                        // if no sort actions, sort by the first search  fields
+                        if (hasSearch) {
+                            searchableFields.getSafeArray(tableName)?.let {
+                                if (it.length() > 0) {
+                                    saveSortChoice(mapOf(it.get(0).toString() to "ASC"))
+                                }
+                            }
+                        } else {
+                            // and if no search fields for this table , used default  sort field field  (the first item in the model)
+                            val defaultFieldToSortWith =
+                                BaseApp.runtimeDataHolder.defaultSortFields.getSafeString(tableName)
+                            if (defaultFieldToSortWith != null) {
+                                saveSortChoice(mapOf(defaultFieldToSortWith to "ASC"))
+                            } else {
+                                // if no default sort field find for this table, use the id as sort field
+                                saveSortChoice(mapOf("id" to "ASC"))
+                            }
                         }
                     }
-                } else {
-                    // and if no search fields for this table , used default  sort field field  (the first item in the model)
-                    val defaultFieldToSortWith = BaseApp.runtimeDataHolder.defaultSortFields.getSafeString(tableName)
-                    if (defaultFieldToSortWith != null) {
-                        saveSortChoice(mapOf(defaultFieldToSortWith to "ASC"))
-                    } else {
-                        // if no default sort field find for this table, use the id as sort field
-                        saveSortChoice(mapOf("id" to "ASC"))
+
+                    1 -> {
+                        sortActions.first().let { action ->
+                            // no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
+                            saveSortChoice(action.getSortFields())
+                            tableActions.remove(action)
+                        }
+                    }
+                    else -> {
+                        // if more than one action we apply by default the first one
+                        val defaultSort = sortActions.firstOrNull()?.getSortFields()
+                        defaultSort?.let { saveSortChoice(it) }
                     }
                 }
+
             }
 
-            1 -> {
-                sortActions.first().let { action ->
-                    // no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
-                    saveSortChoice(action.getSortFields())
-                    tableActions.remove(action)
-                }
-            }
-            else -> {
-                // if more than one action we apply by default the first one
-                val defaultSort = sortActions.firstOrNull()?.getSortFields()
-                defaultSort?.let { saveSortChoice(it) }
-            }
-        }
 
         if (hasTableActions) {
             actionActivity.setupActionsMenu(menu, tableActions, this) {
