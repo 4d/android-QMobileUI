@@ -11,7 +11,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
-import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.getColorFromAttr
@@ -57,11 +56,7 @@ object SnackbarHelper {
                 findViewById<BottomNavigationView>(R.id.bottom_nav)?.let { bottomNav ->
                     snackbar.anchorView = bottomNav
                 }
-                if (BaseApp.nightMode()) {
-                    snackbar.setNightModeColors(this, type)
-                } else {
-                    snackbar.setLightModeColors(this, type)
-                }
+                snackbar.setColors(this, type)
                 duration?.let {
                     snackbar.setDuration(duration)
                 }
@@ -75,33 +70,15 @@ object SnackbarHelper {
         this.show()
     }
 
-    private fun Snackbar.setNightModeColors(context: Context, type: ToastMessage.Type) {
+    private fun Snackbar.setColors(context: Context, type: ToastMessage.Type) {
         when (type) {
             ToastMessage.Type.SUCCESS -> {
-                setBackgroundTint(ContextCompat.getColor(context, R.color.theme_dark_snackbar_success))
-                setTextColor(ContextCompat.getColor(context, R.color.theme_dark_on_snackbar_success))
+                setBackgroundTint(ContextCompat.getColor(context, R.color.snackbar_success))
+                setTextColor(ContextCompat.getColor(context, R.color.on_snackbar_success))
             }
             ToastMessage.Type.WARNING -> {
-                setBackgroundTint(ContextCompat.getColor(context, R.color.theme_dark_snackbar_warning))
-                setTextColor(ContextCompat.getColor(context, R.color.theme_dark_on_snackbar_warning))
-            }
-            ToastMessage.Type.ERROR -> {
-                setBackgroundTint(context.getColorFromAttr(R.attr.colorError))
-                setTextColor(context.getColorFromAttr(R.attr.colorOnError))
-            }
-            else -> {}
-        }
-    }
-
-    private fun Snackbar.setLightModeColors(context: Context, type: ToastMessage.Type) {
-        when (type) {
-            ToastMessage.Type.SUCCESS -> {
-                setBackgroundTint(ContextCompat.getColor(context, R.color.theme_light_snackbar_success))
-                setTextColor(ContextCompat.getColor(context, R.color.theme_light_on_snackbar_success))
-            }
-            ToastMessage.Type.WARNING -> {
-                setBackgroundTint(ContextCompat.getColor(context, R.color.theme_light_snackbar_warning))
-                setTextColor(ContextCompat.getColor(context, R.color.theme_light_on_snackbar_warning))
+                setBackgroundTint(ContextCompat.getColor(context, R.color.snackbar_warning))
+                setTextColor(ContextCompat.getColor(context, R.color.on_snackbar_warning))
             }
             ToastMessage.Type.ERROR -> {
                 setBackgroundTint(context.getColorFromAttr(R.attr.colorError))

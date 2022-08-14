@@ -32,7 +32,7 @@ class BarcodeOverlay @JvmOverloads constructor(
     private var translY = 0.0f
 
     private val mRectPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.android_green)
+        color = ContextCompat.getColor(context, R.color.barcode_reader_frame)
         style = Paint.Style.STROKE
         strokeWidth = 10F
         strokeJoin = Paint.Join.ROUND
