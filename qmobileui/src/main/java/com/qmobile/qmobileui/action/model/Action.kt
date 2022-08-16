@@ -57,11 +57,20 @@ open class Action(
                 else -> ""
             }
 
-            parameter.getSafeString("name")?.lowercase()?.filter { !it.isWhitespace() }?.let { name ->
-                if (format.isNotEmpty()) {
-                    fieldsToSortBy[name] = format
+            val type = parameter.getSafeString("type")
+            parameter.getSafeString("name")?.lowercase()?.filter { !it.isWhitespace() }
+                ?.let { name ->
+
+                    // if the field is a time we have to convert it from string to int, otherwise the AM/PM sort will not work
+                    val key = if (type == "time") {
+                        "CAST ($name AS INT)"
+                    } else {
+                        name
+                    }
+                    if (format.isNotEmpty()) {
+                        fieldsToSortBy[key] = format
+                    }
                 }
-            }
         }
         return fieldsToSortBy
     }
