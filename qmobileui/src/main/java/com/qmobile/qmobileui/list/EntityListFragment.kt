@@ -39,6 +39,7 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.model.Action
+import com.qmobile.qmobileui.action.sort.SortFormat
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
@@ -347,23 +348,11 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 val sortActions = tableActions.filter { it1 -> it1.preset == "sort" }
                 when (sortActions.size) {
                     0 -> {
-                        // if no sort actions, sort by the first search  fields
-                        if (hasSearch) {
-                            searchableFields.getSafeArray(tableName)?.let {
-                                if (it.length() > 0) {
-                                    saveSortChoice(mapOf(it.get(0).toString() to "ASC"))
-                                }
-                            }
-                        } else {
-                            // and if no search fields for this table , used default  sort field field  (the first item in the model)
-                            val defaultFieldToSortWith =
-                                BaseApp.runtimeDataHolder.defaultSortFields.getSafeString(tableName)
-                            if (defaultFieldToSortWith != null) {
-                                saveSortChoice(mapOf(defaultFieldToSortWith to "ASC"))
-                            } else {
-                                // if no default sort field find for this table, use the id as sort field
-                                saveSortChoice(mapOf("id" to "ASC"))
-                            }
+                        // get default sort field from default_sort_fields.json
+                        val defaultFieldToSortWith =
+                            BaseApp.runtimeDataHolder.defaultSortFields.getSafeString(tableName)
+                        if (defaultFieldToSortWith != null) {
+                            saveSortChoice(mapOf(defaultFieldToSortWith to SortFormat.ASCENDING.value))
                         }
                     }
 
@@ -380,7 +369,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                         defaultSort?.let { saveSortChoice(it) }
                     }
                 }
-
             }
 
 

@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.action.model
 
 import com.qmobile.qmobileapi.utils.getJSONObjectList
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileui.action.sort.SortFormat
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import org.json.JSONArray
 import java.util.Locale
@@ -52,8 +53,8 @@ open class Action(
         val fieldsToSortBy: LinkedHashMap<String, String> = LinkedHashMap()
         parameters.getJSONObjectList().forEach { parameter ->
             val format = when (parameter.getSafeString("format")) {
-                "ascending" -> "ASC"
-                "descending" -> "DESC"
+                "ascending" -> SortFormat.ASCENDING.value
+                "descending" -> SortFormat.DESCENDING.value
                 else -> ""
             }
 
