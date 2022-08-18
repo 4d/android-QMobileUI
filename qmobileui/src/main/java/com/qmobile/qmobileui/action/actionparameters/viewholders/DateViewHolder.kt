@@ -12,8 +12,9 @@ import androidx.fragment.app.FragmentManager
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.formatters.DateFormat
 import com.qmobile.qmobileui.formatters.FormatterUtils
-import java.util.Calendar
+import java.util.*
 
 class DateViewHolder(
     itemView: View,
@@ -31,6 +32,8 @@ class DateViewHolder(
 
     private val calendar = Calendar.getInstance()
 
+    private var initialPickerDate = -1L
+
     override fun bind(
         item: Any,
         currentEntity: RoomEntity?,
@@ -43,8 +46,13 @@ class DateViewHolder(
 
         container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.calendar_month)
 
+        if (initialPickerDate == -1L) {
+            initialPickerDate = Calendar.getInstance().timeInMillis
+        }
+
         val datePicker =
             MaterialDatePicker.Builder.datePicker()
+                .setSelection(initialPickerDate)
                 .setTitleText(container.hint)
                 .setInputMode(MaterialDatePicker.INPUT_MODE_TEXT)
                 .build()
@@ -80,6 +88,16 @@ class DateViewHolder(
                 Calendar.MONTH
             ) + 1
             ) + "!" + calendar.get(Calendar.YEAR)
+
+    internal fun updatePickerDate(newDate: String) {
+        val cal = DateFormat.getDateFromString(newDate)
+        val clearedTZ = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH))
+            set(Calendar.MONTH, cal.get(Calendar.MONTH))
+            set(Calendar.YEAR, cal.get(Calendar.YEAR))
+        }
+        initialPickerDate = clearedTZ.timeInMillis
+    }
 
     override fun formatToDisplay(input: String): String =
         FormatterUtils.applyFormat(dateFormat, input)

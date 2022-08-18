@@ -29,10 +29,10 @@ class ActionParameterViewHolderFactory private constructor() {
                 ActionParameter.TEXT_DEFAULT,
                 ActionParameter.TEXT_EMAIL,
                 ActionParameter.TEXT_PASSWORD,
+                ActionParameter.TEXT_URL,
                 ActionParameter.TEXT_ZIP,
                 ActionParameter.TEXT_PHONE,
                 ActionParameter.TEXT_ACCOUNT,
-                ActionParameter.TEXT_URL,
                 ActionParameter.TEXT_AREA ->
                     TextViewHolder(
                         LayoutInflater.from(context)
@@ -40,12 +40,26 @@ class ActionParameterViewHolderFactory private constructor() {
                         itemType.format
                     )
 
+                // Boolean
+                ActionParameter.BOOLEAN_DEFAULT ->
+                    BooleanViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_boolean_switch, parent, false),
+                        itemType.format
+                    )
+                ActionParameter.BOOLEAN_CHECK ->
+                    BooleanViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_boolean_check_mark, parent, false),
+                        itemType.format
+                    )
+
                 // Number
                 ActionParameter.NUMBER_DEFAULT1,
                 ActionParameter.NUMBER_DEFAULT2,
-                ActionParameter.NUMBER_INTEGER,
-                ActionParameter.NUMBER_PERCENTAGE,
                 ActionParameter.NUMBER_SCIENTIFIC,
+                ActionParameter.NUMBER_PERCENTAGE,
+                ActionParameter.NUMBER_INTEGER,
                 ActionParameter.NUMBER_SPELL_OUT ->
                     NumberViewHolder(
                         LayoutInflater.from(context)
@@ -57,8 +71,8 @@ class ActionParameterViewHolderFactory private constructor() {
                 ActionParameter.DATE_DEFAULT1,
                 ActionParameter.DATE_DEFAULT2,
                 ActionParameter.DATE_SHORT,
-                ActionParameter.DATE_FULL,
-                ActionParameter.DATE_LONG ->
+                ActionParameter.DATE_LONG,
+                ActionParameter.DATE_FULL ->
                     DateViewHolder(
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_text, parent, false),
@@ -74,19 +88,6 @@ class ActionParameterViewHolderFactory private constructor() {
                             .inflate(R.layout.item_parameter_text, parent, false),
                         itemType.format,
                         fragmentManager
-                    )
-                // Boolean
-                ActionParameter.BOOLEAN_DEFAULT ->
-                    BooleanViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_boolean_switch, parent, false),
-                        itemType.format
-                    )
-                ActionParameter.BOOLEAN_CHECK ->
-                    BooleanViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_boolean_check_mark, parent, false),
-                        itemType.format
                     )
 
                 // Image

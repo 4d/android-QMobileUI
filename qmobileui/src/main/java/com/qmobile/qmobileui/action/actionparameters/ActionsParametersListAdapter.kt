@@ -119,9 +119,11 @@ class ActionsParametersListAdapter(
     override fun getItemViewType(position: Int): Int {
         val itemJsonObject = list[position] as JSONObject
         val type = itemJsonObject.getSafeString("type")
-        val format = itemJsonObject.getSafeString("format") ?: "default"
-        return ActionParameter.values().find { it.type == type && it.format == format }?.ordinal
-            ?: 0
+        val format = itemJsonObject.getSafeString("format")
+        val actionParameter =
+            ActionParameter.values().firstOrNull { it.type == type && it.format == format }
+                ?: ActionParameter.values().find { it.type == type && it.format == "default" }
+        return actionParameter?.ordinal ?: 0
     }
 
     fun updateImageForPosition(position: Int, data: Uri) {

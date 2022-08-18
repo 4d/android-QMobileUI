@@ -77,6 +77,9 @@ abstract class BaseInputLessViewHolder(itemView: View, format: String) : BaseVie
     }
 
     override fun fill(value: Any) {
+        if (this is DateViewHolder) {
+            updatePickerDate(value.toString())
+        }
         input.setText(formatToDisplay(value.toString()))
     }
 
