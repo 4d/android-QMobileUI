@@ -360,7 +360,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                         sortActions.first().let { action ->
                             // no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
                             saveSortChoice(action.getSortFields())
-                            tableActions.remove(action)
                         }
                     }
                     else -> {
@@ -371,6 +370,11 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 }
             }
 
+
+        // if the only action is sort action it should not be displayed
+        if((tableActions.size == 1) && (tableActions[0].isSortAction() )){
+            tableActions.clear()
+        }
 
         if (hasTableActions) {
             actionActivity.setupActionsMenu(menu, tableActions, this) {
