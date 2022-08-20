@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_VALUE_INJECT_KEY
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.utils.PermissionChecker
 
@@ -33,7 +34,8 @@ class BarcodeViewHolder(
 
         container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.qr_code_scanner)
 
-        itemJsonObject.getSafeString("barcode_value")?.let {
+        itemJsonObject.getSafeString(BARCODE_VALUE_INJECT_KEY)?.let {
+            itemJsonObject.remove(BARCODE_VALUE_INJECT_KEY)
             input.setText(it)
         }
 

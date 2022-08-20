@@ -21,6 +21,7 @@ import com.qmobile.qmobileapi.utils.parseToType
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.IMAGE_URI_INJECT_KEY
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.px
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
@@ -119,8 +120,8 @@ abstract class BaseImageViewHolder(itemView: View, format: String) : BaseViewHol
     }
 
     private fun newImageChosen(): Uri? {
-        val uri: Uri? = itemJsonObject.getSafeAny("image_uri") as Uri?
-        itemJsonObject.remove("image_uri")
+        val uri: Uri? = itemJsonObject.getSafeAny(IMAGE_URI_INJECT_KEY) as Uri?
+        itemJsonObject.remove(IMAGE_URI_INJECT_KEY)
         return uri
     }
 

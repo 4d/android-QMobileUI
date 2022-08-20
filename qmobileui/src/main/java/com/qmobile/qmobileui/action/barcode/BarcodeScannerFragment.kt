@@ -26,6 +26,7 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_FRAGMENT_REQUEST_KEY
+import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_VALUE_KEY
 import com.qmobile.qmobileui.databinding.FragmentBarcodeBinding
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import timber.log.Timber
@@ -120,7 +121,7 @@ class BarcodeScannerFragment : BaseFragment() {
                                 binding.progress.visibility = View.GONE
 
                                 val result = Bundle().apply {
-                                    putString("barcode_value", value)
+                                    putString(BARCODE_VALUE_KEY, value)
                                 }
                                 if (isAdded) {
                                     parentFragmentManager.setFragmentResult(BARCODE_FRAGMENT_REQUEST_KEY, result)
