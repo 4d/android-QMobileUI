@@ -63,11 +63,13 @@ open class Action(
                 ?.let { name ->
 
                     // if the field is a time we have to convert it from string to int, otherwise the AM/PM sort will not work
-                    val key = if (type == "time") {
-                        "CAST ($name AS INT)"
-                    } else {
-                        name
+                    // if type is string we make the sort case insensitive
+                    val key = when (type) {
+                        "type" -> "CAST ($name AS INT)"
+                        "string" -> "$name COLLATE NOCASE "
+                        else -> name
                     }
+
                     if (format.isNotEmpty()) {
                         fieldsToSortBy[key] = format
                     }
