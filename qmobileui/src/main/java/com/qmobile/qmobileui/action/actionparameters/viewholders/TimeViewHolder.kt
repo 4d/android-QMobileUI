@@ -10,7 +10,6 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
 import com.google.android.material.timepicker.TimeFormat
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
@@ -56,7 +55,7 @@ class TimeViewHolder(
                 .setHour(defaultHour)
                 .setMinute(defaultMinute)
                 .setTitleText(container.hint)
-                .setInputMode(INPUT_MODE_KEYBOARD)
+                .setInputMode(MaterialTimePicker.INPUT_MODE_KEYBOARD)
                 .build()
 
         picker.addOnPositiveButtonClickListener {

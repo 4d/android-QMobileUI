@@ -6,7 +6,7 @@
 
 package com.qmobile.qmobileui.action.actionparameters
 
-enum class ActionParameter(val type: String, val format: String = "default") {
+enum class ActionParameter(val type: String, val format: String) {
 
     // Text
     TEXT_DEFAULT("string", "default"),
@@ -42,7 +42,7 @@ enum class ActionParameter(val type: String, val format: String = "default") {
     TIME_DURATION("time", "duration"),
 
     // Image
-    IMAGE("image"),
+    IMAGE("image", "default"),
     SIGNATURE("image", "signature"),
 
     // Barcode

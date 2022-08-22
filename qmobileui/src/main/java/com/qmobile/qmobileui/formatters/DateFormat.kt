@@ -38,7 +38,7 @@ object DateFormat {
         }
     }
 
-    private fun getDateFromString(date: String): Calendar = Calendar.getInstance().apply {
+    fun getDateFromString(date: String): Calendar = Calendar.getInstance().apply {
         val dateFormat = SimpleDateFormat("dd!MM!yyyy", Locale.getDefault())
         dateFormat.safeParse(date)?.let { date ->
             time = date
