@@ -14,14 +14,16 @@ import java.util.concurrent.TimeUnit
 @Suppress("MagicNumber")
 object TimeFormat {
 
-    fun applyFormat(format: String, baseText: String): String {
+    fun applyFormat(format: String, baseText: String, timeUnit: TimeUnit = TimeUnit.MILLISECONDS): String {
         val longText = baseText.toLongOrNull() ?: return ""
-
-        return when (format) {
-            "timeInteger" -> longText.toString()
-            "shortTime" -> getShortAMPMTimeFromMillis(longText)
-            "mediumTime" -> getLongAMPMTimeFromMillis(longText)
-            "duration" -> millisToShortDuration(longText)
+        return when {
+            format == "timeInteger" -> longText.toString()
+            format == "shortTime" && timeUnit == TimeUnit.MILLISECONDS -> getShortAMPMTimeFromMillis(longText)
+            format == "shortTime" && timeUnit == TimeUnit.SECONDS -> getShortAMPMTimeFromSeconds(longText)
+            format == "mediumTime" && timeUnit == TimeUnit.MILLISECONDS -> getLongAMPMTimeFromMillis(longText)
+            format == "mediumTime" && timeUnit == TimeUnit.SECONDS -> getLongAMPMTimeFromSeconds(longText)
+            format == "duration" && timeUnit == TimeUnit.MILLISECONDS -> millisToShortDuration(longText)
+            format == "duration" && timeUnit == TimeUnit.SECONDS -> secondsToShortDuration(longText)
             else -> ""
         }
     }
