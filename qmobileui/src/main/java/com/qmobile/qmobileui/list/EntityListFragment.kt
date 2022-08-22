@@ -311,6 +311,11 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                     if (searchPattern != it) {
                         searchPattern = it
                         setSearchQuery()
+
+                        // Restore selected sort after canceling/clearing search edittext
+                        if(it.isEmpty()){
+                            sortListIfNeeded()
+                        }
                     }
                 }
                 return true
@@ -329,7 +334,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 searchPlate.clearFocus()
             }
         }
-        sortListIfNeeded()
         super.onPrepareOptionsMenu(menu)
     }
 
@@ -337,6 +341,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         setupActionsMenuIfNeeded(menu)
         setupSearchMenuIfNeeded(menu, inflater)
+        sortListIfNeeded()
+
         super.onCreateOptionsMenu(menu, inflater)
     }
 
