@@ -17,6 +17,8 @@ import com.google.android.material.textfield.TextInputEditText
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_VALUE_INJECT_KEY
+import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.IMAGE_URI_INJECT_KEY
 import com.qmobile.qmobileui.action.actionparameters.viewholders.ActionParameterViewHolderFactory
 import com.qmobile.qmobileui.action.actionparameters.viewholders.BaseViewHolder
 import com.qmobile.qmobileui.action.actionparameters.viewholders.ImageViewHolder
@@ -127,12 +129,12 @@ class ActionsParametersListAdapter(
     }
 
     fun updateImageForPosition(position: Int, data: Uri) {
-        (list[position] as JSONObject).put("image_uri", data)
+        (list[position] as JSONObject).put(IMAGE_URI_INJECT_KEY, data)
         notifyItemChanged(position)
     }
 
     fun updateBarcodeForPosition(position: Int, value: String) {
-        (list[position] as JSONObject).put("barcode_value", value)
+        (list[position] as JSONObject).put(BARCODE_VALUE_INJECT_KEY, value)
         notifyItemChanged(position)
     }
 }

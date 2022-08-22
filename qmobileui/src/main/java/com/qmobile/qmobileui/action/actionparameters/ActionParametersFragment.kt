@@ -99,6 +99,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
 
     companion object {
         const val BARCODE_FRAGMENT_REQUEST_KEY = "scan_request"
+        const val BARCODE_VALUE_INJECT_KEY = "barcode_inject"
+        const val BARCODE_VALUE_KEY = "barcode_value"
+        const val IMAGE_URI_INJECT_KEY = "image_uri_inject"
     }
 
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
@@ -151,7 +154,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         activity?.setupToolbarTitle(navbarTitle)
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
-            bundle.getString("barcode_value")?.let {
+            bundle.getString(BARCODE_VALUE_KEY)?.let {
                 adapter.updateBarcodeForPosition(actionPosition, it)
             }
         }
