@@ -372,9 +372,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
 
         // if the only action is sort action it should not be displayed
-        if((tableActions.size == 1) && (tableActions[0].isSortAction() )){
+        if ((tableActions.size == 1) && (tableActions[0].isSortAction()))
             tableActions.clear()
-        }
 
         if (hasTableActions) {
             actionActivity.setupActionsMenu(menu, tableActions, this) {
