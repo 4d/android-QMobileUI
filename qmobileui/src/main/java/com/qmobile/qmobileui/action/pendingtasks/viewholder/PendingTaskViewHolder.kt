@@ -10,12 +10,13 @@ import com.qmobile.qmobileapi.utils.getJSONObjectList
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobileui.action.actionparameters.ActionParameter
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.databinding.ItemPendingTaskBinding
-import com.qmobile.qmobileui.formatters.FormatterUtils
+import com.qmobile.qmobileui.formatters.DateFormat
+import com.qmobile.qmobileui.formatters.TimeFormat
 import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
 class PendingTaskViewHolder(
     private val binding: ItemPendingTaskBinding,
@@ -34,12 +35,8 @@ class PendingTaskViewHolder(
         item.actionInfo.paramsToSubmit?.entries?.forEach { entry ->
             relatedActionParameters.find { it.getSafeString("name") == entry.key }?.let { relatedParam ->
                 val type = relatedParam.getSafeString("type")
-                var format = relatedParam.getSafeString("format")
-                if (format != "duration") format = "shortTime"
-                // We don't display password fields
-                if (format != ActionParameter.TEXT_PASSWORD.format) {
-                    sb = getFieldOverview(format, type, entry.value, sb)
-                }
+                val format = relatedParam.getSafeString("format")
+                sb = getFieldOverview(format, type, entry.value, sb)
             }
 
             if (sb.toString().isNotEmpty()) {
@@ -48,17 +45,18 @@ class PendingTaskViewHolder(
         }
     }
 
-    private fun getFieldOverview(format: String, type: String?, value: Any, sb: StringBuilder): StringBuilder {
-        val stringToAppend = when (type) {
-            "date" -> FormatterUtils.applyFormat("shortDate", value)
-            "time" -> FormatterUtils.applyFormat(format, value)
+    private fun getFieldOverview(format: String?, type: String?, value: Any, sb: StringBuilder): StringBuilder {
+        val stringToAppend = when {
+            format == "password" -> "" // We don't display password fields
+            type == "date" -> DateFormat.applyFormat("shortDate", value.toString())
+            format == "duration" -> TimeFormat.applyFormat(format, value.toString(), TimeUnit.SECONDS)
+            type == "time" -> TimeFormat.applyFormat("shortTime", value.toString(), TimeUnit.SECONDS)
             else -> value.toString()
         }
 
         if (stringToAppend.isNotEmpty()) {
             sb.append("$stringToAppend , ")
         }
-
         return sb
     }
 
