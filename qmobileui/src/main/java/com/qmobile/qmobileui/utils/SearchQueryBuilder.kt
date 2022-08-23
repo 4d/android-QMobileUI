@@ -11,9 +11,6 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.utils.containsIgnoreCase
-import com.qmobile.qmobiledatasync.utils.fieldAdjustment
-import com.qmobile.qmobiledatasync.utils.tableNameAdjustment
-import com.qmobile.qmobileui.utils.SearchQueryBuilder.removeSuffix
 import org.json.JSONArray
 import timber.log.Timber
 
@@ -95,29 +92,16 @@ object SearchQueryBuilder {
         fieldForQuery: String
     ): String {
         var appendice = ""
-        BaseApp.runtimeDataHolder.customFormatters[tableName.tableNameAdjustment()]?.get(fieldName.fieldAdjustment())
-            ?.let { fieldMapping ->
-                if (fieldMapping.binding == "localizedText") {
-                    val choiceList = fieldMapping.choiceList
-                    appendice = when (choiceList) {
-                        is Map<*, *> -> {
-                            appendFromFormatMap(
-                                choiceList,
-                                fieldForQuery,
-                                pattern
-                            )
-                        }
-                        is List<*> -> {
-                            appendFromFormatList(
-                                choiceList,
-                                fieldForQuery,
-                                pattern
-                            )
-                        }
-                        else -> ""
-                    }
+        BaseApp.runtimeDataHolder.customFormatters[tableName]?.get(fieldName)?.let { fieldMapping ->
+            if (fieldMapping.binding == "localizedText") {
+                val choiceList = fieldMapping.choiceList
+                appendice = when (choiceList) {
+                    is Map<*, *> -> appendFromFormatMap(choiceList, fieldForQuery, pattern)
+                    is List<*> -> appendFromFormatList(choiceList, fieldForQuery, pattern)
+                    else -> ""
                 }
             }
+        }
         return appendice
     }
 
