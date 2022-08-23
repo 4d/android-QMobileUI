@@ -115,9 +115,9 @@ class EntityViewPagerFragment : BaseFragment() {
         })
 
         EntityViewPagerFragmentObserver(this, entityListViewModel).initObservers()
-        if(searchQueryPattern.isNotEmpty()){
+        if (searchQueryPattern.isNotEmpty()) {
             setSearchQuery()
-        } else{
+        } else {
             sortListIfNeeded()
         }
     }
