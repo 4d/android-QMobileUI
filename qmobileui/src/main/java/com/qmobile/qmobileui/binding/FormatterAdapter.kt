@@ -12,8 +12,6 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.FieldMapping
-import com.qmobile.qmobiledatasync.utils.fieldAdjustment
-import com.qmobile.qmobiledatasync.utils.tableNameAdjustment
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.formatters.ImageNamed
 import com.qmobile.qmobileui.webview.WebViewHelper
@@ -84,22 +82,14 @@ private fun applyCustomFormat(
     imageHeight: Int?
 ): Boolean {
     if (tableName != null && fieldName != null) {
-        BaseApp.runtimeDataHolder.customFormatters[tableName.tableNameAdjustment()]?.get(
-            fieldName.fieldAdjustment()
-        )
-            ?.let { fieldMapping ->
-
-                when (fieldMapping.binding) {
-                    "imageNamed" -> {
-                        applyImageNamedFormat(view, text, fieldMapping, imageWidth, imageHeight)
-                    }
-                    "localizedText" -> {
-                        applyLocalizedTextFormat(view, text, fieldMapping)
-                    }
-                    else -> view.text = ""
-                }
-                return true
+        BaseApp.runtimeDataHolder.customFormatters[tableName]?.get(fieldName)?.let { fieldMapping ->
+            when (fieldMapping.binding) {
+                "imageNamed" -> applyImageNamedFormat(view, text, fieldMapping, imageWidth, imageHeight)
+                "localizedText" -> applyLocalizedTextFormat(view, text, fieldMapping)
+                else -> view.text = ""
             }
+            return true
+        }
     }
     return false
 }
