@@ -13,10 +13,8 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.databinding.ItemPendingTaskBinding
-import com.qmobile.qmobileui.formatters.DateFormat
-import com.qmobile.qmobileui.formatters.TimeFormat
+import com.qmobile.qmobileui.formatters.FormatterUtils
 import org.json.JSONObject
-import java.util.concurrent.TimeUnit
 
 class PendingTaskViewHolder(
     private val binding: ItemPendingTaskBinding,
@@ -48,9 +46,9 @@ class PendingTaskViewHolder(
     private fun getFieldOverview(format: String?, type: String?, value: Any, sb: StringBuilder): StringBuilder {
         val stringToAppend = when {
             format == "password" -> "" // We don't display password fields
-            type == "date" -> DateFormat.applyFormat("shortDate", value.toString())
-            format == "duration" -> TimeFormat.applyFormat(format, value.toString(), TimeUnit.SECONDS)
-            type == "time" -> TimeFormat.applyFormat("shortTime", value.toString(), TimeUnit.SECONDS)
+            type == "date" -> FormatterUtils.applyFormat("shortDate", value.toString())
+            format == "duration" -> FormatterUtils.applyFormat("duration", value.toString())
+            type == "time" -> FormatterUtils.applyFormat("shortTime", value.toString())
             else -> value.toString()
         }
 

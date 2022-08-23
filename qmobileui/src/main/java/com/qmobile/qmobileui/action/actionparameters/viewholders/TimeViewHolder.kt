@@ -13,9 +13,9 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.formatters.TimeFormat.convertToSeconds
-import com.qmobile.qmobileui.formatters.TimeFormat.getShortAMPMTimeFromSeconds
-import com.qmobile.qmobileui.formatters.TimeFormat.secondsToVerboseDuration
+import com.qmobile.qmobileui.formatters.TimeFormat.convertToMillis
+import com.qmobile.qmobileui.formatters.TimeFormat.getShortAMPMTime
+import com.qmobile.qmobileui.formatters.TimeFormat.toVerboseDuration
 
 @Suppress("MagicNumber")
 class TimeViewHolder(
@@ -59,14 +59,14 @@ class TimeViewHolder(
                 .build()
 
         picker.addOnPositiveButtonClickListener {
-            val totalSeconds = convertToSeconds(picker.hour, picker.minute).toLong()
-            input.setText(getFormattedString(totalSeconds, isDuration))
-            onValueChanged(parameterName, totalSeconds, null, validate(false))
+            val millis = convertToMillis(picker.hour, picker.minute).toLong()
+            input.setText(getFormattedString(millis, isDuration))
+            onValueChanged(parameterName, millis, null, validate(false))
         }
 
         onValueChanged(
             parameterName,
-            convertToSeconds(defaultHour, defaultMinute),
+            convertToMillis(defaultHour, defaultMinute),
             null,
             validate(false)
         )
@@ -82,16 +82,16 @@ class TimeViewHolder(
     }
 
     override fun formatToDisplay(input: String): String {
-        return input.toLongOrNull()?.let {
-            getFormattedString(it, isDuration)
+        return input.toLongOrNull()?.let { millis ->
+            getFormattedString(millis, isDuration)
         } ?: ""
     }
 
-    private fun getFormattedString(totalSeconds: Long, isDuration: Boolean): String {
+    private fun getFormattedString(millis: Long, isDuration: Boolean): String {
         return if (isDuration) {
-            secondsToVerboseDuration(totalSeconds)
+            toVerboseDuration(millis)
         } else {
-            getShortAMPMTimeFromSeconds(totalSeconds)
+            getShortAMPMTime(millis)
         }
     }
 }
