@@ -14,26 +14,19 @@ import java.util.concurrent.TimeUnit
 @Suppress("MagicNumber")
 object TimeFormat {
 
-    fun applyFormat(format: String, baseText: String, timeUnit: TimeUnit = TimeUnit.MILLISECONDS): String {
+    fun applyFormat(format: String, baseText: String): String {
         val longText = baseText.toLongOrNull() ?: return ""
-        return when {
-            format == "timeInteger" -> longText.toString()
-            format == "shortTime" && timeUnit == TimeUnit.MILLISECONDS -> getShortAMPMTimeFromMillis(longText)
-            format == "shortTime" && timeUnit == TimeUnit.SECONDS -> getShortAMPMTimeFromSeconds(longText)
-            format == "mediumTime" && timeUnit == TimeUnit.MILLISECONDS -> getLongAMPMTimeFromMillis(longText)
-            format == "mediumTime" && timeUnit == TimeUnit.SECONDS -> getLongAMPMTimeFromSeconds(longText)
-            format == "duration" && timeUnit == TimeUnit.MILLISECONDS -> millisToShortDuration(longText)
-            format == "duration" && timeUnit == TimeUnit.SECONDS -> secondsToShortDuration(longText)
+        return when (format) {
+            "timeInteger" -> longText.toString()
+            "shortTime" -> getShortAMPMTime(longText)
+            "mediumTime" -> getLongAMPMTime(longText)
+            "duration" -> toShortDuration(longText)
             else -> ""
         }
     }
 
-    fun getShortAMPMTimeFromMillis(millis: Long): String {
+    fun getShortAMPMTime(millis: Long): String {
         val totalSecs = millis / 1000
-        return getShortAMPMTimeFromSeconds(totalSecs)
-    }
-
-    fun getShortAMPMTimeFromSeconds(totalSecs: Long): String {
         val days = TimeUnit.SECONDS.toDays(totalSecs).toInt()
         val hours = (TimeUnit.SECONDS.toHours(totalSecs) - days * 24).toInt()
         val minutes = (TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60).toInt()
@@ -45,12 +38,8 @@ object TimeFormat {
         return timeString
     }
 
-    fun getLongAMPMTimeFromMillis(millis: Long): String {
+    fun getLongAMPMTime(millis: Long): String {
         val totalSecs = millis / 1000
-        return getLongAMPMTimeFromSeconds(totalSecs)
-    }
-
-    fun getLongAMPMTimeFromSeconds(totalSecs: Long): String {
         val days = TimeUnit.SECONDS.toDays(totalSecs).toInt()
         val hours = (TimeUnit.SECONDS.toHours(totalSecs) - days * 24).toInt()
         val minutes = (TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60).toInt()
@@ -63,7 +52,8 @@ object TimeFormat {
         return timeString
     }
 
-    fun secondsToVerboseDuration(totalSecs: Long): String {
+    fun toVerboseDuration(millis: Long): String {
+        val totalSecs = millis / 1000
         val days = TimeUnit.SECONDS.toDays(totalSecs).toInt()
         val hours = (TimeUnit.SECONDS.toHours(totalSecs) - days * 24).toInt()
         val minutes = (TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60).toInt()
@@ -80,12 +70,8 @@ object TimeFormat {
         return timeString
     }
 
-    fun millisToShortDuration(millis: Long): String {
+    fun toShortDuration(millis: Long): String {
         val totalSecs = millis / 1000
-        return secondsToShortDuration(totalSecs)
-    }
-
-    fun secondsToShortDuration(totalSecs: Long): String {
         val hours = TimeUnit.SECONDS.toHours(totalSecs)
         val minutes = TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60
         val seconds = TimeUnit.SECONDS.toSeconds(totalSecs) - TimeUnit.SECONDS.toMinutes(totalSecs) * 60
@@ -99,7 +85,7 @@ object TimeFormat {
         return timeString
     }
 
-    fun convertToSeconds(hour: Int, minute: Int): Int = hour * 3600 + minute * 60
+    fun convertToMillis(hour: Int, minute: Int): Int = (hour * 3600 + minute * 60) * 1000
 
     fun getElapsedTime(date: Date): String {
         val diff: Long = Date().time - date.time
