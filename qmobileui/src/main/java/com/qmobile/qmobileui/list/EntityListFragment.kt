@@ -154,7 +154,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         initOnRefreshListener()
         EntityListFragmentObserver(this, entityListViewModel).initObservers()
         hideKeyboard(activity)
-        setSearchQuery()
         BaseApp.genericTableFragmentHelper.getCustomEntityListFragment(tableName, binding)
             ?.onViewCreated(view, savedInstanceState)
     }
@@ -338,6 +337,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         setupActionsMenuIfNeeded(menu)
         setupSearchMenuIfNeeded(menu, inflater)
         sortListIfNeeded()
+        setSearchQuery()
 
         super.onCreateOptionsMenu(menu, inflater)
     }
@@ -488,7 +488,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         SortHelper.getSortFieldsForTable(tableName)?.let {
             if (it.isNotEmpty()) {
                 sortFields = it
-                setSearchQuery()
             }
         }
     }
