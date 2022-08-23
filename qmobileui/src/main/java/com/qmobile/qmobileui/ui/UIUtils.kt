@@ -6,7 +6,9 @@
 
 package com.qmobile.qmobileui.ui
 
+import android.app.Application
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -33,6 +35,15 @@ fun FragmentActivity?.setupToolbarTitle(title: String) {
         collapsingToolbarLayout.title = title
     }
 }
+
+// Provides if dark mode is enabled
+fun Application.isNightMode(): Boolean =
+    when (this.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
+        Configuration.UI_MODE_NIGHT_YES -> true
+        Configuration.UI_MODE_NIGHT_NO -> false
+        Configuration.UI_MODE_NIGHT_UNDEFINED -> false
+        else -> false
+    }
 
 fun getShakeAnimation(context: Context): Animation = AnimationUtils.loadAnimation(context, R.anim.shake)
 

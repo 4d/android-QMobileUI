@@ -6,17 +6,15 @@
 
 <resources>
     <color name="relation_link">#007AFF</color>
-    <color name="android_green">#3DDC84</color>
     <color name="divider_color">#22828282</color>
+    <color name="barcode_reader_frame">#3DDC84</color>
 
-    <color name="theme_light_snackbar_success">#006E1C</color>
-    <color name="theme_light_on_snackbar_success">#FFFFFF</color>
-    <color name="theme_light_snackbar_warning">#F9E534</color>
-    <color name="theme_light_on_snackbar_warning">#201C00</color>
-    <color name="theme_dark_snackbar_success">#78DC77</color>
-    <color name="theme_dark_on_snackbar_success">#00390A</color>
-    <color name="theme_dark_snackbar_warning">#F9E534</color>
-    <color name="theme_dark_on_snackbar_warning">#201C00</color>
+    <color name="green_success">#006E1C</color>
+
+    <color name="snackbar_success">@color/green_success</color>
+    <color name="on_snackbar_success">#FFFFFF</color>
+    <color name="snackbar_warning">#F9E534</color>
+    <color name="on_snackbar_warning">#201C00</color>
 
     <color name="grey_light_1">#E9E9EB</color>
     <color name="grey_light_2">#F2F2F7</color>

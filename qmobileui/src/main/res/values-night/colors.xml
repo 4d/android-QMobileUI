@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by Quentin Marciset on 28/1/2021.
+  ~ 4D SAS
+  ~ Copyright (c) 2021 Quentin Marciset. All rights reserved.
+  -->
+
+<resources>
+    <color name="green_success">#78DC77</color>
+
+    <color name="snackbar_success">@color/green_success</color>
+    <color name="on_snackbar_success">#00390A</color>
+    <color name="snackbar_warning">#F9E534</color>
+    <color name="on_snackbar_warning">#201C00</color>
+</resources>

@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import com.google.android.material.chip.Chip
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobileui.ui.isNightMode
 
 object ImageNamed {
 
@@ -34,7 +35,7 @@ object ImageNamed {
     }
 
     private fun Chip.setChipDrawable(drawableResPair: Pair<Int, Int>, tintable: Boolean?) {
-        if (BaseApp.nightMode() && drawableResPair.second != 0) {
+        if (BaseApp.instance.isNightMode() && drawableResPair.second != 0) {
             this.chipIcon =
                 ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.second)
         } else {
@@ -51,7 +52,7 @@ object ImageNamed {
         drawableResPair: Pair<Int, Int>,
         tintable: Boolean?
     ) {
-        if (BaseApp.nightMode() && drawableResPair.second != 0) {
+        if (BaseApp.instance.isNightMode() && drawableResPair.second != 0) {
             this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.second, 0, 0, 0)
         } else {
             this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.first, 0, 0, 0)
@@ -68,7 +69,7 @@ object ImageNamed {
         imageWidth: Int,
         imageHeight: Int
     ) {
-        val drawable = if (BaseApp.nightMode() && drawableResPair.second != 0) {
+        val drawable = if (BaseApp.instance.isNightMode() && drawableResPair.second != 0) {
             ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.second)
         } else {
             ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
