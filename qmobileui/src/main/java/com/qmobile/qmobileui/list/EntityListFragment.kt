@@ -491,7 +491,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             // Json object containing all sort fields : Map<tableName, MapOf<fieldName, order (asc/desc))>>
             val jsonObject = JSONObject(parametersToSortWith)
             jsonObject.getSafeString(tableName)?.let { fieldsToSortCurrentTableJsonString ->
-                val fieldsToSortCurrentTable: HashMap<String, String> = HashMap()
+                val fieldsToSortCurrentTable: LinkedHashMap<String, String> = LinkedHashMap()
 
                 // Json object only current table sort fields :  MapOf<fieldName, order (asc/desc)>
                 val currentTableFieldsJsonObject = JSONObject(fieldsToSortCurrentTableJsonString)
