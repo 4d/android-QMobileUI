@@ -16,17 +16,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.viewpager2.widget.ViewPager2
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.utils.getSafeString
-import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.sort.SortHelper
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.ColorHelper
 import com.qmobile.qmobileui.utils.FormQueryBuilder
-import org.json.JSONObject
 
 class EntityViewPagerFragment : BaseFragment() {
 
@@ -34,7 +32,7 @@ class EntityViewPagerFragment : BaseFragment() {
     internal var viewPager: ViewPager2? = null
     lateinit var adapter: ViewPagerAdapter
 
-//    lateinit var adapter: ViewPagerAdapter2
+    //    lateinit var adapter: ViewPagerAdapter2
     private lateinit var actionPrevious: MenuItem
     private lateinit var actionNext: MenuItem
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
@@ -192,30 +190,10 @@ class EntityViewPagerFragment : BaseFragment() {
     }
 
     // Used to sort items of current table if a sort action is already applied (and persisted in shared prefs)
-    @Suppress("NestedBlockDepth")
     private fun sortListIfNeeded() {
-        val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
-        if (parametersToSortWith.isNotEmpty()) {
-            // Json object containing all sort fields : Map<tableName, MapOf<fieldName, order (asc/desc))>>
-            val jsonObject = JSONObject(parametersToSortWith)
-            jsonObject.getSafeString(tableName)?.let { fieldsToSortCurrentTableJsonString ->
-                val fieldsToSortCurrentTable: LinkedHashMap<String, String> = LinkedHashMap()
-
-                // Json object only current table sort fields :  MapOf<fieldName, order (asc/desc)>
-                val currentTableFieldsJsonObject = JSONObject(fieldsToSortCurrentTableJsonString)
-                // Extracting the json content to a hashmap
-                val keysItr = currentTableFieldsJsonObject.keys()
-                while (keysItr.hasNext()) {
-                    val key = keysItr.next()
-                    currentTableFieldsJsonObject.getSafeString(key)?.let { value ->
-                        fieldsToSortCurrentTable[key] = value
-                    }
-                }
-
-                if (fieldsToSortCurrentTable.isNotEmpty()) {
-                    setSearchQuery(fieldsToSortCurrentTable)
-                }
-                return
+        SortHelper.getSortFieldsForTable(tableName)?.let {
+            if (it.isNotEmpty()) {
+                setSearchQuery(it)
             }
         }
     }
