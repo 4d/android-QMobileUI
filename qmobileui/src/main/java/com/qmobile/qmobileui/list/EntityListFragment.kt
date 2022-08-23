@@ -72,7 +72,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     private var tableActionsJsonObject = BaseApp.runtimeDataHolder.tableActions
     private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
     private lateinit var formQueryBuilder: FormQueryBuilder
-    private lateinit var sortFields: LinkedHashMap<String, String>
+    private var sortFields: LinkedHashMap<String, String>? = null
 
     // fragment parameters
     override var tableName = ""
@@ -312,13 +312,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                     if (searchPattern != it) {
                         searchPattern = it
                         setSearchQuery()
-
-                        // Restore selected sort after canceling/clearing search edittext
-                        sortFields.let { fields ->
-                            if (it.isEmpty() && fields.isNotEmpty()) {
-                                sortListIfNeeded()
-                            }
-                        }
                     }
                 }
                 return true
@@ -423,7 +416,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         outState.putString(CURRENT_SEARCH_QUERY_KEY, searchPattern)
     }
 
-    private fun setSearchQuery(fieldToSortBy: HashMap<String, String>? = null) {
+    private fun setSearchQuery() {
         val formQuery = if (fromRelation) {
             formQueryBuilder.getRelationQuery(
                 parentItemId = parentItemId,
@@ -432,7 +425,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 path = path
             )
         } else {
-            formQueryBuilder.getQuery(searchPattern, fieldToSortBy)
+            formQueryBuilder.getQuery(searchPattern, sortFields)
         }
         entityListViewModel.setSearchQuery(formQuery)
     }
@@ -471,9 +464,11 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     }
 
     private fun sortItems(action: Action) {
-        val fieldsToSortBy = action.getSortFields()
-        setSearchQuery(fieldsToSortBy)
-        saveSortChoice(fieldsToSortBy)
+        sortFields = action.getSortFields()
+        setSearchQuery()
+        sortFields?.let {
+            saveSortChoice(it)
+        }
     }
 
     private fun saveSortChoice(fieldsToSortBy: Map<String, String>) {
@@ -493,7 +488,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         SortHelper.getSortFieldsForTable(tableName)?.let {
             if (it.isNotEmpty()) {
                 sortFields = it
-                setSearchQuery(it)
+                setSearchQuery()
             }
         }
     }
