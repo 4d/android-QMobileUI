@@ -6,7 +6,7 @@
 
 package com.qmobile.qmobileui.action.sort
 
-enum class SortFormat (val value: String) {
+enum class SortFormat(val value: String) {
     ASCENDING("ASC"),
     DESCENDING("DESC")
 }

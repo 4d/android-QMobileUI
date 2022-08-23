@@ -26,7 +26,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
@@ -313,7 +312,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                         setSearchQuery()
 
                         // Restore selected sort after canceling/clearing search edittext
-                        if(it.isEmpty()){
+                        if (it.isEmpty()) {
                             sortListIfNeeded()
                         }
                     }
@@ -346,40 +345,39 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    @Suppress("NestedBlockDepth")
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
         // If user already applied a sort, we need no more to apply default sort
-            if (parametersToSortWith.isEmpty() || !JSONObject(parametersToSortWith).has(tableName)) {
-                val sortActions = tableActions.filter { it1 -> it1.preset == "sort" }
-                when (sortActions.size) {
-                    0 -> {
-                        // get default sort field from default_sort_fields.json
-                        val defaultFieldToSortWith =
-                            BaseApp.runtimeDataHolder.defaultSortFields.getSafeString(tableName)
-                        if (defaultFieldToSortWith != null) {
-                            saveSortChoice(mapOf(defaultFieldToSortWith to SortFormat.ASCENDING.value))
-                        }
-                    }
-
-                    1 -> {
-                        sortActions.first().let { action ->
-                            // no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
-                            saveSortChoice(action.getSortFields())
-                        }
-                    }
-                    else -> {
-                        // if more than one action we apply by default the first one
-                        val defaultSort = sortActions.firstOrNull()?.getSortFields()
-                        defaultSort?.let { saveSortChoice(it) }
+        if (parametersToSortWith.isEmpty() || !JSONObject(parametersToSortWith).has(tableName)) {
+            val sortActions = tableActions.filter { it.isSortAction() }
+            when (sortActions.size) {
+                0 -> {
+                    // get default sort field from default_sort_fields.json
+                    val defaultFieldToSortWith =
+                        BaseApp.runtimeDataHolder.defaultSortFields.getSafeString(tableName)
+                    if (defaultFieldToSortWith != null) {
+                        saveSortChoice(mapOf(defaultFieldToSortWith to SortFormat.ASCENDING.value))
                     }
                 }
-            }
 
+                1 -> {
+                    sortActions.firstOrNull()?.let { action ->
+                        // no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
+                        saveSortChoice(action.getSortFields())
+                    }
+                }
+                else -> {
+                    // if more than one action we apply by default the first one
+                    val defaultSort = sortActions.firstOrNull()?.getSortFields()
+                    defaultSort?.let { saveSortChoice(it) }
+                }
+            }
+        }
 
         // if the only action is sort action it should not be displayed
-        if ((tableActions.size == 1) && (tableActions[0].isSortAction()))
+        if (tableActions.size == 1 && tableActions[0].isSortAction()) {
             tableActions.clear()
+        }
 
         if (hasTableActions) {
             actionActivity.setupActionsMenu(menu, tableActions, this) {
