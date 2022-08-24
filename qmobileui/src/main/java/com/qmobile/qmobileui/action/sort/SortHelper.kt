@@ -5,6 +5,7 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import org.json.JSONObject
 
 object SortHelper {
+    @Suppress("NestedBlockDepth")
     fun getSortFieldsForTable(tableName: String): LinkedHashMap<String, String>? {
         val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
         if (parametersToSortWith.isNotEmpty()) {
