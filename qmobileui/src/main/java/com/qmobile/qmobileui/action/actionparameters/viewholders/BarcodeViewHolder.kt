@@ -41,7 +41,7 @@ class BarcodeViewHolder(
 
         onValueChanged(parameterName, input.text.toString(), null, validate(false))
 
-        onEndIconClick {
+        onClick {
             (itemView.context as PermissionChecker?)?.askPermission(
                 context = itemView.context,
                 permission = Manifest.permission.CAMERA,

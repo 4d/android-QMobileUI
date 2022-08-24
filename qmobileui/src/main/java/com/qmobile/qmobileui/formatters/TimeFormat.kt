@@ -57,17 +57,15 @@ object TimeFormat {
         val days = TimeUnit.SECONDS.toDays(totalSecs).toInt()
         val hours = (TimeUnit.SECONDS.toHours(totalSecs) - days * 24).toInt()
         val minutes = (TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60).toInt()
+        val seconds = (TimeUnit.SECONDS.toSeconds(totalSecs) - TimeUnit.SECONDS.toMinutes(totalSecs) * 60).toInt()
 
-        val timeString = when {
-            days > 0 -> "$days ${getDayWord(days)} $hours ${getHourWord(hours)} ${getMinutes(minutes)} ${
-            getMinuteWord(
-                minutes
-            )
-            }"
-            hours > 0 -> "$hours ${getHourWord(hours)} ${getMinutes(minutes)} ${getMinuteWord(minutes)}"
-            else -> "${getMinutes(minutes)} ${getMinuteWord(minutes)}"
-        }
-        return timeString
+        var timeString = ""
+        if (days > 0) timeString = "$days ${getDayWord(days)}"
+        if (hours > 0) timeString += " $hours ${getHourWord(hours)}"
+        if (minutes > 0) timeString += " $minutes ${getMinuteWord(minutes)}"
+        if (seconds > 0) timeString += " $seconds ${getSecondWord(seconds)}"
+        if (timeString.isEmpty()) timeString = "0 second"
+        return timeString.removePrefix(" ")
     }
 
     fun toShortDuration(millis: Long): String {
@@ -85,7 +83,7 @@ object TimeFormat {
         return timeString
     }
 
-    fun convertToMillis(hour: Int, minute: Int): Int = (hour * 3600 + minute * 60) * 1000
+    fun convertToMillis(hour: Int, minute: Int, seconds: Int = 0): Int = (hour * 3600 + minute * 60 + seconds) * 1000
 
     fun getElapsedTime(date: Date): String {
         val diff: Long = Date().time - date.time
