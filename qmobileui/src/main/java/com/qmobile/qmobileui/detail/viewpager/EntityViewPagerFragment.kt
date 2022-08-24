@@ -21,6 +21,7 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.sort.SortHelper
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.ColorHelper
 import com.qmobile.qmobileui.utils.FormQueryBuilder
@@ -31,7 +32,7 @@ class EntityViewPagerFragment : BaseFragment() {
     internal var viewPager: ViewPager2? = null
     lateinit var adapter: ViewPagerAdapter
 
-//    lateinit var adapter: ViewPagerAdapter2
+    //    lateinit var adapter: ViewPagerAdapter2
     private lateinit var actionPrevious: MenuItem
     private lateinit var actionNext: MenuItem
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
@@ -112,7 +113,11 @@ class EntityViewPagerFragment : BaseFragment() {
         })
 
         EntityViewPagerFragmentObserver(this, entityListViewModel).initObservers()
-        setSearchQuery()
+        if (searchQueryPattern.isNotEmpty()) {
+            setSearchQuery()
+        } else {
+            sortListIfNeeded()
+        }
     }
 
     override fun onDestroyView() {
@@ -170,7 +175,7 @@ class EntityViewPagerFragment : BaseFragment() {
         }
     }
 
-    private fun setSearchQuery() {
+    private fun setSearchQuery(fieldToSortBy: HashMap<String, String>? = null) {
         val formQuery = if (fromRelation) {
             formQueryBuilder.getRelationQuery(
                 parentItemId = parentItemId,
@@ -179,8 +184,17 @@ class EntityViewPagerFragment : BaseFragment() {
                 path = path
             )
         } else {
-            formQueryBuilder.getQuery(searchQueryPattern)
+            formQueryBuilder.getQuery(searchQueryPattern, fieldToSortBy)
         }
         entityListViewModel.setSearchQuery(formQuery)
+    }
+
+    // Used to sort items of current table if a sort action is already applied (and persisted in shared prefs)
+    private fun sortListIfNeeded() {
+        SortHelper.getSortFieldsForTable(tableName)?.let {
+            if (it.isNotEmpty()) {
+                setSearchQuery(it)
+            }
+        }
     }
 }
