@@ -88,6 +88,13 @@
     <string name="pending_task_cancelled">Pending task deleted</string>
     <string name="pending_task_cancelled_undo">Undo</string>
     <string name="item_action_button_ellipsize">…</string>
+    <string name="action_time_dialog_negative">Cancel</string>
+    <string name="action_time_dialog_positive">OK</string>
+
+    <!-- Duration Picker -->
+    <string name="hour_column_title">Hours</string>
+    <string name="minute_column_title">Minutes</string>
+    <string name="second_column_title">Seconds</string>
 
     <!-- Permissions -->
     <string name="permission_dialog_title">Permission required</string>

@@ -13,6 +13,7 @@ import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.ui.getShakeAnimation
+import com.qmobile.qmobileui.ui.setOnSingleClickListener
 
 abstract class BaseInputLessViewHolder(itemView: View, format: String) : BaseViewHolder(itemView, format) {
 
@@ -49,6 +50,7 @@ abstract class BaseInputLessViewHolder(itemView: View, format: String) : BaseVie
         container.endIconMode = TextInputLayout.END_ICON_CUSTOM
         input.isFocusable = false
         input.isLongClickable = false
+        input.isCursorVisible = false
 
         alreadyFilledValue?.let {
             fill(it)
@@ -87,9 +89,9 @@ abstract class BaseInputLessViewHolder(itemView: View, format: String) : BaseVie
         return -1
     }
 
-    internal fun onEndIconClick(endIconClick: () -> Unit) {
-        container.setEndIconOnClickListener {
-            endIconClick()
+    internal fun onClick(onClick: () -> Unit) {
+        input.setOnSingleClickListener {
+            onClick()
         }
     }
 
