@@ -126,11 +126,14 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         hasCurrentRecordActions = currentRecordActionsJsonObject.has(tableName)
         isSwipable = BaseApp.genericTableFragmentHelper.isSwipeAllowed(tableName)
 
-        if (hasSearch || hasTableActions) {
-            this.setHasOptionsMenu(true)
-        }
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
+        if (hasSearch || hasTableActions) {
+            this.setHasOptionsMenu(true)
+        } else {
+            setSearchQuery()
+        }
+
         _binding = FragmentListBinding.inflate(inflater, container, false).apply {
             viewModel = entityListViewModel
             lifecycleOwner = viewLifecycleOwner
