@@ -4,7 +4,7 @@
  * Copyright (c) 2020 Quentin Marciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.list.viewholder
+package com.qmobile.qmobileui.list
 
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView

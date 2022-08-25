@@ -42,11 +42,11 @@ import com.qmobile.qmobileui.action.sort.SortFormat
 import com.qmobile.qmobileui.action.sort.SortHelper
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.databinding.FragmentListBinding
+import com.qmobile.qmobileui.list.swipe.ItemActionButton
+import com.qmobile.qmobileui.list.swipe.SwipeToActionCallback
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
 import com.qmobile.qmobileui.ui.GridDividerDecoration
 import com.qmobile.qmobileui.ui.setupToolbarTitle
-import com.qmobile.qmobileui.ui.swipe.ItemActionButton
-import com.qmobile.qmobileui.ui.swipe.SwipeHelper
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
 import org.json.JSONObject
@@ -246,7 +246,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     private fun initCellSwipe() {
         if (hasCurrentRecordActions && isSwipable) {
             val itemTouchHelper =
-                ItemTouchHelper(object : SwipeHelper(binding.fragmentListRecyclerView) {
+                ItemTouchHelper(object : SwipeToActionCallback(requireContext(), binding.fragmentListRecyclerView) {
                     override fun instantiateUnderlayButton(position: Int): List<ItemActionButton> {
                         val swipeButtons = mutableListOf<ItemActionButton>()
                         for (i in 0 until (currentRecordActions.size)) {
@@ -280,24 +280,17 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         horizontalIndex: Int,
         onActionClick: (action: Action, roomEntity: RoomEntity) -> Unit
     ): ItemActionButton {
-        return ItemActionButton(
-            requireContext(),
-            action,
-            horizontalIndex,
-            object : SwipeHelper.UnderlayButtonClickListener {
-                override fun onClick() {
-                    adapter.getSelectedItem(position)?.let { entity ->
-                        if (action == null) { // the case of "..." button
-                            showDialog { clickedAction ->
-                                onActionClick(clickedAction, entity)
-                            }
-                        } else {
-                            onActionClick(action, entity)
-                        }
+        return ItemActionButton(requireContext(), action, horizontalIndex) {
+            adapter.getSelectedItem(position)?.let { entity ->
+                if (action == null) { // the case of "..." button
+                    showDialog { clickedAction ->
+                        onActionClick(clickedAction, entity)
                     }
+                } else {
+                    onActionClick(action, entity)
                 }
             }
-        )
+        }
     }
 
     private val searchListener: SearchView.OnQueryTextListener =

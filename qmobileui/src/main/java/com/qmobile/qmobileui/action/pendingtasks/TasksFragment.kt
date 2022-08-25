@@ -29,7 +29,6 @@ import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.SnackbarHelper.UNDO_ACTION_DURATION
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.ui.setupToolbarTitle
-import com.qmobile.qmobileui.ui.swipe.SwipeToDeleteCallback
 import java.util.*
 
 class TasksFragment : BaseFragment(), NetworkChecker {
