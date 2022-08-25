@@ -6,12 +6,11 @@
 
 package com.qmobile.qmobileui.utils
 
-import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.utils.containsIgnoreCase
-import org.json.JSONArray
+import com.qmobile.qmobiledatasync.utils.fieldAdjustment
 import timber.log.Timber
 
 object SearchQueryBuilder {
@@ -19,22 +18,20 @@ object SearchQueryBuilder {
     fun appendPredicate(
         tableName: String,
         stringBuilder: StringBuilder,
-        columnsToFilter: JSONArray,
+        columnsToFilter: List<String>,
         pattern: String,
         sortQuery: String? = null
     ) {
-        (0 until columnsToFilter.length()).forEach eachColumn@{ index ->
-            val fieldName = columnsToFilter.getSafeString(index)
-            if (fieldName !is String) return@eachColumn
-
+        columnsToFilter.forEach {
+            val fieldName = it.fieldAdjustment()
             if (fieldName.contains(".")) { // manager.FirstName
 
                 val pathWithoutFieldName = fieldName.substringBeforeLast(".")
 
                 val relation = if (pathWithoutFieldName.contains(".")) { // alias
-                    RelationHelper.getRelations(tableName).find { it.path == pathWithoutFieldName }
+                    RelationHelper.getRelations(tableName).find { rel -> rel.path == pathWithoutFieldName }
                 } else { // basic relation
-                    RelationHelper.getRelations(tableName).find { it.name == pathWithoutFieldName }
+                    RelationHelper.getRelations(tableName).find { rel -> rel.name == pathWithoutFieldName }
                 }
 
                 relation?.let { rel ->
