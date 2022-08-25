@@ -30,6 +30,7 @@ import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.utils.LayoutType
+import com.qmobile.qmobiledatasync.utils.fieldAdjustment
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
@@ -344,7 +345,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 0 -> {
                     val defaultFieldToSortWith = BaseApp.runtimeDataHolder.tableInfo[tableName]?.defaultSortField
                     if (defaultFieldToSortWith != null) {
-                        saveSortChoice(mapOf(defaultFieldToSortWith to SortFormat.ASCENDING.value))
+                        saveSortChoice(mapOf(defaultFieldToSortWith.fieldAdjustment() to SortFormat.ASCENDING.value))
                     }
                 }
 

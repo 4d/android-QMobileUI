@@ -66,7 +66,7 @@ class SqlBuilderTest {
         val actualQueryResult =
             formQueryBuilder.getQuery("abc", sortFields = linkedMapOf("name COLLATE NOCASE" to "DESC", "id" to "DESC", "age" to "ASC")).sql
         val expectedQueryResult =
-            SimpleSQLiteQuery("SELECT * FROM Employee AS T1 WHERE T1.LastName LIKE '%abc%' OR T1.FirstName LIKE '%abc%' order by name COLLATE NOCASE DESC, id DESC, age ASC").sql
+            SimpleSQLiteQuery("SELECT * FROM Employee AS T1 WHERE T1.lastName LIKE '%abc%' OR T1.firstName LIKE '%abc%' ORDER BY name COLLATE NOCASE DESC, id DESC, age ASC").sql
         Assert.assertEquals(expectedQueryResult, actualQueryResult)
     }
 
@@ -79,7 +79,7 @@ class SqlBuilderTest {
             FormQueryBuilder(tableName = "Service", searchFields = searchFieldsService)
         val actualQueryResult = formQueryBuilder.getQuery("abc", hashMapOf("name COLLATE NOCASE " to "DESC")).sql
         val expectedQueryResult =
-            SimpleSQLiteQuery("SELECT * FROM Service AS T1 WHERE T1.name LIKE '%abc%' OR T1.employeeNumber LIKE '%abc%' order by name COLLATE NOCASE  DESC").sql
+            SimpleSQLiteQuery("SELECT * FROM Service AS T1 WHERE T1.name LIKE '%abc%' OR T1.employeeNumber LIKE '%abc%' ORDER BY name COLLATE NOCASE  DESC").sql
         Assert.assertEquals(expectedQueryResult, actualQueryResult)
     }
 
@@ -96,7 +96,7 @@ class SqlBuilderTest {
         val formQueryBuilder = FormQueryBuilder(tableName = "Table_3", searchFields = searchFields)
         val actualQueryResult = formQueryBuilder.getQuery("abc").sql
         val expectedQueryResult =
-            SimpleSQLiteQuery("SELECT * FROM Table_3 AS T1 WHERE T1.LastName LIKE '%abc%' OR EXISTS ( SELECT * FROM RELATED_TABLE AS T2 WHERE T2.__KEY = T1.__relation4Key AND T2.field_x LIKE '%abc%' )").sql
+            SimpleSQLiteQuery("SELECT * FROM Table_3 AS T1 WHERE T1.lastName LIKE '%abc%' OR EXISTS ( SELECT * FROM RELATED_TABLE AS T2 WHERE T2.__KEY = T1.__relation4Key AND T2.field_x LIKE '%abc%' )").sql
         Assert.assertEquals(expectedQueryResult, actualQueryResult)
     }
 
@@ -112,7 +112,7 @@ class SqlBuilderTest {
         val formQueryBuilder = FormQueryBuilder(tableName = "Table_3", searchFields = searchFields)
         val actualQueryResult = formQueryBuilder.getQuery("abc").sql
         val expectedQueryResult =
-            SimpleSQLiteQuery("SELECT * FROM Table_3 AS T1 WHERE T1.LastName LIKE '%abc%' OR T1.field_x LIKE '%abc%'").sql
+            SimpleSQLiteQuery("SELECT * FROM Table_3 AS T1 WHERE T1.lastName LIKE '%abc%' OR T1.field_x LIKE '%abc%'").sql
         Assert.assertEquals(expectedQueryResult, actualQueryResult)
     }
 
@@ -128,7 +128,7 @@ class SqlBuilderTest {
         val formQueryBuilder = FormQueryBuilder(tableName = "Table_3", searchFields = searchFields)
         val actualQueryResult = formQueryBuilder.getQuery("UX").sql
         val expectedQueryResult =
-            SimpleSQLiteQuery("SELECT * FROM Table_3 AS T1 WHERE T1.LastName LIKE '%UX%' OR T1.field_x LIKE '%UX%' OR T1.field_x == '0'").sql
+            SimpleSQLiteQuery("SELECT * FROM Table_3 AS T1 WHERE T1.lastName LIKE '%UX%' OR T1.field_x LIKE '%UX%' OR T1.field_x == '0'").sql
         Assert.assertEquals(expectedQueryResult, actualQueryResult)
     }
 
@@ -147,7 +147,7 @@ class SqlBuilderTest {
         val formQueryBuilder = FormQueryBuilder(tableName = "Table_4", searchFields = searchFields)
         val actualQueryResult = formQueryBuilder.getQuery("UX").sql
         val expectedQueryResult =
-            SimpleSQLiteQuery("SELECT * FROM Table_4 AS T1 WHERE T1.LastName LIKE '%UX%' OR EXISTS ( SELECT * FROM RELATED_TABLE AS T2 WHERE T2.__KEY = T1.__relationFieldKey AND ( T2.field_1 LIKE '%UX%' OR T2.field_1 == '0' ) )").sql
+            SimpleSQLiteQuery("SELECT * FROM Table_4 AS T1 WHERE T1.lastName LIKE '%UX%' OR EXISTS ( SELECT * FROM RELATED_TABLE AS T2 WHERE T2.__KEY = T1.__relationFieldKey AND ( T2.field_1 LIKE '%UX%' OR T2.field_1 == '0' ) )").sql
         Assert.assertEquals(expectedQueryResult, actualQueryResult)
     }
 }

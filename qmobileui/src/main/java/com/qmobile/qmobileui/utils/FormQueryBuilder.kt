@@ -70,7 +70,7 @@ class FormQueryBuilder(
         } else {
             fields.entries.forEach {
                 if (sortStringBuffer.isEmpty()) {
-                    sortStringBuffer.append(" order by ${it.key} ${it.value}")
+                    sortStringBuffer.append(" ORDER BY ${it.key} ${it.value}")
                 } else {
                     sortStringBuffer.append(", ${it.key} ${it.value}")
                 }
