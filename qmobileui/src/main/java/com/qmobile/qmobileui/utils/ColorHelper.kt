@@ -19,28 +19,24 @@ object ColorHelper {
     private const val BRIGHT_COLOR_FACTOR = 0.85F
     private const val MEDIUM_COLOR_FACTOR = 1F
 
-    fun getActionButtonColor(horizontalIndex: Int, context: Context): Int {
+    fun getActionButtonColor(horizontalIndex: Int, context: Context, isDeletePreset: Boolean): Int {
         val themeColor = context.getColorFromAttr(R.attr.colorPrimary)
         val themeColorLuminance = ColorUtils.calculateLuminance(themeColor)
-
-        if (horizontalIndex == 0) {
-            return themeColor
-        }
-
         return when {
-            // dark
-            themeColorLuminance < LUMINANCE_DARK_THRESHOLD -> {
-                manipulateColor(themeColor, DARK_COLOR_FACTOR, horizontalIndex)
-            }
-            // bright
-            themeColorLuminance > LUMINANCE_BRIGHT_THRESHOLD -> {
-                manipulateColor(themeColor, BRIGHT_COLOR_FACTOR, horizontalIndex)
-            }
-            // medium
-            else -> {
-                manipulateColor(themeColor, MEDIUM_COLOR_FACTOR, horizontalIndex)
-            }
+            isDeletePreset -> context.getColorFromAttr(R.attr.colorError)
+            horizontalIndex == 0 -> themeColor
+            themeColorLuminance < LUMINANCE_DARK_THRESHOLD ->
+                manipulateColor(themeColor, DARK_COLOR_FACTOR, horizontalIndex) // dark
+            themeColorLuminance > LUMINANCE_BRIGHT_THRESHOLD ->
+                manipulateColor(themeColor, BRIGHT_COLOR_FACTOR, horizontalIndex) // bright
+            else -> manipulateColor(themeColor, MEDIUM_COLOR_FACTOR, horizontalIndex) // medium
         }
+    }
+
+    fun getActionButtonTextColor(context: Context, isDeletePreset: Boolean): Int = if (isDeletePreset) {
+        context.getColorFromAttr(R.attr.colorOnError)
+    } else {
+        context.getColorFromAttr(R.attr.colorOnPrimary)
     }
 
     private fun manipulateColor(color: Int, factor: Float, horizontalIndex: Int): Int {
