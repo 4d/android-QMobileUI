@@ -26,7 +26,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
@@ -68,7 +67,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
 
     override lateinit var actionActivity: ActionActivity
-    private var searchableFields = BaseApp.runtimeDataHolder.searchField
     private var tableActionsJsonObject = BaseApp.runtimeDataHolder.tableActions
     private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
     private lateinit var formQueryBuilder: FormQueryBuilder
@@ -121,11 +119,10 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         activity?.setupToolbarTitle(navbarTitle)
         formQueryBuilder = FormQueryBuilder(tableName)
 
-        hasSearch = searchableFields.has(tableName)
+        hasSearch = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchFields?.isNotEmpty() == true
         hasTableActions = tableActionsJsonObject.has(tableName)
         hasCurrentRecordActions = currentRecordActionsJsonObject.has(tableName)
         isSwipable = BaseApp.genericTableFragmentHelper.isSwipeAllowed(tableName)
-
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
         if (hasSearch || hasTableActions) {
@@ -345,9 +342,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             val sortActions = tableActions.filter { it.isSortAction() }
             when (sortActions.size) {
                 0 -> {
-                    // get default sort field from default_sort_fields.json
-                    val defaultFieldToSortWith =
-                        BaseApp.runtimeDataHolder.defaultSortFields.getSafeString(tableName)
+                    val defaultFieldToSortWith = BaseApp.runtimeDataHolder.tableInfo[tableName]?.defaultSortField
                     if (defaultFieldToSortWith != null) {
                         saveSortChoice(mapOf(defaultFieldToSortWith to SortFormat.ASCENDING.value))
                     }

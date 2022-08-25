@@ -7,15 +7,13 @@
 package com.qmobile.qmobileui.utils
 
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.RelationHelper
-import org.json.JSONObject
 import timber.log.Timber
 
 class FormQueryBuilder(
     var tableName: String,
-    private val searchField: JSONObject = BaseApp.runtimeDataHolder.searchField // has columns to filter
+    private val searchFields: List<String>? = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchFields
 ) {
 
     private val baseQuery = "SELECT * FROM $tableName"
@@ -28,7 +26,7 @@ class FormQueryBuilder(
         }
 
         val stringBuilder = StringBuilder("SELECT * FROM $tableName AS T1 WHERE ")
-        searchField.getSafeArray(tableName)?.let { columnsToFilter ->
+        searchFields?.let { columnsToFilter ->
             SearchQueryBuilder
                 .appendPredicate(tableName, stringBuilder, columnsToFilter, pattern, sortQuery)
         }
@@ -53,7 +51,7 @@ class FormQueryBuilder(
                 SimpleSQLiteQuery(query)
             } else {
                 val stringBuilder = StringBuilder("$query AND ( ")
-                searchField.getSafeArray(tableName)?.let { columnsToFilter ->
+                searchFields?.let { columnsToFilter ->
                     SearchQueryBuilder.appendPredicate(tableName, stringBuilder, columnsToFilter, pattern)
                 }
                 SimpleSQLiteQuery(stringBuilder.toString().removeSuffix(" OR ").plus(" )"))
