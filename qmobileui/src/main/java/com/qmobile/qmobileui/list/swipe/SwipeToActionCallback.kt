@@ -26,6 +26,10 @@ abstract class SwipeToActionCallback(
     ItemTouchHelper.LEFT
 ) {
 
+    companion object {
+        private const val VERTICAL_MARGIN = 45f
+    }
+
     private var swipedPosition = -1
     private val buttonsBuffer: MutableMap<Int, List<ItemActionButton>> = mutableMapOf()
 
@@ -140,16 +144,16 @@ abstract class SwipeToActionCallback(
         val itemHeight: Float = (itemView.bottom - itemView.top).toFloat()
         val itemWidth: Float = (itemView.right - itemView.left).toFloat()
         val buttonWidth: Float = itemWidth / ItemActionButton.BUTTON_WIDTH_FACTOR
+        val buttonVerticalCenter: Float = itemView.top + itemHeight / 2
         var left: Float
 
         buttons.forEach { button ->
             // Calculate position of icon
-            val iconDrawable = button.icon
             left = right - buttonWidth
             val iconLeft = right - (buttonWidth / 2) - (button.iconIntrinsicWidth / 2)
-            val iconTop = itemView.top + (itemHeight - button.iconIntrinsicHeight) / 2
+            val iconTop = buttonVerticalCenter - button.iconIntrinsicHeight
             val iconRight = right - (buttonWidth / 2) + (button.iconIntrinsicWidth / 2)
-            val iconBottom = iconTop + button.iconIntrinsicHeight
+            val iconBottom = buttonVerticalCenter
 
             // Draw the background
             paint.color = button.backgroundColor
@@ -159,17 +163,19 @@ abstract class SwipeToActionCallback(
 //            canvas.drawRect(rect, paintStroke)
 
             // Draw the delete icon
+            val iconDrawable = button.icon
             iconDrawable?.setBounds(iconLeft.toInt(), iconTop.toInt(), iconRight.toInt(), iconBottom.toInt())
             iconDrawable?.draw(canvas)
 
             // Draw title
             button.textPaint.getTextBounds(button.title, 0, button.title.length, titleBounds)
+            val titleHeight = titleBounds.bottom - titleBounds.top
             val x: Float = buttonWidth / 2f - titleBounds.width() / 2f - titleBounds.left
             val xPos = left + x
             val yPos = if (iconDrawable != null) {
-                iconBottom + ItemActionButton.VERTICAL_MARGIN
+                buttonVerticalCenter + VERTICAL_MARGIN + titleHeight
             } else {
-                itemView.top + itemHeight / 2 + (titleBounds.bottom - titleBounds.top).toFloat() / 2
+                buttonVerticalCenter + titleHeight.toFloat() / 2
             }
             canvas.drawText(button.title, xPos, yPos, button.textPaint)
 

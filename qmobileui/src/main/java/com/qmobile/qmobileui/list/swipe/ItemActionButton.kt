@@ -29,7 +29,6 @@ class ItemActionButton(
 
     companion object {
         const val BUTTON_WIDTH_FACTOR = 4.5f
-        const val VERTICAL_MARGIN = 70F
         private const val TRUNCATE_FACTOR = 5
         private const val HORIZONTAL_PADDING = 50.0F
         private const val TEXT_SIZE = 14 // Material Design md.sys.typescale.label-large.size
@@ -89,9 +88,12 @@ class ItemActionButton(
     }
 
     private fun getTitle(action: Action?, paint: Paint, intrinsicWidth: Float): String {
-        if (action == null) return ""
-        val title = action.getPreferredShortName()
-        return ellipsize(title, paint, intrinsicWidth - HORIZONTAL_PADDING)
+        return if (action == null) {
+            context.getString(R.string.action_more_button_title)
+        } else {
+            val title = action.getPreferredShortName()
+            ellipsize(title, paint, intrinsicWidth - HORIZONTAL_PADDING)
+        }
     }
 
     private fun ellipsize(input: String, paint: Paint, maxWidth: Float): String {
