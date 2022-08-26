@@ -248,7 +248,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     private fun initCellSwipe() {
         if (hasCurrentRecordActions && isSwipable) {
             val itemTouchHelper =
-                ItemTouchHelper(object : SwipeToActionCallback(requireContext(), binding.fragmentListRecyclerView) {
+                ItemTouchHelper(object : SwipeToActionCallback(binding.fragmentListRecyclerView) {
                     override fun instantiateUnderlayButton(position: Int): List<ItemActionButton> {
                         val swipeButtons = mutableListOf<ItemActionButton>()
                         for (i in 0 until (currentRecordActions.size)) {

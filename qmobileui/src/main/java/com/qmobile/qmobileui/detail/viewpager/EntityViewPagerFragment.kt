@@ -22,8 +22,8 @@ import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.sort.SortHelper
+import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.ui.setupToolbarTitle
-import com.qmobile.qmobileui.utils.ColorHelper
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 
 class EntityViewPagerFragment : BaseFragment() {
@@ -169,9 +169,9 @@ class EntityViewPagerFragment : BaseFragment() {
 
     private fun shadowDisabledButton(menuItem: MenuItem) {
         menuItem.icon.alpha = if (!menuItem.isEnabled) {
-            ColorHelper.ARGB_HALF_VALUE
+            ImageHelper.ARGB_HALF_VALUE
         } else {
-            ColorHelper.ARGB_MAX_VALUE
+            ImageHelper.ARGB_MAX_VALUE
         }
     }
 

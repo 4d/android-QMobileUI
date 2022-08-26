@@ -181,5 +181,13 @@ class ActionHelper private constructor() {
                 }
             }
         }
+
+        fun getActionButtonColor(context: Context, index: Int): Int {
+            return when (index) {
+                0 -> context.getColorFromAttr(R.attr.colorPrimary)
+                1 -> context.getColorFromAttr(R.attr.colorSecondary)
+                else -> context.getColorFromAttr(R.attr.colorTertiary)
+            }
+        }
     }
 }

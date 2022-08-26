@@ -16,8 +16,9 @@ import android.view.MotionEvent
 import androidx.appcompat.content.res.AppCompatResources
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.model.Action
+import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.binding.getColorFromAttr
-import com.qmobile.qmobileui.utils.ColorHelper
+import com.qmobile.qmobileui.binding.px
 
 class ItemActionButton(
     val context: Context,
@@ -27,29 +28,30 @@ class ItemActionButton(
 ) {
 
     companion object {
+        const val BUTTON_WIDTH_FACTOR = 4.5f
+        const val VERTICAL_MARGIN = 70F
         private const val TRUNCATE_FACTOR = 5
         private const val HORIZONTAL_PADDING = 50.0F
-        private const val TEXT_SIZE = 12
-        private const val BUTTON_TEXT_LETTER_SPACING = 0.0333333333F
+        private const val TEXT_SIZE = 14 // Material Design md.sys.typescale.label-large.size
+        private const val TITLE_FONT = "Roboto-Medium.ttf" // md.sys.typescale.label-large.font
     }
 
     private val screenWidth: Int = context.resources.displayMetrics.widthPixels
-    val intrinsicWidth = (screenWidth / SwipeToActionCallback.BUTTON_WIDTH_FACTOR)
+    val intrinsicWidth = (screenWidth / BUTTON_WIDTH_FACTOR)
 
     val icon = getIconDrawable()?.apply {
         this.setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
     }
     val iconIntrinsicWidth = icon?.intrinsicWidth?.toFloat() ?: 0f
     val iconIntrinsicHeight = icon?.intrinsicHeight?.toFloat() ?: 0f
-    val backgroundColor = ColorHelper.getActionButtonColor(horizontalIndex, context)
+    val backgroundColor = ActionHelper.getActionButtonColor(context, horizontalIndex)
     val textColor = context.getColorFromAttr(R.attr.colorOnPrimary)
 
     val textPaint: Paint = Paint().apply {
-        textSize = TEXT_SIZE * context.resources.displayMetrics.density
+        textSize = TEXT_SIZE.px.toFloat()
         textAlign = Paint.Align.LEFT
         // trying to mimic Material Design button style
-        typeface = Typeface.SANS_SERIF
-        letterSpacing = BUTTON_TEXT_LETTER_SPACING
+        typeface = Typeface.createFromAsset(context.assets, TITLE_FONT)
         color = textColor
     }
 
