@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.list.swipe
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
@@ -15,15 +14,12 @@ import android.graphics.RectF
 import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.ui.SwipeHelper
 import java.util.*
 import kotlin.math.max
 
 @SuppressLint("ClickableViewAccessibility")
 abstract class SwipeToActionCallback(
-    private val context: Context,
     private val recyclerView: RecyclerView
 ) : ItemTouchHelper.SimpleCallback(
     ItemTouchHelper.ACTION_STATE_IDLE,
@@ -31,23 +27,20 @@ abstract class SwipeToActionCallback(
 ) {
 
     companion object {
-        private const val BUTTON_RADIUS = 20F
-        private const val BUTTON_STROKE = 10F
-        private const val VERTICAL_MARGIN = 70F
-        const val BUTTON_WIDTH_FACTOR = 4.5f
+        private const val VERTICAL_MARGIN = 45f
     }
 
     private var swipedPosition = -1
     private val buttonsBuffer: MutableMap<Int, List<ItemActionButton>> = mutableMapOf()
 
     private val paint = Paint()
-    private val paintStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    /*private val paintStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = context.getColorFromAttr(R.attr.colorSurface)
         style = Paint.Style.STROKE
-        strokeWidth = BUTTON_STROKE
+        strokeWidth = 2F
         strokeJoin = Paint.Join.ROUND
         strokeCap = Paint.Cap.ROUND
-    }
+    }*/
 
     private val titleBounds = Rect()
 
@@ -150,33 +143,41 @@ abstract class SwipeToActionCallback(
         var right: Float = itemView.right.toFloat()
         val itemHeight: Float = (itemView.bottom - itemView.top).toFloat()
         val itemWidth: Float = (itemView.right - itemView.left).toFloat()
-        val buttonWidth: Float = itemWidth / BUTTON_WIDTH_FACTOR
+        val buttonWidth: Float = itemWidth / ItemActionButton.BUTTON_WIDTH_FACTOR
+        val buttonVerticalCenter: Float = itemView.top + itemHeight / 2
         var left: Float
 
         buttons.forEach { button ->
             // Calculate position of icon
-            val iconDrawable = button.icon
             left = right - buttonWidth
             val iconLeft = right - (buttonWidth / 2) - (button.iconIntrinsicWidth / 2)
-            val iconTop = itemView.top + (itemHeight - button.iconIntrinsicHeight) / 2
+            val iconTop = buttonVerticalCenter - button.iconIntrinsicHeight
             val iconRight = right - (buttonWidth / 2) + (button.iconIntrinsicWidth / 2)
-            val iconBottom = iconTop + button.iconIntrinsicHeight
+            val iconBottom = buttonVerticalCenter
 
             // Draw the background
             paint.color = button.backgroundColor
             val rect = RectF(left, itemView.top.toFloat(), right, itemView.bottom.toFloat())
             button.clickableRegion = rect
-            canvas.drawRoundRect(rect, BUTTON_RADIUS, BUTTON_RADIUS, paint)
-            canvas.drawRoundRect(rect, BUTTON_RADIUS, BUTTON_RADIUS, paintStroke)
+            canvas.drawRect(rect, paint)
+//            canvas.drawRect(rect, paintStroke)
 
             // Draw the delete icon
+            val iconDrawable = button.icon
             iconDrawable?.setBounds(iconLeft.toInt(), iconTop.toInt(), iconRight.toInt(), iconBottom.toInt())
             iconDrawable?.draw(canvas)
 
             // Draw title
             button.textPaint.getTextBounds(button.title, 0, button.title.length, titleBounds)
+            val titleHeight = titleBounds.bottom - titleBounds.top
             val x: Float = buttonWidth / 2f - titleBounds.width() / 2f - titleBounds.left
-            canvas.drawText(button.title, left + x, iconBottom + VERTICAL_MARGIN, button.textPaint)
+            val xPos = left + x
+            val yPos = if (iconDrawable != null) {
+                buttonVerticalCenter + VERTICAL_MARGIN + titleHeight
+            } else {
+                buttonVerticalCenter + titleHeight.toFloat() / 2
+            }
+            canvas.drawText(button.title, xPos, yPos, button.textPaint)
 
             right = left
         }

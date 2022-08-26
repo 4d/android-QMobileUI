@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import androidx.core.view.setPadding
 import androidx.core.widget.TextViewCompat
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
@@ -25,6 +26,8 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.model.ActionMetaData
 import com.qmobile.qmobileui.binding.ImageHelper
+import com.qmobile.qmobileui.binding.ImageHelper.ICON_MARGIN
+import com.qmobile.qmobileui.binding.ImageHelper.NO_ICON_PADDING
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.px
@@ -129,9 +132,6 @@ class ActionHelper private constructor() {
             )
         }
 
-        private fun getActionDrawablePadding(context: Context): Int =
-            (ImageHelper.ICON_MARGIN * context.resources.displayMetrics.density).toInt()
-
         fun fillActionList(json: JSONObject, tableName: String, actionList: MutableList<Action>) {
             getActionObjectList(json, tableName).forEach {
                 val action = createActionFromJsonObject(it)
@@ -169,12 +169,24 @@ class ActionHelper private constructor() {
                         textView.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
                         TextViewCompat.setCompoundDrawableTintList(textView, textView.textColors)
                         // Add margin between image and text (support various screen densities)
-                        textView.compoundDrawablePadding = getActionDrawablePadding(context)
+                        val padding = ICON_MARGIN.px
+                        textView.compoundDrawablePadding = padding
+                        textView.setPadding(padding, 0, 0, 0)
+                    } else {
+                        textView.setPadding(NO_ICON_PADDING.px, 0, 0, 0)
                     }
 
                     textView.text = action.getPreferredName()
                     return itemView
                 }
+            }
+        }
+
+        fun getActionButtonColor(context: Context, index: Int): Int {
+            return when (index) {
+                0 -> context.getColorFromAttr(R.attr.colorPrimary)
+                1 -> context.getColorFromAttr(R.attr.colorSecondary)
+                else -> context.getColorFromAttr(R.attr.colorTertiary)
             }
         }
     }

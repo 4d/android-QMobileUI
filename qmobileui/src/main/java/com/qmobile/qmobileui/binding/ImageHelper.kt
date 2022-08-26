@@ -44,7 +44,10 @@ object ImageHelper {
     const val drawableSpace = 8
     const val luminanceThreshold = 0.5
     const val ICON_MARGIN = 8
+    const val NO_ICON_PADDING = 24
     const val DEFAULT_BITMAP_QUALITY = 85
+    const val ARGB_MAX_VALUE = 255
+    const val ARGB_HALF_VALUE = 127
 
     private val factory =
         DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()

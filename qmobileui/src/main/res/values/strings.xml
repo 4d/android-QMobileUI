@@ -90,6 +90,7 @@
     <string name="item_action_button_ellipsize">…</string>
     <string name="action_time_dialog_negative">Cancel</string>
     <string name="action_time_dialog_positive">OK</string>
+    <string name="action_more_button_title">More</string>
 
     <!-- Duration Picker -->
     <string name="hour_column_title">Hours</string>
