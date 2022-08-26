@@ -176,7 +176,13 @@ abstract class SwipeToActionCallback(
             // Draw title
             button.textPaint.getTextBounds(button.title, 0, button.title.length, titleBounds)
             val x: Float = buttonWidth / 2f - titleBounds.width() / 2f - titleBounds.left
-            canvas.drawText(button.title, left + x, iconBottom + VERTICAL_MARGIN, button.textPaint)
+            val xPos = left + x
+            val yPos = if (iconDrawable != null) {
+                iconBottom + VERTICAL_MARGIN
+            } else {
+                itemView.top + itemHeight / 2 + (titleBounds.bottom - titleBounds.top).toFloat() / 2
+            }
+            canvas.drawText(button.title, xPos, yPos, button.textPaint)
 
             right = left
         }

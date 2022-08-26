@@ -42,8 +42,6 @@ open class Action(
 
     fun isOfflineCompatible() = preset?.lowercase(Locale.getDefault()) != "share"
 
-    fun isDeletePreset() = preset == "delete"
-
     enum class Type {
         TAKE_PICTURE_CAMERA, PICK_PHOTO_GALLERY, SCAN, SIGN
     }

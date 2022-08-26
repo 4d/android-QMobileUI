@@ -34,16 +34,15 @@ class ItemActionButton(
     }
 
     private val screenWidth: Int = context.resources.displayMetrics.widthPixels
-    val intrinsicWidth = (screenWidth / SwipeToActionCallback.BUTTON_WIDTH_FACTOR) // Set button width to screenWidth/4
+    val intrinsicWidth = (screenWidth / SwipeToActionCallback.BUTTON_WIDTH_FACTOR)
 
-    private val isDeletePreset = action?.isDeletePreset() == true
     val icon = getIconDrawable()?.apply {
         this.setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
     }
     val iconIntrinsicWidth = icon?.intrinsicWidth?.toFloat() ?: 0f
     val iconIntrinsicHeight = icon?.intrinsicHeight?.toFloat() ?: 0f
-    val backgroundColor = ColorHelper.getActionButtonColor(horizontalIndex, context, isDeletePreset)
-    val textColor = ColorHelper.getActionButtonTextColor(context, isDeletePreset)
+    val backgroundColor = ColorHelper.getActionButtonColor(horizontalIndex, context)
+    val textColor = context.getColorFromAttr(R.attr.colorOnPrimary)
 
     val textPaint: Paint = Paint().apply {
         textSize = TEXT_SIZE * context.resources.displayMetrics.density
@@ -81,7 +80,7 @@ class ItemActionButton(
                 iconDrawable?.setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
             }
             else -> {
-                iconDrawable = AppCompatResources.getDrawable(context, R.drawable.empty_action)
+                iconDrawable = null
             }
         }
         return iconDrawable

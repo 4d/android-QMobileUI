@@ -55,7 +55,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
     companion object {
         private const val CURRENT_SEARCH_QUERY_KEY = "currentSearchQuery_key"
-        private const val MAX_ACTIONS_VISIBLE = 2
+        private const val MAX_ACTIONS_THRESHOLD = 2
+        private const val MAX_ACTIONS_VISIBLE = 3
     }
 
     // views
@@ -251,7 +252,13 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                     override fun instantiateUnderlayButton(position: Int): List<ItemActionButton> {
                         val swipeButtons = mutableListOf<ItemActionButton>()
                         for (i in 0 until (currentRecordActions.size)) {
-                            val action = if ((i + 1) > MAX_ACTIONS_VISIBLE) null else currentRecordActions[i]
+                            val hasMoreButton =
+                                (i + 1) > MAX_ACTIONS_THRESHOLD && currentRecordActions.size > MAX_ACTIONS_VISIBLE
+                            val action = if (hasMoreButton) {
+                                null
+                            } else {
+                                currentRecordActions[i]
+                            }
                             val swipeButton = createSwipeButton(position, action, i) { clickedAction, entity ->
                                 actionActivity.setCurrentEntityModel(entity)
                                 actionActivity.onActionClick(clickedAction, this@EntityListFragment)
