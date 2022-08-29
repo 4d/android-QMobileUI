@@ -175,13 +175,14 @@ class EntityViewPagerFragment : BaseFragment() {
         }
     }
 
-    private fun setSearchQuery(fieldToSortBy: HashMap<String, String>? = null) {
+    private fun setSearchQuery(fieldToSortBy: LinkedHashMap<String, String>? = null) {
         val formQuery = if (fromRelation) {
             formQueryBuilder.getRelationQuery(
                 parentItemId = parentItemId,
                 pattern = searchQueryPattern,
                 parentTableName = parentTableName,
-                path = path
+                path = path,
+                sortFields = fieldToSortBy
             )
         } else {
             formQueryBuilder.getQuery(searchQueryPattern, fieldToSortBy)

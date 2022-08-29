@@ -25,6 +25,11 @@ open class Action(
     val uuid: String
 ) {
 
+    var sortFields : LinkedHashMap<String, String>? = null
+
+    init {
+        sortFields = fetchSortFields()
+    }
     fun getIconDrawablePath(): String? =
         ResourcesHelper.correctIconPath(icon)
 
@@ -50,7 +55,7 @@ open class Action(
         TABLE, CURRENT_RECORD
     }
 
-    fun getSortFields(): LinkedHashMap<String, String> {
+    private fun fetchSortFields(): LinkedHashMap<String, String> {
         val fieldsToSortBy: LinkedHashMap<String, String> = LinkedHashMap()
         parameters.getJSONObjectList().forEach { parameter ->
             val format = when (parameter.getSafeString("format")) {

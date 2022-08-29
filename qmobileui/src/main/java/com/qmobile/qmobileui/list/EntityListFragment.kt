@@ -352,19 +352,19 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 0 -> {
                     val defaultFieldToSortWith = BaseApp.runtimeDataHolder.tableInfo[tableName]?.defaultSortField
                     if (defaultFieldToSortWith != null) {
-                        saveSortChoice(mapOf(defaultFieldToSortWith.fieldAdjustment() to SortFormat.ASCENDING.value))
+                        saveSortChoice(mapOf(defaultFieldToSortWith.fieldAdjustment() to "zzz"))
                     }
                 }
 
                 1 -> {
                     sortActions.firstOrNull()?.let { action ->
                         // no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
-                        saveSortChoice(action.getSortFields())
+                        action.sortFields?.let { saveSortChoice(it) }
                     }
                 }
                 else -> {
                     // if more than one action we apply by default the first one
-                    val defaultSort = sortActions.firstOrNull()?.getSortFields()
+                    val defaultSort = sortActions.firstOrNull()?.sortFields
                     defaultSort?.let { saveSortChoice(it) }
                 }
             }
@@ -421,7 +421,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 parentItemId = parentItemId,
                 pattern = searchPattern,
                 parentTableName = parentTableName,
-                path = path
+                path = path,
+                sortFields
             )
         } else {
             formQueryBuilder.getQuery(searchPattern, sortFields)
@@ -463,7 +464,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     }
 
     private fun sortItems(action: Action) {
-        sortFields = action.getSortFields()
+        sortFields = action.sortFields
         setSearchQuery()
         sortFields?.let {
             saveSortChoice(it)
