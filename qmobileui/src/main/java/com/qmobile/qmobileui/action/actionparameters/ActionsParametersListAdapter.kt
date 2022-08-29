@@ -11,6 +11,7 @@ import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
@@ -25,6 +26,7 @@ import com.qmobile.qmobileui.action.actionparameters.viewholders.ImageViewHolder
 import com.qmobile.qmobileui.action.actionparameters.viewholders.SignatureViewHolder
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
+import com.qmobile.qmobileui.utils.hideKeyboard
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
@@ -112,7 +114,9 @@ class ActionsParametersListAdapter(
                     ?.requestFocus()
                     ?: kotlin.run {
                         Timber.d("itemView ${holder.bindingAdapterPosition} has focus but no input, hiding keyboard")
-                        hideKeyboardCallback()
+                        // Warning :
+                        // do not call hideKeyboardCallback() because it will clearFocus and generate an infinite loop
+                        (context as FragmentActivity?)?.let { hideKeyboard(it) }
                     }
             }
         }
