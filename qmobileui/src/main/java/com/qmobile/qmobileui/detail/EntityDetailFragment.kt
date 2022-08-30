@@ -156,6 +156,12 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
         }
     }
 
+    override fun navigateToActionWebView(path: String) {
+        activity?.let {
+            BaseApp.genericNavigationResolver.navigateToActionWebView(viewDataBinding = binding, path = path)
+        }
+    }
+
     override fun getActionContent(actionUUID: String, itemId: String?): MutableMap<String, Any> {
         // Event if we are in a N-1 relation, we don't need to provide parent information in the request
         return ActionHelper.getActionContent(

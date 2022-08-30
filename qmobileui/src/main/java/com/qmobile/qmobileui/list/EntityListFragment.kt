@@ -461,6 +461,12 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         }
     }
 
+    override fun navigateToActionWebView(path: String) {
+        activity?.let {
+            BaseApp.genericNavigationResolver.navigateToActionWebView(viewDataBinding = binding, path = path)
+        }
+    }
+
     private fun sortItems(action: Action) {
         sortFields = action.sortFields
         setSearchQuery()

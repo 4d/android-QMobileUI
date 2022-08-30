@@ -376,7 +376,6 @@ class MainActivity :
             // not giving a simple string because we want a divider before pending tasks
             menu.add(1, Random().nextInt(), order, pendingTaskString)
                 .setOnMenuItemClickListener {
-                    actionNavigable.navigateToPendingTasks()
                     true
                 }
                 .setIcon(drawable?.adjustActionDrawableMargins(this))
@@ -386,7 +385,9 @@ class MainActivity :
     }
 
     override fun onActionClick(action: Action, actionNavigable: ActionNavigable) {
-        if (action.parameters.length() > 0) {
+        if (action.isOpenUrlAction()) {
+            action.description?.let { actionNavigable.navigateToActionWebView(it) }
+        } else if (action.parameters.length() > 0) {
             if (action.scope == Action.Scope.TABLE) {
                 currentEntity = null
             }
