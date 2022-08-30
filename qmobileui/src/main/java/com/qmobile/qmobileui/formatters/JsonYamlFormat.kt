@@ -30,8 +30,11 @@ object JsonYamlFormat {
     fun applyFormat(format: String, baseText: Any): String {
         return when (format) {
             "yaml" -> {
-                if (baseText.toString().isEmpty()) ""
-                else yamlMapper.writeValueAsString(baseText)
+                if (baseText.toString().isEmpty()) {
+                    ""
+                } else {
+                    yamlMapper.writeValueAsString(baseText)
+                }
             }
             "jsonPrettyPrinted" -> {
                 BaseApp.mapper.enable(SerializationFeature.INDENT_OUTPUT)

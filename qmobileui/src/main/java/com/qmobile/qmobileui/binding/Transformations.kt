@@ -10,7 +10,6 @@ import android.graphics.Bitmap
 import androidx.annotation.ColorInt
 import com.bumptech.glide.load.Transformation
 import jp.wasabeef.glide.transformations.BlurTransformation
-import jp.wasabeef.glide.transformations.CropCircleTransformation
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.GrayscaleTransformation
@@ -26,11 +25,8 @@ object Transformations {
 
     fun getTransformation(transform: String?, @ColorInt borderColor: Int? = null): Transformation<Bitmap>? {
         return when (transform) {
-            "CropCircle" -> CropCircleTransformation()
-            "CropCircleWithBorder" -> CropCircleWithBorderTransformation(
-                CROP_CIRCLE_WITH_BORDER_SIZE,
-                borderColor ?: 0
-            )
+            "CropCircle" -> CropCircleWithBorderTransformation(0, 0)
+            "CropCircleWithBorder" -> CropCircleWithBorderTransformation(CROP_CIRCLE_WITH_BORDER_SIZE, borderColor ?: 0)
             "Blur" -> BlurTransformation(BLUR_RADIUS, BLUR_SAMPLING)
             "RoundedCorners" -> RoundedCornersTransformation(
                 ROUNDED_CORNERS_RADIUS,

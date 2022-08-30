@@ -5,6 +5,5 @@
   -->
 
 <resources>
-
-    <integer name="reply_motion_duration_large">300</integer>
+    <integer name="motion_duration_large">300</integer>
 </resources>

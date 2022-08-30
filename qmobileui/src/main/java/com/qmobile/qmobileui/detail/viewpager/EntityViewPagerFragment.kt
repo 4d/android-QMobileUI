@@ -14,6 +14,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.MenuProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -26,7 +27,7 @@ import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 
-class EntityViewPagerFragment : BaseFragment() {
+class EntityViewPagerFragment : BaseFragment(), MenuProvider {
 
     // views
     internal var viewPager: ViewPager2? = null
@@ -76,7 +77,7 @@ class EntityViewPagerFragment : BaseFragment() {
 
         formQueryBuilder = FormQueryBuilder(tableName)
 
-        this.setHasOptionsMenu(true)
+        initMenuProvider()
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
         return viewPager
@@ -125,8 +126,8 @@ class EntityViewPagerFragment : BaseFragment() {
         viewPager = null
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_viewpager, menu)
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_viewpager, menu)
         actionPrevious = menu.findItem(R.id.action_previous)
         actionNext = menu.findItem(R.id.action_next)
 
@@ -134,20 +135,19 @@ class EntityViewPagerFragment : BaseFragment() {
             handleActionPreviousEnability(pos)
             handleActionNextEnability(pos)
         }
-        super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         val currPosition = viewPager?.currentItem
         currPosition?.let {
-            when (item.itemId) {
+            when (menuItem.itemId) {
                 R.id.action_previous -> {
                     viewPager?.setCurrentItem(currPosition - 1, true)
                 }
                 R.id.action_next -> {
                     viewPager?.setCurrentItem(currPosition + 1, true)
                 }
-                else -> super.onOptionsItemSelected(item)
+                else -> {}
             }
         }
         return false

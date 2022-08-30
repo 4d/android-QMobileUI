@@ -135,6 +135,7 @@ abstract class SwipeToActionCallback(
         super.onChildDraw(c, recyclerView, viewHolder, maxDX, dY, actionState, isCurrentlyActive)
     }
 
+    @Suppress("UnnecessaryVariable")
     private fun drawButtons(
         canvas: Canvas,
         buttons: List<ItemActionButton>,

@@ -118,7 +118,7 @@ fun BottomNavigationView.setupWithNavController(
                     // to it, creating the fixed started destination.
 
                     selectedFragment.enterTransition = MaterialFadeThrough().apply {
-                        duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+                        duration = resources.getInteger(R.integer.motion_duration_large).toLong()
                     }
 
                     fragmentManager.beginTransaction()
