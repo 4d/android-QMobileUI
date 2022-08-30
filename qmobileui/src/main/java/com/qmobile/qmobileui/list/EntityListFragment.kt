@@ -343,7 +343,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    @Suppress("NestedBlockDepth")
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
         // If user already applied a sort, we need no more to apply default sort
@@ -358,10 +357,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 }
 
                 1 -> {
-                    sortActions.firstOrNull()?.let { action ->
-                        // no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
-                        action.sortFields?.let { saveSortChoice(it) }
-                    }
+                    // no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
+                    sortActions.firstOrNull()?.sortFields?.let { saveSortChoice(it) }
                 }
                 else -> {
                     // if more than one action we apply by default the first one
