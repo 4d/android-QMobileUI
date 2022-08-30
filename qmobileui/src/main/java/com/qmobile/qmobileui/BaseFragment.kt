@@ -9,7 +9,10 @@ package com.qmobile.qmobileui
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import com.google.android.material.appbar.AppBarLayout
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
 import com.qmobile.qmobileui.action.pendingtasks.TasksFragment
@@ -26,6 +29,11 @@ abstract class BaseFragment : Fragment() {
         if (context is FragmentCommunication) {
             delegate = context
         }
+    }
+
+    protected fun MenuProvider.initMenuProvider() {
+        val menuHost: MenuHost = requireActivity() as MenuHost
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

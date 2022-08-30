@@ -12,6 +12,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -19,6 +20,7 @@ import android.widget.EditText
 import android.widget.ListAdapter
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import androidx.core.view.MenuProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -51,7 +53,7 @@ import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
 import org.json.JSONObject
 
-open class EntityListFragment : BaseFragment(), ActionNavigable {
+open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
 
     companion object {
         private const val CURRENT_SEARCH_QUERY_KEY = "currentSearchQuery_key"
@@ -128,7 +130,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
         if (hasSearch || hasTableActions) {
-            this.setHasOptionsMenu(true)
+            initMenuProvider()
         } else {
             setSearchQuery()
         }
@@ -318,7 +320,18 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             }
         }
 
-    override fun onPrepareOptionsMenu(menu: Menu) {
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        setupActionsMenuIfNeeded(menu)
+        setupSearchMenuIfNeeded(menu, menuInflater)
+        sortListIfNeeded()
+        setSearchQuery()
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        return false
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
         if (hasSearch) {
             searchView.setOnQueryTextListener(searchListener)
 
@@ -330,17 +343,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 searchPlate.clearFocus()
             }
         }
-        super.onPrepareOptionsMenu(menu)
-    }
-
-    // Searchable implementation
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        setupActionsMenuIfNeeded(menu)
-        setupSearchMenuIfNeeded(menu, inflater)
-        sortListIfNeeded()
-        setSearchQuery()
-
-        super.onCreateOptionsMenu(menu, inflater)
+        super.onPrepareMenu(menu)
     }
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {

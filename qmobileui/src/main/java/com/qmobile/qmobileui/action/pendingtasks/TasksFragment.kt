@@ -63,7 +63,6 @@ class TasksFragment : BaseFragment(), NetworkChecker {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        setHasOptionsMenu(true)
         activity?.setupToolbarTitle(resources.getString(R.string.pending_task_navbar_title))
 
         _binding = FragmentActionTasksBinding.inflate(inflater, container, false).apply {
