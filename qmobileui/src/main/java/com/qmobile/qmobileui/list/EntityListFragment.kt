@@ -343,6 +343,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
+    @Suppress("NestedBlockDepth")
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
         // If user already applied a sort, we need no more to apply default sort
@@ -352,7 +353,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 0 -> {
                     val defaultFieldToSortWith = BaseApp.runtimeDataHolder.tableInfo[tableName]?.defaultSortField
                     if (defaultFieldToSortWith != null) {
-                        saveSortChoice(mapOf(defaultFieldToSortWith.fieldAdjustment() to "zzz"))
+                        saveSortChoice(mapOf(defaultFieldToSortWith.fieldAdjustment() to SortFormat.ASCENDING.value))
                     }
                 }
 
