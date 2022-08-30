@@ -133,7 +133,7 @@ afterEvaluate { project ->
     project.addMySourcesToAar.dependsOn build
 }
 artifacts {
-    archives addMySourcesToAar.archiveFile
+    archives addMySourcesToAar.archiveFile.get().asFile
 }
 
 artifactoryPublish {
