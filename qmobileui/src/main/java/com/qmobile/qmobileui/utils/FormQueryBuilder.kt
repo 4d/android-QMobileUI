@@ -18,7 +18,7 @@ class FormQueryBuilder(
 
     private val baseQuery = "SELECT * FROM $tableName"
 
-    fun getQuery(pattern: String = "", sortFields: HashMap<String, String>? = null): SimpleSQLiteQuery {
+    fun getQuery(pattern: String = "", sortFields: LinkedHashMap<String, String>? = null): SimpleSQLiteQuery {
         val sortQuery = sortFields?.let { getSortQueryFromFieldList(it) } ?: ""
 
         if (pattern.isEmpty()) {
@@ -37,8 +37,11 @@ class FormQueryBuilder(
         parentItemId: String,
         pattern: String = "",
         parentTableName: String,
-        path: String
+        path: String,
+        sortFields: LinkedHashMap<String, String>?
     ): SimpleSQLiteQuery {
+        val sortQuery = sortFields?.let { getSortQueryFromFieldList(it) } ?: ""
+
         val relation = if (path.contains(".")) {
             RelationHelper.getRelations(parentTableName).find { it.path == path }
         } else {
@@ -48,7 +51,7 @@ class FormQueryBuilder(
         relation?.let {
             val query = DeepQueryBuilder.createQuery(relation, parentItemId)
             return if (pattern.isEmpty()) {
-                SimpleSQLiteQuery(query)
+                SimpleSQLiteQuery(query + sortQuery)
             } else {
                 val stringBuilder = StringBuilder("$query AND ( ")
                 searchFields?.let { columnsToFilter ->
