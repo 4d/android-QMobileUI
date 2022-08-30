@@ -77,7 +77,7 @@ class SqlBuilderTest {
         BaseApp.runtimeDataHolder = mockRuntimeDataHolder
         val formQueryBuilder =
             FormQueryBuilder(tableName = "Service", searchFields = searchFieldsService)
-        val actualQueryResult = formQueryBuilder.getQuery("abc", hashMapOf("name COLLATE NOCASE " to "DESC")).sql
+        val actualQueryResult = formQueryBuilder.getQuery("abc", linkedMapOf("name COLLATE NOCASE " to "DESC")).sql
         val expectedQueryResult =
             SimpleSQLiteQuery("SELECT * FROM Service AS T1 WHERE T1.name LIKE '%abc%' OR T1.employeeNumber LIKE '%abc%' ORDER BY name COLLATE NOCASE  DESC").sql
         Assert.assertEquals(expectedQueryResult, actualQueryResult)
