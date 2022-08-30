@@ -20,7 +20,7 @@ object Versions {
     const val artifactory = "4.29.0"
     const val atsl_junit = "1.1.2"
     const val barcode_scanning = "17.0.2"
-    const val camerax = "1.2.0-beta01"
+    const val camerax = "1.1.0"
     const val dynamic_toasts = "4.1.2"
     const val espresso = "3.4.0"
     const val espresso_contrib = "3.0.2"
