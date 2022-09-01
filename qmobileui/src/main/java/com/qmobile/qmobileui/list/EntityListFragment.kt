@@ -31,6 +31,7 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
+import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.utils.LayoutType
 import com.qmobile.qmobiledatasync.utils.fieldAdjustment
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -78,10 +79,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
 
     // fragment parameters
     override var tableName = ""
-    private var parentTableName = ""
     private var path = ""
     private var parentItemId = ""
-    private var fromRelation = false
 
     private val tableActions = mutableListOf<Action>()
     private var currentRecordActions = mutableListOf<Action>()
@@ -102,17 +101,17 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
             navbarTitle = it
         }
         // Entity list fragment from relation
-        arguments?.getString("destinationTable")?.let { dest ->
-            if (dest.isNotEmpty()) {
-                tableName = dest
-                fromRelation = true
+        arguments?.getString("relationName")?.let { relationName ->
+            if (relationName.isNotEmpty()) {
+                var parentTableName = ""
+                arguments?.getString("parentTableName")?.let { parentTableName = it }
+                relation = RelationHelper.getRelation(parentTableName, relationName)
+                tableName = relation?.dest ?: tableName
+                arguments?.getString("parentItemId")?.let { parentItemId = it }
+                arguments?.getString("path")?.let { path = it }
                 arguments?.getString("navbarTitle")?.let { navbarTitle = it }
             }
         }
-
-        arguments?.getString("parentItemId")?.let { parentItemId = it }
-        arguments?.getString("parentTableName")?.let { parentTableName = it }
-        arguments?.getString("path")?.let { path = it }
     }
 
     override fun onCreateView(
@@ -180,10 +179,9 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
                     viewDataBinding = dataBinding,
                     key = key,
                     query = searchPattern,
-                    sourceTable = if (fromRelation) parentTableName else tableName,
-                    destinationTable = if (fromRelation) tableName else "",
+                    sourceTable = relation?.source ?: tableName,
+                    relationName = relation?.name ?: "",
                     parentItemId = parentItemId,
-                    parentTableName = parentTableName,
                     path = path
                 )
             },
@@ -417,11 +415,11 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     }
 
     private fun setSearchQuery() {
-        val formQuery = if (fromRelation) {
+        val formQuery = if (relation != null) {
             formQueryBuilder.getRelationQuery(
                 parentItemId = parentItemId,
                 pattern = searchPattern,
-                parentTableName = parentTableName,
+                parentTableName = relation?.source ?: "",
                 path = path,
                 sortFields
             )

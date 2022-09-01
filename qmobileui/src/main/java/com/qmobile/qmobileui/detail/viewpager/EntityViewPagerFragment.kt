@@ -17,6 +17,8 @@ import android.view.ViewGroup
 import androidx.core.view.MenuProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatasync.relation.Relation
+import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
@@ -43,9 +45,8 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
     private var tableName = ""
     private var searchQueryPattern = ""
     private var parentItemId = ""
-    private var parentTableName = ""
     private var path = ""
-    private var fromRelation = false
+    private var relation: Relation? = null
 
     private lateinit var formQueryBuilder: FormQueryBuilder
     private lateinit var actionActivity: ActionActivity
@@ -56,15 +57,14 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("searchQueryPattern")?.let { searchQueryPattern = it }
 
-        arguments?.getString("destinationTable")?.let {
-            if (it.isNotEmpty()) {
-                tableName = it
-                fromRelation = true
+        arguments?.getString("relationName")?.let { relationName ->
+            if (relationName.isNotEmpty()) {
+                relation = RelationHelper.getRelation(tableName, relationName)
+                tableName = relation?.dest ?: tableName
+                arguments?.getString("parentItemId")?.let { parentItemId = it }
+                arguments?.getString("path")?.let { path = it }
             }
         }
-        arguments?.getString("parentItemId")?.let { parentItemId = it }
-        arguments?.getString("parentTableName")?.let { parentTableName = it }
-        arguments?.getString("path")?.let { path = it }
     }
 
     override fun onCreateView(
@@ -176,11 +176,11 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
     }
 
     private fun setSearchQuery(fieldToSortBy: LinkedHashMap<String, String>? = null) {
-        val formQuery = if (fromRelation) {
+        val formQuery = if (relation != null) {
             formQueryBuilder.getRelationQuery(
                 parentItemId = parentItemId,
                 pattern = searchQueryPattern,
-                parentTableName = parentTableName,
+                parentTableName = relation?.source ?: "",
                 path = path,
                 sortFields = fieldToSortBy
             )

@@ -141,8 +141,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         arguments?.getString("relationName")?.let { relationName ->
             if (relationName.isNotEmpty()) {
                 relation = RelationHelper.getRelation(tableName, relationName)
+                tableName = relation?.dest ?: tableName
+                arguments?.getString("parentItemId")?.let { parentItemId = it }
             }
-            arguments?.getString("parentItemId")?.let { parentItemId = it }
         }
     }
 
