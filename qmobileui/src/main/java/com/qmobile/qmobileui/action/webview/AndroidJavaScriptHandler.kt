@@ -13,6 +13,9 @@ import com.qmobile.qmobileapi.utils.getSafeBoolean
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobileui.ui.SnackbarHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 const val TAG = "WebView info"
@@ -20,7 +23,9 @@ const val TAG = "WebView info"
 class AndroidJavaScriptHandler(var activity: FragmentActivity) {
     @JavascriptInterface
     fun onDismiss() {
-        activity.onBackPressed()
+        CoroutineScope(Dispatchers.Main.immediate).launch {
+            activity.onBackPressed()
+        }
     }
 
     @JavascriptInterface

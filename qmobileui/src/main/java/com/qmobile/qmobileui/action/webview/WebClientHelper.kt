@@ -35,7 +35,7 @@ object WebClientHelper {
         }
     }
 
-    fun getScriptForAction(actionName: String, actionLabel: String, actionShortLabel: String): String {
+    private fun getScriptForAction(actionName: String, actionLabel: String, actionShortLabel: String): String {
         return """
          'use strict';
            var ${'$'}4d = {mobile: { 'dismiss': function () {
