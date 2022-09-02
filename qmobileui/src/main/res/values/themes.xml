@@ -6,44 +6,4 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">?attr/isLightTheme</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">?attr/isLightTheme</item>
     </style>
-
-    <style name="Theme.QMobileApp.Card.Background" parent="Theme.QMobileApp">
-        <item name="cardBackgroundColor">@android:color/white</item>
-    </style>
-
-    <style name="Theme.QMobileApp.Card.Background.Alt1" parent="Theme.QMobileApp">
-        <item name="cardBackgroundColor">@color/grey_light_2</item>
-    </style>
-
-    <style name="Theme.QMobileApp.Card.Background.Alt2" parent="Theme.QMobileApp">
-        <item name="cardBackgroundColor">@color/grey_light_3</item>
-    </style>
-
-    <style name="Theme.QMobileApp.Card.Background.Alt3" parent="Theme.QMobileApp">
-        <item name="cardBackgroundColor">@android:color/white</item>
-    </style>
-
-    <style name="Theme.QMobileApp.Custom.Background" parent="Theme.QMobileApp">
-        <item name="background">@android:color/white</item>
-    </style>
-
-    <style name="Theme.QMobileApp.Custom.Background.Alt1" parent="Theme.QMobileApp">
-        <item name="background">@color/grey_light_1</item>
-    </style>
-
-    <style name="Theme.QMobileApp.Custom.Background.Alt2" parent="Theme.QMobileApp">
-        <item name="background">@android:color/white</item>
-    </style>
-
-    <style name="Theme.QMobileApp.Custom.Background.Alt3" parent="Theme.QMobileApp">
-        <item name="background">@android:color/black</item>
-    </style>
-
-    <style name="Theme.QMobileApp.Custom.Background.Alt4" parent="Theme.QMobileApp">
-        <item name="background">@color/grey_light_2</item>
-    </style>
-
-    <style name="Theme.QMobileApp.Text.Color" parent="Theme.QMobileApp">
-        <item name="android:textColor">@android:color/black</item>
-    </style>
 </resources>
