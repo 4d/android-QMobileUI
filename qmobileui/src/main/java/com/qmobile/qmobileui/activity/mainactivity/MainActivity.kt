@@ -386,7 +386,7 @@ class MainActivity :
 
     override fun onActionClick(action: Action, actionNavigable: ActionNavigable) {
         if (action.isOpenUrlAction()) {
-            action.description?.let { actionNavigable.navigateToActionWebView(it) }
+            action.description?.let { actionNavigable.navigateToActionWebView(it,action.name, action.label, action.shortLabel) }
         } else if (action.parameters.length() > 0) {
             if (action.scope == Action.Scope.TABLE) {
                 currentEntity = null

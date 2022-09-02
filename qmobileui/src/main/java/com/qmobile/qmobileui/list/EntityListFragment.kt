@@ -461,9 +461,9 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         }
     }
 
-    override fun navigateToActionWebView(path: String) {
+    override fun navigateToActionWebView( path: String, actionName: String, actionLabel: String?, actionShortLabel: String?) {
         activity?.let {
-            BaseApp.genericNavigationResolver.navigateToActionWebView(viewDataBinding = binding, path = path)
+            BaseApp.genericNavigationResolver.navigateToActionWebView(viewDataBinding = binding, path = path, actionName = actionName, actionLabel = actionLabel, actionShortLabel = actionShortLabel)
         }
     }
 
