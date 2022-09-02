@@ -8,26 +8,42 @@ package com.qmobile.qmobileui.action.webview
 
 import android.util.Base64
 import android.webkit.WebView
+import timber.log.Timber
 import java.io.IOException
 import java.io.InputStream
 
 object WebClientHelper {
-
-
     fun injectScriptFile(view: WebView, actionName: String, actionLabel: String, actionShortLabel: String) {
         val input: InputStream
         try {
-            val script = """
-                          'use strict';
-                           var y = 66;
-                            var ${'$'}4d = {mobile: { 'dismiss': function () {
+            input = getScriptForAction(actionName, actionLabel, actionShortLabel).byteInputStream()
+            val buffer = ByteArray(input.available())
+            input.read(buffer)
+            input.close()
+            val encoded = Base64.encodeToString(buffer, Base64.NO_WRAP)
+            view.loadUrl(
+                "javascript:(function() {" +
+                    "var parent = document.getElementsByTagName('head').item(0);" +
+                    "var script = document.createElement('script');" +
+                    "script.type = 'text/javascript';" +
+                    "script.innerHTML = window.atob('" + encoded + "');" +
+                    "parent.appendChild(script)" +
+                    "})()"
+            )
+        } catch (e: IOException) {
+            Timber.e(e.message.orEmpty())
+        }
+    }
+
+    fun getScriptForAction(actionName: String, actionLabel: String, actionShortLabel: String): String {
+        return """
+         'use strict';
+           var ${'$'}4d = {mobile: { 'dismiss': function () {
                                                                 console.log('click');
                                                                 Android.onDismiss()
                                                             },
                                                          
                                                             'status': function (message) {
-                                                                console.log('statussssss');
-                                                                console.log(message);
                                                                 Android.status(JSON.stringify(message))
                                                             },
                                                             
@@ -52,27 +68,8 @@ object WebClientHelper {
                                                                                 error: function (message) {
                                                                                     this.log('error', message);
                                                                                 }
-                                                                    }                      
-                                                            
-                                                            }
-      }
-           """
-            input = script.byteInputStream()
-            val buffer = ByteArray(input.available())
-            input.read(buffer)
-            input.close()
-            val encoded = Base64.encodeToString(buffer, Base64.NO_WRAP)
-            view.loadUrl(
-                "javascript:(function() {" +
-                        "var parent = document.getElementsByTagName('head').item(0);" +
-                        "var script = document.createElement('script');" +
-                        "script.type = 'text/javascript';" +  // Tell the browser to BASE64-decode the string into your script !!!
-                        "script.innerHTML = window.atob('" + encoded + "');" +
-                        "parent.appendChild(script)" +
-                        "})()"
-            )
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
+                                                                    }     
+       }
+      }  """
     }
 }

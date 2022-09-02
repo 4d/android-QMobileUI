@@ -36,7 +36,6 @@ class AndroidJavaScriptHandler(var activity: FragmentActivity) {
     @JavascriptInterface
     fun status(message: String) {
         val jsonObject = JSONObject(message)
-
         // case of message is {message: String, succes: Boolean}
         jsonObject.getSafeString("message")?.let { text ->
             val success = jsonObject.getSafeBoolean("success")
@@ -46,31 +45,27 @@ class AndroidJavaScriptHandler(var activity: FragmentActivity) {
                     false -> ToastMessage.Type.ERROR
                 }
                 SnackbarHelper.show(activity, text, type)
-                return
             } else {
                 // case of message is {message: String}
                 SnackbarHelper.show(activity, text, ToastMessage.Type.NEUTRAL)
-                return
             }
+            return
         }
 
         jsonObject.getSafeString("statusText")?.let { text ->
             val level = jsonObject.getSafeString("level")
             level?.let {
                 // case of message is {statusText: String, level: string}
-
                 val type = when (it) {
                     "debug" -> ToastMessage.Type.NEUTRAL
                     "info" -> ToastMessage.Type.NEUTRAL
                     "warning" -> ToastMessage.Type.WARNING
                     "error" -> ToastMessage.Type.ERROR
-                    else -> ToastMessage.Type.SUCCESS
+                    else -> ToastMessage.Type.NEUTRAL
                 }
                 SnackbarHelper.show(activity, text, type)
                 return
             }
         }
     }
-
-
 }

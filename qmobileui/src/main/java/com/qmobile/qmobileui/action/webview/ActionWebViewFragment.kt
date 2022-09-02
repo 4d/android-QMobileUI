@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.action.webview
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,7 +48,7 @@ class ActionWebViewFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.webView.settings.javaScriptEnabled = true
         binding.webView.addJavascriptInterface(AndroidJavaScriptHandler(requireActivity()), "Android")
-        binding.webView.settings.javaScriptEnabled = true;
+        binding.webView.settings.javaScriptEnabled = true
 
         binding.webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
@@ -67,5 +66,3 @@ class ActionWebViewFragment : BaseFragment() {
         this@ActionWebViewFragment
     }
 }
-
-

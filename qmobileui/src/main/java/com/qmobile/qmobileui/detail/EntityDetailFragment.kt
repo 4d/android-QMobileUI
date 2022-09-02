@@ -156,9 +156,20 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
         }
     }
 
-    override fun navigateToActionWebView( path: String, actionName: String, actionLabel: String?, actionShortLabel: String?) {
+    override fun navigateToActionWebView(
+        path: String,
+        actionName: String,
+        actionLabel: String?,
+        actionShortLabel: String?
+    ) {
         activity?.let {
-            BaseApp.genericNavigationResolver.navigateToActionWebView(viewDataBinding = binding, path = path,actionName, actionLabel, actionShortLabel)
+            BaseApp.genericNavigationResolver.navigateToActionWebView(
+                viewDataBinding = binding,
+                path = path,
+                actionName,
+                actionLabel,
+                actionShortLabel
+            )
         }
     }
 
