@@ -16,6 +16,7 @@ import androidx.lifecycle.Lifecycle
 import com.google.android.material.appbar.AppBarLayout
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
 import com.qmobile.qmobileui.action.pendingtasks.TasksFragment
+import com.qmobile.qmobileui.detail.EntityDetailFragment
 import com.qmobile.qmobileui.list.EntityListFragment
 
 abstract class BaseFragment : Fragment() {
@@ -46,8 +47,9 @@ abstract class BaseFragment : Fragment() {
         activity?.findViewById<AppBarLayout>(R.id.appbar)?.let { appBarLayout ->
             when (this) {
                 is EntityListFragment -> appBarLayout.liftOnScrollTargetViewId = R.id.fragment_list_recycler_view
+                is EntityDetailFragment -> appBarLayout.liftOnScrollTargetViewId = R.id.base_detail_scroll_view
                 is ActionParametersFragment -> appBarLayout.liftOnScrollTargetViewId = R.id.parameters_recycler_view
-                is TasksFragment -> appBarLayout.liftOnScrollTargetViewId = R.id.task_nested_sv
+                is TasksFragment -> appBarLayout.liftOnScrollTargetViewId = R.id.task_nested_scroll_view
             }
         }
     }

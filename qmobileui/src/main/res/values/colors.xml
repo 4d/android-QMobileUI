@@ -15,12 +15,4 @@
     <color name="on_snackbar_success">#FFFFFF</color>
     <color name="snackbar_warning">#F9E534</color>
     <color name="on_snackbar_warning">#201C00</color>
-
-    <color name="grey_light_1">#E9E9EB</color>
-    <color name="grey_light_2">#F2F2F7</color>
-    <color name="grey_light_3">#F3F3F7</color>
-    <color name="grey_dark_1">#262629</color>
-    <color name="grey_dark_2">#1C1C1E</color>
-    <color name="grey_dark_3">#2A2A2C</color>
-    <color name="grey_dark_4">#2C2C2E</color>
 </resources>

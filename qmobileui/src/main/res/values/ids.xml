@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by qmarciset on 1/9/2022.
+  ~ 4D SAS
+  ~ Copyright (c) 2022 qmarciset. All rights reserved.
+  -->
+
+<resources>
+    <item name="base_detail_scroll_view" type="id" />
+</resources>

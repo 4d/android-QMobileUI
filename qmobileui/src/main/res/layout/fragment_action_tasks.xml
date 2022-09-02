@@ -11,7 +11,7 @@
         app:swipeRefreshLayoutProgressSpinnerBackgroundColor="?android:attr/colorPrimary">
 
         <androidx.core.widget.NestedScrollView
-            android:id="@+id/task_nested_sv"
+            android:id="@+id/task_nested_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
