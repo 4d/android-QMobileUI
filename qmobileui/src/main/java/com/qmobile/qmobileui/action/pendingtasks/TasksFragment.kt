@@ -21,7 +21,7 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.utils.ActionHelper.Companion.getActionContent
+import com.qmobile.qmobileui.action.utils.ActionHelper.getActionContent
 import com.qmobile.qmobileui.binding.px
 import com.qmobile.qmobileui.databinding.FragmentActionTasksBinding
 import com.qmobile.qmobileui.network.NetworkChecker

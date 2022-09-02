@@ -59,7 +59,7 @@ import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
-import com.qmobile.qmobileui.action.utils.ActionHelper.Companion.setMenuActionDrawable
+import com.qmobile.qmobileui.action.utils.ActionHelper.setMenuActionDrawable
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
