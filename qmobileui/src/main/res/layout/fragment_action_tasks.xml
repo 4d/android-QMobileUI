@@ -44,7 +44,7 @@
                     android:paddingBottom="16dp"
                     android:text="@string/completed_tasks_title"
                     android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-                    android:textColor="?colorOnSurface" />
+                    android:textColor="?attr/colorOnSurface" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/completed_rv"
