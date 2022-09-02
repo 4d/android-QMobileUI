@@ -14,6 +14,8 @@
 
     <!--    Detail and List -->
     <string name="try_refresh_data">Please try refreshing data again</string>
+    <string name="chevron_content_description">Chevron image</string>
+    <string name="default_image_content_description">Image</string>
 
     <!--    Settings Fragment -->
     <string name="cat_title_server">SERVER</string>
