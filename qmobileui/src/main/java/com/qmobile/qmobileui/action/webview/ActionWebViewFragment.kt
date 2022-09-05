@@ -53,6 +53,7 @@ class ActionWebViewFragment : BaseFragment() {
         binding.webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
                 return false
+                WebViewHelper.loadUrl(binding.webView, url)
             }
 
             override fun onPageFinished(view: WebView, url: String) {
