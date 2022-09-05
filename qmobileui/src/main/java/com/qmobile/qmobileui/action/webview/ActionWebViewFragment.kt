@@ -53,6 +53,7 @@ class ActionWebViewFragment : BaseFragment() {
         binding.webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
                 return false
+                        binding.progressCircular.visibility = View.INVISIBLE
                 WebViewHelper.loadUrl(binding.webView, url)
             }
 
