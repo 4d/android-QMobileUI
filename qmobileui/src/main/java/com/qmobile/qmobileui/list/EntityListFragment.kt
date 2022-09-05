@@ -467,7 +467,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         actionLabel: String?,
         actionShortLabel: String?
     ) {
-        activity?.let {
             BaseApp.genericNavigationResolver.navigateToActionWebView(
                 viewDataBinding = binding,
                 path = path,
@@ -475,7 +474,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 actionLabel = actionLabel,
                 actionShortLabel = actionShortLabel
             )
-        }
     }
 
     private fun sortItems(action: Action) {

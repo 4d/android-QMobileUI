@@ -22,7 +22,6 @@ import com.qmobile.qmobileui.databinding.FragmentActionWebviewBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.webview.WebViewHelper
 
-@ExperimentalGetImage
 class ActionWebViewFragment : BaseFragment() {
 
     private var _binding: FragmentActionWebviewBinding? = null

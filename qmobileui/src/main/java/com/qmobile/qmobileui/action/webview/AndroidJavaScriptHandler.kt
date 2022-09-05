@@ -17,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import timber.log.Timber
 
 const val TAG = "WebView info"
 
@@ -31,30 +32,32 @@ class AndroidJavaScriptHandler(var activity: FragmentActivity) {
     @JavascriptInterface
     fun log(level: String, message: String) {
         when (level) {
-            "info" -> Log.i(TAG, message)
-            "debug" -> Log.d(TAG, message)
-            "warning" -> Log.w(TAG, message)
-            "error" -> Log.e(TAG, message)
+            "info" -> Timber.i(message)
+            "debug" -> Timber.d(message)
+            "warning" -> Timber.w(message)
+            "error" -> Timber.e(message)
         }
     }
 
     @JavascriptInterface
     fun status(message: String) {
         val jsonObject = JSONObject(message)
-        // case of message is {message: String, succes: Boolean}
+        // case of message is {message: String, success: Boolean}
         jsonObject.getSafeString("message")?.let { text ->
-            val success = jsonObject.getSafeBoolean("success")
-            if (success != null) {
-                val type = when (success) {
-                    true -> ToastMessage.Type.SUCCESS
-                    false -> ToastMessage.Type.ERROR
+            return when (jsonObject.getSafeBoolean("success")) {
+                null -> {
+                    // case of message is {message: String}
+                    SnackbarHelper.show(activity, text, ToastMessage.Type.NEUTRAL)
                 }
-                SnackbarHelper.show(activity, text, type)
-            } else {
-                // case of message is {message: String}
-                SnackbarHelper.show(activity, text, ToastMessage.Type.NEUTRAL)
+                true -> {
+                    SnackbarHelper.show(activity, text, ToastMessage.Type.SUCCESS)
+
+                }
+                false -> {
+                    SnackbarHelper.show(activity, text, ToastMessage.Type.ERROR)
+                }
             }
-            return
+
         }
 
         jsonObject.getSafeString("statusText")?.let { text ->
