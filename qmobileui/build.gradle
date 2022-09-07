@@ -114,13 +114,12 @@ artifactory {
             publications('aar')
             publishArtifacts = true
             publishPom = true
-            properties = ['qa.level': 'basic', 'q.os': 'android', 'dev.team': 'core']
         }
     }
 }
 
 task generateMySources(type: Jar) {
-    classifier = 'sources'
+    archiveClassifier.set("sources")
     from android.sourceSets.main.java.srcDirs
 }
 task addMySourcesToAar(type: Jar) {
@@ -134,7 +133,7 @@ afterEvaluate { project ->
     project.addMySourcesToAar.dependsOn build
 }
 artifacts {
-    archives addMySourcesToAar.archivePath
+    archives addMySourcesToAar.archiveFile.get().asFile
 }
 
 artifactoryPublish {

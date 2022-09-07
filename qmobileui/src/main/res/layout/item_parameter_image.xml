@@ -20,7 +20,7 @@
         android:scrollbars="none"
         android:singleLine="true"
         android:textAlignment="viewStart"
-        android:textColor="?colorOnSurface"
+        android:textColor="?attr/colorOnSurface"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/image_view"
         app:layout_constraintStart_toStartOf="parent"
@@ -35,7 +35,7 @@
         android:scrollbars="none"
         android:singleLine="true"
         android:textAlignment="viewStart"
-        android:textColor="?colorError"
+        android:textColor="?attr/colorError"
         android:visibility="gone"
         app:layout_constraintEnd_toStartOf="@+id/image_view"
         app:layout_constraintStart_toStartOf="parent"
@@ -66,6 +66,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/image_view"
         app:layout_constraintTop_toTopOf="@id/image_view"
-        app:tint="?colorOnSurface" />
+        app:tint="?attr/colorOnSurface" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,9 +12,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
+import androidx.core.view.MenuProvider
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import com.qmobile.qmobileapi.model.entity.EntityModel
@@ -33,7 +35,7 @@ import com.qmobile.qmobileui.webview.MyWebViewClient
 import com.qmobile.qmobileui.webview.WebViewHelper.adjustSize
 import com.qmobile.qmobileui.webview.WebViewHelper.checkIfChildIsWebView
 
-open class EntityDetailFragment : BaseFragment(), ActionNavigable {
+open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider {
 
     // views
     private var _binding: ViewDataBinding? = null
@@ -76,26 +78,32 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
             lifecycleOwner = viewLifecycleOwner
         }
 
+        binding.root.checkIfChildIsWebView()?.let { foundWebView ->
+            webView = foundWebView
+            webView.webViewClient = MyWebViewClient()
+            webView.adjustSize()
+        }
+
+        if (::webView.isInitialized || hasActions) {
+            initMenuProvider()
+        }
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         EntityDetailFragmentObserver(this, entityViewModel).initObservers()
-        view.checkIfChildIsWebView()?.let { foundWebView ->
-            webView = foundWebView
-            webView.webViewClient = MyWebViewClient()
-            webView.adjustSize()
-        }
-
-        setHasOptionsMenu(::webView.isInitialized || hasActions)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_webview, menu)
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_webview, menu)
         setupActionsMenuIfNeeded(menu)
         setupWebViewMenuIfNeeded(menu)
-        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        return false
     }
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {

@@ -26,11 +26,12 @@ open class Action(
     val description: String? = null
 ) {
 
-    var sortFields: LinkedHashMap<String, String>? = null
+    var sortFields: LinkedHashMap<String, String>
 
     init {
         sortFields = fetchSortFields()
     }
+
     fun getIconDrawablePath(): String? =
         ResourcesHelper.correctIconPath(icon)
 

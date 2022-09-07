@@ -117,8 +117,11 @@ class DotProgressBar : FrameLayout {
     }
 
     override fun setVisibility(visibility: Int) {
-        if (visibility == View.VISIBLE) startAnimation()
-        else stopAnimation()
+        if (visibility == View.VISIBLE) {
+            startAnimation()
+        } else {
+            stopAnimation()
+        }
         super.setVisibility(visibility)
     }
 

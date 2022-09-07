@@ -10,6 +10,7 @@ import android.view.View
 import android.webkit.WebView
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
+import com.google.android.material.chip.Chip
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.FieldMapping
 import com.qmobile.qmobileui.formatters.FormatterUtils
@@ -30,11 +31,17 @@ fun applyFormatter(
     imageHeight: Int?
 ) {
     if (text == null || text.toString().isEmpty()) {
+        if (view is Chip) {
+            view.visibility = View.GONE
+        }
         return
     }
     if (view is WebView) {
         WebViewHelper.loadUrl(view, text.toString())
         return
+    }
+    if (view is Chip) {
+        view.visibility = View.VISIBLE
     }
     if (view is TextView) {
         if (!handleAsTextView(view, text, format, tableName, fieldName, imageWidth, imageHeight)) {

@@ -17,6 +17,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -59,7 +60,7 @@ import java.io.File
 import java.util.Date
 import kotlin.collections.HashMap
 
-class ActionParametersFragment : BaseFragment(), ActionProvider {
+class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
     // views
     private lateinit var adapter: ActionsParametersListAdapter
@@ -140,8 +141,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         arguments?.getString("relationName")?.let { relationName ->
             if (relationName.isNotEmpty()) {
                 relation = RelationHelper.getRelation(tableName, relationName)
+                tableName = relation?.dest ?: tableName
+                arguments?.getString("parentItemId")?.let { parentItemId = it }
             }
-            arguments?.getString("parentItemId")?.let { parentItemId = it }
         }
     }
 
@@ -150,7 +152,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        setHasOptionsMenu(true)
+        initMenuProvider()
         activity?.setupToolbarTitle(navbarTitle)
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
@@ -251,7 +253,18 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         }
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu) {
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_actions_parameters, menu)
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        if (menuItem.itemId == R.id.validate) {
+            onValidateClick()
+        }
+        return false
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
         val item = menu.findItem(R.id.validate)
         if (fromPendingTasks) {
             currentTask?.isErrorServer()?.let { isErrorServer ->
@@ -264,19 +277,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
         } else {
             item.title = getString(R.string.validate_action)
         }
-        super.onPrepareOptionsMenu(menu)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_actions_parameters, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.validate) {
-            onValidateClick()
-        }
-        return super.onOptionsItemSelected(item)
+        super.onPrepareMenu(menu)
     }
 
     private fun onValidateClick() {
@@ -504,7 +505,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider {
                         Timber.d("Could not get the signature bitmap (${e.message})")
                         null
                     }
-                    bitmap?.let { bitmap ->
+                    bitmap?.let {
                         this.writeBitmap(bitmap)
                         onImageChosen(Uri.fromFile(this))
                     }

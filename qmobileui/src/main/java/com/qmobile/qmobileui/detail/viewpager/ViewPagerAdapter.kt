@@ -41,6 +41,10 @@ class ViewPagerAdapter(fragment: Fragment, private val tableName: String) :
     }
 }
 
+/**
+ * Not used as we are not using ViewPager with PagedList.
+ * Unfortunately could not find a way to use PagingData with ViewPager so far
+ */
 class ViewPagerAdapter2 internal constructor(
     private val tableName: String,
     private val lifecycleOwner: LifecycleOwner

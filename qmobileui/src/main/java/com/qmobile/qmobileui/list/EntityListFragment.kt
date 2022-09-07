@@ -12,6 +12,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -19,6 +20,7 @@ import android.widget.EditText
 import android.widget.ListAdapter
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import androidx.core.view.MenuProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -29,6 +31,7 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
+import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.utils.LayoutType
 import com.qmobile.qmobiledatasync.utils.fieldAdjustment
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
@@ -51,7 +54,7 @@ import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
 import org.json.JSONObject
 
-open class EntityListFragment : BaseFragment(), ActionNavigable {
+open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
 
     companion object {
         private const val CURRENT_SEARCH_QUERY_KEY = "currentSearchQuery_key"
@@ -76,10 +79,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
     // fragment parameters
     override var tableName = ""
-    private var parentTableName = ""
     private var path = ""
     private var parentItemId = ""
-    private var fromRelation = false
 
     private val tableActions = mutableListOf<Action>()
     private var currentRecordActions = mutableListOf<Action>()
@@ -100,17 +101,17 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             navbarTitle = it
         }
         // Entity list fragment from relation
-        arguments?.getString("destinationTable")?.let { dest ->
-            if (dest.isNotEmpty()) {
-                tableName = dest
-                fromRelation = true
+        arguments?.getString("relationName")?.let { relationName ->
+            if (relationName.isNotEmpty()) {
+                var parentTableName = ""
+                arguments?.getString("parentTableName")?.let { parentTableName = it }
+                relation = RelationHelper.getRelation(parentTableName, relationName)
+                tableName = relation?.dest ?: tableName
+                arguments?.getString("parentItemId")?.let { parentItemId = it }
+                arguments?.getString("path")?.let { path = it }
                 arguments?.getString("navbarTitle")?.let { navbarTitle = it }
             }
         }
-
-        arguments?.getString("parentItemId")?.let { parentItemId = it }
-        arguments?.getString("parentTableName")?.let { parentTableName = it }
-        arguments?.getString("path")?.let { path = it }
     }
 
     override fun onCreateView(
@@ -128,7 +129,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
         if (hasSearch || hasTableActions) {
-            this.setHasOptionsMenu(true)
+            initMenuProvider()
         } else {
             setSearchQuery()
         }
@@ -178,10 +179,9 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                     viewDataBinding = dataBinding,
                     key = key,
                     query = searchPattern,
-                    sourceTable = if (fromRelation) parentTableName else tableName,
-                    destinationTable = if (fromRelation) tableName else "",
+                    sourceTable = relation?.source ?: tableName,
+                    relationName = relation?.name ?: "",
                     parentItemId = parentItemId,
-                    parentTableName = parentTableName,
                     path = path
                 )
             },
@@ -318,7 +318,18 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
             }
         }
 
-    override fun onPrepareOptionsMenu(menu: Menu) {
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        setupActionsMenuIfNeeded(menu)
+        setupSearchMenuIfNeeded(menu, menuInflater)
+        sortListIfNeeded()
+        setSearchQuery()
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        return false
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
         if (hasSearch) {
             searchView.setOnQueryTextListener(searchListener)
 
@@ -330,17 +341,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
                 searchPlate.clearFocus()
             }
         }
-        super.onPrepareOptionsMenu(menu)
-    }
-
-    // Searchable implementation
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        setupActionsMenuIfNeeded(menu)
-        setupSearchMenuIfNeeded(menu, inflater)
-        sortListIfNeeded()
-        setSearchQuery()
-
-        super.onCreateOptionsMenu(menu, inflater)
+        super.onPrepareMenu(menu)
     }
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
@@ -414,11 +415,11 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
     }
 
     private fun setSearchQuery() {
-        val formQuery = if (fromRelation) {
+        val formQuery = if (relation != null) {
             formQueryBuilder.getRelationQuery(
                 parentItemId = parentItemId,
                 pattern = searchPattern,
-                parentTableName = parentTableName,
+                parentTableName = relation?.source ?: "",
                 path = path,
                 sortFields
             )

@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -58,7 +59,7 @@ import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
-import com.qmobile.qmobileui.action.utils.ActionHelper.Companion.setMenuActionDrawable
+import com.qmobile.qmobileui.action.utils.ActionHelper.setMenuActionDrawable
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
@@ -119,9 +120,11 @@ class MainActivity :
             type(statusBars = true) {
                 padding(animated = true)
             }
-//            type(navigationBars = true)}
         }
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+        }
 
         serverNotAccessibleString = getString(R.string.server_not_accessible)
         serverNotAccessibleActionString = getString(R.string.action_send_server_not_accessible)
@@ -382,7 +385,9 @@ class MainActivity :
                 .setIcon(drawable?.adjustActionDrawableMargins(this))
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         }
-        menu.setGroupDividerEnabled(true)
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1) {
+            menu.setGroupDividerEnabled(true)
+        }
     }
 
     override fun onActionClick(action: Action, actionNavigable: ActionNavigable) {

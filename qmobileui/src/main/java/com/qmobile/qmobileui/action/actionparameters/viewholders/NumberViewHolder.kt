@@ -23,7 +23,7 @@ class NumberViewHolder(itemView: View, format: String) : BaseTextViewHolder(item
         private const val PERCENT_DOUBLE_TO_STRING = 100
     }
 
-    var numberValueForSpellOut: String = ""
+    private var numberValueForSpellOut: String = ""
 
     override fun bind(
         item: Any,
