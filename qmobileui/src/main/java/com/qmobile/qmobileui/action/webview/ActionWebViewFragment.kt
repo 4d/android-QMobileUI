@@ -73,15 +73,19 @@ class ActionWebViewFragment : BaseFragment() {
                         super.onPageStarted(view, url, favicon)
                     }
 
-                    override fun shouldInterceptRequest(
-                        view: WebView?,
-                        request: WebResourceRequest?
-                    ): WebResourceResponse {
+                    override fun shouldInterceptRequest(view: WebView?, url: String?): WebResourceResponse? {
                         return WebClientHelper.getResponseWithHeader(
-                            request?.url.toString(),
+                            url.toString(),
                             HEADER_CONTEXT_KEY,
                             base64EncodedContext
                         )
+                    }
+                    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                        return false
+                    }
+
+                    override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                        return false
                     }
 
                     override fun onPageFinished(view: WebView, url: String) {

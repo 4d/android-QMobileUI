@@ -9,6 +9,7 @@ package com.qmobile.qmobileui.action.webview
 import android.util.Base64
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
+import com.qmobile.qmobiledatasync.app.BaseApp
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -78,10 +79,12 @@ object WebClientHelper {
     }
 
     fun getResponseWithHeader(url: String, headerName: String, headerValue: String): WebResourceResponse {
-
         val httpClient = OkHttpClient()
+
         val request: Request = Request.Builder()
             .url(url.trim { it <= ' ' })
+            // Add cookie as header
+            .addHeader("Cookie", BaseApp.sharedPreferencesHolder.cookies)
             .addHeader(headerName, headerValue)
             .build()
         val response: Response = httpClient.newCall(request).execute()
@@ -90,6 +93,5 @@ object WebClientHelper {
             response.header("content-encoding", "utf-8"),
             response.body.byteStream()
         )
-
     }
 }
