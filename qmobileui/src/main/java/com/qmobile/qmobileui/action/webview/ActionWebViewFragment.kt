@@ -12,15 +12,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.camera.core.ExperimentalGetImage
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionWebviewBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.webview.WebViewHelper
+
+const val HEADER_CONTEXT_KEY = "X-QMobile-Context"
 
 class ActionWebViewFragment : BaseFragment() {
 
@@ -30,6 +33,7 @@ class ActionWebViewFragment : BaseFragment() {
     var actionName = ""
     var actionLabel = ""
     var actionShortLabel = ""
+    var base64EncodedContext = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +42,9 @@ class ActionWebViewFragment : BaseFragment() {
         arguments?.getString("actionLabel")?.let { actionLabel = it }
         arguments?.getString("actionShortLabel")?.let {
             actionShortLabel = it
+        }
+        arguments?.getString("base64EncodedContext")?.let {
+            base64EncodedContext = it
         }
     }
 
@@ -59,14 +66,22 @@ class ActionWebViewFragment : BaseFragment() {
                 binding.webView.settings.javaScriptEnabled = true
                 binding.webView.addJavascriptInterface(AndroidJavaScriptHandler(requireActivity()), "Android")
                 binding.webView.settings.javaScriptEnabled = true
+                val url = BaseApp.sharedPreferencesHolder.remoteUrl + path
 
                 binding.webView.webViewClient = object : WebViewClient() {
                     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                         super.onPageStarted(view, url, favicon)
                     }
 
-                    override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                        return false
+                    override fun shouldInterceptRequest(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): WebResourceResponse {
+                        return WebClientHelper.getResponseWithHeader(
+                            request?.url.toString(),
+                            HEADER_CONTEXT_KEY,
+                            base64EncodedContext
+                        )
                     }
 
                     override fun onPageFinished(view: WebView, url: String) {
@@ -76,7 +91,6 @@ class ActionWebViewFragment : BaseFragment() {
                     }
                 }
 
-                val url = BaseApp.sharedPreferencesHolder.remoteUrl + path
                 WebViewHelper.loadUrl(binding.webView, url)
             }
 

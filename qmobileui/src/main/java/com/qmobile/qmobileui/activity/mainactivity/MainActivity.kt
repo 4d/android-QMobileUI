@@ -387,12 +387,20 @@ class MainActivity :
 
     override fun onActionClick(action: Action, actionNavigable: ActionNavigable) {
         if (action.isOpenUrlAction()) {
+            // action.description contains the url if openUrl action
             action.description?.let {
+                val base64EncodedContext = ActionHelper.getBase64EncodedContext(
+                    actionNavigable.getActionContent(
+                        actionUUID = action.uuid,
+                        itemId = (currentEntity?.__entity as EntityModel?)?.__KEY
+                    )
+                )
                 actionNavigable.navigateToActionWebView(
                     it,
                     action.name,
                     action.label,
-                    action.shortLabel
+                    action.shortLabel,
+                    base64EncodedContext
                 )
             }
         } else if (action.parameters.length() > 0) {

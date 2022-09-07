@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.action.utils
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.util.Base64
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -15,10 +16,11 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
-import androidx.core.view.setPadding
 import androidx.core.widget.TextViewCompat
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileapi.utils.parseToString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper.inverseAliasPath
@@ -33,7 +35,6 @@ import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.px
 import org.json.JSONArray
 import org.json.JSONObject
-import kotlin.collections.HashMap
 
 class ActionHelper private constructor() {
 
@@ -189,6 +190,12 @@ class ActionHelper private constructor() {
                 1 -> context.getColorFromAttr(R.attr.colorSecondary)
                 else -> context.getColorFromAttr(R.attr.colorTertiary)
             }
+        }
+
+        // Get base 64 encoded context from actionContent map
+        fun getBase64EncodedContext(actionContent: Map<String, Any>): String {
+            val context = ObjectMapper().parseToString(actionContent["context"])
+            return Base64.encodeToString(context.toByteArray(), Base64.NO_WRAP)
         }
     }
 }

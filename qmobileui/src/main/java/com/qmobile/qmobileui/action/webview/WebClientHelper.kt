@@ -7,7 +7,11 @@
 package com.qmobile.qmobileui.action.webview
 
 import android.util.Base64
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import timber.log.Timber
 import java.io.IOException
 import java.io.InputStream
@@ -71,5 +75,21 @@ object WebClientHelper {
                                                                     }     
        }
       }  """
+    }
+
+    fun getResponseWithHeader(url: String, headerName: String, headerValue: String): WebResourceResponse {
+
+        val httpClient = OkHttpClient()
+        val request: Request = Request.Builder()
+            .url(url.trim { it <= ' ' })
+            .addHeader(headerName, headerValue)
+            .build()
+        val response: Response = httpClient.newCall(request).execute()
+        return WebResourceResponse(
+            null,
+            response.header("content-encoding", "utf-8"),
+            response.body.byteStream()
+        )
+
     }
 }

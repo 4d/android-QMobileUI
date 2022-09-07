@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.action.webview
 
-import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.fragment.app.FragmentActivity
 import com.qmobile.qmobileapi.utils.getSafeBoolean
@@ -51,13 +50,11 @@ class AndroidJavaScriptHandler(var activity: FragmentActivity) {
                 }
                 true -> {
                     SnackbarHelper.show(activity, text, ToastMessage.Type.SUCCESS)
-
                 }
                 false -> {
                     SnackbarHelper.show(activity, text, ToastMessage.Type.ERROR)
                 }
             }
-
         }
 
         jsonObject.getSafeString("statusText")?.let { text ->

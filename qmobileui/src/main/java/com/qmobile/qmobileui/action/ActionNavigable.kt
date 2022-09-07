@@ -14,5 +14,11 @@ interface ActionNavigable : ActionProvider {
 
     fun navigateToPendingTasks()
 
-    fun navigateToActionWebView(path: String, actionName: String, actionLabel: String?, actionShortLabel: String?)
+    fun navigateToActionWebView(
+        path: String,
+        actionName: String,
+        actionLabel: String?,
+        actionShortLabel: String?,
+        base64EncodedContext: String
+    )
 }

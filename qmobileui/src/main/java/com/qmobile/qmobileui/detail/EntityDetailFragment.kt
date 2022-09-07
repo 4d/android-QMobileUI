@@ -160,15 +160,17 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable {
         path: String,
         actionName: String,
         actionLabel: String?,
-        actionShortLabel: String?
+        actionShortLabel: String?,
+        base64EncodedContext: String
     ) {
-            BaseApp.genericNavigationResolver.navigateToActionWebView(
-                viewDataBinding = binding,
-                path = path,
-                actionName,
-                actionLabel,
-                actionShortLabel
-            )
+        BaseApp.genericNavigationResolver.navigateToActionWebView(
+            viewDataBinding = binding,
+            path = path,
+            actionName,
+            actionLabel,
+            actionShortLabel,
+            base64EncodedContext
+        )
     }
 
     override fun getActionContent(actionUUID: String, itemId: String?): MutableMap<String, Any> {

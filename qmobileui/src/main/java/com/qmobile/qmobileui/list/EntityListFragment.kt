@@ -465,15 +465,17 @@ open class EntityListFragment : BaseFragment(), ActionNavigable {
         path: String,
         actionName: String,
         actionLabel: String?,
-        actionShortLabel: String?
+        actionShortLabel: String?,
+        base64EncodedContext: String
     ) {
-            BaseApp.genericNavigationResolver.navigateToActionWebView(
-                viewDataBinding = binding,
-                path = path,
-                actionName = actionName,
-                actionLabel = actionLabel,
-                actionShortLabel = actionShortLabel
-            )
+        BaseApp.genericNavigationResolver.navigateToActionWebView(
+            viewDataBinding = binding,
+            path = path,
+            actionName = actionName,
+            actionLabel = actionLabel,
+            actionShortLabel = actionShortLabel,
+            base64EncodedContext
+        )
     }
 
     private fun sortItems(action: Action) {
