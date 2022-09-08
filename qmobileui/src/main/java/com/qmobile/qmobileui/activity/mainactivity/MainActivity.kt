@@ -368,9 +368,9 @@ class MainActivity :
             order++
         }
 
-        // Should display pending task button only when actions are not empty
         // Ps: if we have only one action and having (preset = sort) it should be applied by default and already deleted from actions list)
-        if (actions.isNotEmpty()) {
+        //Check if actions is not empty and contains at least one regular (non sort or openUrl) action
+        if (actions.isNotEmpty() && actions.firstOrNull { !(it.isSortAction() || it.isOpenUrlAction()) } != null) {
             // Add pendingTasks menu item at the end
             val drawable =
                 if (withIcons) ContextCompat.getDrawable(this, R.drawable.pending_actions) else null
