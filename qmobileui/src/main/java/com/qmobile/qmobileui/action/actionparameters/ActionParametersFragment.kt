@@ -16,6 +16,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.setFragmentResultListener
@@ -114,17 +115,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         }
     }
 
-    private val getImageFromGallery = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            onImageChosen(uri)
-        }
-    }
+    private val getImageFromGallery: ActivityResultLauncher<String> = registerImageFromGallery()
 
-    private val getCameraImage = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success) {
-            onImageChosen(Uri.fromFile(File(currentPhotoPath)))
-        }
-    }
+    private val getCameraImage: ActivityResultLauncher<Uri> = registerCameraImage()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -205,7 +198,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     internal fun setupAdapter() {
         adapter = ActionsParametersListAdapter(
             context = requireContext(),
-            list = allParameters,
+            allParameters = allParameters,
             paramsToSubmit = paramsToSubmit,
             imagesToUpload = imagesToUpload,
             paramsError = errorsByParameter,
@@ -530,5 +523,21 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     private fun scan() {
         delegate.setFullScreenMode(true)
         BaseApp.genericNavigationResolver.navigateToActionScanner(binding, actionPosition)
+    }
+
+    private fun registerImageFromGallery(): ActivityResultLauncher<String> {
+        return registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                onImageChosen(uri)
+            }
+        }
+    }
+
+    private fun registerCameraImage(): ActivityResultLauncher<Uri> {
+        return registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success) {
+                onImageChosen(Uri.fromFile(File(currentPhotoPath)))
+            }
+        }
     }
 }

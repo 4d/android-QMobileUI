@@ -89,7 +89,7 @@ class TimeViewHolder(
             validate(false)
         )
 
-        onClick {
+        setOnSingleClickListener {
             if (isDuration && ::durationPicker.isInitialized) {
                 showPicker(durationPicker)
             }

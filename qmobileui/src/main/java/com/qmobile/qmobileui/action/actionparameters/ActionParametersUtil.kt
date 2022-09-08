@@ -6,6 +6,14 @@
 
 package com.qmobile.qmobileui.action.actionparameters
 
+import android.content.Context
+import android.graphics.drawable.Drawable
+import androidx.core.content.ContextCompat
+import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.binding.ImageHelper.DRAWABLE_24
+import com.qmobile.qmobileui.binding.ImageHelper.getDrawableFromString
+import com.qmobile.qmobileui.binding.px
+
 @Suppress("TooManyFunctions", "unused")
 class ActionParametersUtil(private val format: String) {
     // Text
@@ -47,4 +55,16 @@ class ActionParametersUtil(private val format: String) {
 
     // Barcode
     fun isBarcode() = format == ActionParameter.BARCODE.format
+
+    // ----------------------------------------------
+
+    fun getInputControlDrawable(context: Context, icon: String): Drawable? {
+        var drawable: Drawable? = getDrawableFromString(context, icon, DRAWABLE_24.px, DRAWABLE_24.px)
+
+        if (drawable == null) {
+            drawable = ContextCompat.getDrawable(context, R.drawable.empty_action)
+        }
+
+        return drawable
+    }
 }

@@ -6,11 +6,14 @@
 
 package com.qmobile.qmobileui.binding
 
+import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
+import com.qmobile.qmobileui.binding.ImageHelper.DRAWABLE_24
+import com.qmobile.qmobileui.binding.ImageHelper.DRAWABLE_SPACE
+import com.qmobile.qmobileui.binding.ImageHelper.getDrawableFromString
 
 @BindingAdapter("icon")
 fun bindFieldLabelIcon(view: TextView, icon: String?) {
@@ -18,15 +21,13 @@ fun bindFieldLabelIcon(view: TextView, icon: String?) {
         return
     }
 
-    val resId = view.resources.getIdentifier(icon, "drawable", view.context.packageName)
-    if (resId > 0) {
-        ContextCompat.getDrawable(view.context.applicationContext, resId)?.let { drawable ->
-            drawable.setTint(view.currentTextColor)
-            drawable.setBounds(0, 0, ImageHelper.drawableStartWidth.px, ImageHelper.drawableStartHeight.px)
-            view.gravity = Gravity.CENTER_VERTICAL
-            view.compoundDrawablePadding = ImageHelper.drawableSpace.px
-            (view.layoutParams as? ViewGroup.MarginLayoutParams)?.bottomMargin = ImageHelper.drawableSpace.px
-            view.setCompoundDrawables(drawable, null, null, null)
-        }
+    val drawable: Drawable? = getDrawableFromString(view.context, icon, DRAWABLE_24.px, DRAWABLE_24.px)
+
+    if (drawable != null) {
+        drawable.setTint(view.currentTextColor)
+        view.gravity = Gravity.CENTER_VERTICAL
+        view.compoundDrawablePadding = DRAWABLE_SPACE.px
+        (view.layoutParams as? ViewGroup.MarginLayoutParams)?.bottomMargin = DRAWABLE_SPACE.px
+        view.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
     }
 }

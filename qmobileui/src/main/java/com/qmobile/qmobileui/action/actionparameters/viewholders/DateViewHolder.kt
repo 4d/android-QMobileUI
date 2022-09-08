@@ -72,7 +72,7 @@ class DateViewHolder(
             validate(false)
         )
 
-        onClick {
+        setOnSingleClickListener {
             fragmentManager?.let {
                 val dialog = datePicker.dialog
                 if (dialog == null || !dialog.isShowing) {

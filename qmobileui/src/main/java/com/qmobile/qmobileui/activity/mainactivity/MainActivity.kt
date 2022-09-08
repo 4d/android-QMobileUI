@@ -8,7 +8,6 @@ package com.qmobile.qmobileui.activity.mainactivity
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
@@ -17,7 +16,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.view.menu.MenuBuilder
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
@@ -28,7 +26,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
@@ -59,14 +56,17 @@ import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
-import com.qmobile.qmobileui.action.utils.ActionHelper.setMenuActionDrawable
+import com.qmobile.qmobileui.action.utils.ActionHelper.paramMenuActionDrawable
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
 import com.qmobile.qmobileui.databinding.ActivityMainBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
+import com.qmobile.qmobileui.utils.ActivityLauncher
+import com.qmobile.qmobileui.utils.ActivityLauncherImpl
 import com.qmobile.qmobileui.utils.PermissionChecker
+import com.qmobile.qmobileui.utils.PermissionCheckerImpl
 import com.qmobile.qmobileui.utils.setupWithNavController
 import dev.chrisbanes.insetter.applyInsetter
 import kotlinx.coroutines.flow.SharedFlow
@@ -83,7 +83,8 @@ class MainActivity :
     ActivitySettingsInterface,
     LifecycleEventObserver,
     PermissionChecker,
-    ActionActivity {
+    ActionActivity,
+    ActivityLauncher {
 
     private var loginStatusText = ""
     private var onLaunch = true
@@ -103,6 +104,9 @@ class MainActivity :
     private var noInternetString = ""
     private var noInternetActionString = ""
     private var pendingTaskString = ""
+
+    override val activityLauncherImpl = ActivityLauncherImpl(this)
+    override val permissionCheckerImpl = PermissionCheckerImpl(this)
 
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
@@ -350,7 +354,7 @@ class MainActivity :
         var order = 0
         actions.forEach { action ->
             val drawable = if (withIcons) ActionHelper.getActionIconDrawable(this, action) else null
-            drawable?.setMenuActionDrawable(this)
+            drawable?.paramMenuActionDrawable(this)
 
             // not giving a simple string because we want a divider before pending tasks
             menu.add(0, action.hashCode(), order, action.getPreferredName())
@@ -374,7 +378,7 @@ class MainActivity :
             // Add pendingTasks menu item at the end
             val drawable =
                 if (withIcons) ContextCompat.getDrawable(this, R.drawable.pending_actions) else null
-            drawable?.setMenuActionDrawable(this)
+            drawable?.paramMenuActionDrawable(this)
 
             // not giving a simple string because we want a divider before pending tasks
             menu.add(1, Random().nextInt(), order, pendingTaskString)
@@ -591,59 +595,13 @@ class MainActivity :
         return navHostFragment?.childFragmentManager?.fragments?.get(0)
     }
 
-    private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()
-
-    /**
-     * This method is accessible from BindingAdapters for Custom formatters
-     */
-    fun askPermission(permission: String, rationale: String, callback: (isGranted: Boolean) -> Unit) {
-        val requestPermissionCode = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
-        requestPermissionMap[requestPermissionCode] = callback
-
-        if (ContextCompat.checkSelfPermission(
-                this,
-                permission
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-                MaterialAlertDialogBuilder(this)
-                    .setTitle(getString(R.string.permission_dialog_title))
-                    .setMessage(rationale)
-                    .setPositiveButton(getString(R.string.permission_dialog_positive)) { _, _ ->
-                        ActivityCompat.requestPermissions(
-                            this,
-                            arrayOf(permission),
-                            requestPermissionCode
-                        )
-                    }
-                    .setNegativeButton(getString(R.string.permission_dialog_negative)) { dialog, _ -> dialog.cancel() }
-                    .show()
-            } else {
-                ActivityCompat.requestPermissions(this, arrayOf(permission), requestPermissionCode)
-            }
-        } else {
-            callback(true)
-        }
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when {
-            requestPermissionMap.containsKey(requestCode) -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    requestPermissionMap[requestCode]?.invoke(true)
-                } else {
-                    requestPermissionMap[requestCode]?.invoke(false)
-                }
-                return
-            }
-            else -> {
-            }
-        }
+        permissionCheckerImpl.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun sendPendingTasks() {
@@ -700,6 +658,7 @@ class MainActivity :
     }
 
     override fun setFullScreenMode(isFullScreen: Boolean) {
+//        findViewById<AppBarLayout>(R.id.appbar).visibility =
         binding.bottomNav.visibility = if (isFullScreen) {
             supportActionBar?.hide()
             View.GONE
