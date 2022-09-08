@@ -80,7 +80,6 @@ object ActionHelper {
             }
         }
 
-
         val map: MutableMap<String, Any> = mutableMapOf()
         map["context"] = actionContext
         map["id"] = actionUUID

@@ -85,7 +85,7 @@ object WebClientHelper {
             .addHeader("Cookie", BaseApp.sharedPreferencesHolder.cookies)
             .addHeader(headerName, headerValue)
             .build()
-        val response: Response = HttpClient.httpClient.newCall(request).execute()
+        val response: Response = HttpClient.instance.newCall(request).execute()
         return WebResourceResponse(
             null,
             response.header("content-encoding", "utf-8"),
@@ -93,10 +93,8 @@ object WebClientHelper {
         )
     }
 
-
     // Singleton http client
     object HttpClient {
-        val httpClient = OkHttpClient()
+        val instance = OkHttpClient()
     }
-
 }

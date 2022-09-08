@@ -369,7 +369,7 @@ class MainActivity :
         }
 
         // Ps: if we have only one action and having (preset = sort) it should be applied by default and already deleted from actions list)
-        //Check if actions is not empty and contains at least one regular (non sort or openUrl) action
+        // Check if actions is not empty and contains at least one regular (non sort or openUrl) action
         if (actions.isNotEmpty() && actions.firstOrNull { !(it.isSortAction() || it.isOpenUrlAction()) } != null) {
             // Add pendingTasks menu item at the end
             val drawable =
