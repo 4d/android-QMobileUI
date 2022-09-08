@@ -79,19 +79,24 @@ object WebClientHelper {
     }
 
     fun getResponseWithHeader(url: String, headerName: String, headerValue: String): WebResourceResponse {
-        val httpClient = OkHttpClient()
-
         val request: Request = Request.Builder()
             .url(url.trim { it <= ' ' })
             // Add cookie as header
             .addHeader("Cookie", BaseApp.sharedPreferencesHolder.cookies)
             .addHeader(headerName, headerValue)
             .build()
-        val response: Response = httpClient.newCall(request).execute()
+        val response: Response = HttpClient.httpClient.newCall(request).execute()
         return WebResourceResponse(
             null,
             response.header("content-encoding", "utf-8"),
             response.body.byteStream()
         )
     }
+
+
+    // Singleton http client
+    object HttpClient {
+        val httpClient = OkHttpClient()
+    }
+
 }
