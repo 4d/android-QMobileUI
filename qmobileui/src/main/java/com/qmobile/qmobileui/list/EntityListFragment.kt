@@ -462,6 +462,23 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         }
     }
 
+    override fun navigateToActionWebView(
+        path: String,
+        actionName: String,
+        actionLabel: String?,
+        actionShortLabel: String?,
+        base64EncodedContext: String
+    ) {
+        BaseApp.genericNavigationResolver.navigateToActionWebView(
+            viewDataBinding = binding,
+            path = path,
+            actionName = actionName,
+            actionLabel = actionLabel,
+            actionShortLabel = actionShortLabel,
+            base64EncodedContext
+        )
+    }
+
     private fun sortItems(action: Action) {
         sortFields = action.sortFields
         setSearchQuery()
