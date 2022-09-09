@@ -16,6 +16,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.view.menu.MenuBuilder
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
@@ -63,8 +64,6 @@ import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
 import com.qmobile.qmobileui.databinding.ActivityMainBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
-import com.qmobile.qmobileui.utils.ActivityLauncher
-import com.qmobile.qmobileui.utils.ActivityLauncherImpl
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.PermissionCheckerImpl
 import com.qmobile.qmobileui.utils.setupWithNavController
@@ -108,6 +107,9 @@ class MainActivity :
     override val activityLauncherImpl = ActivityLauncherImpl(this)
     override val permissionCheckerImpl = PermissionCheckerImpl(this)
 
+    private var statusBarHeight = 0
+    private var appBarHeight = 0
+
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
@@ -125,6 +127,9 @@ class MainActivity :
                 padding(animated = true)
             }
         }
+
+        statusBarHeight = getStatusBarHeight()
+        appBarHeight = statusBarHeight
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
             WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -155,7 +160,6 @@ class MainActivity :
             initObservers()
         }
 
-        // Init data sync class
         mainActivityDataSync = MainActivityDataSync(this)
 
         // Follow activity lifecycle and check when activity enters foreground for data sync
@@ -601,7 +605,7 @@ class MainActivity :
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        permissionCheckerImpl.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionCheckerImpl.onRequestPermissionsResult(requestCode, grantResults)
     }
 
     override fun sendPendingTasks() {
@@ -658,13 +662,22 @@ class MainActivity :
     }
 
     override fun setFullScreenMode(isFullScreen: Boolean) {
-//        findViewById<AppBarLayout>(R.id.appbar).visibility =
-        binding.bottomNav.visibility = if (isFullScreen) {
-            supportActionBar?.hide()
-            View.GONE
+        if (isFullScreen) {
+            appBarHeight = binding.appbar.height
+            binding.appbar.layoutParams = CoordinatorLayout.LayoutParams(binding.appbar.width, statusBarHeight)
+            binding.bottomNav.visibility = View.GONE
         } else {
-            supportActionBar?.show()
-            View.VISIBLE
+            binding.appbar.layoutParams = CoordinatorLayout.LayoutParams(binding.appbar.width, appBarHeight)
+            binding.bottomNav.visibility = View.VISIBLE
+        }
+    }
+
+    private fun getStatusBarHeight(): Int {
+        val idStatusBarHeight = resources.getIdentifier("status_bar_height", "dimen", "android")
+        return if (idStatusBarHeight > 0) {
+            resources.getDimensionPixelSize(idStatusBarHeight)
+        } else {
+            0
         }
     }
 

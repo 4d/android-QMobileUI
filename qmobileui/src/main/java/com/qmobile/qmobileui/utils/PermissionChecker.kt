@@ -1,5 +1,5 @@
 /*
- * Created by qmarciset on 3/2/2022.
+ * Created by qmarciset on 8/9/2022.
  * 4D SAS
  * Copyright (c) 2022 qmarciset. All rights reserved.
  */
@@ -57,7 +57,9 @@ class PermissionCheckerImpl(private val context: Context) {
                                 requestPermissionCode
                             )
                         }
-                        .setNegativeButton(getString(R.string.permission_dialog_negative)) { dialog, _ -> dialog.cancel() }
+                        .setNegativeButton(getString(R.string.permission_dialog_negative)) { dialog, _ ->
+                            dialog.cancel()
+                        }
                         .show()
                 } else {
                     ActivityCompat.requestPermissions(this, arrayOf(permission), requestPermissionCode)
@@ -68,11 +70,7 @@ class PermissionCheckerImpl(private val context: Context) {
         }
     }
 
-    fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
+    fun onRequestPermissionsResult(requestCode: Int, grantResults: IntArray) {
         if (requestPermissionMap.containsKey(requestCode)) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 requestPermissionMap[requestCode]?.invoke(true)

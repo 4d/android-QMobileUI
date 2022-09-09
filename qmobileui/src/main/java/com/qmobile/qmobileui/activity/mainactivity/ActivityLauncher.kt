@@ -4,11 +4,10 @@
  * Copyright (c) 2022 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.utils
+package com.qmobile.qmobileui.activity.mainactivity
 
 import android.content.Context
 import android.net.Uri
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.fragment.app.FragmentActivity
@@ -25,17 +24,14 @@ interface ActivityLauncher {
     }
 }
 
-class ActivityLauncherImpl(private val context: Context) {
+class ActivityLauncherImpl(context: Context) {
 
     private var contactPhoneNumberCallback: (contactUri: Uri?) -> Unit = {}
 
-    private val getContactPhoneNumber: ActivityResultLauncher<Void?> = registerContactPhoneNumber()
-
-    private fun registerContactPhoneNumber(): ActivityResultLauncher<Void?> {
-        return (context as FragmentActivity).registerForActivityResult(ActivityResultContracts.PickContact()) { contactUri ->
+    private val getContactPhoneNumber =
+        (context as FragmentActivity).registerForActivityResult(ActivityResultContracts.PickContact()) { contactUri ->
             contactPhoneNumberCallback(contactUri)
         }
-    }
 
     fun launchContactPhoneNumber(callback: (contactUri: Uri?) -> Unit) {
         contactPhoneNumberCallback = callback
