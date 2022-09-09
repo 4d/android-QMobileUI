@@ -368,9 +368,9 @@ class MainActivity :
             order++
         }
 
-        // Should display pending task button only when actions are not empty
         // Ps: if we have only one action and having (preset = sort) it should be applied by default and already deleted from actions list)
-        if (actions.isNotEmpty()) {
+        // Check if actions is not empty and contains at least one regular (non sort or openUrl) action
+        if (actions.isNotEmpty() && actions.firstOrNull { !(it.isSortAction() || it.isOpenUrlAction()) } != null) {
             // Add pendingTasks menu item at the end
             val drawable =
                 if (withIcons) ContextCompat.getDrawable(this, R.drawable.pending_actions) else null
@@ -391,7 +391,24 @@ class MainActivity :
     }
 
     override fun onActionClick(action: Action, actionNavigable: ActionNavigable) {
-        if (action.parameters.length() > 0) {
+        if (action.isOpenUrlAction()) {
+            // action.description contains the url if openUrl action
+            action.description?.let {
+                val base64EncodedContext = ActionHelper.getBase64EncodedContext(
+                    actionNavigable.getActionContent(
+                        actionUUID = action.uuid,
+                        itemId = (currentEntity?.__entity as EntityModel?)?.__KEY
+                    )
+                )
+                actionNavigable.navigateToActionWebView(
+                    it,
+                    action.name,
+                    action.label,
+                    action.shortLabel,
+                    base64EncodedContext
+                )
+            }
+        } else if (action.parameters.length() > 0) {
             if (action.scope == Action.Scope.TABLE) {
                 currentEntity = null
             }

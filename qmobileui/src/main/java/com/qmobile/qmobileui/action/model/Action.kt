@@ -22,7 +22,8 @@ open class Action(
     val preset: String? = null,
     val scope: Scope? = null,
     val parameters: JSONArray,
-    val uuid: String
+    val uuid: String,
+    val description: String? = null
 ) {
 
     var sortFields: LinkedHashMap<String, String>
@@ -85,6 +86,7 @@ open class Action(
     }
 
     fun isSortAction() = preset == "sort"
+    fun isOpenUrlAction() = preset == "openURL"
 
     class ActionException(message: String) : Exception(message)
 }
