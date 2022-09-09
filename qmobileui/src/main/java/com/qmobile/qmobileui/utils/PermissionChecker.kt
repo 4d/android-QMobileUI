@@ -32,12 +32,12 @@ interface PermissionChecker {
     }
 }
 
-class PermissionCheckerImpl(private val context: Context) {
+class PermissionCheckerImpl(private val fragmentActivity: FragmentActivity) {
 
     private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()
 
     fun askPermission(permission: String, rationale: String, callback: (isGranted: Boolean) -> Unit) {
-        (context as FragmentActivity?)?.apply {
+        fragmentActivity.apply {
             val requestPermissionCode = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
             requestPermissionMap[requestPermissionCode] = callback
 

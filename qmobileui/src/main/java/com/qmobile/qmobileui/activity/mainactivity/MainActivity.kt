@@ -83,7 +83,7 @@ class MainActivity :
     LifecycleEventObserver,
     PermissionChecker,
     ActionActivity,
-    ActivityLauncher {
+    ActivityResultController {
 
     private var loginStatusText = ""
     private var onLaunch = true
@@ -104,7 +104,7 @@ class MainActivity :
     private var noInternetActionString = ""
     private var pendingTaskString = ""
 
-    override val activityLauncherImpl = ActivityLauncherImpl(this)
+    override val activityResultControllerImpl = ActivityResultControllerImpl(this)
     override val permissionCheckerImpl = PermissionCheckerImpl(this)
 
     private var statusBarHeight = 0
