@@ -64,12 +64,15 @@ class TimeViewHolder(
         if (isDuration) {
             durationPicker = DurationPicker()
             durationPicker.title = container.hint ?: ""
+            durationPicker.setupDefault(defaultHour, defaultMinute, defaultSecond)
             durationPicker.addOnPositiveButtonClickListener { hour, minute, second ->
                 onTimeSet(hour, minute, second, onValueChanged)
             }
         } else {
             timePicker = MaterialTimePicker.Builder()
                 .setTimeFormat(clockFormat)
+                .setHour(defaultHour)
+                .setMinute(defaultMinute)
                 .setTitleText(container.hint)
                 .setInputMode(MaterialTimePicker.INPUT_MODE_KEYBOARD)
                 .setPositiveButtonText(itemView.context.getString(R.string.action_time_dialog_positive))
@@ -80,7 +83,6 @@ class TimeViewHolder(
                 onTimeSet(timePicker.hour, timePicker.minute, 0, onValueChanged)
             }
         }
-        setInitialValues(defaultHour, defaultMinute, defaultSecond)
 
         onValueChanged(
             parameterName,
