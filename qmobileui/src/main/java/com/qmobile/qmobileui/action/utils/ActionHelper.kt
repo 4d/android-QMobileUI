@@ -193,7 +193,7 @@ object ActionHelper {
 
     // Get base 64 encoded context from actionContent map
     fun getBase64EncodedContext(actionContent: Map<String, Any>): String {
-        val context = ObjectMapper().parseToString(actionContent["context"])
+        val context =BaseApp.mapper.parseToString(actionContent["context"])
         return Base64.encodeToString(context.toByteArray(), Base64.NO_WRAP)
     }
 }
