@@ -17,7 +17,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.core.widget.TextViewCompat
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileapi.utils.parseToString
@@ -193,7 +192,7 @@ object ActionHelper {
 
     // Get base 64 encoded context from actionContent map
     fun getBase64EncodedContext(actionContent: Map<String, Any>): String {
-        val context =BaseApp.mapper.parseToString(actionContent["context"])
+        val context = BaseApp.mapper.parseToString(actionContent["context"])
         return Base64.encodeToString(context.toByteArray(), Base64.NO_WRAP)
     }
 }
