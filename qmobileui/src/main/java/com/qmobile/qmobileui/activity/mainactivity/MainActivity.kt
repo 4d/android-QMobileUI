@@ -17,6 +17,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.view.menu.MenuBuilder
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
@@ -104,6 +105,9 @@ class MainActivity :
     private var noInternetActionString = ""
     private var pendingTaskString = ""
 
+    private var statusBarHeight = 0
+    private var appBarHeight = 0
+
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
@@ -121,6 +125,9 @@ class MainActivity :
                 padding(animated = true)
             }
         }
+
+        statusBarHeight = getStatusBarHeight()
+        appBarHeight = statusBarHeight
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
             WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -151,7 +158,6 @@ class MainActivity :
             initObservers()
         }
 
-        // Init data sync class
         mainActivityDataSync = MainActivityDataSync(this)
 
         // Follow activity lifecycle and check when activity enters foreground for data sync
@@ -555,7 +561,7 @@ class MainActivity :
         intent.putExtra(LOGGED_OUT, true)
         intent.addFlags(
             Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                Intent.FLAG_ACTIVITY_NEW_TASK
+                    Intent.FLAG_ACTIVITY_NEW_TASK
         )
         startActivity(intent)
         finish()
@@ -717,12 +723,23 @@ class MainActivity :
     }
 
     override fun setFullScreenMode(isFullScreen: Boolean) {
-        binding.bottomNav.visibility = if (isFullScreen) {
-            supportActionBar?.hide()
-            View.GONE
+        if (isFullScreen) {
+            appBarHeight = binding.appbar.height
+            binding.appbar.layoutParams = CoordinatorLayout.LayoutParams(binding.appbar.width, statusBarHeight)
+            binding.bottomNav.visibility = View.GONE
         } else {
-            supportActionBar?.show()
-            View.VISIBLE
+            binding.appbar.layoutParams = CoordinatorLayout.LayoutParams(binding.appbar.width, appBarHeight)
+            binding.bottomNav.visibility = View.VISIBLE
+        }
+
+    }
+
+    private fun getStatusBarHeight(): Int {
+        val idStatusBarHeight = resources.getIdentifier("status_bar_height", "dimen", "android")
+        return if (idStatusBarHeight > 0) {
+            resources.getDimensionPixelSize(idStatusBarHeight)
+        } else {
+            0
         }
     }
 
