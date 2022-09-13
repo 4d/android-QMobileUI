@@ -74,8 +74,6 @@ import timber.log.Timber
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
-const val BASE_PERMISSION_REQUEST_CODE = 1000
-
 class MainActivity :
     BaseActivity(),
     FragmentCommunication,
@@ -614,15 +612,6 @@ class MainActivity :
     private fun getCurrentFragment(): Fragment? {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
         return navHostFragment?.childFragmentManager?.fragments?.get(0)
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        permissionCheckerImpl.onRequestPermissionsResult(requestCode, grantResults)
     }
 
     override fun sendPendingTasks() {

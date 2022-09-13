@@ -8,12 +8,13 @@ package com.qmobile.qmobileui.utils
 
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.activity.mainactivity.BASE_PERMISSION_REQUEST_CODE
+import com.qmobile.qmobileui.activity.mainactivity.ActivityResultController
 
 interface PermissionChecker {
 
@@ -34,13 +35,8 @@ interface PermissionChecker {
 
 class PermissionCheckerImpl(private val fragmentActivity: FragmentActivity) {
 
-    private val requestPermissionMap: MutableMap<Int, (isGranted: Boolean) -> Unit> = mutableMapOf()
-
     fun askPermission(permission: String, rationale: String, callback: (isGranted: Boolean) -> Unit) {
         fragmentActivity.apply {
-            val requestPermissionCode = BASE_PERMISSION_REQUEST_CODE + requestPermissionMap.size
-            requestPermissionMap[requestPermissionCode] = callback
-
             if (ContextCompat.checkSelfPermission(
                     this,
                     permission
@@ -51,18 +47,14 @@ class PermissionCheckerImpl(private val fragmentActivity: FragmentActivity) {
                         .setTitle(getString(R.string.permission_dialog_title))
                         .setMessage(rationale)
                         .setPositiveButton(getString(R.string.permission_dialog_positive)) { _, _ ->
-                            ActivityCompat.requestPermissions(
-                                this,
-                                arrayOf(permission),
-                                requestPermissionCode
-                            )
+                            requestPermission(permission, callback)
                         }
                         .setNegativeButton(getString(R.string.permission_dialog_negative)) { dialog, _ ->
                             dialog.cancel()
                         }
                         .show()
                 } else {
-                    ActivityCompat.requestPermissions(this, arrayOf(permission), requestPermissionCode)
+                    requestPermission(permission, callback)
                 }
             } else {
                 callback(true)
@@ -70,13 +62,11 @@ class PermissionCheckerImpl(private val fragmentActivity: FragmentActivity) {
         }
     }
 
-    fun onRequestPermissionsResult(requestCode: Int, grantResults: IntArray) {
-        if (requestPermissionMap.containsKey(requestCode)) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                requestPermissionMap[requestCode]?.invoke(true)
-            } else {
-                requestPermissionMap[requestCode]?.invoke(false)
-            }
-        }
+    private fun requestPermission(permission: String, callback: (isGranted: Boolean) -> Unit) {
+        (fragmentActivity as ActivityResultController?)?.launch(
+            type = ActivityResultContracts.RequestPermission(),
+            input = permission,
+            callback = callback
+        )
     }
 }
