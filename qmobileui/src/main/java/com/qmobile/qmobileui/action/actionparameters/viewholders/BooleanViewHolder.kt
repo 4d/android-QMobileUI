@@ -13,11 +13,11 @@ import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
 
-class BooleanViewHolder(itemView: View, format: String) : BaseViewHolder(itemView, format) {
+open class BooleanViewHolder(itemView: View, format: String) : BaseViewHolder(itemView, format) {
 
-    private var compoundButton: CompoundButton = itemView.findViewById(R.id.compoundButton)
+    protected var compoundButton: CompoundButton = itemView.findViewById(R.id.compoundButton)
     private val label: TextView = itemView.findViewById(R.id.label)
-    private val error: TextView = itemView.findViewById(R.id.error)
+    protected val error: TextView = itemView.findViewById(R.id.error)
 
     override fun bind(
         item: Any,

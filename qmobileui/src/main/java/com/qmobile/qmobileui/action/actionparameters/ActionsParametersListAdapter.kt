@@ -128,7 +128,10 @@ class ActionsParametersListAdapter(
         val format = itemJsonObject.getSafeString("format")
 
         if (format?.startsWith("/") == true) { // Custom Input Control
-            return ActionParameter.values().size + 1
+            return when (type) {
+                "bool" -> ActionParameter.values().size + 2
+                else -> ActionParameter.values().size + 1
+            }
         }
 
         val actionParameter =

@@ -24,10 +24,19 @@ object ActionParameterViewHolderFactory {
         actionTypesCallback: (actionTypes: Action.Type, position: Int) -> Unit
     ): BaseViewHolder {
         return when (val itemType = ActionParameter.values().getOrNull(viewType)) {
-            null -> InputControlViewHolder(
-                LayoutInflater.from(context)
-                    .inflate(R.layout.item_parameter_text, parent, false)
-            )
+            null -> {
+                when (viewType) {
+                    ActionParameter.values().size + 2 -> InputControlBooleanViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_boolean_custom, parent, false)
+                    )
+                    else -> InputControlViewHolder(
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.item_parameter_text, parent, false)
+                    )
+                }
+            }
+
             // Text
             ActionParameter.TEXT_DEFAULT,
             ActionParameter.TEXT_EMAIL,

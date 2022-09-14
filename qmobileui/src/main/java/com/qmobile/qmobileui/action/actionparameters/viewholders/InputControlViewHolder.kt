@@ -10,6 +10,7 @@ import android.view.View
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.utils.BaseInputControl
 
 open class InputControlViewHolder(itemView: View, format: String = "") : BaseInputLessViewHolder(itemView, format) {
 
@@ -23,6 +24,12 @@ open class InputControlViewHolder(itemView: View, format: String = "") : BaseInp
     ) {
         super.bind(item, currentEntity, isLastParameter, alreadyFilledValue, serverError, onValueChanged)
 
+        itemJsonObject.getSafeString("type")?.let { type ->
+            if (type == "boolean") {
+                container.hint = ""
+            }
+        }
+
         itemJsonObject.getSafeString("inputControlIcon")?.let {
             container.endIconDrawable = apu.getInputControlDrawable(itemView.context, it)
         }
@@ -31,11 +38,23 @@ open class InputControlViewHolder(itemView: View, format: String = "") : BaseInp
 
         val format = itemJsonObject.getSafeString("format")
 
-        setOnSingleClickListener {
-            BaseApp.genericActionHelper.getInputControl(itemView, format)?.onClick { outputText ->
-                input.setText(outputText)
-                onValueChanged(parameterName, outputText, null, validate(false))
+        BaseApp.genericActionHelper.getInputControl(itemView, format)?.let { inputControl ->
+            if (inputControl.autocomplete) {
+                processInputControl(inputControl, onValueChanged)
             }
+            setOnSingleClickListener {
+                processInputControl(inputControl, onValueChanged)
+            }
+        }
+    }
+
+    private fun processInputControl(
+        inputControl: BaseInputControl,
+        onValueChanged: (String, Any?, String?, Boolean) -> Unit
+    ) {
+        inputControl.process { outputText ->
+            input.setText(outputText as String)
+            onValueChanged(parameterName, outputText, null, validate(false))
         }
     }
 
