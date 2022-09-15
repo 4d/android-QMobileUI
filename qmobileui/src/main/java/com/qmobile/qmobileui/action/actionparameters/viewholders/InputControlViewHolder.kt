@@ -24,12 +24,6 @@ open class InputControlViewHolder(itemView: View, format: String = "") : BaseInp
     ) {
         super.bind(item, currentEntity, isLastParameter, alreadyFilledValue, serverError, onValueChanged)
 
-        itemJsonObject.getSafeString("type")?.let { type ->
-            if (type == "boolean") {
-                container.hint = ""
-            }
-        }
-
         onValueChanged(parameterName, input.text.toString(), null, validate(false))
 
         val format = itemJsonObject.getSafeString("format")
