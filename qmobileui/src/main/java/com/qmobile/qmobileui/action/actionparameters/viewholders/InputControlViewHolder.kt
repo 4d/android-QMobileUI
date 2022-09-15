@@ -30,15 +30,16 @@ open class InputControlViewHolder(itemView: View, format: String = "") : BaseInp
             }
         }
 
-        itemJsonObject.getSafeString("inputControlIcon")?.let {
-            container.endIconDrawable = apu.getInputControlDrawable(itemView.context, it)
-        }
-
         onValueChanged(parameterName, input.text.toString(), null, validate(false))
 
         val format = itemJsonObject.getSafeString("format")
 
         BaseApp.genericActionHelper.getInputControl(itemView, format)?.let { inputControl ->
+
+            if (inputControl.getIconName().isNotEmpty()) {
+                container.endIconDrawable = apu.getInputControlDrawable(itemView.context, inputControl.getIconName())
+            }
+
             if (inputControl.autocomplete) {
                 processInputControl(inputControl, onValueChanged)
             }

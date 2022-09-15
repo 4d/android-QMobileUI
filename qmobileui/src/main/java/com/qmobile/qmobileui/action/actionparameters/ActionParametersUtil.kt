@@ -13,6 +13,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.ImageHelper.DRAWABLE_24
 import com.qmobile.qmobileui.binding.ImageHelper.getDrawableFromString
 import com.qmobile.qmobileui.binding.px
+import com.qmobile.qmobileui.utils.ResourcesHelper
 
 @Suppress("TooManyFunctions", "unused")
 class ActionParametersUtil(private val format: String) {
@@ -59,7 +60,10 @@ class ActionParametersUtil(private val format: String) {
     // ----------------------------------------------
 
     fun getInputControlDrawable(context: Context, icon: String): Drawable? {
-        var drawable: Drawable? = getDrawableFromString(context, icon, DRAWABLE_24.px, DRAWABLE_24.px)
+        var drawable: Drawable? = null
+        ResourcesHelper.correctIconPath(icon)?.let {
+            drawable = getDrawableFromString(context, it, DRAWABLE_24.px, DRAWABLE_24.px)
+        }
 
         if (drawable == null) {
             drawable = ContextCompat.getDrawable(context, R.drawable.empty_action)
