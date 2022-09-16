@@ -21,7 +21,7 @@ interface ActivityResultController {
     val activityResultControllerImpl: ActivityResultControllerImpl
 
     /**
-     * This method is accessible for Input Controls
+     * This method is accessible for Kotlin Input Controls
      */
     fun launch(type: ActivityResultContract<*, *>, input: Any?, callback: Any?) {
         activityResultControllerImpl.launch(type, input, callback)

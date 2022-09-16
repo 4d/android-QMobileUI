@@ -127,7 +127,7 @@ class ActionsParametersListAdapter(
         val type = itemJsonObject.getSafeString("type")
         val format = itemJsonObject.getSafeString("format")
 
-        if (format?.startsWith("/") == true) { // Custom Input Control
+        if (format?.startsWith("/") == true) { // Kotlin Input Control
             return when (type) {
                 "bool" -> ActionParameter.values().size + 2
                 else -> ActionParameter.values().size + 1

@@ -10,9 +10,9 @@ import android.view.View
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.utils.BaseInputControl
+import com.qmobile.qmobiledatasync.utils.BaseKotlinInputControl
 
-open class InputControlViewHolder(itemView: View, format: String = "") : BaseInputLessViewHolder(itemView, format) {
+class KotlinInputControlViewHolder(itemView: View, format: String = "") : BaseInputLessViewHolder(itemView, format) {
 
     override fun bind(
         item: Any,
@@ -28,10 +28,11 @@ open class InputControlViewHolder(itemView: View, format: String = "") : BaseInp
 
         val format = itemJsonObject.getSafeString("format")
 
-        BaseApp.genericActionHelper.getInputControl(itemView, format)?.let { inputControl ->
+        BaseApp.genericActionHelper.getKotlinInputControl(itemView, format)?.let { inputControl ->
 
             if (inputControl.getIconName().isNotEmpty()) {
-                container.endIconDrawable = apu.getInputControlDrawable(itemView.context, inputControl.getIconName())
+                container.endIconDrawable =
+                    apu.getKotlinInputControlDrawable(itemView.context, inputControl.getIconName())
             }
 
             if (inputControl.autocomplete) {
@@ -44,7 +45,7 @@ open class InputControlViewHolder(itemView: View, format: String = "") : BaseInp
     }
 
     private fun processInputControl(
-        inputControl: BaseInputControl,
+        inputControl: BaseKotlinInputControl,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
         inputControl.process { outputText ->

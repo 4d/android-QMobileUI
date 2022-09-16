@@ -21,7 +21,7 @@ interface PermissionChecker {
     val permissionCheckerImpl: PermissionCheckerImpl
 
     /**
-     * This method is accessible for Custom formatters and Input Controls
+     * This method is accessible for Custom formatters and Kotlin Input Controls
      */
     fun askPermission(
         context: Context? = null,

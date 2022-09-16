@@ -26,11 +26,11 @@ object ActionParameterViewHolderFactory {
         return when (val itemType = ActionParameter.values().getOrNull(viewType)) {
             null -> {
                 when (viewType) {
-                    ActionParameter.values().size + 2 -> InputControlBooleanViewHolder(
+                    ActionParameter.values().size + 2 -> KotlinInputControlBooleanViewHolder(
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_boolean_custom, parent, false)
                     )
-                    else -> InputControlViewHolder(
+                    else -> KotlinInputControlViewHolder(
                         LayoutInflater.from(context)
                             .inflate(R.layout.item_parameter_text, parent, false)
                     )

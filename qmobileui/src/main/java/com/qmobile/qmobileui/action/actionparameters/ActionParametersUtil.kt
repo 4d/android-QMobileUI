@@ -59,7 +59,7 @@ class ActionParametersUtil(private val format: String) {
 
     // ----------------------------------------------
 
-    fun getInputControlDrawable(context: Context, icon: String): Drawable? {
+    fun getKotlinInputControlDrawable(context: Context, icon: String): Drawable? {
         var drawable: Drawable? = null
         ResourcesHelper.correctIconPath(icon)?.let {
             drawable = getDrawableFromString(context, it, DRAWABLE_24.px, DRAWABLE_24.px)

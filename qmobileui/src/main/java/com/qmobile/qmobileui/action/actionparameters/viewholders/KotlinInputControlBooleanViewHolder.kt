@@ -11,7 +11,7 @@ import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 
-class InputControlBooleanViewHolder(itemView: View, format: String = "") : BooleanViewHolder(itemView, format) {
+class KotlinInputControlBooleanViewHolder(itemView: View, format: String = "") : BooleanViewHolder(itemView, format) {
 
     override fun bind(
         item: Any,
@@ -25,7 +25,7 @@ class InputControlBooleanViewHolder(itemView: View, format: String = "") : Boole
 
         val format = itemJsonObject.getSafeString("format")
 
-        BaseApp.genericActionHelper.getInputControl(itemView, format)?.let { inputControl ->
+        BaseApp.genericActionHelper.getKotlinInputControl(itemView, format)?.let { inputControl ->
             inputControl.process(inputValue = compoundButton.isChecked) { output ->
                 if (output is Boolean) {
                     error.visibility = View.INVISIBLE
