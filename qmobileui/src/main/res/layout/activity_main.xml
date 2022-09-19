@@ -27,9 +27,11 @@
             <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:id="@+id/collapsing_toolbar"
                 style="?attr/collapsingToolbarLayoutMediumStyle"
+                layout_scrollFlags="scroll|exitUntilCollapsed|snap"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/collapsingToolbarLayoutMediumSize"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                app:collapsedTitleTextAppearance="?attr/textAppearanceHeadlineSmall"
+                app:expandedTitleTextAppearance="?attr/textAppearanceHeadlineMedium"
                 app:titleCollapseMode="scale"
                 app:titleEnabled="true">
 
