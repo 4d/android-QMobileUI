@@ -120,4 +120,9 @@ class ActionWebViewFragment : BaseFragment() {
         builder.create()
         builder.show()
     }
+
+    override fun onDetach() {
+        super.onDetach()
+        delegate.setFullScreenMode(false)
+    }
 }
