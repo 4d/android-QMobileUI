@@ -65,6 +65,7 @@ class ActionWebViewFragment : BaseFragment() {
             override fun onServerAccessible() {
                 binding.webView.settings.javaScriptEnabled = true
                 binding.webView.addJavascriptInterface(AndroidJavaScriptHandler(requireActivity()), "Android")
+                binding.webView.settings.builtInZoomControls = true
                 val url = BaseApp.sharedPreferencesHolder.remoteUrl + path
 
                 binding.webView.webViewClient = object : WebViewClient() {
@@ -106,7 +107,7 @@ class ActionWebViewFragment : BaseFragment() {
 
     fun showErrorServer() {
         val builder = AlertDialog.Builder(requireActivity())
-        builder.setMessage(R.string.server_not_accessible)
+        builder.setMessage(R.string.server_not_reachable)
             .setPositiveButton(
                 R.string.retry_action
             ) { _, _ ->
