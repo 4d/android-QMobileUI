@@ -107,7 +107,7 @@ class ActionWebViewFragment : BaseFragment() {
 
     fun showErrorServer() {
         val builder = AlertDialog.Builder(requireActivity())
-        builder.setMessage(R.string.server_not_accessible)
+        builder.setMessage(R.string.server_not_reachable)
             .setPositiveButton(
                 R.string.retry_action
             ) { _, _ ->

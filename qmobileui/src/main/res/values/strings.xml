@@ -40,6 +40,7 @@
     <string name="no_internet_auto_login">No Internet connection, you won\'t be able to perform server requests</string>
     <string name="server_accessible">Server is accessible</string>
     <string name="server_not_accessible">Server is not accessible</string>
+    <string name="server_not_reachable">The server is not reachable</string>
     <string name="remote_url_placeholder">%1$s - %2$s</string>
 
     <!--    Login -->
