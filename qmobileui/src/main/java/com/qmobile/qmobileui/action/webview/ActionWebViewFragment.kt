@@ -65,6 +65,7 @@ class ActionWebViewFragment : BaseFragment() {
             override fun onServerAccessible() {
                 binding.webView.settings.javaScriptEnabled = true
                 binding.webView.addJavascriptInterface(AndroidJavaScriptHandler(requireActivity()), "Android")
+                binding.webView.settings.javaScriptEnabled = true
                 val url = BaseApp.sharedPreferencesHolder.remoteUrl + path
 
                 binding.webView.webViewClient = object : WebViewClient() {
@@ -83,6 +84,9 @@ class ActionWebViewFragment : BaseFragment() {
                         return false
                     }
 
+                    override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                        return false
+                    }
 
                     override fun onPageFinished(view: WebView, url: String) {
                         super.onPageFinished(view, url)
