@@ -65,6 +65,7 @@ class ActionWebViewFragment : BaseFragment() {
             override fun onServerAccessible() {
                 binding.webView.settings.javaScriptEnabled = true
                 binding.webView.addJavascriptInterface(AndroidJavaScriptHandler(requireActivity()), "Android")
+                binding.webView.settings.builtInZoomControls = true
                 val url = BaseApp.sharedPreferencesHolder.remoteUrl + path
 
                 binding.webView.webViewClient = object : WebViewClient() {
