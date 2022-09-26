@@ -58,9 +58,11 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
+import com.qmobile.qmobileui.action.barcode.BarcodeScannerFragment
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.action.utils.ActionHelper.setMenuActionDrawable
+import com.qmobile.qmobileui.action.webview.ActionWebViewFragment
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
@@ -744,8 +746,11 @@ class MainActivity :
     }
 
     override fun onBackPressed() {
+        // If fullscreen fragment, set back ActionBar
+        when (getCurrentFragment()) {
+            is BarcodeScannerFragment, is ActionWebViewFragment -> setFullScreenMode(false)
+        }
         super.onBackPressed()
-        setFullScreenMode(false)
     }
 
     override fun logout() {
