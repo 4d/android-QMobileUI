@@ -16,7 +16,10 @@ import okhttp3.Response
 import timber.log.Timber
 import java.io.IOException
 import java.io.InputStream
-
+import java.net.SocketException
+import java.net.SocketTimeoutException
+import java.util.concurrent.TimeUnit
+const val HTTP_CLIENT_TIMEOUT :Long = 1
 object WebClientHelper {
     fun injectScriptFile(view: WebView, actionName: String, actionLabel: String, actionShortLabel: String) {
         val input: InputStream
@@ -78,23 +81,34 @@ object WebClientHelper {
       }  """
     }
 
-    fun getResponseWithHeader(url: String, headerName: String, headerValue: String): WebResourceResponse {
-        val request: Request = Request.Builder()
-            .url(url.trim { it <= ' ' })
-            // Add cookie as header
-            .addHeader("Cookie", BaseApp.sharedPreferencesHolder.cookies)
-            .addHeader(headerName, headerValue)
-            .build()
-        val response: Response = HttpClient.instance.newCall(request).execute()
-        return WebResourceResponse(
-            null,
-            response.header("content-encoding", "utf-8"),
-            response.body.byteStream()
-        )
+    fun getResponseWithHeader(url: String, headerName: String, headerValue: String): WebResourceResponse? {
+
+        try {
+            val request: Request = Request.Builder()
+                .url(url.trim { it <= ' ' })
+                // Add cookie as header
+                .addHeader("Cookie", BaseApp.sharedPreferencesHolder.cookies)
+                .addHeader(headerName, headerValue)
+                .build()
+            val response: Response = HttpClient.instance.newCall(request).execute()
+            return WebResourceResponse(
+                null,
+                response.header("content-encoding", "utf-8"),
+                response.body.byteStream())
+        } catch (exception : SocketTimeoutException){
+            Timber.e("WebClientHelper::: ${exception.message}")
+            return null
+        }
+
     }
 
     // Singleton http client
     object HttpClient {
-        val instance = OkHttpClient()
+        val instance =
+            OkHttpClient().newBuilder()
+                .connectTimeout(HTTP_CLIENT_TIMEOUT, TimeUnit.MINUTES) // connect timeout
+                .writeTimeout(HTTP_CLIENT_TIMEOUT, TimeUnit.MINUTES) // write timeout
+                .readTimeout(HTTP_CLIENT_TIMEOUT, TimeUnit.MINUTES) // read timeout
+                .build()
     }
 }
