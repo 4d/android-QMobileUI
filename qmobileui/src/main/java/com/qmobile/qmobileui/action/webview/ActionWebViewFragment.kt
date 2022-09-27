@@ -57,6 +57,7 @@ class ActionWebViewFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        delegate.setFullScreenMode(true)
         setupWebView()
     }
 
@@ -83,7 +84,6 @@ class ActionWebViewFragment : BaseFragment() {
                     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                         return false
                     }
-
 
                     override fun onPageFinished(view: WebView, url: String) {
                         super.onPageFinished(view, url)

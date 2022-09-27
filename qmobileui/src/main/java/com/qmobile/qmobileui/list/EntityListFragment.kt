@@ -469,7 +469,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         actionShortLabel: String?,
         base64EncodedContext: String
     ) {
-        delegate.setFullScreenMode(true)
         BaseApp.genericNavigationResolver.navigateToActionWebView(
             viewDataBinding = binding,
             path = path,

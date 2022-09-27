@@ -73,6 +73,7 @@ class BarcodeScannerFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        delegate.setFullScreenMode(true)
         bindCameraUseCases()
     }
 
