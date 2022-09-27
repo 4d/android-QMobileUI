@@ -9,6 +9,7 @@ package com.qmobile.qmobileui.action.webview
 import android.util.Base64
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
+import com.qmobile.qmobileapi.network.ApiClient.REQUEST_TIMEOUT
 import com.qmobile.qmobiledatasync.app.BaseApp
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -19,7 +20,6 @@ import java.io.InputStream
 import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
-const val HTTP_CLIENT_TIMEOUT :Long = 1
 object WebClientHelper {
     fun injectScriptFile(view: WebView, actionName: String, actionLabel: String, actionShortLabel: String) {
         val input: InputStream
@@ -81,8 +81,7 @@ object WebClientHelper {
       }  """
     }
 
-    fun getResponseWithHeader(url: String, headerName: String, headerValue: String): WebResourceResponse? {
-
+    fun getResponseWithHeader(url: String, headerName: String, headerValue: String, onError: () -> Unit): WebResourceResponse? {
         try {
             val request: Request = Request.Builder()
                 .url(url.trim { it <= ' ' })
@@ -96,7 +95,8 @@ object WebClientHelper {
                 response.header("content-encoding", "utf-8"),
                 response.body.byteStream())
         } catch (exception : SocketTimeoutException){
-            Timber.e("WebClientHelper::: ${exception.message}")
+            Timber.e("WebClientHelper: ${exception.localizedMessage}")
+            onError()
             return null
         }
 
@@ -104,11 +104,12 @@ object WebClientHelper {
 
     // Singleton http client
     object HttpClient {
+        private const val timeOut = REQUEST_TIMEOUT.toLong()
         val instance =
             OkHttpClient().newBuilder()
-                .connectTimeout(HTTP_CLIENT_TIMEOUT, TimeUnit.MINUTES) // connect timeout
-                .writeTimeout(HTTP_CLIENT_TIMEOUT, TimeUnit.MINUTES) // write timeout
-                .readTimeout(HTTP_CLIENT_TIMEOUT, TimeUnit.MINUTES) // read timeout
+                .connectTimeout(timeOut, TimeUnit.SECONDS) // connect timeout
+                .writeTimeout(timeOut, TimeUnit.SECONDS) // write timeout
+                .readTimeout(timeOut, TimeUnit.SECONDS) // read timeout
                 .build()
     }
 }
