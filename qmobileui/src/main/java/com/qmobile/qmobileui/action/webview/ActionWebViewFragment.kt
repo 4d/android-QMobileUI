@@ -79,8 +79,13 @@ class ActionWebViewFragment : BaseFragment() {
                             url.toString(),
                             HEADER_CONTEXT_KEY,
                             base64EncodedContext
-                        )
+                        ) {
+                            requireActivity().runOnUiThread {
+                                showErrorServer()
+                            }
+                        }
                     }
+
                     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                         return false
                     }
