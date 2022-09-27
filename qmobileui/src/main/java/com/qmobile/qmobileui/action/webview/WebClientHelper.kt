@@ -81,7 +81,12 @@ object WebClientHelper {
       }  """
     }
 
-    fun getResponseWithHeader(url: String, headerName: String, headerValue: String, onError: () -> Unit): WebResourceResponse? {
+    fun getResponseWithHeader(
+        url: String,
+        headerName: String,
+        headerValue: String,
+        onError: () -> Unit
+    ): WebResourceResponse? {
         try {
             val request: Request = Request.Builder()
                 .url(url.trim { it <= ' ' })
@@ -93,8 +98,9 @@ object WebClientHelper {
             return WebResourceResponse(
                 null,
                 response.header("content-encoding", "utf-8"),
-                response.body.byteStream())
-        } catch (exception : SocketTimeoutException){
+                response.body.byteStream()
+            )
+        } catch (exception: SocketTimeoutException) {
             Timber.e("WebClientHelper: ${exception.localizedMessage}")
             onError()
             return null
