@@ -26,10 +26,12 @@ import com.qmobile.qmobiledatasync.relation.RelationHelper.inverseAliasPath
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.model.ActionMetaData
-import com.qmobile.qmobileui.binding.ImageHelper
+import com.qmobile.qmobileui.binding.ImageHelper.DRAWABLE_24
+import com.qmobile.qmobileui.binding.ImageHelper.DRAWABLE_32
 import com.qmobile.qmobileui.binding.ImageHelper.ICON_MARGIN
 import com.qmobile.qmobileui.binding.ImageHelper.NO_ICON_PADDING
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
+import com.qmobile.qmobileui.binding.ImageHelper.getDrawableFromString
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.px
 import org.json.JSONArray
@@ -103,26 +105,19 @@ object ActionHelper {
         }
     }
 
-    fun getActionIconDrawable(context: Context, action: Action): Drawable {
-        var drawable: Drawable? = null
-        val iconDrawablePath = action.getIconDrawablePath()
-        iconDrawablePath?.let { icon ->
-            val resId = context.resources.getIdentifier(icon, "drawable", context.packageName)
-            if (resId != 0) {
-                drawable = ContextCompat.getDrawable(context, resId)
-            }
-        }
+    fun getActionIconDrawable(context: Context, action: Action): Drawable? {
+        var drawable: Drawable? = getDrawableFromString(context, action.icon, DRAWABLE_32.px, DRAWABLE_32.px)
 
         if (drawable == null) {
             drawable = ContextCompat.getDrawable(context, R.drawable.empty_action)
         }
 
-        return drawable.adjustActionDrawableMargins(context)
+        return drawable?.adjustActionDrawableMargins(context)
     }
 
-    fun Drawable.setMenuActionDrawable(context: Context) {
+    fun Drawable.paramMenuActionDrawable(context: Context) {
         this.setMenuItemColorFilter(context)
-        this.setBounds(0, 0, ImageHelper.drawableStartWidth.px, ImageHelper.drawableStartHeight.px)
+        this.setBounds(0, 0, DRAWABLE_24.px, DRAWABLE_24.px)
     }
 
     private fun Drawable.setMenuItemColorFilter(context: Context) {

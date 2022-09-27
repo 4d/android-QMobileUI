@@ -9,6 +9,7 @@ package com.qmobile.qmobileui.binding
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.InsetDrawable
 import android.net.Uri
@@ -18,8 +19,10 @@ import android.util.TypedValue
 import android.view.View
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
@@ -31,6 +34,8 @@ import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
 import com.qmobile.qmobileui.ui.SnackbarHelper
+import com.qmobile.qmobileui.ui.WrappedDrawable
+import com.qmobile.qmobileui.utils.ResourcesHelper
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -39,10 +44,10 @@ import java.util.Calendar
 
 object ImageHelper {
 
-    const val drawableStartWidth = 24
-    const val drawableStartHeight = 24
-    const val drawableSpace = 8
-    const val luminanceThreshold = 0.5
+    const val DRAWABLE_24 = 24
+    const val DRAWABLE_32 = 32
+    const val DRAWABLE_SPACE = 8
+    const val LUMINANCE_THRESHOLD = 0.5
     const val ICON_MARGIN = 8
     const val NO_ICON_PADDING = 24
     const val DEFAULT_BITMAP_QUALITY = 85
@@ -125,6 +130,24 @@ object ImageHelper {
             else -> File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
         }
     }
+
+    fun getDrawableFromString(context: Context, drawablePath: String?, width: Int, height: Int): Drawable? {
+        var drawable: Drawable? = null
+        val iconDrawablePath = ResourcesHelper.correctIconPath(drawablePath)
+        iconDrawablePath?.let { iconPath ->
+            val resId = context.resources.getIdentifier(iconPath, "drawable", context.packageName)
+            if (resId != 0) {
+                drawable = ContextCompat.getDrawable(context, resId)
+                drawable?.let {
+                    val wrappedDrawable = WrappedDrawable(it)
+                    wrappedDrawable.setBounds(0, 0, width, height)
+                    val bitmap = wrappedDrawable.toBitmap()
+                    drawable = BitmapDrawable(context.resources, bitmap)
+                }
+            }
+        }
+        return drawable
+    }
 }
 
 @ColorInt
@@ -138,7 +161,7 @@ fun Context.getColorFromAttr(
 }
 
 fun isDarkColor(@ColorInt color: Int): Boolean =
-    ColorUtils.calculateLuminance(color) < ImageHelper.luminanceThreshold
+    ColorUtils.calculateLuminance(color) < ImageHelper.LUMINANCE_THRESHOLD
 
 val Int.dp: Int
     get() = (this / Resources.getSystem().displayMetrics.density).toInt()

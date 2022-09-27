@@ -6,6 +6,15 @@
 
 package com.qmobile.qmobileui.action.actionparameters
 
+import android.content.Context
+import android.graphics.drawable.Drawable
+import androidx.core.content.ContextCompat
+import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.binding.ImageHelper.DRAWABLE_24
+import com.qmobile.qmobileui.binding.ImageHelper.getDrawableFromString
+import com.qmobile.qmobileui.binding.px
+import com.qmobile.qmobileui.utils.ResourcesHelper
+
 @Suppress("TooManyFunctions", "unused")
 class ActionParametersUtil(private val format: String) {
     // Text
@@ -47,4 +56,19 @@ class ActionParametersUtil(private val format: String) {
 
     // Barcode
     fun isBarcode() = format == ActionParameter.BARCODE.format
+
+    // ----------------------------------------------
+
+    fun getKotlinInputControlDrawable(context: Context, icon: String): Drawable? {
+        var drawable: Drawable? = null
+        ResourcesHelper.correctIconPath(icon)?.let {
+            drawable = getDrawableFromString(context, it, DRAWABLE_24.px, DRAWABLE_24.px)
+        }
+
+        if (drawable == null) {
+            drawable = ContextCompat.getDrawable(context, R.drawable.empty_action)
+        }
+
+        return drawable
+    }
 }

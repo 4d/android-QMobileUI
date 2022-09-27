@@ -13,10 +13,12 @@ import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.view.MotionEvent
-import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
+import com.qmobile.qmobileui.binding.ImageHelper.DRAWABLE_32
+import com.qmobile.qmobileui.binding.ImageHelper.getDrawableFromString
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.px
 
@@ -65,19 +67,15 @@ class ItemActionButton(
     }
 
     private fun getIconDrawable(): Drawable? {
-        var iconResId = 0
         val iconDrawablePath = action?.getIconDrawablePath()
-        if (iconDrawablePath != null && iconDrawablePath.isNotEmpty()) {
-            iconResId = context.resources.getIdentifier(iconDrawablePath, "drawable", context.packageName)
-        }
         val iconDrawable: Drawable?
         when {
-            iconResId != 0 -> {
-                iconDrawable = AppCompatResources.getDrawable(context, iconResId)
+            !iconDrawablePath.isNullOrEmpty() -> {
+                iconDrawable = getDrawableFromString(context, iconDrawablePath, DRAWABLE_32.px, DRAWABLE_32.px)
                 iconDrawable?.setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
             }
             action == null -> {
-                iconDrawable = AppCompatResources.getDrawable(context, R.drawable.more_horiz)
+                iconDrawable = ContextCompat.getDrawable(context, R.drawable.more_horiz)
                 iconDrawable?.setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
             }
             else -> {

@@ -71,6 +71,7 @@
     <string name="action_list_title">Actions</string>
     <string name="action_item_image_content_description">Action item image</string>
     <string name="action_remove_item_image_content_description">Remove item image</string>
+    <string name="item_parameter_boolean_image_switch_content_description">Image switch for boolean</string>
     <string name="action_parameter_mandatory_error">Field required</string>
     <string name="action_parameter_min_value_error">Must be greater than or equal to %s</string>
     <string name="action_parameter_max_value_error">Must be less than or equal to %s</string>

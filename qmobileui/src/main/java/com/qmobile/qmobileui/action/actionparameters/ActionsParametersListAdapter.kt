@@ -33,7 +33,7 @@ import timber.log.Timber
 
 class ActionsParametersListAdapter(
     private val context: Context,
-    val list: JSONArray,
+    val allParameters: JSONArray,
     // contains data of the failed action, this data will be used for pre-fill form to edit pending task
     private val paramsToSubmit: HashMap<String, Any>,
     private val imagesToUpload: HashMap<String, Uri>,
@@ -58,11 +58,11 @@ class ActionsParametersListAdapter(
     }
 
     override fun getItemCount(): Int {
-        return list.length()
+        return allParameters.length()
     }
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
-        val item = list[position]
+        val item = allParameters[position]
         val paramName = (item as JSONObject).getSafeString("name")
 
         // Value used to pre-fill offline action edit form
@@ -81,7 +81,7 @@ class ActionsParametersListAdapter(
         holder.bind(
             item = item,
             currentEntity = currentEntity,
-            isLastParameter = position == list.length(),
+            isLastParameter = position == allParameters.length(),
             alreadyFilledValue = alreadyFilledValue,
             serverError = errorText
         ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
@@ -123,9 +123,17 @@ class ActionsParametersListAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        val itemJsonObject = list[position] as JSONObject
+        val itemJsonObject = allParameters[position] as JSONObject
         val type = itemJsonObject.getSafeString("type")
         val format = itemJsonObject.getSafeString("format")
+
+        if (format?.startsWith("/") == true) { // Kotlin Input Control
+            return when (type) {
+                "bool" -> ActionParameter.values().size + 2
+                else -> ActionParameter.values().size + 1
+            }
+        }
+
         val actionParameter =
             ActionParameter.values().firstOrNull { it.type == type && it.format == format }
                 ?: ActionParameter.values().find { it.type == type && it.format == "default" }
@@ -133,12 +141,12 @@ class ActionsParametersListAdapter(
     }
 
     fun updateImageForPosition(position: Int, data: Uri) {
-        (list[position] as JSONObject).put(IMAGE_URI_INJECT_KEY, data)
+        (allParameters[position] as JSONObject).put(IMAGE_URI_INJECT_KEY, data)
         notifyItemChanged(position)
     }
 
     fun updateBarcodeForPosition(position: Int, value: String) {
-        (list[position] as JSONObject).put(BARCODE_VALUE_INJECT_KEY, value)
+        (allParameters[position] as JSONObject).put(BARCODE_VALUE_INJECT_KEY, value)
         notifyItemChanged(position)
     }
 }
