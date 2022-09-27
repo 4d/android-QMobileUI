@@ -521,7 +521,6 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     }
 
     private fun scan() {
-        delegate.setFullScreenMode(true)
         BaseApp.genericNavigationResolver.navigateToActionScanner(binding, actionPosition)
     }
 
