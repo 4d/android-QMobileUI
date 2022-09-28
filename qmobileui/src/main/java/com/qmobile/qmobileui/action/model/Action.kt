@@ -72,7 +72,7 @@ open class Action(
                 // if the field is a time we have to convert it from string to int, otherwise the AM/PM sort will not work
                 // if type is string we make the sort case insensitive
                 val key = when (type) {
-                    "type" -> "CAST ($fieldName AS INT)"
+                    "time" -> "CAST ($fieldName AS INT)"
                     "string" -> "$fieldName COLLATE NOCASE "
                     else -> fieldName
                 }
