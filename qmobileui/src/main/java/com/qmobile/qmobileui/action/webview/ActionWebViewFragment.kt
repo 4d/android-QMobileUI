@@ -111,7 +111,7 @@ class ActionWebViewFragment : BaseFragment() {
     }
 
     fun showErrorServer() {
-        MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_Material3_MaterialAlertDialog)
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(requireContext().getString(R.string.server_not_reachable))
             .setCancelable(false)
             .setPositiveButton(
