@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.action.webview
 
-import android.app.AlertDialog
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,6 +15,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
@@ -111,20 +111,20 @@ class ActionWebViewFragment : BaseFragment() {
     }
 
     fun showErrorServer() {
-        val builder = AlertDialog.Builder(requireActivity())
-        builder.setMessage(R.string.server_not_reachable)
+        MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_Material3_MaterialAlertDialog)
+            .setTitle(requireContext().getString(R.string.server_not_reachable))
+            .setCancelable(false)
             .setPositiveButton(
-                R.string.retry_action
+                getString(R.string.open_url_retry_dialog)
             ) { _, _ ->
                 setupWebView()
             }
             .setNegativeButton(
-                R.string.remote_url_dialog_cancel
+                getString(R.string.open_url_dialog_cancel)
             ) { _, _ ->
                 requireActivity().onBackPressed()
             }
-        builder.create()
-        builder.show()
+            .show()
     }
 
     override fun onDetach() {

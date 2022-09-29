@@ -41,6 +41,7 @@
     <string name="server_accessible">Server is accessible</string>
     <string name="server_not_accessible">Server is not accessible</string>
     <string name="server_not_reachable">The server is not reachable</string>
+    <string name="open_url_server_not_reachable">The server is not reachable</string>
     <string name="remote_url_placeholder">%1$s - %2$s</string>
 
     <!--    Login -->
@@ -50,6 +51,7 @@
     <string name="login_invalid_email">Invalid mail address</string>
     <string name="login_image_content_description">Application logo</string>
     <string name="remote_url_dialog_cancel">Cancel</string>
+    <string name="open_url_dialog_cancel">Cancel</string>
     <string name="remote_url_dialog_done">Done</string>
     <string name="remote_url_dialog_positive">OK</string>
     <string name="remote_url_dialog_edit">Edit</string>
@@ -67,6 +69,7 @@
     <string name="action_send_no_internet">Check your connexion, your action will be executed later</string>
     <string name="action_send_server_not_accessible">The server is not available, your action will be executed later</string>
     <string name="retry_action">Retry</string>
+    <string name="open_url_retry_dialog">Try again</string>
     <string name="validate_action">Validate</string>
     <string name="action_list_title">Actions</string>
     <string name="action_item_image_content_description">Action item image</string>
