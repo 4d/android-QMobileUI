@@ -62,6 +62,7 @@ class ActionWebViewFragment : BaseFragment() {
     }
 
     private fun setupWebView() {
+        binding.progressCircular.visibility = View.VISIBLE
         delegate.checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
                 binding.webView.settings.javaScriptEnabled = true
@@ -111,6 +112,7 @@ class ActionWebViewFragment : BaseFragment() {
     }
 
     fun showErrorServer() {
+        binding.webView.stopLoading()
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(requireContext().getString(R.string.server_not_reachable))
             .setCancelable(false)
