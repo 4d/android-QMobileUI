@@ -89,7 +89,7 @@ abstract class BaseActivity : AppCompatActivity() {
         }
     }
 
-    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChanger: RemoteUrlChanger) {
+    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChanger: RemoteUrlChanger, onDialogDismiss: (() -> Unit)?) {
         val remoteUrlEditDialog = LayoutInflater.from(this)
             .inflate(R.layout.remote_url_edit_dialog, findViewById(android.R.id.content), false)
         val remoteUrlEditLayout = remoteUrlEditDialog.findViewById<TextInputLayout>(R.id.remote_url_edit_layout)
@@ -103,7 +103,9 @@ abstract class BaseActivity : AppCompatActivity() {
             .setView(remoteUrlEditDialog)
             .setTitle(getString(R.string.pref_remote_url_title))
             .setPositiveButton(getString(R.string.remote_url_dialog_positive), null)
-            .setNegativeButton(getString(R.string.remote_url_dialog_cancel), null)
+            .setNegativeButton(getString(R.string.remote_url_dialog_cancel)) { _, _ ->
+                onDialogDismiss?.invoke()
+            }
             .create().apply {
                 setOnShowListener {
                     getButton(AlertDialog.BUTTON_POSITIVE).setOnSingleClickListener {
@@ -112,6 +114,7 @@ abstract class BaseActivity : AppCompatActivity() {
                             remoteUrlChanger.onValidRemoteUrlChange(newRemoteUrl)
                             checkNetwork(remoteUrlChanger)
                             dismiss()
+                            onDialogDismiss?.invoke()
                         } else {
                             remoteUrlEditEditText.startAnimation(getShakeAnimation(this@BaseActivity))
                             remoteUrlEditLayout.error = getString(R.string.remote_url_invalid)

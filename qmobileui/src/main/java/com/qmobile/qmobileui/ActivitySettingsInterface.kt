@@ -23,7 +23,11 @@ interface ActivitySettingsInterface {
 
     fun requestAuthentication()
 
-    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChanger: RemoteUrlChanger)
+    fun showRemoteUrlEditDialog(
+        remoteUrl: String,
+        remoteUrlChanger: RemoteUrlChanger,
+        onDialogDismiss: (() -> Unit)? = null
+    )
 
     fun logout()
 }

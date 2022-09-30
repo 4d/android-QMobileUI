@@ -177,7 +177,9 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
             .setView(remoteUrlDisplayDialog)
             .setTitle(getString(R.string.pref_remote_url_title))
             .setPositiveButton(getString(R.string.remote_url_dialog_edit)) { _, _ ->
-                showRemoteUrlEditDialog(remoteUrl, this@LoginActivity)
+                showRemoteUrlEditDialog(remoteUrl, this@LoginActivity) {
+                    showRemoteUrlDisplayDialog()
+                }
             }
             .setNegativeButton(getString(R.string.remote_url_dialog_done), null)
             .show()
