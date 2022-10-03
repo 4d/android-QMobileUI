@@ -31,7 +31,6 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.ToastMessage
-import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.WrappedDrawable
@@ -63,17 +62,16 @@ object ImageHelper {
             .transition(DrawableTransitionOptions.withCrossFade(factory))
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .listener(CustomRequestListener())
-            .error(R.drawable.image_not_supported)
 
     fun getImage(imageUrl: String?, fieldName: String?, key: String?, tableName: String?): Any =
         tryImageFromAssets(tableName, key, fieldName)
-            ?: if (!imageUrl.isNullOrEmpty()) imageUrl else R.drawable.image_not_supported
+            ?: if (!imageUrl.isNullOrEmpty()) imageUrl else ""
 
     private fun tryImageFromAssets(tableName: String?, key: String?, fieldName: String?): Uri? {
         BaseApp.runtimeDataHolder.embeddedFiles.find {
             it.contains(tableName + File.separator + "$tableName($key)_${fieldName}_")
         }?.let { path ->
-            Timber.d("file = $path")
+            Timber.d("Image file path (file:///android_asset/...): $path")
             return Uri.parse("file:///android_asset/$path")
         }
         return null
