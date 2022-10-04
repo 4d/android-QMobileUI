@@ -128,6 +128,12 @@ class MainActivity :
             }
         }
 
+        binding.navHostContainer.applyInsetter {
+            type(navigationBars = true) {
+                padding(animated = true)
+            }
+        }
+
         statusBarHeight = getStatusBarHeight()
         appBarHeight = statusBarHeight
 
@@ -561,10 +567,7 @@ class MainActivity :
     fun startLoginActivity() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.putExtra(LOGGED_OUT, true)
-        intent.addFlags(
-            Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                Intent.FLAG_ACTIVITY_NEW_TASK
-        )
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
         finish()
     }
