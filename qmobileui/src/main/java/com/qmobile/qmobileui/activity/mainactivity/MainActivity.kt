@@ -416,7 +416,7 @@ class MainActivity :
                 )
 
                 BaseApp.genericNavigationResolver.navigateToActionWebView(
-                    this,
+                    fragmentActivity = this,
                     path = it,
                     actionName = action.name,
                     actionLabel = action.label,
