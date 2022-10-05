@@ -414,12 +414,14 @@ class MainActivity :
                         itemId = (currentEntity?.__entity as EntityModel?)?.__KEY
                     )
                 )
-                actionNavigable.navigateToActionWebView(
-                    it,
-                    action.name,
-                    action.label,
-                    action.shortLabel,
-                    base64EncodedContext
+
+                BaseApp.genericNavigationResolver.navigateToActionWebView(
+                    this,
+                    path = it,
+                    actionName = action.name,
+                    actionLabel = action.label,
+                    actionShortLabel = action.shortLabel,
+                    base64EncodedContext = base64EncodedContext
                 )
             }
         } else if (action.parameters.length() > 0) {
