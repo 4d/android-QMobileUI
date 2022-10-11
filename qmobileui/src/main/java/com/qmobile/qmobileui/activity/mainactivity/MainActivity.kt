@@ -677,7 +677,11 @@ class MainActivity :
     override fun setFullScreenMode(isFullScreen: Boolean) {
         if (isFullScreen) {
             appBarHeight = binding.appbar.height
-            binding.appbar.layoutParams = CoordinatorLayout.LayoutParams(binding.appbar.width, statusBarHeight)
+            binding.appbar.layoutParams = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+                CoordinatorLayout.LayoutParams(binding.appbar.width, statusBarHeight)
+            } else {
+                CoordinatorLayout.LayoutParams(binding.appbar.width, 0)
+            }
             binding.bottomNav.visibility = View.GONE
         } else {
             binding.appbar.layoutParams = CoordinatorLayout.LayoutParams(binding.appbar.width, appBarHeight)
