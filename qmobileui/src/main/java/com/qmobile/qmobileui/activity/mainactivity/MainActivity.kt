@@ -487,8 +487,8 @@ class MainActivity :
                             if (actionResponse.dataSynchro == true) {
                                 requestDataSync(tableName)
                             }
-                            onActionSent()
                         }
+                        onActionSent()
                     }
             }
 
