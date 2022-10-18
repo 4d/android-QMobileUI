@@ -35,7 +35,7 @@ class KotlinInputControlViewHolder(itemView: View, format: String = "") : BaseIn
                     apu.getKotlinInputControlDrawable(itemView.context, inputControl.getIconName())
             }
 
-            if (inputControl.autocomplete) {
+            if (inputControl.autocomplete && alreadyFilledValue == null) {
                 processInputControl(inputControl, onValueChanged)
             }
             setOnSingleClickListener {
