@@ -66,8 +66,6 @@ class ActionWebViewFragment : BaseFragment() {
         delegate.checkNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
                 binding.webView.settings.javaScriptEnabled = true
-                binding.webView.settings.domStorageEnabled = true
-
                 binding.webView.addJavascriptInterface(AndroidJavaScriptHandler(requireActivity()), "Android")
                 binding.webView.settings.builtInZoomControls = true
                 val url = BaseApp.sharedPreferencesHolder.remoteUrl + path
@@ -77,6 +75,22 @@ class ActionWebViewFragment : BaseFragment() {
                         super.onPageStarted(view, url, favicon)
                     }
 
+                    override fun shouldInterceptRequest(view: WebView?, url: String?): WebResourceResponse? {
+                        return WebClientHelper.getResponseWithHeader(
+                            url.toString(),
+                            HEADER_CONTEXT_KEY,
+                            base64EncodedContext
+                        ) {
+                            requireActivity().runOnUiThread {
+                                showErrorServer()
+                            }
+                        }
+                    }
+
+                    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                        return false
+                    }
+
                     override fun onPageFinished(view: WebView, url: String) {
                         super.onPageFinished(view, url)
                         binding.progressCircular.visibility = View.INVISIBLE
@@ -84,9 +98,7 @@ class ActionWebViewFragment : BaseFragment() {
                     }
                 }
 
-                BaseApp.sharedPreferencesHolder.injectCookies(url)
-                val extraHeaders =  mapOf(HEADER_CONTEXT_KEY to base64EncodedContext)
-                binding.webView.loadUrl(url, extraHeaders)
+                WebViewHelper.loadUrl(binding.webView, url)
             }
 
             override fun onServerInaccessible() {
