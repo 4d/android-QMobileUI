@@ -411,7 +411,11 @@ class MainActivity :
                 val base64EncodedContext = ActionHelper.getBase64EncodedContext(
                     actionNavigable.getActionContent(
                         actionUUID = action.uuid,
-                        itemId = (currentEntity?.__entity as EntityModel?)?.__KEY
+                        itemId = if (action.scope == Action.Scope.CURRENT_RECORD) {
+                            (currentEntity?.__entity as EntityModel?)?.__KEY
+                        } else {
+                            ""
+                        }
                     )
                 )
 
