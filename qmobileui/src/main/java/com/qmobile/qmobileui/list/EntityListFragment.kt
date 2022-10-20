@@ -82,7 +82,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     private var path = ""
     private var parentItemId = ""
 
-    private val tableActions = mutableListOf<Action>()
+    private var tableActions = mutableListOf<Action>()
     private var currentRecordActions = mutableListOf<Action>()
     private var hasSearch = false
     private var hasTableActions = false
@@ -347,8 +347,9 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
         // If user already applied a sort, we need no more to apply default sort
+        val sortActions = tableActions.filter { it.isSortAction() }
+
         if (parametersToSortWith.isEmpty() || !JSONObject(parametersToSortWith).has(tableName)) {
-            val sortActions = tableActions.filter { it.isSortAction() }
             when (sortActions.size) {
                 0 -> {
                     val defaultFieldToSortWith = BaseApp.runtimeDataHolder.tableInfo[tableName]?.defaultSortField
@@ -369,9 +370,9 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
             }
         }
 
-        // if the only action is sort action it should not be displayed
-        if (tableActions.size == 1 && tableActions[0].isSortAction()) {
-            tableActions.clear()
+        // if we have  only one  sort action it should not be displayed
+        if (sortActions.size == 1) {
+            tableActions = tableActions.filter { !it.isSortAction() }.toMutableList()
         }
 
         if (hasTableActions) {
