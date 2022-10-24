@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 
 class CenterLayoutManager : LinearLayoutManager {
+
     constructor(context: Context) : super(context)
     constructor(context: Context, orientation: Int, reverseLayout: Boolean) : super(
         context,
@@ -44,17 +45,11 @@ class CenterLayoutManager : LinearLayoutManager {
             boxStart: Int,
             boxEnd: Int,
             snapPreference: Int
-        ): Int = (boxStart + (boxEnd - boxStart) / 2) - (viewStart + (viewEnd - viewStart) / 2)
+        ): Int {
+            // For itemView top
+            return (boxStart + (boxEnd - boxStart) / 2) - viewStart
+            // For itemView center :
+            // return (boxStart + (boxEnd - boxStart) / 2) - (viewStart + (viewEnd - viewStart) / 2)
+        }
     }
 }
-//
-// class CenterSmoothScroller(context: Context) : LinearSmoothScroller(context) {
-//
-//    override fun calculateDtToFit(
-//        viewStart: Int,
-//        viewEnd: Int,
-//        boxStart: Int,
-//        boxEnd: Int,
-//        snapPreference: Int
-//    ): Int = (boxStart + (boxEnd - boxStart) / 2) - (viewStart + (viewEnd - viewStart) / 2)
-// }

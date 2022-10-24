@@ -18,12 +18,21 @@ import com.google.android.material.textfield.TextInputEditText
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_VALUE_INJECT_KEY
-import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.IMAGE_URI_INJECT_KEY
+import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.INPUT_CONTROL_DISPLAY_TEXT_INJECT_KEY
+import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.INPUT_CONTROL_FIELD_VALUE_INJECT_KEY
 import com.qmobile.qmobileui.action.actionparameters.viewholders.ActionParameterViewHolderFactory
+import com.qmobile.qmobileui.action.actionparameters.viewholders.ActionParameterViewHolderFactory.CUSTOM_BOOLEAN_VH
+import com.qmobile.qmobileui.action.actionparameters.viewholders.ActionParameterViewHolderFactory.CUSTOM_TEXT_VH
+import com.qmobile.qmobileui.action.actionparameters.viewholders.ActionParameterViewHolderFactory.INPUT_CONTROL_MENU_VH
+import com.qmobile.qmobileui.action.actionparameters.viewholders.ActionParameterViewHolderFactory.INPUT_CONTROL_PICKER_VH
+import com.qmobile.qmobileui.action.actionparameters.viewholders.ActionParameterViewHolderFactory.INPUT_CONTROL_POPOVER_VH
+import com.qmobile.qmobileui.action.actionparameters.viewholders.ActionParameterViewHolderFactory.INPUT_CONTROL_PUSH_VH
+import com.qmobile.qmobileui.action.actionparameters.viewholders.ActionParameterViewHolderFactory.INPUT_CONTROL_SEGMENTED_VH
 import com.qmobile.qmobileui.action.actionparameters.viewholders.BaseViewHolder
 import com.qmobile.qmobileui.action.actionparameters.viewholders.ImageViewHolder
 import com.qmobile.qmobileui.action.actionparameters.viewholders.SignatureViewHolder
+import com.qmobile.qmobileui.action.inputcontrols.InputControl
+import com.qmobile.qmobileui.action.inputcontrols.InputControlFormatHolder
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.utils.hideKeyboard
@@ -38,11 +47,15 @@ class ActionsParametersListAdapter(
     private val paramsToSubmit: HashMap<String, Any>,
     private val imagesToUpload: HashMap<String, Uri>,
     private val paramsError: HashMap<String, String>,
+    private val inputControlFormatHolders: Map<Int, InputControlFormatHolder>,
     private val currentEntity: RoomEntity?,
     private val fragmentManager: FragmentManager?,
     private val hideKeyboardCallback: () -> Unit,
     private val focusNextCallback: (position: Int, onlyScroll: Boolean) -> Unit,
     private val actionTypesCallback: (actionTypes: Action.Type, position: Int) -> Unit,
+    private val goToPushFragment: (position: Int) -> Unit,
+    private val formatHolderCallback: (holder: InputControlFormatHolder, position: Int) -> Unit,
+    private val onDataLoadedCallback: () -> Unit,
     private val onValueChanged: (String, Any?, String?, Boolean) -> Unit
 ) :
     RecyclerView.Adapter<BaseViewHolder>() {
@@ -53,7 +66,10 @@ class ActionsParametersListAdapter(
             parent,
             context,
             fragmentManager,
-            actionTypesCallback
+            actionTypesCallback,
+            goToPushFragment,
+            formatHolderCallback,
+            onDataLoadedCallback
         )
     }
 
@@ -62,8 +78,8 @@ class ActionsParametersListAdapter(
     }
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
-        val item = allParameters[position]
-        val paramName = (item as JSONObject).getSafeString("name")
+        val item = allParameters[position] as? JSONObject ?: return
+        val paramName = item.getSafeString("name")
 
         // Value used to pre-fill offline action edit form
         val alreadyFilledValue = when (holder) {
@@ -78,15 +94,17 @@ class ActionsParametersListAdapter(
         // Error returned from server for this specific param
         val errorText = paramsError[paramName]
 
+        item.put(INPUT_CONTROL_DISPLAY_TEXT_INJECT_KEY + "_$position", inputControlFormatHolders[position]?.displayText)
+        item.put(INPUT_CONTROL_FIELD_VALUE_INJECT_KEY + "_$position", inputControlFormatHolders[position]?.fieldValue)
+
         holder.bind(
             item = item,
             currentEntity = currentEntity,
             isLastParameter = position == allParameters.length(),
             alreadyFilledValue = alreadyFilledValue,
-            serverError = errorText
-        ) { name: String, value: Any?, metaData: String?, isValid: Boolean ->
-            onValueChanged(name, value, metaData, isValid)
-        }
+            serverError = errorText,
+            onValueChanged = onValueChanged
+        )
 
         // When clicking outside an EditText we want to hide the keyboard
         holder.itemView.setOnSingleClickListener {
@@ -116,37 +134,53 @@ class ActionsParametersListAdapter(
                         Timber.d("itemView ${holder.bindingAdapterPosition} has focus but no input, hiding keyboard")
                         // Warning :
                         // do not call hideKeyboardCallback() because it will clearFocus and generate an infinite loop
-                        (context as FragmentActivity?)?.let { hideKeyboard(it) }
+                        (context as? FragmentActivity)?.let { hideKeyboard(it) }
                     }
             }
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-        val itemJsonObject = allParameters[position] as JSONObject
+        val itemJsonObject = allParameters[position] as? JSONObject ?: return 0
         val type = itemJsonObject.getSafeString("type")
         val format = itemJsonObject.getSafeString("format")
+        val source = itemJsonObject.getSafeString("source")
 
-        if (format?.startsWith("/") == true) { // Kotlin Input Control
-            return when (type) {
-                "bool" -> ActionParameter.values().size + 2
-                else -> ActionParameter.values().size + 1
-            }
+        return if (format?.startsWith("/") == true) {
+            getInputControlViewType(format, type, source)
+        } else {
+            val actionParameter =
+                ActionParameter.values().firstOrNull { it.type == type && it.format == format }
+                    ?: ActionParameter.values().find { it.type == type && it.format == "default" }
+            actionParameter?.ordinal ?: 0
         }
-
-        val actionParameter =
-            ActionParameter.values().firstOrNull { it.type == type && it.format == format }
-                ?: ActionParameter.values().find { it.type == type && it.format == "default" }
-        return actionParameter?.ordinal ?: 0
     }
 
-    fun updateImageForPosition(position: Int, data: Uri) {
-        (allParameters[position] as JSONObject).put(IMAGE_URI_INJECT_KEY, data)
-        notifyItemChanged(position)
+    private fun getInputControlViewType(format: String, type: String?, source: String?): Int {
+        return if (format in InputControl.Types.values().map { it.format }) {
+            getDefaultInputControlViewType(format, source)
+        } else {
+            getKotlinInputControlViewType(type)
+        }
     }
 
-    fun updateBarcodeForPosition(position: Int, value: String) {
-        (allParameters[position] as JSONObject).put(BARCODE_VALUE_INJECT_KEY, value)
-        notifyItemChanged(position)
+    private fun getKotlinInputControlViewType(type: String?): Int {
+        return when (type) {
+            "text" -> ActionParameter.values().size + CUSTOM_TEXT_VH
+            "bool" -> ActionParameter.values().size + CUSTOM_BOOLEAN_VH
+            else -> ActionParameter.values().size + CUSTOM_TEXT_VH
+        }
+    }
+
+    private fun getDefaultInputControlViewType(format: String, source: String?): Int {
+        return when {
+            source == null -> 0
+            format == InputControl.Types.PUSH.format -> ActionParameter.values().size + INPUT_CONTROL_PUSH_VH
+            format == InputControl.Types.SEGMENTED.format -> ActionParameter.values().size + INPUT_CONTROL_SEGMENTED_VH
+            format == InputControl.Types.POPOVER.format -> ActionParameter.values().size + INPUT_CONTROL_POPOVER_VH
+            format == InputControl.Types.MENU.format -> ActionParameter.values().size + INPUT_CONTROL_MENU_VH
+            format == InputControl.Types.PICKER.format -> ActionParameter.values().size + INPUT_CONTROL_PICKER_VH
+            else -> 0
+        }
     }
 }

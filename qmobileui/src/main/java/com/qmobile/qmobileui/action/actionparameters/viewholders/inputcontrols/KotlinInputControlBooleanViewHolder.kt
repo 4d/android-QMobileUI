@@ -1,20 +1,22 @@
 /*
- * Created by qmarciset on 14/9/2022.
+ * Created by qmarciset on 22/9/2022.
  * 4D SAS
  * Copyright (c) 2022 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action.actionparameters.viewholders
+package com.qmobile.qmobileui.action.actionparameters.viewholders.inputcontrols
 
 import android.view.View
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobileui.action.actionparameters.viewholders.BooleanViewHolder
+import org.json.JSONObject
 
 class KotlinInputControlBooleanViewHolder(itemView: View, format: String = "") : BooleanViewHolder(itemView, format) {
 
     override fun bind(
-        item: Any,
+        item: JSONObject,
         currentEntity: RoomEntity?,
         isLastParameter: Boolean,
         alreadyFilledValue: Any?,
@@ -28,7 +30,7 @@ class KotlinInputControlBooleanViewHolder(itemView: View, format: String = "") :
         BaseApp.genericActionHelper.getKotlinInputControl(itemView, format)?.let { inputControl ->
             inputControl.process(inputValue = compoundButton.isChecked) { output ->
                 if (output is Boolean) {
-                    error.visibility = View.INVISIBLE
+                    error.visibility = View.GONE
                     onValueChanged(parameterName, output, null, true)
                 }
             }

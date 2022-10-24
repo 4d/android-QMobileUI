@@ -34,7 +34,7 @@ class ListItemViewHolder(
     }
 
     private fun setupClickListeners(roomEntity: RoomEntity) {
-        (roomEntity.__entity as EntityModel?)?.__KEY?.let { key ->
+        (roomEntity.__entity as? EntityModel)?.__KEY?.let { key ->
             itemView.setOnSingleClickListener {
                 onItemClick(dataBinding, key)
             }

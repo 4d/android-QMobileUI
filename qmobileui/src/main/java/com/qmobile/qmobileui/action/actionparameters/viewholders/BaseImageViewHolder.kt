@@ -15,17 +15,16 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.model.entity.Photo
-import com.qmobile.qmobileapi.utils.getSafeAny
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileapi.utils.parseToType
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.IMAGE_URI_INJECT_KEY
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.px
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.utils.ReflectionUtils
+import org.json.JSONObject
 
 abstract class BaseImageViewHolder(itemView: View, format: String) : BaseViewHolder(itemView, format) {
 
@@ -42,7 +41,7 @@ abstract class BaseImageViewHolder(itemView: View, format: String) : BaseViewHol
     }
 
     override fun bind(
-        item: Any,
+        item: JSONObject,
         currentEntity: RoomEntity?,
         isLastParameter: Boolean,
         alreadyFilledValue: Any?,
@@ -72,16 +71,12 @@ abstract class BaseImageViewHolder(itemView: View, format: String) : BaseViewHol
             onValueChanged(parameterName, null, null, validate(false))
         }
 
-        newImageChosen()?.let { uri ->
-            displayImage(uri.toString())
-        } ?: kotlin.run {
-            if (alreadyFilledValue is Uri) {
-                displayImage(alreadyFilledValue.toString())
-            } else {
-                getDefaultFieldValue(currentEntity, itemJsonObject) { defaultPhoto ->
-                    BaseApp.mapper.parseToType<Photo>(defaultPhoto.toString())?.__deferred?.uri?.let {
-                        displayImage(it)
-                    }
+        if (alreadyFilledValue is Uri) {
+            displayImage(alreadyFilledValue.toString())
+        } else {
+            getDefaultFieldValue(currentEntity, itemJsonObject) { defaultPhoto ->
+                BaseApp.mapper.parseToType<Photo>(defaultPhoto.toString())?.__deferred?.uri?.let {
+                    displayImage(it)
                 }
             }
         }
@@ -119,15 +114,9 @@ abstract class BaseImageViewHolder(itemView: View, format: String) : BaseViewHol
         }
     }
 
-    private fun newImageChosen(): Uri? {
-        val uri: Uri? = itemJsonObject.getSafeAny(IMAGE_URI_INJECT_KEY) as Uri?
-        itemJsonObject.remove(IMAGE_URI_INJECT_KEY)
-        return uri
-    }
-
     private fun displayImage(uriString: String, currentEntity: RoomEntity? = null, defaultField: String? = null) {
         currentUri = uriString
-        error.visibility = View.INVISIBLE
+        error.visibility = View.GONE
 
         var key: String? = null
         currentEntity?.let {
@@ -136,10 +125,10 @@ abstract class BaseImageViewHolder(itemView: View, format: String) : BaseViewHol
                     ReflectionUtils.getInstanceProperty(
                         currentEntity,
                         defaultField.substringBeforeLast("?.")
-                    ) as EntityModel?
+                    ) as? EntityModel
                     )?.__KEY
             } else { // not alias
-                (currentEntity.__entity as EntityModel?)?.__KEY
+                (currentEntity.__entity as? EntityModel)?.__KEY
             }
         }
 

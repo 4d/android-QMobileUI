@@ -31,6 +31,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.ToastMessage
+import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.glide.CustomRequestListener
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.WrappedDrawable
@@ -77,15 +78,8 @@ object ImageHelper {
         return null
     }
 
-    fun Drawable?.adjustActionDrawableMargins(context: Context): Drawable {
-        val iconMarginPx =
-            TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                ICON_MARGIN.toFloat(),
-                context.resources.displayMetrics
-            )
-                .toInt()
-
+    fun Drawable?.adjustActionDrawableMargins(): Drawable {
+        val iconMarginPx = ICON_MARGIN.px
         return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             InsetDrawable(this, iconMarginPx, 0, iconMarginPx, 0)
         } else {
@@ -106,7 +100,11 @@ object ImageHelper {
             createTempImageFile(activity, format)
         } catch (ex: IOException) {
             Timber.e(ex.message.orEmpty())
-            SnackbarHelper.show(activity, "Could not create temporary file", ToastMessage.Type.ERROR)
+            SnackbarHelper.show(
+                activity,
+                activity.resources.getString(R.string.action_create_image_fail),
+                ToastMessage.Type.ERROR
+            )
             null
         }
         photoFile?.let {
@@ -115,7 +113,11 @@ object ImageHelper {
                 callback(photoURI, it.absolutePath)
             } catch (e: IllegalArgumentException) {
                 Timber.e(e.message.orEmpty())
-                SnackbarHelper.show(activity, "Could not create temporary file", ToastMessage.Type.ERROR)
+                SnackbarHelper.show(
+                    activity,
+                    activity.resources.getString(R.string.action_create_image_fail),
+                    ToastMessage.Type.ERROR
+                )
             }
         }
     }
@@ -131,20 +133,26 @@ object ImageHelper {
 
     fun getDrawableFromString(context: Context, drawablePath: String?, width: Int, height: Int): Drawable? {
         var drawable: Drawable? = null
-        val iconDrawablePath = ResourcesHelper.correctIconPath(drawablePath)
-        iconDrawablePath?.let { iconPath ->
-            val resId = context.resources.getIdentifier(iconPath, "drawable", context.packageName)
-            if (resId != 0) {
-                drawable = ContextCompat.getDrawable(context, resId)
-                drawable?.let {
-                    val wrappedDrawable = WrappedDrawable(it)
-                    wrappedDrawable.setBounds(0, 0, width, height)
-                    val bitmap = wrappedDrawable.toBitmap()
-                    drawable = BitmapDrawable(context.resources, bitmap)
-                }
+        val resId = getResId(context, drawablePath)
+        if (resId != 0) {
+            drawable = ContextCompat.getDrawable(context, resId)
+            drawable?.let {
+                val wrappedDrawable = WrappedDrawable(it)
+                wrappedDrawable.setBounds(0, 0, width, height)
+                val bitmap = wrappedDrawable.toBitmap()
+                drawable = BitmapDrawable(context.resources, bitmap)
             }
         }
         return drawable
+    }
+
+    fun getResId(context: Context, iconName: String?): Int {
+        val iconDrawablePath = ResourcesHelper.correctIconPath(iconName)
+        return if (iconDrawablePath != null) {
+            context.resources.getIdentifier(iconDrawablePath, "drawable", context.packageName)
+        } else {
+            0
+        }
     }
 }
 

@@ -12,30 +12,48 @@ import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.actionparameters.ActionParameter
+import com.qmobile.qmobileui.action.actionparameters.viewholders.inputcontrols.KotlinInputControlBooleanViewHolder
+import com.qmobile.qmobileui.action.actionparameters.viewholders.inputcontrols.KotlinInputControlViewHolder
+import com.qmobile.qmobileui.action.actionparameters.viewholders.inputcontrols.MenuViewHolder
+import com.qmobile.qmobileui.action.actionparameters.viewholders.inputcontrols.PickerViewHolder
+import com.qmobile.qmobileui.action.actionparameters.viewholders.inputcontrols.PopoverViewHolder
+import com.qmobile.qmobileui.action.actionparameters.viewholders.inputcontrols.PushViewHolder
+import com.qmobile.qmobileui.action.actionparameters.viewholders.inputcontrols.SegmentedViewHolder
+import com.qmobile.qmobileui.action.inputcontrols.InputControlFormatHolder
 import com.qmobile.qmobileui.action.model.Action
 
 @Suppress("LongMethod")
 object ActionParameterViewHolderFactory {
+
+    const val CUSTOM_TEXT_VH = 1
+    const val CUSTOM_BOOLEAN_VH = 2
+    const val INPUT_CONTROL_PUSH_VH = 3
+    const val INPUT_CONTROL_SEGMENTED_VH = 4
+    const val INPUT_CONTROL_POPOVER_VH = 5
+    const val INPUT_CONTROL_MENU_VH = 6
+    const val INPUT_CONTROL_PICKER_VH = 7
+
     fun createViewHolderFromViewType(
         viewType: Int,
         parent: ViewGroup,
         context: Context,
         fragmentManager: FragmentManager?,
-        actionTypesCallback: (actionTypes: Action.Type, position: Int) -> Unit
+        actionTypesCallback: (actionTypes: Action.Type, position: Int) -> Unit,
+        goToPushFragment: (position: Int) -> Unit,
+        formatHolderCallback: (holder: InputControlFormatHolder, position: Int) -> Unit,
+        onDataLoadedCallback: () -> Unit
     ): BaseViewHolder {
         return when (val itemType = ActionParameter.values().getOrNull(viewType)) {
-            null -> {
-                when (viewType) {
-                    ActionParameter.values().size + 2 -> KotlinInputControlBooleanViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_boolean_custom, parent, false)
-                    )
-                    else -> KotlinInputControlViewHolder(
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.item_parameter_text, parent, false)
-                    )
-                }
-            }
+            // Input control
+            null -> getInputControlViewHolder(
+                viewType,
+                parent,
+                context,
+                fragmentManager,
+                goToPushFragment,
+                formatHolderCallback,
+                onDataLoadedCallback
+            )
 
             // Text
             ActionParameter.TEXT_DEFAULT,
@@ -124,6 +142,65 @@ object ActionParameterViewHolderFactory {
                     itemType.format,
                     actionTypesCallback
                 )
+        }
+    }
+
+    private fun getInputControlViewHolder(
+        viewType: Int,
+        parent: ViewGroup,
+        context: Context,
+        fragmentManager: FragmentManager?,
+        goToPushFragment: (position: Int) -> Unit,
+        formatHolderCallback: (holder: InputControlFormatHolder, position: Int) -> Unit,
+        onDataLoadedCallback: () -> Unit
+    ): BaseViewHolder {
+        return when (viewType) {
+            // Kotlin input control
+            ActionParameter.values().size + CUSTOM_TEXT_VH -> KotlinInputControlViewHolder(
+                LayoutInflater.from(context)
+                    .inflate(R.layout.item_parameter_text, parent, false)
+            )
+            ActionParameter.values().size + CUSTOM_BOOLEAN_VH -> KotlinInputControlBooleanViewHolder(
+                LayoutInflater.from(context)
+                    .inflate(R.layout.item_parameter_boolean_custom, parent, false)
+            )
+
+            // Default input control
+            ActionParameter.values().size + INPUT_CONTROL_PUSH_VH -> PushViewHolder(
+                LayoutInflater.from(context)
+                    .inflate(R.layout.item_parameter_text, parent, false),
+                goToPushFragment
+            )
+            ActionParameter.values().size + INPUT_CONTROL_SEGMENTED_VH -> SegmentedViewHolder(
+                LayoutInflater.from(context)
+                    .inflate(R.layout.input_control_segmented, parent, false),
+                fragmentManager,
+                formatHolderCallback,
+                onDataLoadedCallback
+            )
+            ActionParameter.values().size + INPUT_CONTROL_POPOVER_VH -> PopoverViewHolder(
+                LayoutInflater.from(context)
+                    .inflate(R.layout.item_parameter_text, parent, false),
+                fragmentManager,
+                formatHolderCallback
+            )
+            ActionParameter.values().size + INPUT_CONTROL_MENU_VH -> MenuViewHolder(
+                LayoutInflater.from(context)
+                    .inflate(R.layout.input_control_menu, parent, false),
+                fragmentManager,
+                formatHolderCallback
+            )
+            ActionParameter.values().size + INPUT_CONTROL_PICKER_VH -> PickerViewHolder(
+                LayoutInflater.from(context)
+                    .inflate(R.layout.input_control_picker, parent, false),
+                fragmentManager,
+                formatHolderCallback,
+                onDataLoadedCallback
+            )
+            else -> KotlinInputControlViewHolder(
+                LayoutInflater.from(context)
+                    .inflate(R.layout.item_parameter_text, parent, false)
+            )
         }
     }
 }

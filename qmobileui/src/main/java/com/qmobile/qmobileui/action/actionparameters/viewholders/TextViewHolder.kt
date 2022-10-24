@@ -12,6 +12,7 @@ import com.qmobile.qmobileapi.auth.isEmailValid
 import com.qmobile.qmobileapi.auth.isUrlValid
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
+import org.json.JSONObject
 
 open class TextViewHolder(itemView: View, format: String) :
     BaseTextViewHolder(itemView, format) {
@@ -22,7 +23,7 @@ open class TextViewHolder(itemView: View, format: String) :
     }
 
     override fun bind(
-        item: Any,
+        item: JSONObject,
         currentEntity: RoomEntity?,
         isLastParameter: Boolean,
         alreadyFilledValue: Any?,
@@ -37,7 +38,7 @@ open class TextViewHolder(itemView: View, format: String) :
         }
     }
 
-    override fun onTextChanged(s: CharSequence, onValueChanged: (String, Any?, String?, Boolean) -> Unit) {
+    override fun onTextChanged(s: CharSequence) {
         onValueChanged(parameterName, s.toString(), null, validate(false))
     }
 

@@ -29,6 +29,7 @@ import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Co
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_VALUE_KEY
 import com.qmobile.qmobileui.databinding.FragmentBarcodeBinding
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
+import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
 import timber.log.Timber
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -47,6 +48,12 @@ class BarcodeScannerFragment : BaseFragment() {
         const val PROGRESS_DELAY: Long = 1000
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setSharedAxisZEnterTransition()
+        activity?.actionBar?.hide()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         cameraExecutor = Executors.newSingleThreadExecutor()
 
@@ -55,20 +62,14 @@ class BarcodeScannerFragment : BaseFragment() {
         }
 
         binding.topActionBarInLiveCamera.closeButton.setOnSingleClickListener {
-            delegate.setFullScreenMode(false)
             activity?.onBackPressed()
         }
         return binding.root
     }
 
-    override fun onDetach() {
-        super.onDetach()
-        delegate.setFullScreenMode(false)
-    }
-
     override fun onDestroy() {
-        super.onDestroy()
         cameraExecutor.shutdown()
+        super.onDestroy()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

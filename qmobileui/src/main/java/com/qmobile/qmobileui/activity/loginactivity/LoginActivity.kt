@@ -58,6 +58,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
     private lateinit var noInternetString: String
     private lateinit var serverAccessibleString: String
     private lateinit var serverNotAccessibleString: String
+    private lateinit var checkingString: String
 
     // Views
     private lateinit var remoteUrlDisplayDialog: View
@@ -144,7 +145,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         initRemoteUrlDisplayDialog()
 
         binding.loginLogo.setOnVeryLongClickListener {
-            checkNetwork(this)
+            queryNetwork(this)
             showRemoteUrlDisplayDialog()
         }
     }
@@ -192,6 +193,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         noInternetString = getString(R.string.no_internet)
         serverAccessibleString = getString(R.string.server_accessible)
         serverNotAccessibleString = getString(R.string.server_not_accessible)
+        checkingString = getString(R.string.remote_url_checking)
 
         remoteUrlDisplayDialog = LayoutInflater.from(this)
             .inflate(R.layout.login_remote_url_display_dialog, findViewById(android.R.id.content), false)
@@ -252,7 +254,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
 
     override fun handleNetworkState(networkState: NetworkState) {
         // Checking network for remote Url dialog
-        checkNetwork(this)
+        queryNetwork(this)
     }
 
     override fun onServerAccessible() {
@@ -273,6 +275,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
     override fun onValidRemoteUrlChange(newRemoteUrl: String) {
         BaseApp.sharedPreferencesHolder.remoteUrl = newRemoteUrl
         remoteUrl = newRemoteUrl
+        remoteUrlMessage.text = checkingString
         refreshApiClients()
     }
 }

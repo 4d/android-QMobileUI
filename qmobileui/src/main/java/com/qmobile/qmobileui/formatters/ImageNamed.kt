@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import com.google.android.material.chip.Chip
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.ui.isNightMode
 
 object ImageNamed {
@@ -23,13 +24,14 @@ object ImageNamed {
         imageHeight: Int?,
         tintable: Boolean?
     ) {
-        if (view is Chip) {
-            view.setChipDrawable(drawableResPair, tintable)
-        } else { // is TextView
-            if (imageWidth == null || imageHeight == null || imageWidth == 0 || imageHeight == 0) {
-                view.setTextViewDrawableWithoutSize(drawableResPair, tintable)
-            } else {
-                view.setTextViewDrawableWithSize(drawableResPair, tintable, imageWidth, imageHeight)
+        when (view) {
+            is Chip -> view.setChipDrawable(drawableResPair, tintable)
+            else -> {
+                if (imageWidth == null || imageHeight == null || imageWidth == 0 || imageHeight == 0) {
+                    view.setDrawableWithoutSize(drawableResPair, tintable)
+                } else {
+                    view.setDrawableWithSize(drawableResPair, tintable, imageWidth, imageHeight)
+                }
             }
         }
     }
@@ -48,32 +50,42 @@ object ImageNamed {
         }
     }
 
-    private fun TextView.setTextViewDrawableWithoutSize(
-        drawableResPair: Pair<Int, Int>,
-        tintable: Boolean?
-    ) {
+    private fun TextView.setDrawableWithoutSize(drawableResPair: Pair<Int, Int>, tintable: Boolean?) {
         if (BaseApp.instance.isNightMode() && drawableResPair.second != 0) {
-            this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.second, 0, 0, 0)
+            this.setDrawableWithoutSize(drawableResPair.second, tintable)
         } else {
-            this.setCompoundDrawablesWithIntrinsicBounds(drawableResPair.first, 0, 0, 0)
+            this.setDrawableWithoutSize(drawableResPair.first, tintable)
         }
+    }
+
+    private fun TextView.setDrawableWithoutSize(resId: Int, tintable: Boolean?) {
+        this.setCompoundDrawablesWithIntrinsicBounds(resId, 0, 0, 0)
 
         if (tintable == true) {
             TextViewCompat.setCompoundDrawableTintList(this, this.textColors)
         }
     }
 
-    private fun TextView.setTextViewDrawableWithSize(
+    private fun TextView.setDrawableWithSize(
         drawableResPair: Pair<Int, Int>,
         tintable: Boolean?,
         imageWidth: Int,
         imageHeight: Int
     ) {
-        val drawable = if (BaseApp.instance.isNightMode() && drawableResPair.second != 0) {
-            ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.second)
+        if (BaseApp.instance.isNightMode() && drawableResPair.second != 0) {
+            setDrawableWithSize(drawableResPair.second, tintable, imageWidth, imageHeight)
         } else {
-            ContextCompat.getDrawable(this.context.applicationContext, drawableResPair.first)
+            setDrawableWithSize(drawableResPair.first, tintable, imageWidth, imageHeight)
         }
+    }
+
+    private fun TextView.setDrawableWithSize(
+        resId: Int,
+        tintable: Boolean?,
+        imageWidth: Int,
+        imageHeight: Int
+    ) {
+        val drawable = ContextCompat.getDrawable(this.context.applicationContext, resId)
 
         drawable?.let {
             if (tintable == true) {
@@ -81,6 +93,18 @@ object ImageNamed {
             }
             drawable.setBounds(0, 0, imageWidth, imageHeight)
             this.setCompoundDrawables(drawable, null, null, null)
+        }
+    }
+
+    @Suppress("ComplexCondition")
+    fun setDrawable(view: TextView, iconName: String, imageWidth: Int?, imageHeight: Int?) {
+        val resId = ImageHelper.getResId(view.context, iconName)
+        if (resId != 0) {
+            if (imageWidth == null || imageHeight == null || imageWidth == 0 || imageHeight == 0) {
+                view.setDrawableWithoutSize(resId, null)
+            } else {
+                view.setDrawableWithSize(resId, null, imageWidth, imageHeight)
+            }
         }
     }
 }

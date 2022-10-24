@@ -14,6 +14,7 @@ import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.formatters.DateFormat
 import com.qmobile.qmobileui.formatters.FormatterUtils
+import org.json.JSONObject
 import java.util.*
 
 class DateViewHolder(
@@ -35,7 +36,7 @@ class DateViewHolder(
     private var initialPickerDate = -1L
 
     override fun bind(
-        item: Any,
+        item: JSONObject,
         currentEntity: RoomEntity?,
         isLastParameter: Boolean,
         alreadyFilledValue: Any?,
@@ -89,7 +90,7 @@ class DateViewHolder(
             ) + 1
             ) + "!" + calendar.get(Calendar.YEAR)
 
-    internal fun updatePickerDate(newDate: String) {
+    private fun updatePickerDate(newDate: String) {
         val cal = DateFormat.getDateFromString(newDate)
         val clearedTZ = Calendar.getInstance().apply {
             set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH))
@@ -101,4 +102,9 @@ class DateViewHolder(
 
     override fun formatToDisplay(input: String): String =
         FormatterUtils.applyFormat(dateFormat, input)
+
+    override fun fill(value: Any) {
+        updatePickerDate(value.toString())
+        super.fill(value)
+    }
 }

@@ -14,6 +14,7 @@ import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.ui.getShakeAnimation
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
+import org.json.JSONObject
 
 abstract class BaseInputLessViewHolder(itemView: View, format: String) : BaseViewHolder(itemView, format) {
 
@@ -23,7 +24,7 @@ abstract class BaseInputLessViewHolder(itemView: View, format: String) : BaseVie
     private val shakeAnimation = getShakeAnimation(itemView.context)
 
     override fun bind(
-        item: Any,
+        item: JSONObject,
         currentEntity: RoomEntity?,
         isLastParameter: Boolean,
         alreadyFilledValue: Any?,
@@ -79,9 +80,6 @@ abstract class BaseInputLessViewHolder(itemView: View, format: String) : BaseVie
     }
 
     override fun fill(value: Any) {
-        if (this is DateViewHolder) {
-            updatePickerDate(value.toString())
-        }
         input.setText(formatToDisplay(value.toString()))
     }
 
@@ -90,6 +88,7 @@ abstract class BaseInputLessViewHolder(itemView: View, format: String) : BaseVie
     }
 
     internal fun setOnSingleClickListener(onClick: () -> Unit) {
+        container.error = null
         input.setOnSingleClickListener {
             onClick()
         }

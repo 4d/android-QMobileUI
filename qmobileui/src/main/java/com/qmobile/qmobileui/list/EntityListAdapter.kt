@@ -30,14 +30,14 @@ class EntityListAdapter internal constructor(
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<RoomEntity>() {
             // The ID property identifies when items are the same.
             override fun areItemsTheSame(oldItem: RoomEntity, newItem: RoomEntity) =
-                (oldItem.__entity as EntityModel?)?.__KEY == (newItem.__entity as EntityModel?)?.__KEY
+                (oldItem.__entity as? EntityModel)?.__KEY == (newItem.__entity as? EntityModel)?.__KEY
 
             // If you use the "==" operator, make sure that the object implements
             // .equals(). Alternatively, write custom data comparison logic here.
             override fun areContentsTheSame(
                 oldItem: RoomEntity,
                 newItem: RoomEntity
-            ) = (oldItem.__entity as EntityModel?)?.__STAMP == (newItem.__entity as EntityModel?)?.__STAMP &&
+            ) = (oldItem.__entity as? EntityModel)?.__STAMP == (newItem.__entity as? EntityModel)?.__STAMP &&
                 BaseApp.genericRelationHelper.relationsEquals(oldItem, newItem)
         }
     }

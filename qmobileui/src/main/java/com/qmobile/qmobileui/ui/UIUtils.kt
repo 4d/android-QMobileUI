@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.ui
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
@@ -18,9 +19,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.Button
-import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.qmobile.qmobileui.R
@@ -96,26 +94,12 @@ fun View.clearViewInParent() {
     }
 }
 
-fun View.disableLink() {
-    when (this) { // Button first has a button is also a TextView
-        is Button -> this.isEnabled = false
-        is TextView -> this.setTextColor(
-            ContextCompat.getColor(
-                this.context,
-                android.R.color.darker_gray
-            )
-        )
-    }
-}
-
-fun View.enableLink() {
-    when (this) { // Button first has a button is also a TextView
-        is Button -> this.isEnabled = true
-        is TextView -> this.setTextColor(
-            ContextCompat.getColor(
-                this.context,
-                R.color.relation_link
-            )
-        )
+@SuppressLint("InternalInsetResource")
+fun getStatusBarHeight(context: Context): Int {
+    val idStatusBarHeight = context.resources.getIdentifier("status_bar_height", "dimen", "android")
+    return if (idStatusBarHeight > 0) {
+        context.resources.getDimensionPixelSize(idStatusBarHeight)
+    } else {
+        0
     }
 }

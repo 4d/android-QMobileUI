@@ -23,17 +23,17 @@ abstract class BaseTaskViewHolder(
     private val tableName: TextView = itemView.findViewById(R.id.tableName)
     private val date: TextView = itemView.findViewById(R.id.date)
 
-    open fun bind(item: ActionTask, isFromSettings: Boolean) {
-        itemView.setOnSingleClickListener { onItemClick(item) }
+    open fun bind(actionTask: ActionTask, isFromSettings: Boolean) {
+        itemView.setOnSingleClickListener { onItemClick(actionTask) }
 
-        label.text = item.label
+        label.text = actionTask.label
 
         if (isFromSettings) {
-            tableName.text = item.actionInfo.tableName
+            tableName.text = actionTask.actionInfo.tableName
         } else {
             tableName.visibility = View.GONE
         }
 
-        date.text = TimeFormat.getElapsedTime(item.date)
+        date.text = TimeFormat.getElapsedTime(actionTask.date)
     }
 }

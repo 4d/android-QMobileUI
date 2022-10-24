@@ -31,7 +31,6 @@ dependencies {
     implementation Libs.androidx_preference_ktx
     implementation Libs.swiperefreshlayout
 
-
     // Room
     implementation Libs.androidx_room_runtime
     kapt Libs.androidx_room_compiler

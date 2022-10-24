@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.action.pendingtasks
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,13 +22,16 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.utils.ActionHelper.getActionContent
+import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.binding.px
 import com.qmobile.qmobileui.databinding.FragmentActionTasksBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.SnackbarHelper.UNDO_ACTION_DURATION
+import com.qmobile.qmobileui.ui.setFadeThroughEnterTransition
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
+import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
+import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import java.util.*
 
@@ -46,6 +50,11 @@ class TasksFragment : BaseFragment(), NetworkChecker {
     private lateinit var noInternetString: String
     private lateinit var serverAccessibleString: String
     private lateinit var serverNotAccessibleString: String
+    private lateinit var checkingString: String
+
+    private var serverAccessibleDrawable: Drawable? = null
+    private var serverNotAccessibleDrawable: Drawable? = null
+    private var noInternetDrawable: Drawable? = null
 
     companion object {
         internal const val MAX_PENDING_TASKS = 10
@@ -56,6 +65,11 @@ class TasksFragment : BaseFragment(), NetworkChecker {
         super.onCreate(savedInstanceState)
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("currentItemId")?.let { currentItemId = it }
+        if (tableName.isEmpty()) { // from Settings fragment
+            setSharedAxisXEnterTransition()
+        } else {
+            setFadeThroughEnterTransition()
+        }
     }
 
     override fun onCreateView(
@@ -141,6 +155,10 @@ class TasksFragment : BaseFragment(), NetworkChecker {
         noInternetString = resources.getString(R.string.no_internet)
         serverAccessibleString = resources.getString(R.string.server_accessible)
         serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
+        checkingString = resources.getString(R.string.remote_url_checking)
+        serverAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.domain)
+        serverNotAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.domain_disabled)
+        noInternetDrawable = ContextCompat.getDrawable(context, R.drawable.signal_disconnected)
     }
 
     /**
@@ -169,6 +187,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
             !actionTask.isSuccess() && actionTask.actionInfo.allParameters?.isNotEmpty() == true
         when {
             shouldNavigateToActionForm -> {
+                setSharedAxisXExitTransition()
                 BaseApp.genericNavigationResolver.navigateToActionForm(
                     viewDataBinding = binding,
                     tableName = actionTask.actionInfo.tableName,
@@ -186,11 +205,8 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                 actionTask.date = Date()
                 // UUID.randomUUID() to send action as new fresh action otherwise will be ignored by the
                 // server (server doesn't treat same actions with same id)
-                actionActivity.sendAction(
-                    actionContent = getActionContent(actionTask.id, UUID.randomUUID().toString()),
-                    actionTask = actionTask,
-                    tableName = tableName
-                ) {
+                ActionHelper.updateActionContentId(actionTask.actionContent)
+                actionActivity.sendAction(actionTask, tableName) {
                     // Nothing to do
                 }
             }
@@ -199,20 +215,21 @@ class TasksFragment : BaseFragment(), NetworkChecker {
 
     override fun onServerAccessible() {
         binding.serverStatus.text = serverAccessibleString
-        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.domain)
+        binding.serverStatus.chipIcon = serverAccessibleDrawable
     }
 
     override fun onServerInaccessible() {
         binding.serverStatus.text = serverNotAccessibleString
-        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.domain_disabled)
+        binding.serverStatus.chipIcon = serverNotAccessibleDrawable
     }
 
     override fun onNoInternet() {
         binding.serverStatus.text = noInternetString
-        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.signal_disconnected)
+        binding.serverStatus.chipIcon = noInternetDrawable
     }
 
     private fun onServerStatusClick() {
+        binding.serverStatus.text = checkingString
         delegate.checkNetwork(this)
         actionActivity.sendPendingTasks()
     }

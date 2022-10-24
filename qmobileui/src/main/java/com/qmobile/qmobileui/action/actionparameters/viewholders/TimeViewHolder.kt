@@ -18,6 +18,7 @@ import com.qmobile.qmobileui.action.utils.DurationPicker
 import com.qmobile.qmobileui.formatters.TimeFormat.convertToMillis
 import com.qmobile.qmobileui.formatters.TimeFormat.getShortAMPMTime
 import com.qmobile.qmobileui.formatters.TimeFormat.toVerboseDuration
+import org.json.JSONObject
 
 @Suppress("MagicNumber")
 class TimeViewHolder(
@@ -35,7 +36,7 @@ class TimeViewHolder(
     private var defaultSecond = 0
 
     override fun bind(
-        item: Any,
+        item: JSONObject,
         currentEntity: RoomEntity?,
         isLastParameter: Boolean,
         alreadyFilledValue: Any?,
@@ -66,7 +67,7 @@ class TimeViewHolder(
             durationPicker.title = container.hint ?: ""
             durationPicker.setupDefault(defaultHour, defaultMinute, defaultSecond)
             durationPicker.addOnPositiveButtonClickListener { hour, minute, second ->
-                onTimeSet(hour, minute, second, onValueChanged)
+                onTimeSet(hour, minute, second)
             }
         } else {
             timePicker = MaterialTimePicker.Builder()
@@ -80,7 +81,7 @@ class TimeViewHolder(
                 .build()
 
             timePicker.addOnPositiveButtonClickListener {
-                onTimeSet(timePicker.hour, timePicker.minute, 0, onValueChanged)
+                onTimeSet(timePicker.hour, timePicker.minute, 0)
             }
         }
 
@@ -120,12 +121,7 @@ class TimeViewHolder(
         }
     }
 
-    private fun onTimeSet(
-        hour: Int,
-        minute: Int,
-        second: Int,
-        onValueChanged: (String, Any?, String?, Boolean) -> Unit
-    ) {
+    private fun onTimeSet(hour: Int, minute: Int, second: Int) {
         setInitialValues(hour, minute, second)
         val millis = convertToMillis(hour, minute, second).toLong()
         input.setText(getFormattedString(millis, isDuration))

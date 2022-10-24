@@ -11,8 +11,9 @@
 
         <Preference
             app:key="@string/pref_remote_url_key"
-            app:summary="@string/pref_remote_url_summary"
-            app:title="@string/pref_remote_url_title" />
+            app:summary="@string/remote_url_checking"
+            app:title="@string/pref_remote_url_title"
+            android:icon="@drawable/network_nok_circle"/>
 
         <Preference
             app:key="@string/pref_pending_tasks_key"

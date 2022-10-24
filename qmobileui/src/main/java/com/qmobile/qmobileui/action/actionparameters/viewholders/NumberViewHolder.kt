@@ -15,6 +15,7 @@ import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.utils.addSuffix
 import com.qmobile.qmobileui.formatters.SpellOutFormat
+import org.json.JSONObject
 
 class NumberViewHolder(itemView: View, format: String) : BaseTextViewHolder(itemView, format) {
 
@@ -26,7 +27,7 @@ class NumberViewHolder(itemView: View, format: String) : BaseTextViewHolder(item
     private var numberValueForSpellOut: String = ""
 
     override fun bind(
-        item: Any,
+        item: JSONObject,
         currentEntity: RoomEntity?,
         isLastParameter: Boolean,
         alreadyFilledValue: Any?,
@@ -40,7 +41,7 @@ class NumberViewHolder(itemView: View, format: String) : BaseTextViewHolder(item
         }
     }
 
-    override fun onTextChanged(s: CharSequence, onValueChanged: (String, Any?, String?, Boolean) -> Unit) {
+    override fun onTextChanged(s: CharSequence) {
         when {
             apu.isSpellOut() -> {
                 numberValueForSpellOut = s.toString().toIntOrNull()?.toString().takeIf { it != "null" } ?: ""

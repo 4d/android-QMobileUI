@@ -17,10 +17,11 @@ import okhttp3.Response
 import timber.log.Timber
 import java.io.IOException
 import java.io.InputStream
-import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
+
 object WebClientHelper {
+
     fun injectScriptFile(view: WebView, actionName: String, actionLabel: String, actionShortLabel: String) {
         val input: InputStream
         try {
@@ -105,7 +106,6 @@ object WebClientHelper {
             onError()
             return null
         }
-
     }
 
     // Singleton http client

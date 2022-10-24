@@ -9,12 +9,11 @@ package com.qmobile.qmobileui.action.actionparameters.viewholders
 import android.Manifest
 import android.view.View
 import androidx.core.content.ContextCompat
-import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_VALUE_INJECT_KEY
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.utils.PermissionChecker
+import org.json.JSONObject
 
 class BarcodeViewHolder(
     itemView: View,
@@ -23,7 +22,7 @@ class BarcodeViewHolder(
 ) : BaseInputLessViewHolder(itemView, format) {
 
     override fun bind(
-        item: Any,
+        item: JSONObject,
         currentEntity: RoomEntity?,
         isLastParameter: Boolean,
         alreadyFilledValue: Any?,
@@ -34,15 +33,10 @@ class BarcodeViewHolder(
 
         container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.qr_code_scanner)
 
-        itemJsonObject.getSafeString(BARCODE_VALUE_INJECT_KEY)?.let {
-            itemJsonObject.remove(BARCODE_VALUE_INJECT_KEY)
-            input.setText(it)
-        }
-
         onValueChanged(parameterName, input.text.toString(), null, validate(false))
 
         setOnSingleClickListener {
-            (itemView.context as PermissionChecker?)?.askPermission(
+            (itemView.context as? PermissionChecker)?.askPermission(
                 context = itemView.context,
                 permission = Manifest.permission.CAMERA,
                 rationale = itemView.context.getString(R.string.permission_rationale_barcode)

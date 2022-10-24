@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by qmarciset on 16/9/2022.
+  ~ 4D SAS
+  ~ Copyright (c) 2022 qmarciset. All rights reserved.
+  -->
+
+<com.google.android.material.chip.Chip xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.Material3.Chip.Input"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:checkedIconEnabled="false"
+    app:closeIconEnabled="false" />

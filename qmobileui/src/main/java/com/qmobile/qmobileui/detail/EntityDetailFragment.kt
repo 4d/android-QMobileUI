@@ -29,6 +29,8 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
+import com.qmobile.qmobileui.ui.setFadeThroughExitTransition
+import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import com.qmobile.qmobileui.webview.MyWebViewClient
@@ -56,6 +58,8 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
         arguments?.getString("navbarTitle")?.let { navbarTitle = it }
         arguments?.getString("itemId")?.let { itemId = it }
         arguments?.getString("tableName")?.let { tableName = it }
+
+        setSharedAxisZEnterTransition()
     }
 
     override fun onCreateView(
@@ -156,6 +160,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
 
     override fun navigateToPendingTasks() {
         activity?.let {
+            setFadeThroughExitTransition()
             BaseApp.genericNavigationResolver.navigateToPendingTasks(
                 fragmentActivity = it,
                 tableName = tableName,
@@ -174,7 +179,8 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
     }
 
     override fun navigateToActionForm(action: Action, itemId: String?) {
-        // Event if we are in a N-1 relation, we don't need to provide parent information in the request
+        setFadeThroughExitTransition()
+        // Even if we are in a N-1 relation, we don't need to provide parent information in the request
         BaseApp.genericNavigationResolver.navigateToActionForm(
             viewDataBinding = binding,
             tableName = tableName,

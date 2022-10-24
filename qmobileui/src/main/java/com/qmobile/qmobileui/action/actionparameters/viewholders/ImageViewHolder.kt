@@ -39,7 +39,7 @@ class ImageViewHolder(
     }
 
     private fun askCameraPermissionAndProceed() {
-        (itemView.context as PermissionChecker?)?.askPermission(
+        (itemView.context as? PermissionChecker)?.askPermission(
             context = itemView.context,
             permission = Manifest.permission.CAMERA,
             rationale = itemView.context.getString(R.string.permission_rationale_camera)

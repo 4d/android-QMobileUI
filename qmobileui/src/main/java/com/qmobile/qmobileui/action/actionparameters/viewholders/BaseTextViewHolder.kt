@@ -15,6 +15,7 @@ import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.ui.getShakeAnimation
+import org.json.JSONObject
 
 abstract class BaseTextViewHolder(itemView: View, private val format: String) : BaseViewHolder(itemView, format) {
 
@@ -23,7 +24,7 @@ abstract class BaseTextViewHolder(itemView: View, private val format: String) : 
     private val shakeAnimation = getShakeAnimation(itemView.context)
 
     override fun bind(
-        item: Any,
+        item: JSONObject,
         currentEntity: RoomEntity?,
         isLastParameter: Boolean,
         alreadyFilledValue: Any?,
@@ -59,7 +60,7 @@ abstract class BaseTextViewHolder(itemView: View, private val format: String) : 
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                s?.let { onTextChanged(it, onValueChanged) }
+                s?.let { onTextChanged(it) }
             }
         })
 
@@ -97,7 +98,7 @@ abstract class BaseTextViewHolder(itemView: View, private val format: String) : 
         input.setText(formattedValue(value.toString()))
     }
 
-    abstract fun onTextChanged(s: CharSequence, onValueChanged: (String, Any?, String?, Boolean) -> Unit)
+    abstract fun onTextChanged(s: CharSequence)
 
     abstract fun getValueToSend(): String
 
