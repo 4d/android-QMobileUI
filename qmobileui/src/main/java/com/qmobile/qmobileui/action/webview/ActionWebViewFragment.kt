@@ -21,6 +21,7 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionWebviewBinding
 import com.qmobile.qmobileui.network.NetworkChecker
+import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
 import com.qmobile.qmobileui.webview.WebViewHelper
 
 const val HEADER_CONTEXT_KEY = "X-QMobile-Context"
@@ -46,6 +47,8 @@ class ActionWebViewFragment : BaseFragment() {
         arguments?.getString("base64EncodedContext")?.let {
             base64EncodedContext = it
         }
+
+        setSharedAxisZEnterTransition()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -101,20 +104,23 @@ class ActionWebViewFragment : BaseFragment() {
 
     fun showErrorServer() {
         binding.webView.stopLoading()
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(requireContext().getString(R.string.server_not_reachable))
-            .setCancelable(false)
-            .setPositiveButton(
-                getString(R.string.open_url_retry_dialog)
-            ) { _, _ ->
-                setupWebView()
-            }
-            .setNegativeButton(
-                getString(R.string.open_url_dialog_cancel)
-            ) { _, _ ->
-                requireActivity().onBackPressed()
-            }
-            .show()
+        // Checking context as we may be gone from fragment
+        context?.let {
+            MaterialAlertDialogBuilder(it)
+                .setTitle(requireActivity().getString(R.string.server_not_reachable))
+                .setCancelable(false)
+                .setPositiveButton(
+                    requireActivity().getString(R.string.open_url_retry_dialog)
+                ) { _, _ ->
+                    setupWebView()
+                }
+                .setNegativeButton(
+                    requireActivity().getString(R.string.open_url_dialog_cancel)
+                ) { _, _ ->
+                    activity?.onBackPressed()
+                }
+                .show()
+        }
     }
 
     override fun onDetach() {

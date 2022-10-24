@@ -19,7 +19,6 @@
     <string name="cat_title_server">SERVER</string>
     <string name="pref_remote_url_key">remote_url</string>
     <string name="pref_remote_url_title">Remote URL</string>
-    <string name="pref_remote_url_summary"> </string>
     <string name="cat_account_key">account_category</string>
     <string name="cat_title_account">ACCOUNT</string>
     <string name="pref_logout_key">logout</string>
@@ -43,6 +42,7 @@
     <string name="server_not_reachable">The server is not reachable</string>
     <string name="open_url_server_not_reachable">The server is not reachable</string>
     <string name="remote_url_placeholder">%1$s - %2$s</string>
+    <string name="remote_url_checking">Checking…</string>
 
     <!--    Login -->
     <string name="login_button_text">Login</string>
@@ -86,7 +86,7 @@
     <string name="action_parameter_image_dialog_gallery">Choose from Gallery</string>
     <string name="pending_task_menu_item">Pending Tasks</string>
     <string name="pending_task_navbar_title">Pending Tasks</string>
-    <string name="scroll_to_not_seen">Scrolling to unseen parameters</string>
+    <string name="scroll_to_not_seen">Scrolling to remaining parameters</string>
     <string name="icon_state_content_description">Completed action icon state</string>
     <string name="completed_tasks_title">Completed tasks</string>
     <string name="server_status_icon">Server status icon</string>
@@ -96,6 +96,7 @@
     <string name="action_time_dialog_negative">Cancel</string>
     <string name="action_time_dialog_positive">OK</string>
     <string name="action_more_button_title">More</string>
+    <string name="action_create_image_fail">Could not create temporary file</string>
 
     <!-- Duration Picker -->
     <string name="hour_column_title">Hours</string>
@@ -117,4 +118,11 @@
     <string name="signature_dialog_positive">Done</string>
     <string name="signature_dialog_cancel">Cancel</string>
 
+    <!-- Input controls -->
+    <string name="input_control_push_baseline">Click to push</string>
+    <string name="input_control_popover_baseline">Click to popover</string>
+    <string name="input_control_menu_baseline">Click to open the menu</string>
+    <string name="input_control_datasource_no_data">Could not get any data for input control \"%s\"</string>
+    <string name="input_control_datasource_no_table">There is no table \"%1$s\" (input control \"%2$s\")</string>
+    <string name="input_control_datasource_no_field">There is no field \"%1$s\" in table \"%2$s\" (input control \"%3$s\")</string>
 </resources>

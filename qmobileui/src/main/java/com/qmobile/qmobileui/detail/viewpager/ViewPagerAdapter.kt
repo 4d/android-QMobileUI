@@ -30,7 +30,7 @@ class ViewPagerAdapter(fragment: Fragment, private val tableName: String) :
     override fun createItem(position: Int): Fragment {
         var itemId = "0"
         getValue(position)?.let { roomEntity ->
-            (roomEntity.__entity as EntityModel?)?.__KEY?.let { itemId = it }
+            (roomEntity.__entity as? EntityModel)?.__KEY?.let { itemId = it }
         }
         return BaseApp.genericTableFragmentHelper.getDetailFragment(tableName).apply {
             arguments = Bundle().apply {
@@ -55,14 +55,14 @@ class ViewPagerAdapter2 internal constructor(
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<RoomEntity>() {
             // The ID property identifies when items are the same.
             override fun areItemsTheSame(oldItem: RoomEntity, newItem: RoomEntity) =
-                (oldItem.__entity as EntityModel?)?.__KEY == (newItem.__entity as EntityModel?)?.__KEY
+                (oldItem.__entity as? EntityModel)?.__KEY == (newItem.__entity as? EntityModel)?.__KEY
 
             // If you use the "==" operator, make sure that the object implements
             // .equals(). Alternatively, write custom data comparison logic here.
             override fun areContentsTheSame(
                 oldItem: RoomEntity,
                 newItem: RoomEntity
-            ) = (oldItem.__entity as EntityModel?)?.__STAMP == (newItem.__entity as EntityModel?)?.__STAMP &&
+            ) = (oldItem.__entity as? EntityModel)?.__STAMP == (newItem.__entity as? EntityModel)?.__STAMP &&
                 BaseApp.genericRelationHelper.relationsEquals(oldItem, newItem)
         }
     }

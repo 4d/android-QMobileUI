@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
@@ -28,8 +29,10 @@ import com.google.android.material.textfield.TextInputEditText
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.UploadHelper
 import com.qmobile.qmobileapi.utils.UploadHelper.getBodies
+import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileapi.utils.getStringList
 import com.qmobile.qmobiledatastore.dao.ActionInfo
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.data.RoomEntity
@@ -43,6 +46,8 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionProvider
 import com.qmobile.qmobileui.action.actionparameters.viewholders.BaseViewHolder
+import com.qmobile.qmobileui.action.inputcontrols.InputControl.Format.saveInputControlFormatHolders
+import com.qmobile.qmobileui.action.inputcontrols.InputControlFormatHolder
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.action.utils.UriHelper.uriToString
@@ -51,15 +56,18 @@ import com.qmobile.qmobileui.binding.writeBitmap
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
 import com.qmobile.qmobileui.ui.CenterLayoutManager
 import com.qmobile.qmobileui.ui.SnackbarHelper
-import com.qmobile.qmobileui.ui.setOnSingleClickListener
+import com.qmobile.qmobileui.ui.setFadeThroughEnterTransition
+import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
+import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
+import com.qmobile.qmobileui.ui.setSharedAxisZExitTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.hideKeyboard
 import okhttp3.RequestBody
 import org.json.JSONArray
 import timber.log.Timber
 import java.io.File
-import java.util.Date
-import kotlin.collections.HashMap
+import java.lang.Integer.max
+import java.util.*
 
 class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
@@ -85,12 +93,13 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     private val metaDataToSubmit = HashMap<String, String>()
     internal var validationMap = linkedMapOf<String, Boolean>()
     internal var imagesToUpload = HashMap<String, Uri>()
+    internal var inputControlFormatHolders = mutableMapOf<Int, InputControlFormatHolder>()
 
     private var scrollPos = 0
     private lateinit var currentPhotoPath: String
-    internal lateinit var action: Action
+    private lateinit var action: Action
     internal var selectedEntity: RoomEntity? = null
-    private var actionPosition = -1
+    private var parameterPosition = -1
 
     internal var currentTask: ActionTask? = null
     internal var taskId: String? = null
@@ -98,18 +107,44 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     internal var allParameters = JSONArray()
 
     internal var entityViewModel: EntityViewModel<EntityModel>? = null
+    private lateinit var validateMenuItem: MenuItem
+
+    private var allSeen = false
+    private var maxSeen = 0
 
     companion object {
+        // barcode
         const val BARCODE_FRAGMENT_REQUEST_KEY = "scan_request"
-        const val BARCODE_VALUE_INJECT_KEY = "barcode_inject"
         const val BARCODE_VALUE_KEY = "barcode_value"
-        const val IMAGE_URI_INJECT_KEY = "image_uri_inject"
+
+        // push input control
+        const val INPUT_CONTROL_PUSH_FRAGMENT_REQUEST_KEY = "input_control_push_request"
+        const val INPUT_CONTROL_PUSH_DISPLAY_TEXT_KEY = "input_control_push_display_text"
+        const val INPUT_CONTROL_PUSH_FIELD_VALUE_KEY = "input_control_push_field_value"
+        const val INPUT_CONTROL_DISPLAY_TEXT_INJECT_KEY = "input_control_display_text_inject"
+        const val INPUT_CONTROL_FIELD_VALUE_INJECT_KEY = "input_control_field_value_inject"
     }
 
-    private val onScrollListener = object : RecyclerView.OnScrollListener() {
+    val lastVisibleItemPosition: Int
+        get() = (binding.parametersRecyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+
+    private val onScrollToValidationListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                triggerError(scrollPos)
+                maxSeen = max(maxSeen, lastVisibleItemPosition)
+                if (lastVisibleItemPosition == adapter.itemCount - 1) {
+                    allSeen = true
+                }
+            }
+        }
+    }
+
+    private val onScrollToErrorListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                for (i in 0 until lastVisibleItemPosition + 1) {
+                    triggerError(i)
+                }
                 recyclerView.removeOnScrollListener(this)
             }
         }
@@ -121,6 +156,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setFadeThroughEnterTransition()
+
         arguments?.getString("navbarTitle")?.let { navbarTitle = it }
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("itemId")?.let { itemId = it }
@@ -129,6 +167,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
             if (it.isNotEmpty()) {
                 taskId = it
                 fromPendingTasks = true
+                setSharedAxisXEnterTransition()
             }
         }
         arguments?.getString("relationName")?.let { relationName ->
@@ -150,7 +189,18 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
             bundle.getString(BARCODE_VALUE_KEY)?.let {
-                adapter.updateBarcodeForPosition(actionPosition, it)
+                action.parameters.getSafeObject(parameterPosition)?.getSafeString("name")?.let { parameterName ->
+                    paramsToSubmit[parameterName] = it
+                    adapter.notifyItemChanged(parameterPosition)
+                }
+            }
+        }
+
+        setFragmentResultListener(INPUT_CONTROL_PUSH_FRAGMENT_REQUEST_KEY) { _, bundle ->
+            bundle.getString(INPUT_CONTROL_PUSH_DISPLAY_TEXT_KEY)?.let { displayText ->
+                val fieldValue: String? = bundle.getString(INPUT_CONTROL_PUSH_FIELD_VALUE_KEY)
+                inputControlFormatHolders[parameterPosition] = InputControlFormatHolder(displayText, fieldValue)
+                adapter.notifyItemChanged(parameterPosition)
             }
         }
 
@@ -181,18 +231,34 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
             ActionParametersFragmentObserver(this).initObservers()
             shouldInitObservers = false
         }
+        onHideKeyboardCallback()
     }
 
     private fun setupRecyclerView() {
         val smoothScroller = CenterLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
         binding.parametersRecyclerView.layoutManager = smoothScroller
         binding.parametersRecyclerView.adapter = adapter
+        binding.parametersRecyclerView.addOnScrollListener(onScrollToValidationListener)
         // Important line : prevent recycled views to get their content reset
         binding.parametersRecyclerView.setItemViewCacheSize(action.parameters.length())
-        // Add this empty view to remove keyboard when click is perform below recyclerView items
-        binding.emptyView.setOnSingleClickListener {
-            onHideKeyboardCallback()
-        }
+        // Remove keyboard when click is perform below recyclerView items
+        binding.parametersRecyclerView.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
+            override fun onInterceptTouchEvent(recyclerView: RecyclerView, motionEvent: MotionEvent): Boolean {
+                return when {
+                    motionEvent.action != MotionEvent.ACTION_UP || recyclerView.findChildViewUnder(
+                        motionEvent.x,
+                        motionEvent.y
+                    ) != null -> false
+                    else -> {
+                        onHideKeyboardCallback()
+                        true
+                    }
+                }
+            }
+
+            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+            override fun onTouchEvent(recyclerView: RecyclerView, motionEvent: MotionEvent) {}
+        })
     }
 
     internal fun setupAdapter() {
@@ -202,12 +268,22 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
             paramsToSubmit = paramsToSubmit,
             imagesToUpload = imagesToUpload,
             paramsError = errorsByParameter,
+            inputControlFormatHolders = inputControlFormatHolders,
             currentEntity = selectedEntity,
             fragmentManager = activity?.supportFragmentManager,
             hideKeyboardCallback = { onHideKeyboardCallback() },
             focusNextCallback = { position, onlyScroll -> onFocusNextCallback(position, onlyScroll) },
             actionTypesCallback = { actionType, position ->
                 actionTypesCallback(actionType, position)
+            },
+            goToPushFragment = { position ->
+                goToPushFragment(position)
+            },
+            formatHolderCallback = { holder, position ->
+                formatHolderCallback(holder, position)
+            },
+            onDataLoadedCallback = {
+                onDataLoadedCallback()
             },
             onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
                 onValueChanged(name, value, metaData, isValid)
@@ -219,6 +295,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     private fun onValueChanged(name: String, value: Any?, metaData: String?, isValid: Boolean) {
         validationMap[name] = isValid
         paramsToSubmit[name] = value ?: ""
+
         metaData?.let {
             metaDataToSubmit[name] = metaData
         }
@@ -235,7 +312,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     }
 
     private fun onFocusNextCallback(position: Int, onlyScroll: Boolean) {
-        scrollTo(position + 1, false)
+        scrollTo(position = position + 1, shouldHideKeyboard = false, triggerError = false)
         if (!onlyScroll) {
             binding.parametersRecyclerView.findViewHolderForLayoutPosition(position + 1)
                 ?.itemView?.findViewById<TextInputEditText>(R.id.input)
@@ -258,17 +335,17 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     }
 
     override fun onPrepareMenu(menu: Menu) {
-        val item = menu.findItem(R.id.validate)
+        validateMenuItem = menu.findItem(R.id.validate)
         if (fromPendingTasks) {
             currentTask?.isErrorServer()?.let { isErrorServer ->
-                item.title = if (isErrorServer) { // error server tasks
+                validateMenuItem.title = if (isErrorServer) { // error server tasks
                     getString(R.string.retry_action)
                 } else { // pending tasks
                     getString(R.string.validate_action)
                 }
             }
         } else {
-            item.title = getString(R.string.validate_action)
+            validateMenuItem.title = getString(R.string.validate_action)
         }
         super.onPrepareMenu(menu)
     }
@@ -313,6 +390,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
                     actionInfo = getActionInfo()
                 )
                 actionTask.id = task.id
+                actionTask.actionContent = getActionContent(task.id, (selectedEntity?.__entity as? EntityModel)?.__KEY)
+
+                actionTask.saveInputControlFormatHolders(inputControlFormatHolders)
 
                 actionActivity.getTaskViewModel().insert(actionTask)
             }
@@ -322,6 +402,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
     private fun validateAction() {
         if (isFormValid()) {
+            validateMenuItem.isEnabled = false
             if (imagesToUpload.isEmpty()) {
                 sendAction()
             } else {
@@ -342,22 +423,19 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     @Suppress("ReturnCount")
     private fun isFormValid(): Boolean {
         // first: check if visible items are valid
-        val firstNotValidItemPosition = validationMap.values.indexOfFirst { !it }
-        if (firstNotValidItemPosition > -1) {
-            scrollTo(firstNotValidItemPosition, true)
-            triggerError(firstNotValidItemPosition)
-            return false
+        val validList = LinkedList(validationMap.values)
+        for (i in 0 until lastVisibleItemPosition + 1) {
+            if (!validList[i]) {
+                scrollTo(position = i, shouldHideKeyboard = true, triggerError = true)
+                return false
+            }
         }
 
         // second: check if there are not yet visible items
-        val nbItems = adapter.itemCount
-        val viewedItems = validationMap.size
-        if (viewedItems < nbItems) {
-            val pos =
-                (binding.parametersRecyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
-            if (pos < nbItems - 1) {
+        if (!allSeen && lastVisibleItemPosition < adapter.itemCount - 1) { // Second condition is if we never scrolled
+            if (maxSeen < adapter.itemCount - 1) {
                 SnackbarHelper.show(activity, activity?.getString(R.string.scroll_to_not_seen))
-                scrollTo(pos + 1, true)
+                scrollTo(position = maxSeen + 2, shouldHideKeyboard = true, triggerError = true)
             }
             return false
         }
@@ -367,10 +445,9 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         validationMap.values.forEachIndexed { index, isValid ->
             if (!isValid) {
                 if (formIsValid) { // scroll to first not valid
-                    scrollTo(index, true)
+                    scrollTo(position = index, shouldHideKeyboard = true, triggerError = true)
                 }
                 formIsValid = false
-                triggerError(index)
             }
         }
         if (!formIsValid) {
@@ -380,16 +457,23 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         return true
     }
 
-    private fun scrollTo(position: Int, shouldHideKeyboard: Boolean) {
+    private fun scrollTo(position: Int, shouldHideKeyboard: Boolean, triggerError: Boolean) {
         if (shouldHideKeyboard) onHideKeyboardCallback()
-        scrollPos = position
-        binding.parametersRecyclerView.removeOnScrollListener(onScrollListener)
-        binding.parametersRecyclerView.addOnScrollListener(onScrollListener)
-        binding.parametersRecyclerView.smoothScrollToPosition(position)
+        if (position == -1) return
+        scrollPos = if (position > adapter.itemCount - 1) {
+            adapter.itemCount - 1
+        } else {
+            position
+        }
+        if (triggerError) {
+            binding.parametersRecyclerView.removeOnScrollListener(onScrollToErrorListener)
+            binding.parametersRecyclerView.addOnScrollListener(onScrollToErrorListener)
+        }
+        binding.parametersRecyclerView.smoothScrollToPosition(scrollPos)
     }
 
     private fun triggerError(position: Int) {
-        (binding.parametersRecyclerView.findViewHolderForLayoutPosition(position) as BaseViewHolder?)?.validate(true)
+        (binding.parametersRecyclerView.findViewHolderForLayoutPosition(position) as? BaseViewHolder)?.validate(true)
     }
 
     private fun retrieveAction(): Action {
@@ -406,22 +490,23 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     }
 
     private fun createPendingTask(): ActionTask {
-        return ActionTask(
+        val actionTask = ActionTask(
             status = ActionTask.Status.PENDING,
             date = Date(),
-            relatedItemId = (selectedEntity?.__entity as EntityModel?)?.__KEY,
+            relatedItemId = (selectedEntity?.__entity as? EntityModel)?.__KEY,
             label = action.getPreferredName(),
             actionInfo = getActionInfo()
         )
+        actionTask.actionContent = getActionContent(actionTask.id, (selectedEntity?.__entity as? EntityModel)?.__KEY)
+
+        actionTask.saveInputControlFormatHolders(inputControlFormatHolders)
+
+        return actionTask
     }
 
     private fun sendAction() {
         val pendingTask = createPendingTask()
-        actionActivity.sendAction(
-            actionContent = getActionContent(pendingTask.id, (selectedEntity?.__entity as EntityModel?)?.__KEY),
-            actionTask = pendingTask,
-            tableName = tableName
-        ) {
+        actionActivity.sendAction(actionTask = pendingTask, tableName = tableName) {
             activity?.onBackPressed()
         }
     }
@@ -456,20 +541,44 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     }
 
     private fun onImageChosen(uri: Uri) {
-        action.parameters.getSafeObject(actionPosition)?.getSafeString("name")?.let { parameterName ->
+        action.parameters.getSafeObject(parameterPosition)?.getSafeString("name")?.let { parameterName ->
             imagesToUpload[parameterName] = uri
+            paramsToSubmit[parameterName] = uri
+            adapter.notifyItemChanged(parameterPosition)
         }
-        adapter.updateImageForPosition(actionPosition, uri)
     }
 
     private fun actionTypesCallback(actionType: Action.Type, position: Int) {
-        actionPosition = position
+        parameterPosition = position
         when (actionType) {
             Action.Type.PICK_PHOTO_GALLERY -> pickPhotoFromGallery()
             Action.Type.TAKE_PICTURE_CAMERA -> takePhotoFromCamera()
             Action.Type.SCAN -> scan()
             Action.Type.SIGN -> showSignDialog()
         }
+    }
+
+    private fun goToPushFragment(position: Int) {
+        parameterPosition = position
+        val actionParameter = action.parameters.getSafeObject(parameterPosition)
+        actionParameter?.getSafeString("source")?.let { format ->
+            setSharedAxisXExitTransition()
+            val isMandatory = actionParameter.getSafeArray("rules")?.getStringList()?.contains("mandatory") ?: false
+            BaseApp.genericNavigationResolver.navigateToPushInputControl(binding, format.removePrefix("/"), isMandatory)
+        }
+    }
+
+    private fun formatHolderCallback(inputControlFormatHolder: InputControlFormatHolder, position: Int) {
+        if (inputControlFormatHolder.displayText.isEmpty() && inputControlFormatHolder.fieldValue == null) {
+            inputControlFormatHolders.remove(position)
+        } else {
+            inputControlFormatHolders[position] = inputControlFormatHolder
+        }
+    }
+
+    // Callback triggered with an input control datasource has done loading its data and displayed it
+    private fun onDataLoadedCallback() {
+        scrollTo(position = parameterPosition, shouldHideKeyboard = false, triggerError = false)
     }
 
     private fun showSignDialog() {
@@ -521,7 +630,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     }
 
     private fun scan() {
-        BaseApp.genericNavigationResolver.navigateToActionScanner(binding, actionPosition)
+        setSharedAxisZExitTransition()
+        BaseApp.genericNavigationResolver.navigateToActionScanner(binding, parameterPosition)
     }
 
     private fun registerImageFromGallery(): ActivityResultLauncher<String> {

@@ -23,7 +23,7 @@ import com.qmobile.qmobileui.R
  *
  * This sample is a workaround until the Navigation Component supports multiple back stacks.
  */
-@Suppress("LongMethod")
+@Suppress("LongMethod", "ComplexMethod")
 fun BottomNavigationView.setupWithNavController(
     navGraphIds: List<Int>,
     fragmentManager: FragmentManager,
@@ -117,6 +117,9 @@ fun BottomNavigationView.setupWithNavController(
                     // Commit a transaction that cleans the back stack and adds the first fragment
                     // to it, creating the fixed started destination.
 
+                    previousSelectedFragment.exitTransition = MaterialFadeThrough().apply {
+                        duration = resources.getInteger(R.integer.motion_duration_large).toLong()
+                    }
                     selectedFragment.enterTransition = MaterialFadeThrough().apply {
                         duration = resources.getInteger(R.integer.motion_duration_large).toLong()
                     }
@@ -250,7 +253,7 @@ private fun obtainNavHostFragment(
     containerId: Int
 ): NavHostFragment {
     // If the Nav Host fragment exists, return it
-    val existingFragment = fragmentManager.findFragmentByTag(fragmentTag) as NavHostFragment?
+    val existingFragment = fragmentManager.findFragmentByTag(fragmentTag) as? NavHostFragment
     existingFragment?.let { return it }
 
     // Otherwise, create it and return it.

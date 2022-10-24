@@ -8,16 +8,24 @@ package com.qmobile.qmobileui
 
 import android.content.Context
 import android.os.Bundle
+import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import com.google.android.material.appbar.AppBarLayout
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
+import com.qmobile.qmobileui.action.inputcontrols.PushInputControlFragment
 import com.qmobile.qmobileui.action.pendingtasks.TasksFragment
 import com.qmobile.qmobileui.detail.EntityDetailFragment
 import com.qmobile.qmobileui.list.EntityListFragment
+import com.qmobile.qmobileui.utils.hideKeyboard
 
 abstract class BaseFragment : Fragment() {
 
@@ -50,7 +58,38 @@ abstract class BaseFragment : Fragment() {
                 is EntityDetailFragment -> appBarLayout.liftOnScrollTargetViewId = R.id.base_detail_scroll_view
                 is ActionParametersFragment -> appBarLayout.liftOnScrollTargetViewId = R.id.parameters_recycler_view
                 is TasksFragment -> appBarLayout.liftOnScrollTargetViewId = R.id.task_nested_scroll_view
+                is PushInputControlFragment ->
+                    appBarLayout.liftOnScrollTargetViewId = R.id.input_control_list_recycler_view
             }
+        }
+    }
+
+    protected lateinit var searchView: SearchView
+    protected lateinit var searchPlate: EditText
+
+    protected fun setupSearchView(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_search, menu)
+        searchView = menu.findItem(R.id.search).actionView as SearchView
+        searchPlate =
+            searchView.findViewById(androidx.appcompat.R.id.search_src_text) as EditText
+        searchPlate.hint = ""
+
+        searchPlate.setOnEditorActionListener { textView, actionId, keyEvent ->
+            if ((keyEvent != null && (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER)) ||
+                (actionId == EditorInfo.IME_ACTION_DONE)
+            ) {
+                hideKeyboard(activity)
+                textView.clearFocus()
+                if (textView.text.isEmpty()) {
+                    searchView.onActionViewCollapsed()
+                }
+            }
+            true
+        }
+
+        searchView.setOnCloseListener {
+            searchView.onActionViewCollapsed()
+            true
         }
     }
 }

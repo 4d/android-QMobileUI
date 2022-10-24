@@ -8,15 +8,12 @@ package com.qmobile.qmobileui.list
 
 import android.content.Context
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.widget.EditText
 import android.widget.ListAdapter
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
@@ -33,7 +30,6 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.utils.LayoutType
-import com.qmobile.qmobiledatasync.utils.fieldAdjustment
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
@@ -41,18 +37,20 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.model.Action
-import com.qmobile.qmobileui.action.sort.SortFormat
-import com.qmobile.qmobileui.action.sort.SortHelper
+import com.qmobile.qmobileui.action.sort.Sort
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.list.swipe.ItemActionButton
 import com.qmobile.qmobileui.list.swipe.SwipeToActionCallback
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
 import com.qmobile.qmobileui.ui.GridDividerDecoration
+import com.qmobile.qmobileui.ui.setFadeThroughExitTransition
+import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
+import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
+import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.hideKeyboard
-import org.json.JSONObject
 
 open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
 
@@ -65,8 +63,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     // views
     private var _binding: FragmentListBinding? = null
     val binding get() = _binding!!
-    private lateinit var searchView: SearchView
-    private lateinit var searchPlate: EditText
     internal lateinit var adapter: EntityListAdapter
     private lateinit var currentRecordActionsListAdapter: ListAdapter
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
@@ -75,15 +71,14 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     private var tableActionsJsonObject = BaseApp.runtimeDataHolder.tableActions
     private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
     private lateinit var formQueryBuilder: FormQueryBuilder
-    private var sortFields: LinkedHashMap<String, String>? = null
 
     // fragment parameters
     override var tableName = ""
     private var path = ""
     private var parentItemId = ""
 
-    private var tableActions = mutableListOf<Action>()
-    private var currentRecordActions = mutableListOf<Action>()
+    private val tableActions = mutableListOf<Action>()
+    private val currentRecordActions = mutableListOf<Action>()
     private var hasSearch = false
     private var hasTableActions = false
     private var hasCurrentRecordActions = false
@@ -94,6 +89,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         savedInstanceState?.getString(CURRENT_SEARCH_QUERY_KEY, "")?.let { searchPattern = it }
+
+        setSharedAxisXEnterTransition()
 
         // Base entity list fragment
         arguments?.getString("tableName")?.let {
@@ -110,6 +107,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
                 arguments?.getString("parentItemId")?.let { parentItemId = it }
                 arguments?.getString("path")?.let { path = it }
                 arguments?.getString("navbarTitle")?.let { navbarTitle = it }
+                setSharedAxisZEnterTransition()
             }
         }
     }
@@ -151,6 +149,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         initActions()
         initCellSwipe()
         initRecyclerView()
@@ -175,6 +174,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
             tableName = tableName,
             lifecycleOwner = viewLifecycleOwner,
             onItemClick = { dataBinding, key ->
+                setSharedAxisXExitTransition()
                 BaseApp.genericNavigationResolver.navigateFromListToViewPager(
                     viewDataBinding = dataBinding,
                     key = key,
@@ -321,7 +321,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         setupActionsMenuIfNeeded(menu)
         setupSearchMenuIfNeeded(menu, menuInflater)
-        sortListIfNeeded()
         setSearchQuery()
     }
 
@@ -346,67 +345,36 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
 
     private fun setupActionsMenuIfNeeded(menu: Menu) {
         val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
-        // If user already applied a sort, we need no more to apply default sort
         val sortActions = tableActions.filter { it.isSortAction() }
-
-        if (parametersToSortWith.isEmpty() || !JSONObject(parametersToSortWith).has(tableName)) {
-            when (sortActions.size) {
-                0 -> {
-                    val defaultFieldToSortWith = BaseApp.runtimeDataHolder.tableInfo[tableName]?.defaultSortField
-                    if (defaultFieldToSortWith != null) {
-                        saveSortChoice(mapOf(defaultFieldToSortWith.fieldAdjustment() to SortFormat.ASCENDING.value))
-                    }
-                }
-
-                1 -> {
-                    // no call for sort item here, just save it in shared prefs to be used in sortItems() (triggered later)
-                    sortActions.firstOrNull()?.sortFields?.let { saveSortChoice(it) }
-                }
-                else -> {
-                    // if more than one action we apply by default the first one
-                    val defaultSort = sortActions.firstOrNull()?.sortFields
-                    defaultSort?.let { saveSortChoice(it) }
-                }
+        // If user already applied a sort, we need no more to apply default sort
+        if (!parametersToSortWith.has(tableName)) {
+            // if 1, no call for sort item here, just save it in shared prefs to be used in sortItems()
+            // if more than one, we apply by default the first one
+            val fieldsToSortBy: Map<String, String>? = if (sortActions.isEmpty()) {
+                Sort.getDefaultSortField(tableName)
+            } else {
+                sortActions.firstOrNull()?.sortFields
             }
+            Sort.saveSortChoice(tableName, fieldsToSortBy)
         }
 
-        // if we have  only one  sort action it should not be displayed
-        if (sortActions.size == 1) {
-            tableActions = tableActions.filter { !it.isSortAction() }.toMutableList()
+        val actionsForMenu = if (sortActions.size == 1) {
+            tableActions.filter { !it.isSortAction() }
+        } else {
+            tableActions
         }
 
         if (hasTableActions) {
-            actionActivity.setupActionsMenu(menu, tableActions, this) {
-                sortItems(it)
+            actionActivity.setupActionsMenu(menu, actionsForMenu, this) { onSortAction ->
+                Sort.saveSortChoice(tableName, onSortAction.sortFields)
+                setSearchQuery()
             }
         }
     }
 
     private fun setupSearchMenuIfNeeded(menu: Menu, inflater: MenuInflater) {
         if (hasSearch) {
-            inflater.inflate(R.menu.menu_search, menu)
-            searchView = menu.findItem(R.id.search).actionView as SearchView
-            searchPlate =
-                searchView.findViewById(androidx.appcompat.R.id.search_src_text) as EditText
-            searchPlate.hint = ""
-
-            searchPlate.setOnEditorActionListener { textView, actionId, keyEvent ->
-                if ((keyEvent != null && (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER)) ||
-                    (actionId == EditorInfo.IME_ACTION_DONE)
-                ) {
-                    hideKeyboard(activity)
-                    textView.clearFocus()
-                    if (textView.text.isEmpty()) {
-                        searchView.onActionViewCollapsed()
-                    }
-                }
-                true
-            }
-
-            searchView.setOnCloseListener {
-                searchView.onActionViewCollapsed()
-                true
-            }
+            setupSearchView(menu, inflater)
         }
     }
 
@@ -421,11 +389,10 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
                 parentItemId = parentItemId,
                 pattern = searchPattern,
                 parentTableName = relation?.source ?: "",
-                path = path,
-                sortFields
+                path = path
             )
         } else {
-            formQueryBuilder.getQuery(searchPattern, sortFields)
+            formQueryBuilder.getQuery(searchPattern)
         }
         entityListViewModel.setSearchQuery(formQuery)
     }
@@ -441,6 +408,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     }
 
     override fun navigateToActionForm(action: Action, itemId: String?) {
+        setFadeThroughExitTransition()
         BaseApp.genericNavigationResolver.navigateToActionForm(
             viewDataBinding = binding,
             tableName = relation?.source ?: tableName,
@@ -455,40 +423,12 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
 
     override fun navigateToPendingTasks() {
         activity?.let {
+            setFadeThroughExitTransition()
             BaseApp.genericNavigationResolver.navigateToPendingTasks(
                 fragmentActivity = it,
                 tableName = relation?.source ?: tableName,
                 currentItemId = ""
             )
-        }
-    }
-
-    private fun sortItems(action: Action) {
-        sortFields = action.sortFields
-        setSearchQuery()
-        sortFields?.let {
-            saveSortChoice(it)
-        }
-    }
-
-    private fun saveSortChoice(fieldsToSortBy: Map<String, String>) {
-        val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
-        BaseApp.sharedPreferencesHolder.parametersToSortWith =
-            if (parametersToSortWith.isNotEmpty()) {
-                val allTablesJsonObject = JSONObject(parametersToSortWith)
-                allTablesJsonObject.put(tableName, JSONObject(fieldsToSortBy).toString())
-                allTablesJsonObject.toString()
-            } else {
-                JSONObject(mapOf(tableName to JSONObject(fieldsToSortBy).toString())).toString()
-            }
-    }
-
-    // Used to sort items of current table if a sort action is already applied (and persisted in shared prefs)
-    private fun sortListIfNeeded() {
-        SortHelper.getSortFieldsForTable(tableName)?.let {
-            if (it.isNotEmpty()) {
-                sortFields = it
-            }
         }
     }
 }

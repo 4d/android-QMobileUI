@@ -108,7 +108,7 @@ private fun applyImageNamedFormat(
     imageWidth: Int?,
     imageHeight: Int?
 ) {
-    fieldMapping.getChoiceListString(text)?.let { drawableName ->
+    fieldMapping.getStringInChoiceList(text)?.let { drawableName ->
 
         fieldMapping.name?.let { formatName ->
             BaseApp.genericTableFragmentHelper.getDrawableForFormatter(
@@ -134,8 +134,6 @@ private fun applyImageNamedFormat(
 }
 
 private fun applyLocalizedTextFormat(view: TextView, text: String, fieldMapping: FieldMapping) {
-    val formattedValue: String? =
-        fieldMapping.getChoiceListString(text)
-    view.text =
-        if (formattedValue.isNullOrEmpty()) "" else formattedValue
+    val formattedValue: String? = fieldMapping.getStringInChoiceList(text)
+    view.text = if (formattedValue.isNullOrEmpty()) "" else formattedValue
 }

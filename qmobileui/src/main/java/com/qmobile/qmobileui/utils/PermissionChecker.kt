@@ -63,7 +63,7 @@ class PermissionCheckerImpl(private val fragmentActivity: FragmentActivity) {
     }
 
     private fun requestPermission(permission: String, callback: (isGranted: Boolean) -> Unit) {
-        (fragmentActivity as ActivityResultController?)?.launch(
+        (fragmentActivity as? ActivityResultController)?.launch(
             type = ActivityResultContracts.RequestPermission(),
             input = permission,
             callback = callback

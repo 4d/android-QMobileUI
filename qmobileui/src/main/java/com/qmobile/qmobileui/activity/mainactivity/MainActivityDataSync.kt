@@ -13,6 +13,7 @@ import com.qmobile.qmobiledatasync.sync.notifyDataUnSynced
 import com.qmobile.qmobiledatasync.sync.syncDeletedRecords
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import timber.log.Timber
 
@@ -35,16 +36,23 @@ class MainActivityDataSync(private val activity: MainActivity) {
         )
 
     fun dataSync(alreadyRefreshedTable: String? = null) {
-        if (activity.connectivityViewModel.isConnected()) {
-            activity.connectivityViewModel.isServerConnectionOk { isAccessible ->
-                if (isAccessible) {
+        activity.queryNetwork(
+            object : NetworkChecker {
+                override fun onServerAccessible() {
                     prepareViewModelsForDataSync(alreadyRefreshedTable)
                     dataSync.perform()
-                } // else : Nothing to do, errors already provided in isServerConnectionOk
-            }
-        } else {
-            SnackbarHelper.show(activity, activity.getString(R.string.no_internet), ToastMessage.Type.WARNING)
-        }
+                }
+
+                override fun onServerInaccessible() {
+                    // Nothing to do, errors already provided in isServerConnectionOk
+                }
+
+                override fun onNoInternet() {
+                    SnackbarHelper.show(activity, activity.getString(R.string.no_internet), ToastMessage.Type.WARNING)
+                }
+            },
+            toastError = true
+        )
     }
 
     private fun prepareViewModelsForDataSync(alreadyRefreshedTable: String?) {

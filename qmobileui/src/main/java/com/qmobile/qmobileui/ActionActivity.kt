@@ -26,10 +26,9 @@ interface ActionActivity {
     fun onActionClick(action: Action, actionNavigable: ActionNavigable)
 
     fun sendAction(
-        actionContent: MutableMap<String, Any>,
         actionTask: ActionTask,
         tableName: String,
-        onActionSent: () -> Unit
+        proceed: () -> Unit
     )
 
     fun uploadImage(

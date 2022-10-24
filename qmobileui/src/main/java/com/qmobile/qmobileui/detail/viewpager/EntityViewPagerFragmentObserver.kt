@@ -28,7 +28,7 @@ class EntityViewPagerFragmentObserver(
             Lifecycle.State.STARTED
         ) {
             fragment.adapter.submitList(it)
-            val index = it.indexOfFirst { roomEntity -> (roomEntity.__entity as EntityModel?)?.__KEY == fragment.key }
+            val index = it.indexOfFirst { roomEntity -> (roomEntity.__entity as? EntityModel)?.__KEY == fragment.key }
             if (index > -1) {
                 fragment.viewPager?.setCurrentItem(index, false)
             }
@@ -36,7 +36,7 @@ class EntityViewPagerFragmentObserver(
 //        fragment.lifecycleScope.launch {
 //            entityListViewModel.entityListPagingDataFlow.distinctUntilChanged().collectLatest {
 //                fragment.adapter.submitData(it)
-//                val index = it.indexOfFirst { roomEntity -> (roomEntity.__entity as EntityModel?)?.__KEY == fragment.key }
+//                val index = it.indexOfFirst { roomEntity -> (roomEntity.__entity as? EntityModel)?.__KEY == fragment.key }
 //                if (index > -1) {
 //                    fragment.viewPager?.setCurrentItem(index, false)
 //                }

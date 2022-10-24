@@ -24,8 +24,9 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.sort.SortHelper
 import com.qmobile.qmobileui.binding.ImageHelper
+import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
+import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 
@@ -53,6 +54,9 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setSharedAxisXEnterTransition()
+
         arguments?.getString("key")?.let { key = it }
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("searchQueryPattern")?.let { searchQueryPattern = it }
@@ -63,6 +67,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
                 tableName = relation?.dest ?: tableName
                 arguments?.getString("parentItemId")?.let { parentItemId = it }
                 arguments?.getString("path")?.let { path = it }
+                setSharedAxisZEnterTransition()
             }
         }
     }
@@ -100,12 +105,12 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
             override fun onPageSelected(position: Int) {
                 adapter.getValue(position)?.let { roomEntity ->
                     actionActivity.setCurrentEntityModel(roomEntity)
-                    key = (roomEntity.__entity as EntityModel?)?.__KEY ?: ""
+                    key = (roomEntity.__entity as? EntityModel)?.__KEY ?: ""
                     arguments?.putString("key", key)
                 }
 //                adapter.getSelectedItem(position)?.let { roomEntity ->
 //                    actionActivity.setCurrentEntityModel(roomEntity)
-//                    key = (roomEntity.__entity as EntityModel?)?.__KEY ?: ""
+//                    key = (roomEntity.__entity as? EntityModel)?.__KEY ?: ""
 //                    arguments?.putString("key", key)
 //                }
                 handleActionPreviousEnability(position)
@@ -114,11 +119,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
         })
 
         EntityViewPagerFragmentObserver(this, entityListViewModel).initObservers()
-        if (searchQueryPattern.isNotEmpty()) {
-            setSearchQuery()
-        } else {
-            sortListIfNeeded()
-        }
+        setSearchQuery()
     }
 
     override fun onDestroyView() {
@@ -175,27 +176,17 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
         }
     }
 
-    private fun setSearchQuery(fieldToSortBy: LinkedHashMap<String, String>? = null) {
+    private fun setSearchQuery() {
         val formQuery = if (relation != null) {
             formQueryBuilder.getRelationQuery(
                 parentItemId = parentItemId,
                 pattern = searchQueryPattern,
                 parentTableName = relation?.source ?: "",
-                path = path,
-                sortFields = fieldToSortBy
+                path = path
             )
         } else {
-            formQueryBuilder.getQuery(searchQueryPattern, fieldToSortBy)
+            formQueryBuilder.getQuery(searchQueryPattern)
         }
         entityListViewModel.setSearchQuery(formQuery)
-    }
-
-    // Used to sort items of current table if a sort action is already applied (and persisted in shared prefs)
-    private fun sortListIfNeeded() {
-        SortHelper.getSortFieldsForTable(tableName)?.let {
-            if (it.isNotEmpty()) {
-                setSearchQuery(it)
-            }
-        }
     }
 }

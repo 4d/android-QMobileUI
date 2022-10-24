@@ -12,6 +12,7 @@ import android.widget.TextView
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
+import org.json.JSONObject
 
 open class BooleanViewHolder(itemView: View, format: String) : BaseViewHolder(itemView, format) {
 
@@ -20,7 +21,7 @@ open class BooleanViewHolder(itemView: View, format: String) : BaseViewHolder(it
     protected val error: TextView = itemView.findViewById(R.id.error)
 
     override fun bind(
-        item: Any,
+        item: JSONObject,
         currentEntity: RoomEntity?,
         isLastParameter: Boolean,
         alreadyFilledValue: Any?,
@@ -38,7 +39,7 @@ open class BooleanViewHolder(itemView: View, format: String) : BaseViewHolder(it
         }
 
         compoundButton.setOnCheckedChangeListener { _, b ->
-            error.visibility = View.INVISIBLE
+            error.visibility = View.GONE
             onValueChanged(parameterName, b, null, true)
         }
 

@@ -124,25 +124,25 @@ class FormatterTest {
         var fieldName = "field_x"
         customFormatters[tableName]?.get(fieldName)?.let { fieldMapping ->
             Assert.assertEquals("localizedText", fieldMapping.binding)
-            Assert.assertEquals("UX designers", fieldMapping.getChoiceListString("0"))
-            Assert.assertNull(fieldMapping.getChoiceListString("AnyRandomText"))
+            Assert.assertEquals("UX designers", fieldMapping.getStringInChoiceList("0"))
+            Assert.assertNull(fieldMapping.getStringInChoiceList("AnyRandomText"))
         } ?: kotlin.run { Assert.fail() }
 
         tableName = "Table_1"
         fieldName = "field_1"
         customFormatters[tableName]?.get(fieldName)?.let { fieldMapping ->
             Assert.assertEquals("imageNamed", fieldMapping.binding)
-            Assert.assertEquals("todo.png", fieldMapping.getChoiceListString("abc"))
-            Assert.assertEquals("pending.png", fieldMapping.getChoiceListString("2"))
-            Assert.assertNull(fieldMapping.getChoiceListString("AnyRandomText"))
+            Assert.assertEquals("todo.png", fieldMapping.getStringInChoiceList("abc"))
+            Assert.assertEquals("pending.png", fieldMapping.getStringInChoiceList("2"))
+            Assert.assertNull(fieldMapping.getStringInChoiceList("AnyRandomText"))
         } ?: kotlin.run { Assert.fail() }
 
         tableName = "Table_4"
         fieldName = "relationField.field_1"
         customFormatters[tableName]?.get(fieldName)?.let { fieldMapping ->
             Assert.assertEquals("localizedText", fieldMapping.binding)
-            Assert.assertEquals("UX designers", fieldMapping.getChoiceListString("0"))
-            Assert.assertNull(fieldMapping.getChoiceListString("AnyRandomText"))
+            Assert.assertEquals("UX designers", fieldMapping.getStringInChoiceList("0"))
+            Assert.assertNull(fieldMapping.getStringInChoiceList("AnyRandomText"))
         } ?: kotlin.run { Assert.fail() }
     }
 

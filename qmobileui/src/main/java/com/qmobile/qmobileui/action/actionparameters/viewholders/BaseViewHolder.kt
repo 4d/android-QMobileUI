@@ -25,16 +25,18 @@ abstract class BaseViewHolder(itemView: View, format: String) : RecyclerView.Vie
     lateinit var itemJsonObject: JSONObject
     private var serverError: String? = null
     val apu = ActionParametersUtil(format)
+    lateinit var onValueChanged: (String, Any?, String?, Boolean) -> Unit
 
     open fun bind(
-        item: Any,
+        item: JSONObject,
         currentEntity: RoomEntity?,
         isLastParameter: Boolean,
         alreadyFilledValue: Any?,
         serverError: String?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        itemJsonObject = item as JSONObject
+        this.onValueChanged = onValueChanged
+        itemJsonObject = item
         parameterName = itemJsonObject.getSafeString("name") ?: ""
         this.serverError = serverError
 

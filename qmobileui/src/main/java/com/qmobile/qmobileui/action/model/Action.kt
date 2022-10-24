@@ -6,10 +6,6 @@
 
 package com.qmobile.qmobileui.action.model
 
-import com.qmobile.qmobileapi.utils.getJSONObjectList
-import com.qmobile.qmobileapi.utils.getSafeString
-import com.qmobile.qmobiledatasync.utils.fieldAdjustment
-import com.qmobile.qmobileui.action.sort.SortFormat
 import com.qmobile.qmobileui.utils.ResourcesHelper
 import org.json.JSONArray
 import java.util.Locale
@@ -23,14 +19,9 @@ open class Action(
     val scope: Scope? = null,
     val parameters: JSONArray,
     val uuid: String,
-    val description: String? = null
+    val description: String? = null,
+    val sortFields: LinkedHashMap<String, String>
 ) {
-
-    var sortFields: LinkedHashMap<String, String>
-
-    init {
-        sortFields = fetchSortFields()
-    }
 
     fun getIconDrawablePath(): String? =
         ResourcesHelper.correctIconPath(icon)
@@ -55,34 +46,6 @@ open class Action(
 
     enum class Scope {
         TABLE, CURRENT_RECORD
-    }
-
-    private fun fetchSortFields(): LinkedHashMap<String, String> {
-        val fieldsToSortBy: LinkedHashMap<String, String> = LinkedHashMap()
-        parameters.getJSONObjectList().forEach { parameter ->
-            val format = when (parameter.getSafeString("format")) {
-                "ascending" -> SortFormat.ASCENDING.value
-                "descending" -> SortFormat.DESCENDING.value
-                else -> ""
-            }
-
-            val type = parameter.getSafeString("type")
-            parameter.getSafeString("name")?.let { name ->
-                val fieldName = name.fieldAdjustment()
-                // if the field is a time we have to convert it from string to int, otherwise the AM/PM sort will not work
-                // if type is string we make the sort case insensitive
-                val key = when (type) {
-                    "time" -> "CAST ($fieldName AS INT)"
-                    "string" -> "$fieldName COLLATE NOCASE "
-                    else -> fieldName
-                }
-
-                if (format.isNotEmpty()) {
-                    fieldsToSortBy[key] = format
-                }
-            }
-        }
-        return fieldsToSortBy
     }
 
     fun isSortAction() = preset == "sort"

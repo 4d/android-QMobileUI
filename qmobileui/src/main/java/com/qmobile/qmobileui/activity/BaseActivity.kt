@@ -29,6 +29,7 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.SnackbarHelper
@@ -112,7 +113,7 @@ abstract class BaseActivity : AppCompatActivity() {
                         val newRemoteUrl = remoteUrlEditLayout.editText?.text.toString()
                         if (newRemoteUrl.isUrlValid()) {
                             remoteUrlChanger.onValidRemoteUrlChange(newRemoteUrl)
-                            checkNetwork(remoteUrlChanger)
+                            queryNetwork(remoteUrlChanger)
                             dismiss()
                             onDialogDismiss?.invoke()
                         } else {
@@ -127,9 +128,15 @@ abstract class BaseActivity : AppCompatActivity() {
             }.show()
     }
 
-    fun checkNetwork(networkChecker: NetworkChecker) {
+    fun queryNetwork(networkChecker: NetworkChecker, toastError: Boolean = false) {
         if (connectivityViewModel.isConnected()) {
-            connectivityViewModel.isServerConnectionOk(toastError = false) { isAccessible ->
+            if (this is MainActivity) {
+                setCheckInProgress(true)
+            }
+            connectivityViewModel.isServerConnectionOk(toastError) { isAccessible ->
+                if (this is MainActivity) {
+                    setCheckInProgress(false)
+                }
                 if (isAccessible) {
                     networkChecker.onServerAccessible()
                 } else {

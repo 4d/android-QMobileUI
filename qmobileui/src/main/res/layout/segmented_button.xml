@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by qmarciset on 20/9/2022.
+  ~ 4D SAS
+  ~ Copyright (c) 2022 qmarciset. All rights reserved.
+  -->
+
+<Button xmlns:android="http://schemas.android.com/apk/res/android"
+    style="?attr/materialButtonOutlinedStyle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />

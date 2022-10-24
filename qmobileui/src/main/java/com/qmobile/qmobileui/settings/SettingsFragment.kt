@@ -28,6 +28,7 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.SnackbarHelper
+import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import timber.log.Timber
 
@@ -60,6 +61,7 @@ class SettingsFragment :
     private lateinit var noInternetString: String
     private lateinit var serverAccessibleString: String
     private lateinit var serverNotAccessibleString: String
+    private lateinit var checkingString: String
 
     // ViewModels
     private lateinit var loginViewModel: LoginViewModel
@@ -86,11 +88,11 @@ class SettingsFragment :
         accountCategoryKey = resources.getString(R.string.cat_account_key)
         logoutPrefKey = resources.getString(R.string.pref_logout_key)
         serverAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.network_ok_circle)
-        serverNotAccessibleDrawable =
-            ContextCompat.getDrawable(context, R.drawable.network_nok_circle)
+        serverNotAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.network_nok_circle)
         noInternetString = resources.getString(R.string.no_internet)
         serverAccessibleString = resources.getString(R.string.server_accessible)
         serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
+        checkingString = resources.getString(R.string.remote_url_checking)
 
         logoutDialogTitle = resources.getString(R.string.logout_dialog_title)
         logoutDialogMessage = resources.getString(R.string.logout_dialog_message)
@@ -145,6 +147,7 @@ class SettingsFragment :
             }
             pendingTaskPrefKey -> {
                 activity?.let {
+                    setSharedAxisXExitTransition()
                     BaseApp.genericNavigationResolver.navigateToPendingTasks(
                         fragmentActivity = it,
                         tableName = "",
@@ -212,26 +215,33 @@ class SettingsFragment :
     }
 
     override fun onServerAccessible() {
-        remoteUrlPref?.summary =
-            getString(R.string.remote_url_placeholder, remoteUrl, serverAccessibleString)
+        activity?.apply {
+            remoteUrlPref?.summary =
+                this.getString(R.string.remote_url_placeholder, remoteUrl, serverAccessibleString)
+        }
         remoteUrlPref?.icon = serverAccessibleDrawable
     }
 
     override fun onServerInaccessible() {
-        remoteUrlPref?.summary =
-            getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
+        activity?.apply {
+            remoteUrlPref?.summary =
+                this.getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
+        }
         remoteUrlPref?.icon = serverNotAccessibleDrawable
     }
 
     override fun onNoInternet() {
-        remoteUrlPref?.summary =
-            getString(R.string.remote_url_placeholder, remoteUrl, noInternetString)
+        activity?.apply {
+            remoteUrlPref?.summary =
+                this.getString(R.string.remote_url_placeholder, remoteUrl, noInternetString)
+        }
         remoteUrlPref?.icon = serverNotAccessibleDrawable
     }
 
     override fun onValidRemoteUrlChange(newRemoteUrl: String) {
         BaseApp.sharedPreferencesHolder.remoteUrl = newRemoteUrl
         remoteUrl = newRemoteUrl
+        remoteUrlPref?.summary = checkingString
         this@SettingsFragment.activitySettingsInterface.refreshAllApiClients()
     }
 }

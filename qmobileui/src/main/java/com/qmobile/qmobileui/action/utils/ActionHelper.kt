@@ -17,15 +17,18 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.core.widget.TextViewCompat
+import com.qmobile.qmobileapi.utils.getJSONObjectList
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileapi.utils.parseToString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper.inverseAliasPath
+import com.qmobile.qmobiledatasync.utils.fieldAdjustment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.model.ActionMetaData
+import com.qmobile.qmobileui.action.sort.Sort
 import com.qmobile.qmobileui.binding.ImageHelper.DRAWABLE_24
 import com.qmobile.qmobileui.binding.ImageHelper.DRAWABLE_32
 import com.qmobile.qmobileui.binding.ImageHelper.ICON_MARGIN
@@ -36,6 +39,8 @@ import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.px
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.*
+import kotlin.collections.HashMap
 
 object ActionHelper {
 
@@ -89,8 +94,13 @@ object ActionHelper {
         return map
     }
 
+    fun updateActionContentId(actionContent: MutableMap<String, Any>?) {
+        actionContent?.put("id", UUID.randomUUID().toString())
+    }
+
     fun createActionFromJsonObject(jsonObject: JSONObject): Action {
         jsonObject.apply {
+            val parameters = getSafeArray("parameters") ?: JSONArray()
             return Action(
                 name = getSafeString("name") ?: "",
                 shortLabel = getSafeString("shortLabel"),
@@ -98,11 +108,36 @@ object ActionHelper {
                 icon = getSafeString("icon"),
                 preset = getSafeString("preset"),
                 scope = if (getSafeString("scope") == "table") Action.Scope.TABLE else Action.Scope.CURRENT_RECORD,
-                parameters = getSafeArray("parameters") ?: JSONArray(),
+                parameters = parameters,
                 uuid = getSafeString("uuid") ?: "",
-                description = getSafeString("description") ?: ""
+                description = getSafeString("description") ?: "",
+                sortFields = getSortFields(parameters)
             )
         }
+    }
+
+    private fun getSortFields(parameters: JSONArray): LinkedHashMap<String, String> {
+        val fieldsToSortBy: LinkedHashMap<String, String> = LinkedHashMap()
+        parameters.getJSONObjectList().forEach { parameter ->
+            val format = Sort.sortMatchingKeywords(parameter.getSafeString("format"))
+
+            val type = parameter.getSafeString("type")
+            parameter.getSafeString("name")?.let { name ->
+                val fieldName = name.fieldAdjustment()
+                // if the field is a time we have to convert it from string to int, otherwise the AM/PM sort will not work
+                // if type is string we make the sort case insensitive
+                val key = when (type) {
+                    "time" -> "CAST ($fieldName AS INT)"
+                    "string" -> "$fieldName COLLATE NOCASE"
+                    else -> fieldName
+                }
+
+                if (format.isNotEmpty()) {
+                    fieldsToSortBy[key] = format
+                }
+            }
+        }
+        return fieldsToSortBy
     }
 
     fun getActionIconDrawable(context: Context, action: Action): Drawable? {
@@ -112,7 +147,7 @@ object ActionHelper {
             drawable = ContextCompat.getDrawable(context, R.drawable.empty_action)
         }
 
-        return drawable?.adjustActionDrawableMargins(context)
+        return drawable?.adjustActionDrawableMargins()
     }
 
     fun Drawable.paramMenuActionDrawable(context: Context) {

@@ -8,6 +8,7 @@
     <color name="relation_link">#007AFF</color>
     <color name="divider_color">#22828282</color>
     <color name="barcode_reader_frame">#3DDC84</color>
+    <color name="network_ok_color">#05B714</color>
 
     <color name="green_success">#006E1C</color>
 

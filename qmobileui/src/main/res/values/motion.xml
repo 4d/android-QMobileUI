@@ -5,5 +5,5 @@
   -->
 
 <resources>
-    <integer name="motion_duration_large">300</integer>
+    <integer name="motion_duration_large">600</integer>
 </resources>

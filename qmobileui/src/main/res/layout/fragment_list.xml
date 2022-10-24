@@ -57,6 +57,8 @@
                 android:id="@+id/fragment_list_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:paddingBottom="80dp"
+                android:transitionGroup="true"
                 tools:listitem="@layout/recyclerview_item_stub" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

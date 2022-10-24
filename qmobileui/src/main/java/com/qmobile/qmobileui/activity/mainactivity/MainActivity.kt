@@ -16,7 +16,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.view.menu.MenuBuilder
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
@@ -56,6 +55,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
 import com.qmobile.qmobileui.action.barcode.BarcodeScannerFragment
+import com.qmobile.qmobileui.action.inputcontrols.InputControl.Format.cleanActionContent
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.action.utils.ActionHelper.paramMenuActionDrawable
@@ -66,6 +66,8 @@ import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
 import com.qmobile.qmobileui.databinding.ActivityMainBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
+import com.qmobile.qmobileui.ui.setMaterialFadeTransition
+import com.qmobile.qmobileui.ui.setSharedAxisZExitTransition
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.PermissionCheckerImpl
 import com.qmobile.qmobileui.utils.setupWithNavController
@@ -107,8 +109,11 @@ class MainActivity :
     override val activityResultControllerImpl = ActivityResultControllerImpl(this)
     override val permissionCheckerImpl = PermissionCheckerImpl(this)
 
-    private var statusBarHeight = 0
-    private var appBarHeight = 0
+    val currentNavigationFragment: Fragment?
+        get() = supportFragmentManager.findFragmentById(R.id.nav_host_container)
+            ?.childFragmentManager
+            ?.fragments
+            ?.first()
 
     // ViewModels
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
@@ -133,9 +138,6 @@ class MainActivity :
                 padding(animated = true)
             }
         }
-
-        statusBarHeight = getStatusBarHeight()
-        appBarHeight = statusBarHeight
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
             WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -264,7 +266,7 @@ class MainActivity :
         val entityListViewModel =
             entityListViewModelList.find { it.getAssociatedTableName() == currentTableName }
 
-        checkNetwork(object : NetworkChecker {
+        queryNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
                 if (loginViewModel.authenticationState.value != AuthenticationState.AUTHENTICATED) {
                     // This is to schedule a notifyDataSetChanged() because of cached images (only on first dataSync)
@@ -345,9 +347,8 @@ class MainActivity :
     }
 
     private fun checkPendingTasks() {
-        val currentFragment = getCurrentFragment()
         // User is editing the action, don't try to send it now
-        if (currentFragment !is ActionParametersFragment) {
+        if (currentNavigationFragment !is ActionParametersFragment) {
             sendPendingTasks()
         }
     }
@@ -396,7 +397,7 @@ class MainActivity :
                     actionNavigable.navigateToPendingTasks()
                     true
                 }
-                .setIcon(drawable?.adjustActionDrawableMargins(this))
+                .setIcon(drawable?.adjustActionDrawableMargins())
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         }
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1) {
@@ -405,56 +406,57 @@ class MainActivity :
     }
 
     override fun onActionClick(action: Action, actionNavigable: ActionNavigable) {
-        if (action.isOpenUrlAction()) {
-            // action.description contains the url if openUrl action
-            action.description?.let {
-                val base64EncodedContext = ActionHelper.getBase64EncodedContext(
-                    actionNavigable.getActionContent(
+        when {
+            action.isOpenUrlAction() -> {
+                // action.description contains the url if openUrl action
+                action.description?.let {
+                    val base64EncodedContext = ActionHelper.getBase64EncodedContext(
+                        actionNavigable.getActionContent(
+                            actionUUID = action.uuid,
+                            itemId = if (action.scope == Action.Scope.CURRENT_RECORD) {
+                                (currentEntity?.__entity as EntityModel?)?.__KEY
+                            } else {
+                                ""
+                            }
+                        )
+                    )
+                    currentNavigationFragment?.setSharedAxisZExitTransition()
+                    BaseApp.genericNavigationResolver.navigateToActionWebView(
+                        fragmentActivity = this,
+                        path = it,
+                        actionName = action.name,
+                        actionLabel = action.label,
+                        actionShortLabel = action.shortLabel,
+                        base64EncodedContext = base64EncodedContext
+                    )
+                }
+            }
+            action.parameters.length() > 0 -> {
+                if (action.scope == Action.Scope.TABLE) {
+                    currentEntity = null
+                }
+                actionNavigable.navigateToActionForm(action, (currentEntity?.__entity as? EntityModel)?.__KEY)
+            }
+            else -> {
+                val task = ActionTask(
+                    status = ActionTask.Status.PENDING,
+                    date = Date(),
+                    relatedItemId = (currentEntity?.__entity as? EntityModel)?.__KEY,
+                    label = action.getPreferredName(),
+                    actionInfo = ActionInfo(
+                        actionName = action.name,
+                        tableName = actionNavigable.tableName,
                         actionUUID = action.uuid,
-                        itemId = if (action.scope == Action.Scope.CURRENT_RECORD) {
-                            (currentEntity?.__entity as EntityModel?)?.__KEY
-                        } else {
-                            ""
-                        }
+                        isOfflineCompatible = action.isOfflineCompatible(),
+                        preferredShortName = action.getPreferredShortName()
                     )
                 )
+                task.actionContent =
+                    actionNavigable.getActionContent(task.id, (currentEntity?.__entity as? EntityModel)?.__KEY)
 
-                BaseApp.genericNavigationResolver.navigateToActionWebView(
-                    fragmentActivity = this,
-                    path = it,
-                    actionName = action.name,
-                    actionLabel = action.label,
-                    actionShortLabel = action.shortLabel,
-                    base64EncodedContext = base64EncodedContext
-                )
-            }
-        } else if (action.parameters.length() > 0) {
-            if (action.scope == Action.Scope.TABLE) {
-                currentEntity = null
-            }
-            actionNavigable.navigateToActionForm(action, (currentEntity?.__entity as EntityModel?)?.__KEY)
-        } else {
-            val task = ActionTask(
-                status = ActionTask.Status.PENDING,
-                date = Date(),
-                relatedItemId = (currentEntity?.__entity as EntityModel?)?.__KEY,
-                label = action.getPreferredName(),
-                actionInfo = ActionInfo(
-                    actionName = action.name,
-                    tableName = actionNavigable.tableName,
-                    actionUUID = action.uuid,
-                    isOfflineCompatible = action.isOfflineCompatible(),
-                    preferredShortName = action.getPreferredShortName()
-                )
-            )
-
-            sendAction(
-                actionContent = actionNavigable
-                    .getActionContent(task.id, (currentEntity?.__entity as EntityModel?)?.__KEY),
-                actionTask = task,
-                tableName = actionNavigable.tableName
-            ) {
-                // Nothing to do
+                sendAction(task, actionNavigable.tableName) {
+                    // Nothing to do
+                }
             }
         }
     }
@@ -464,35 +466,38 @@ class MainActivity :
     }
 
     override fun sendAction(
-        actionContent: MutableMap<String, Any>,
         actionTask: ActionTask,
         tableName: String,
-        onActionSent: () -> Unit
+        proceed: () -> Unit
     ) {
         if (actionTask.actionInfo.isOfflineCompatible) {
             taskViewModel.insert(actionTask)
         }
 
-        checkNetwork(object : NetworkChecker {
+        queryNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
+                val savedActionContent = actionTask.actionContent
+                val cleanedActionContent = actionTask.cleanActionContent()
                 entityListViewModelList.firstOrNull()
-                    ?.sendAction(actionTask.actionInfo.actionName, actionContent) { actionResponse ->
+                    ?.sendAction(actionTask.actionInfo.actionName, cleanedActionContent) { actionResponse ->
                         actionResponse?.let {
-                            actionTask.status = if (actionResponse.success) {
-                                ActionTask.Status.SUCCESS
+                            if (actionResponse.success) {
+                                actionTask.status = ActionTask.Status.SUCCESS
                             } else {
-                                ActionTask.Status.ERROR_SERVER
+                                actionTask.status = ActionTask.Status.ERROR_SERVER
+                                actionTask.actionContent = savedActionContent
                             }
 
                             actionTask.message = actionResponse.statusText
                             actionTask.actionInfo.errors =
                                 actionResponse.errors?.associateBy({ it.parameter }, { it.message })
                             taskViewModel.insert(actionTask)
+
                             if (actionResponse.dataSynchro == true) {
                                 requestDataSync(tableName)
                             }
                         }
-                        onActionSent()
+                        proceed()
                     }
             }
 
@@ -514,12 +519,15 @@ class MainActivity :
         onImageUploaded: (parameterName: String, receivedId: String) -> Unit,
         onAllUploadFinished: () -> Unit
     ) {
-        checkNetwork(object : NetworkChecker {
+        queryNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
                 entityListViewModelList.firstOrNull()?.uploadImage(
                     imagesToUpload = bodies,
                     onImageUploaded = { parameterName, receivedId ->
                         onImageUploaded(parameterName, receivedId)
+                    },
+                    onError = {
+                        taskToSendIfOffline?.let { taskViewModel.insert(it) }
                     }
                 ) {
                     onAllUploadFinished()
@@ -620,13 +628,8 @@ class MainActivity :
         currentNavController = controller
     }
 
-    private fun getCurrentFragment(): Fragment? {
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
-        return navHostFragment?.childFragmentManager?.fragments?.get(0)
-    }
-
     override fun sendPendingTasks() {
-        checkNetwork(object : NetworkChecker {
+        queryNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
                 taskViewModel.pendingTasks.value?.forEach { pendingTask ->
                     sendSinglePendingTask(pendingTask)
@@ -644,17 +647,9 @@ class MainActivity :
     }
 
     private fun sendSinglePendingTask(pendingTask: ActionTask) {
-        val actionContent = ActionHelper.getActionContent(
-            tableName = pendingTask.actionInfo.tableName,
-            actionUUID = pendingTask.id,
-            itemId = pendingTask.relatedItemId ?: "",
-            parameters = pendingTask.actionInfo.paramsToSubmit,
-            metaData = pendingTask.actionInfo.metaDataToSubmit
-        )
-
         val images = pendingTask.actionInfo.imagesToUpload
         if (images.isNullOrEmpty()) {
-            sendAction(actionContent, pendingTask, pendingTask.actionInfo.tableName) {
+            sendAction(pendingTask, pendingTask.actionInfo.tableName) {
                 // Nothing to do
             }
         } else {
@@ -670,7 +665,7 @@ class MainActivity :
                     pendingTask.actionInfo.metaDataToSubmit?.set(parameterName, UPLOADED_METADATA_STRING)
                 },
                 onAllUploadFinished = {
-                    sendAction(actionContent, pendingTask, pendingTask.actionInfo.tableName) {
+                    sendAction(pendingTask, pendingTask.actionInfo.tableName) {
                         // Nothing to do
                     }
                 }
@@ -679,32 +674,19 @@ class MainActivity :
     }
 
     override fun setFullScreenMode(isFullScreen: Boolean) {
+        setMaterialFadeTransition(binding.mainContainer, true)
         if (isFullScreen) {
-            appBarHeight = binding.appbar.height
-            binding.appbar.layoutParams = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-                CoordinatorLayout.LayoutParams(binding.appbar.width, statusBarHeight)
-            } else {
-                CoordinatorLayout.LayoutParams(binding.appbar.width, 0)
-            }
+            binding.collapsingToolbar.visibility = View.GONE
             binding.bottomNav.visibility = View.GONE
         } else {
-            binding.appbar.layoutParams = CoordinatorLayout.LayoutParams(binding.appbar.width, appBarHeight)
+            binding.collapsingToolbar.visibility = View.VISIBLE
             binding.bottomNav.visibility = View.VISIBLE
-        }
-    }
-
-    private fun getStatusBarHeight(): Int {
-        val idStatusBarHeight = resources.getIdentifier("status_bar_height", "dimen", "android")
-        return if (idStatusBarHeight > 0) {
-            resources.getDimensionPixelSize(idStatusBarHeight)
-        } else {
-            0
         }
     }
 
     override fun onBackPressed() {
         // If fullscreen fragment, set back ActionBar
-        when (getCurrentFragment()) {
+        when (currentNavigationFragment) {
             is BarcodeScannerFragment, is ActionWebViewFragment -> setFullScreenMode(false)
         }
         super.onBackPressed()
@@ -723,5 +705,17 @@ class MainActivity :
         }
         taskViewModel.deleteAll()
         loginViewModel.disconnectUser {}
+    }
+
+    override fun checkNetwork(networkChecker: NetworkChecker) {
+        queryNetwork(networkChecker)
+    }
+
+    internal fun setCheckInProgress(inProgress: Boolean) {
+        binding.linearProgressIndicator.visibility = if (inProgress) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
     }
 }

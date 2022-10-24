@@ -15,14 +15,14 @@ class CompletedTaskViewHolder(
     onItemClick: (actionTask: ActionTask) -> Unit
 ) : BaseTaskViewHolder(binding.root, onItemClick) {
 
-    override fun bind(item: ActionTask, isFromSettings: Boolean) {
-        super.bind(item, isFromSettings)
+    override fun bind(actionTask: ActionTask, isFromSettings: Boolean) {
+        super.bind(actionTask, isFromSettings)
 
-        if (!item.message.isNullOrEmpty()) {
-            binding.status.text = item.message
+        if (!actionTask.message.isNullOrEmpty()) {
+            binding.status.text = actionTask.message
         }
 
-        when (item.status) {
+        when (actionTask.status) {
             ActionTask.Status.SUCCESS -> {
                 binding.iconState.setImageResource(R.drawable.check_circle)
             }

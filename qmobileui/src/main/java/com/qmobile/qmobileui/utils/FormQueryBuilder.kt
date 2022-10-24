@@ -9,17 +9,19 @@ package com.qmobile.qmobileui.utils
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.RelationHelper
+import com.qmobile.qmobileui.action.sort.Sort
 import timber.log.Timber
 
 class FormQueryBuilder(
     var tableName: String,
-    private val searchFields: List<String>? = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchFields
+    private val searchFields: List<String>? = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchFields,
+    private val customSortFields: LinkedHashMap<String, String>? = null // used for Input control datasource
 ) {
 
     private val baseQuery = "SELECT * FROM $tableName"
 
-    fun getQuery(pattern: String = "", sortFields: LinkedHashMap<String, String>? = null): SimpleSQLiteQuery {
-        val sortQuery = sortFields?.let { getSortQueryFromFieldList(it) } ?: ""
+    fun getQuery(pattern: String = ""): SimpleSQLiteQuery {
+        val sortQuery = getSortQuery()
 
         if (pattern.isEmpty()) {
             return SimpleSQLiteQuery(baseQuery + sortQuery)
@@ -37,10 +39,9 @@ class FormQueryBuilder(
         parentItemId: String,
         pattern: String = "",
         parentTableName: String,
-        path: String,
-        sortFields: LinkedHashMap<String, String>?
+        path: String
     ): SimpleSQLiteQuery {
-        val sortQuery = sortFields?.let { getSortQueryFromFieldList(it) } ?: ""
+        val sortQuery = getSortQuery()
 
         val relation = if (path.contains(".")) {
             RelationHelper.getRelations(parentTableName).find { it.path == path }
@@ -65,18 +66,14 @@ class FormQueryBuilder(
         }
     }
 
-    private fun getSortQueryFromFieldList(fields: HashMap<String, String>): String? {
+    private fun getSortQuery(): String {
+        val sortFields = customSortFields ?: Sort.getSortFieldsFromSharedPrefs(tableName) ?: return ""
         val sortStringBuffer = StringBuffer()
-
-        if (fields.isEmpty()) {
-            return null
-        } else {
-            fields.entries.forEach {
-                if (sortStringBuffer.isEmpty()) {
-                    sortStringBuffer.append(" ORDER BY ${it.key} ${it.value}")
-                } else {
-                    sortStringBuffer.append(", ${it.key} ${it.value}")
-                }
+        sortFields.entries.forEach {
+            if (sortStringBuffer.isEmpty()) {
+                sortStringBuffer.append(" ORDER BY ${it.key} ${it.value}")
+            } else {
+                sortStringBuffer.append(", ${it.key} ${it.value}")
             }
         }
         return sortStringBuffer.toString()
