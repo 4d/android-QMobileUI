@@ -36,7 +36,10 @@ class PopoverViewHolder(
     override val fragMng: FragmentManager? = fragmentManager
     override var fieldMapping: FieldMapping? = null
     override val placeHolder = itemView.context.getString(R.string.input_control_popover_baseline)
+    override var currentEditEntityValue: Any? = null
     override val circularProgressBar: CircularProgressIndicator? = null
+    override val fieldValueMap = mutableMapOf<Int, Any?>()
+    override val displayTextMap = mutableMapOf<Int, String>()
 
     private lateinit var bottomSheetDialog: BottomSheetDialog
     private lateinit var adapter: InputControlAdapter
@@ -52,17 +55,10 @@ class PopoverViewHolder(
     ) {
         super.bind(item, currentEntity, isLastParameter, alreadyFilledValue, serverError, onValueChanged)
 
-        fieldMapping = getFieldMapping(itemJsonObject)
+        fieldMapping = retrieveFieldMapping()
 
         container.isExpandedHintEnabled = false
         container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.chevron_right)
-
-        val displayText = getDisplayText(itemJsonObject, bindingAdapterPosition, input.text.toString(), placeHolder)
-        setTextOrIcon(container, input, displayText)
-
-        val fieldValue: Any? = getFieldValue(itemJsonObject, bindingAdapterPosition, input.text.toString(), placeHolder)
-        val typedValue = InputControl.getTypedValue(itemJsonObject, fieldValue)
-        onValueChanged(parameterName, typedValue, null, validate(false))
 
         initBottomSheetDialog()
         initRecyclerView()
@@ -77,6 +73,12 @@ class PopoverViewHolder(
     }
 
     override fun setupValues(items: LinkedList<Any>, field: String?, entityFormat: String?) {
+        items.forEachIndexed { index, entry ->
+            getText(entry, index, isMandatory(), field, entityFormat) { displayText, fieldValue ->
+                displayTextMap[index] = displayText
+                fieldValueMap[index] = InputControl.getTypedValue(itemJsonObject, fieldValue)
+            }
+        }
         adapter = InputControlAdapter(
             context = itemView.context,
             items = items,
@@ -84,10 +86,19 @@ class PopoverViewHolder(
             isMandatory = isMandatory(),
             field = field,
             entityFormat = entityFormat,
-            onItemClick = { displayText, fieldValue ->
-                onItemSelected(displayText, fieldValue)
+            onItemClick = { _, _, position ->
+                onItemSelected(position)
             }
         )
+
+        handleDefaultField(bindingAdapterPosition) { position ->
+            if (position == -1) {
+                input.setText(placeHolder)
+            } else {
+                setTextOrIcon(container, input, displayTextMap[position])
+            }
+        }
+
         recyclerView?.adapter = adapter
     }
 
@@ -109,14 +120,23 @@ class PopoverViewHolder(
         }
     }
 
-    private fun onItemSelected(displayText: String, fieldValue: Any?) {
+    private fun onItemSelected(position: Int) {
         container.error = null
-        setTextOrIcon(container, input, displayText)
-        val typedValue = InputControl.getTypedValue(itemJsonObject, fieldValue)
-        onValueChanged(parameterName, typedValue, null, validate(false))
-        val inputControlFormatHolder = InputControlFormatHolder(displayText, typedValue)
-        formatHolderCallback(inputControlFormatHolder, bindingAdapterPosition)
+        setTextOrIcon(container, input, displayTextMap[position])
+        onValueChanged(parameterName, fieldValueMap[position], null, validate(false))
+        displayTextMap[position]?.let { displayText ->
+            val inputControlFormatHolder = InputControlFormatHolder(displayText, fieldValueMap[position])
+            formatHolderCallback(inputControlFormatHolder, bindingAdapterPosition)
+        }
+
         bottomSheetDialog.dismiss()
+    }
+
+    override fun fill(value: Any) {
+        super.fill(value)
+        if (value.toString().isNotEmpty()) {
+            currentEditEntityValue = value
+        }
     }
 
     override fun formatToDisplay(input: String): String {

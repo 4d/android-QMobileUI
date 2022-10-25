@@ -31,7 +31,7 @@ class InputControlAdapter(
     private val isMandatory: Boolean,
     private val field: String? = null,
     private val entityFormat: String? = null,
-    private val onItemClick: (displayText: String, fieldValue: Any?) -> Unit
+    private val onItemClick: (displayText: String, fieldValue: Any?, position: Int) -> Unit
 ) :
     RecyclerView.Adapter<InputControlAdapter.TextLineViewHolder>() {
 
@@ -43,13 +43,13 @@ class InputControlAdapter(
 
     override fun onBindViewHolder(holder: TextLineViewHolder, position: Int) {
         when (val item = items[position]) {
-            is RoomEntity -> handleRoomEntity(holder, item)
+            is RoomEntity -> handleRoomEntity(holder, item, position)
             is String -> handleString(holder, item, position)
-            is Pair<*, *> -> handlePair(holder, item)
+            is Pair<*, *> -> handlePair(holder, item, position)
         }
     }
 
-    private fun handleRoomEntity(holder: TextLineViewHolder, item: RoomEntity) {
+    private fun handleRoomEntity(holder: TextLineViewHolder, item: RoomEntity, position: Int) {
         field?.let {
             val fieldValue = ReflectionUtils.getInstanceProperty(item, field.fieldAdjustment())
             val displayText: String = InputControl.applyEntityFormat(item, entityFormat).ifEmpty {
@@ -57,7 +57,7 @@ class InputControlAdapter(
             }
             holder.textView.text = displayText
             holder.itemView.setOnSingleClickListener {
-                onItemClick(displayText, fieldValue)
+                onItemClick(displayText, fieldValue, position)
             }
         }
     }
@@ -66,40 +66,35 @@ class InputControlAdapter(
         if (item == NO_VALUE_PLACEHOLDER_KEY) {
             handleNoValuePlaceholder(holder)
         } else {
-            bindImage(holder, item)
+            bind(holder, item)
             holder.itemView.setOnSingleClickListener {
                 if (isMandatory) {
-                    onItemClick(item, position.toString())
+                    onItemClick(item, position.toString(), position)
                 } else {
                     // the null placeholder get the position 0
-                    onItemClick(item, (position - 1).toString())
+                    onItemClick(item, (position - 1).toString(), position)
                 }
             }
         }
     }
 
-    private fun handlePair(holder: TextLineViewHolder, item: Pair<*, *>) {
+    private fun handlePair(holder: TextLineViewHolder, item: Pair<*, *>, position: Int) {
         if (item.first == NO_VALUE_PLACEHOLDER_KEY) {
             handleNoValuePlaceholder(holder)
         } else {
             item.second?.let {
-                bindImage(holder, it.toString())
+                bind(holder, it.toString())
                 holder.itemView.setOnSingleClickListener {
-                    onItemClick(it.toString(), item.first)
+                    onItemClick(it.toString(), item.first, position)
                 }
             }
         }
     }
 
-    private fun bindImage(holder: TextLineViewHolder, item: String) {
+    private fun bind(holder: TextLineViewHolder, item: String) {
         if (fieldMapping?.binding == "imageNamed") {
             fieldMapping.getImageName(item)?.let { imageName ->
-                ImageNamed.setDrawable(
-                    holder.textView,
-                    imageName,
-                    fieldMapping.imageWidth,
-                    fieldMapping.imageHeight
-                )
+                ImageNamed.setDrawable(holder.textView, imageName, fieldMapping.imageWidth, fieldMapping.imageHeight)
             }
         } else {
             holder.textView.text = item
@@ -109,7 +104,7 @@ class InputControlAdapter(
     private fun handleNoValuePlaceholder(holder: TextLineViewHolder) {
         holder.textView.text = NO_VALUE_PLACEHOLDER
         holder.itemView.setOnSingleClickListener {
-            onItemClick(NO_VALUE_PLACEHOLDER, null)
+            onItemClick(NO_VALUE_PLACEHOLDER, null, 0)
         }
     }
 

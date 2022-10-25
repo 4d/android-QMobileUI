@@ -118,7 +118,7 @@ class PushInputControlFragment : BaseFragment(), MenuProvider, InputControlDataH
             isMandatory = isMandatory,
             field = field,
             entityFormat = entityFormat,
-            onItemClick = { displayText, fieldValue ->
+            onItemClick = { displayText, fieldValue, _ ->
                 onItemClick(displayText, fieldValue)
             }
         )

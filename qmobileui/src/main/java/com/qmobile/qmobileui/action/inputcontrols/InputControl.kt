@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.action.inputcontrols
 
 import com.qmobile.qmobileapi.utils.getSafeString
+import com.qmobile.qmobileapi.utils.getStringList
 import com.qmobile.qmobileapi.utils.parseToString
 import com.qmobile.qmobileapi.utils.parseToType
 import com.qmobile.qmobiledatastore.dao.ActionTask
@@ -18,6 +19,7 @@ import com.qmobile.qmobileui.action.sort.Sort
 import com.qmobile.qmobileui.action.sort.Sort.sortMatchingKeywords
 import com.qmobile.qmobileui.utils.ReflectionUtils
 import com.qmobile.qmobileui.utils.ResourcesHelper
+import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.collections.LinkedHashMap
 
@@ -99,8 +101,9 @@ object InputControl {
                     list.add(search)
                 }
             }
-            is List<*> -> {
-                (search as? List<String>)?.filter { it.isNotEmpty() }?.forEach { list.add(it) }
+            is JSONArray -> {
+                (search as? JSONArray).getStringList().filter { it.isNotEmpty() }
+                    .forEach { list.add(it) }
             }
         }
         return list
@@ -119,16 +122,15 @@ object InputControl {
             }
         }
         when (val sort = dataSource["sort"]) {
-            is List<*> -> { // list of fields with default ascending
-                sort.forEach {
-                    if (it is String) {
-                        map[it] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
-                    }
+            is JSONArray -> { // list of fields with default ascending
+                (sort as? JSONArray)?.getStringList()?.forEach {
+                    map[it] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
                 }
             }
-            is Map<*, *> -> { // map of <field, order>
-                for ((key, value) in sort) {
-                    if (key is String && value is String) {
+            is JSONObject -> { // map of <field, order>
+                (sort as? JSONObject)?.let { json ->
+                    json.keys().forEach { key ->
+                        val value = json.getSafeString(key)
                         map[key] = sortMatchingKeywords(value)
                     }
                 }

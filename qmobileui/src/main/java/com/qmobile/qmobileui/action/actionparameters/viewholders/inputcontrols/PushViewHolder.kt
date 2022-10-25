@@ -28,7 +28,10 @@ class PushViewHolder(
     override val fragMng: FragmentManager? = fragmentManager
     override var fieldMapping: FieldMapping? = null
     override val placeHolder = itemView.context.getString(R.string.input_control_push_baseline)
+    override var currentEditEntityValue: Any? = null
     override val circularProgressBar: CircularProgressIndicator? = null
+    override val fieldValueMap = mutableMapOf<Int, Any?>()
+    override val displayTextMap = mutableMapOf<Int, String>()
 
     override fun bind(
         item: JSONObject,
@@ -40,17 +43,12 @@ class PushViewHolder(
     ) {
         super.bind(item, currentEntity, isLastParameter, alreadyFilledValue, serverError, onValueChanged)
 
-        fieldMapping = getFieldMapping(itemJsonObject)
+        fieldMapping = retrieveFieldMapping()
 
         container.isExpandedHintEnabled = false
         container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.chevron_right)
 
-        val displayText = getDisplayText(itemJsonObject, bindingAdapterPosition, input.text.toString(), placeHolder)
-        setTextOrIcon(container, input, displayText)
-
-        val fieldValue: Any? = getFieldValue(itemJsonObject, bindingAdapterPosition, input.text.toString(), placeHolder)
-        val typedValue = InputControl.getTypedValue(itemJsonObject, fieldValue)
-        onValueChanged(parameterName, typedValue, null, validate(false))
+        setupInputControlData(isMandatory())
 
         setOnSingleClickListener {
             goToPushFragment(bindingAdapterPosition)
@@ -59,12 +57,32 @@ class PushViewHolder(
         showServerError()
     }
 
+    override fun fill(value: Any) {
+        super.fill(value)
+        if (value.toString().isNotEmpty()) {
+            currentEditEntityValue = value
+        }
+    }
+
     override fun formatToDisplay(input: String): String {
         return input
     }
 
     override fun setupValues(items: LinkedList<Any>, field: String?, entityFormat: String?) {
-        // Nothing to do
+        items.forEachIndexed { index, entry ->
+            getText(entry, index, isMandatory(), field, entityFormat) { displayText, fieldValue ->
+                displayTextMap[index] = displayText
+                fieldValueMap[index] = InputControl.getTypedValue(itemJsonObject, fieldValue)
+            }
+        }
+
+        handleDefaultField(bindingAdapterPosition) { position ->
+            if (position == -1) {
+                input.setText(placeHolder)
+            } else {
+                setTextOrIcon(container, input, displayTextMap[position])
+            }
+        }
     }
 
     override fun validate(displayError: Boolean): Boolean {

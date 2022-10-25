@@ -39,13 +39,13 @@ class MenuViewHolder(
     override val fragMng: FragmentManager? = fragmentManager
     override var fieldMapping: FieldMapping? = null
     override val placeHolder = itemView.context.getString(R.string.input_control_menu_baseline)
+    override var currentEditEntityValue: Any? = null
     override val circularProgressBar: CircularProgressIndicator? = null
+    override val fieldValueMap = mutableMapOf<Int, Any?>()
+    override val displayTextMap = mutableMapOf<Int, String>()
 
     private val container: TextInputLayout = itemView.findViewById(R.id.container)
     private val autoCompleteTextView: MaterialAutoCompleteTextView = itemView.findViewById(R.id.autoCompleteTv)
-    private val fieldValueMap = mutableMapOf<Int, Any?>()
-    private val displayTextMap = mutableMapOf<Int, String>()
-
     private var arrayAdapter: ArrayAdapter<String>? = null
 
     override fun bind(
@@ -58,7 +58,7 @@ class MenuViewHolder(
     ) {
         super.bind(item, currentEntity, isLastParameter, alreadyFilledValue, serverError, onValueChanged)
 
-        fieldMapping = getFieldMapping(itemJsonObject)
+        fieldMapping = retrieveFieldMapping()
 
         itemJsonObject.getSafeString("label")?.let { parameterLabel ->
             container.hint = if (isMandatory()) {
@@ -70,6 +70,14 @@ class MenuViewHolder(
 
         container.isExpandedHintEnabled = false
 
+        alreadyFilledValue?.let {
+            fill(it)
+        } ?: kotlin.run {
+            getDefaultFieldValue(currentEntity, itemJsonObject) {
+                fill(it)
+            }
+        }
+
         setupInputControlData(isMandatory())
 
         autoCompleteTextView.setOnItemClickListener { _, _, i, _ ->
@@ -80,26 +88,6 @@ class MenuViewHolder(
         }
 
         showServerError()
-    }
-
-    private fun handleDefaultField(foundPositionInMapCallback: (position: Int) -> Unit) {
-        val fieldValue: Any? = getFieldValue(itemJsonObject, bindingAdapterPosition, "", "")
-        if (fieldValue != null) {
-            for ((position, value) in fieldValueMap) {
-                if (value == fieldValue) {
-                    foundPositionInMapCallback(position)
-                    onValueChanged(parameterName, fieldValueMap[position], null, validate(false))
-                    return
-                }
-            }
-        } else {
-            val displayText: String = getDisplayText(itemJsonObject, bindingAdapterPosition, "", "")
-            if (displayText == NO_VALUE_PLACEHOLDER) {
-                foundPositionInMapCallback(0)
-            }
-        }
-        // Done only if no fieldValue sent or not found in map
-        onValueChanged(parameterName, null, null, validate(false))
     }
 
     private fun onItemSelected(position: Int) {
@@ -118,10 +106,12 @@ class MenuViewHolder(
             }
         }
 
-        autoCompleteTextView.setText(placeHolder)
-
-        handleDefaultField { position ->
-            setTextOrIcon(container, autoCompleteTextView, displayTextMap[position])
+        handleDefaultField(bindingAdapterPosition) { position ->
+            if (position == -1) {
+                autoCompleteTextView.setText(placeHolder)
+            } else {
+                setTextOrIcon(container, autoCompleteTextView, displayTextMap[position])
+            }
         }
 
         initAdapter()
@@ -181,5 +171,9 @@ class MenuViewHolder(
         container.error = text
     }
 
-    override fun fill(value: Any) {}
+    override fun fill(value: Any) {
+        if (value.toString().isNotEmpty()) {
+            currentEditEntityValue = value
+        }
+    }
 }

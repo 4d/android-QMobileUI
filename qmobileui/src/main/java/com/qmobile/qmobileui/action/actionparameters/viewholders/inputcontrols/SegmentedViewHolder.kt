@@ -100,7 +100,7 @@ class SegmentedViewHolder(
                 toggleButton.addView(childButton, index)
             }
         }
-        handleDefaultField { position ->
+        handleDefaultField(bindingAdapterPosition) { position ->
             val child = toggleButton.getChildAt(position)
             child.performClick()
             horizontalScrollView.post { horizontalScrollView.smoothScrollTo(child.left - scrollMargin, 0) }

@@ -38,13 +38,19 @@ interface BaseInputControlViewHolder : InputControlDataHandler {
     }
 
     val fragMng: FragmentManager?
-
     val placeHolder: String
-
     val circularProgressBar: CircularProgressIndicator?
+    var currentEditEntityValue: Any?
+    val fieldValueMap: Map<Int, Any?>
+    val displayTextMap: Map<Int, String>
+    var onValueChanged: (String, Any?, String?, Boolean) -> Unit
+    var parameterName: String
+    var itemJsonObject: JSONObject
 
     // Triggered everytime we get data from observable
     fun setupValues(items: LinkedList<Any>, field: String? = null, entityFormat: String? = null)
+
+    fun validate(displayError: Boolean): Boolean
 
     override fun FieldMapping.prepareStaticData(isMandatory: Boolean) {
         handleMandatory(this.getChoiceList(), isMandatory) { items ->
@@ -71,7 +77,7 @@ interface BaseInputControlViewHolder : InputControlDataHandler {
         }
     }
 
-    fun getFieldMapping(itemJsonObject: JSONObject): FieldMapping? {
+    fun retrieveFieldMapping(): FieldMapping? {
         val inputControlName = itemJsonObject.getSafeString("source")?.removePrefix("/")
         return BaseApp.runtimeDataHolder.inputControls.find { it.name == inputControlName }
     }
@@ -142,23 +148,43 @@ interface BaseInputControlViewHolder : InputControlDataHandler {
         }
     }
 
-    fun getDisplayText(itemJsonObject: JSONObject, position: Int, currentText: String, placeHolder: String): String =
+    fun isInputValid(text: String): Boolean =
+        text.trim().isEmpty() || text == placeHolder || text == NO_VALUE_PLACEHOLDER
+
+    fun handleDefaultField(bindingAdapterPosition: Int, foundPositionInMapCallback: (position: Int) -> Unit) {
+        val fieldValue: Any? = getFieldValue(bindingAdapterPosition, "", "")
+        val targetValue = fieldValue ?: currentEditEntityValue
+        if (targetValue != null) {
+            for ((position, value) in fieldValueMap) {
+                if (value == targetValue) {
+                    foundPositionInMapCallback(position)
+                    onValueChanged(parameterName, fieldValueMap[position], null, validate(false))
+                    return
+                }
+            }
+        }
+
+        if (this !is CustomViewViewHolder) {
+            val displayText: String = getDisplayText(bindingAdapterPosition, "", "")
+            if (displayText == NO_VALUE_PLACEHOLDER) {
+                foundPositionInMapCallback(0)
+            } else {
+                foundPositionInMapCallback(-1)
+            }
+        }
+        // Done only if no fieldValue sent or not found in map
+        onValueChanged(parameterName, null, null, validate(false))
+    }
+
+    private fun getDisplayText(position: Int, currentText: String, placeHolder: String): String =
         itemJsonObject.getSafeString(ActionParametersFragment.INPUT_CONTROL_DISPLAY_TEXT_INJECT_KEY + "_$position")
             ?: currentText.ifEmpty { placeHolder }
 
-    fun getFieldValue(
-        itemJsonObject: JSONObject,
-        position: Int,
-        currentText: String,
-        placeHolder: String
-    ): Any? =
+    private fun getFieldValue(position: Int, currentText: String, placeHolder: String): Any? =
         itemJsonObject.getSafeAny(ActionParametersFragment.INPUT_CONTROL_FIELD_VALUE_INJECT_KEY + "_$position")
             ?: if (currentText != placeHolder) {
                 currentText
             } else {
                 null
             }
-
-    fun isInputValid(text: String): Boolean =
-        text.trim().isEmpty() || text == placeHolder || text == NO_VALUE_PLACEHOLDER
 }

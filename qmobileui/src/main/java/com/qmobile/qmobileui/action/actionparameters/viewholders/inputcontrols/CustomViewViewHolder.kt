@@ -28,12 +28,13 @@ abstract class CustomViewViewHolder(
     override val fragMng: FragmentManager? = fragmentManager
     override var fieldMapping: FieldMapping? = null
     override val placeHolder: String = ""
+    override var currentEditEntityValue: Any? = null
     override val circularProgressBar: CircularProgressIndicator = itemView.findViewById(R.id.circular_progress)
+    override val fieldValueMap = mutableMapOf<Int, Any?>()
+    override val displayTextMap = mutableMapOf<Int, String>()
 
     private val label: TextView = itemView.findViewById(R.id.label)
     internal val error: TextView = itemView.findViewById(R.id.error)
-    internal val fieldValueMap = mutableMapOf<Int, Any?>()
-    internal val displayTextMap = mutableMapOf<Int, String>()
 
     companion object {
         internal const val imageNamedIconSize = 18
@@ -49,7 +50,7 @@ abstract class CustomViewViewHolder(
     ) {
         super.bind(item, currentEntity, isLastParameter, alreadyFilledValue, serverError, onValueChanged)
 
-        fieldMapping = getFieldMapping(itemJsonObject)
+        fieldMapping = retrieveFieldMapping()
 
         itemJsonObject.getSafeString("label")?.let { parameterLabel ->
             label.text = if (isMandatory()) {
@@ -59,22 +60,15 @@ abstract class CustomViewViewHolder(
             }
         }
 
-        setupInputControlData(isMandatory())
-    }
-
-    fun handleDefaultField(foundPositionInMapCallback: (position: Int) -> Unit) {
-        val fieldValue: Any? = getFieldValue(itemJsonObject, bindingAdapterPosition, "", "")
-        if (fieldValue != null) {
-            for ((position, value) in fieldValueMap) {
-                if (value == fieldValue) {
-                    foundPositionInMapCallback(position)
-                    onValueChanged(parameterName, fieldValueMap[position], null, validate(false))
-                    return
-                }
+        alreadyFilledValue?.let {
+            fill(it)
+        } ?: kotlin.run {
+            getDefaultFieldValue(currentEntity, itemJsonObject) {
+                fill(it)
             }
         }
-        // Done only if no fieldValue sent or not found in map
-        onValueChanged(parameterName, null, null, validate(false))
+
+        setupInputControlData(isMandatory())
     }
 
     fun onItemSelected(position: Int) {
@@ -102,7 +96,11 @@ abstract class CustomViewViewHolder(
         error.visibility = View.VISIBLE
     }
 
-    override fun fill(value: Any) {}
+    override fun fill(value: Any) {
+        if (value.toString().isNotEmpty()) {
+            currentEditEntityValue = value
+        }
+    }
 
     abstract fun setVisibility()
 }

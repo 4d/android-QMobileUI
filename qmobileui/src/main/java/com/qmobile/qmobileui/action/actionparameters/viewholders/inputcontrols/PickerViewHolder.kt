@@ -79,7 +79,7 @@ class PickerViewHolder(
             }
         }
 
-        handleDefaultField { position ->
+        handleDefaultField(bindingAdapterPosition) { position ->
             chipGroup.getChildAt(position).performClick()
         }
 

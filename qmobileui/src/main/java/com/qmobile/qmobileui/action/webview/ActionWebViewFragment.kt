@@ -11,8 +11,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -22,7 +20,6 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.databinding.FragmentActionWebviewBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
-import com.qmobile.qmobileui.webview.WebViewHelper
 
 const val HEADER_CONTEXT_KEY = "X-QMobile-Context"
 
@@ -88,7 +85,7 @@ class ActionWebViewFragment : BaseFragment() {
                 }
 
                 BaseApp.sharedPreferencesHolder.injectCookies(url)
-                val extraHeaders =  mapOf(HEADER_CONTEXT_KEY to base64EncodedContext)
+                val extraHeaders = mapOf(HEADER_CONTEXT_KEY to base64EncodedContext)
                 binding.webView.loadUrl(url, extraHeaders)
             }
 
