@@ -169,6 +169,7 @@ object ActionParameterViewHolderFactory {
             ActionParameter.values().size + INPUT_CONTROL_PUSH_VH -> PushViewHolder(
                 LayoutInflater.from(context)
                     .inflate(R.layout.item_parameter_text, parent, false),
+                fragmentManager,
                 goToPushFragment
             )
             ActionParameter.values().size + INPUT_CONTROL_SEGMENTED_VH -> SegmentedViewHolder(

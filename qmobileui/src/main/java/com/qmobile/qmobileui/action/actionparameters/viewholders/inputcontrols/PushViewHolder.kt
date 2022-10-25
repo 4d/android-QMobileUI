@@ -20,11 +20,12 @@ import java.util.LinkedList
 
 class PushViewHolder(
     itemView: View,
+    fragmentManager: FragmentManager?,
     private val goToPushFragment: (position: Int) -> Unit,
     format: String = ""
 ) : BaseInputLessViewHolder(itemView, format), BaseInputControlViewHolder {
 
-    override val fragMng: FragmentManager? = null
+    override val fragMng: FragmentManager? = fragmentManager
     override var fieldMapping: FieldMapping? = null
     override val placeHolder = itemView.context.getString(R.string.input_control_push_baseline)
     override val circularProgressBar: CircularProgressIndicator? = null
