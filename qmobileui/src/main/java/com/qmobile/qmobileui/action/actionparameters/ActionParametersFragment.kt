@@ -131,7 +131,6 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     private val onScrollToValidationListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                maxSeen = max(maxSeen, lastVisibleItemPosition)
                 if (lastVisibleItemPosition == adapter.itemCount - 1) {
                     allSeen = true
                 }
@@ -433,6 +432,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
         // second: check if there are not yet visible items
         if (!allSeen && lastVisibleItemPosition < adapter.itemCount - 1) { // Second condition is if we never scrolled
+            maxSeen = max(maxSeen, lastVisibleItemPosition)
             if (maxSeen < adapter.itemCount - 1) {
                 SnackbarHelper.show(activity, activity?.getString(R.string.scroll_to_not_seen))
                 scrollTo(position = maxSeen + 2, shouldHideKeyboard = true, triggerError = true)
