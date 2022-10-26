@@ -90,11 +90,11 @@ class FormQueryBuilder(
     private fun getSortQuery(fields: LinkedHashMap<String, String>? = null): String {
         val sortFields = fields ?: customSortFields ?: Sort.getSortFieldsFromSharedPrefs(tableName) ?: return ""
         val sortStringBuffer = StringBuffer()
-        sortFields.entries.forEach {
+        sortFields.entries.forEach { entry ->
             if (sortStringBuffer.isEmpty()) {
-                sortStringBuffer.append(" ORDER BY ${it.key} ${it.value}")
+                sortStringBuffer.append(" ORDER BY ${entry.key} ${entry.value}")
             } else {
-                sortStringBuffer.append(", ${it.key} ${it.value}")
+                sortStringBuffer.append(", ${entry.key} ${entry.value}")
             }
         }
         return sortStringBuffer.toString()
