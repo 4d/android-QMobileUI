@@ -5,7 +5,6 @@
  */
 
 package com.qmobile.qmobileui.utils
-
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.qmobile.qmobileapi.utils.getSafeAny
@@ -59,7 +58,9 @@ object ReflectionUtils {
             }
             tmpInstance
         } else {
-            JSONObject(noJsonPropertyMapper.parseToString(instance.__entity)).getSafeAny(propertyName)
+            JSONObject(noJsonPropertyMapper.parseToString(instance.__entity)).getSafeAny(
+                propertyName
+            )
         }
     }
 }

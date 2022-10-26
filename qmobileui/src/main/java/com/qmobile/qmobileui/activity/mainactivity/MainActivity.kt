@@ -58,7 +58,8 @@ import com.qmobile.qmobileui.action.barcode.BarcodeScannerFragment
 import com.qmobile.qmobileui.action.inputcontrols.InputControl.Format.cleanActionContent
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
-import com.qmobile.qmobileui.action.utils.ActionHelper.paramMenuActionDrawable
+import com.qmobile.qmobileui.action.utils.ActionUIHelper
+import com.qmobile.qmobileui.action.utils.ActionUIHelper.paramMenuActionDrawable
 import com.qmobile.qmobileui.action.webview.ActionWebViewFragment
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
@@ -364,7 +365,7 @@ class MainActivity :
         val withIcons = actions.firstOrNull { it.getIconDrawablePath() != null } != null
         var order = 0
         actions.forEach { action ->
-            val drawable = if (withIcons) ActionHelper.getActionIconDrawable(this, action) else null
+            val drawable = if (withIcons) ActionUIHelper.getActionIconDrawable(this, action) else null
             drawable?.paramMenuActionDrawable(this)
 
             // not giving a simple string because we want a divider before pending tasks
