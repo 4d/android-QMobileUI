@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.DiffUtil
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobileui.utils.ReflectionUtils
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
 class EntityListAdapter internal constructor(
@@ -61,5 +62,26 @@ class EntityListAdapter internal constructor(
 
     fun getSelectedItem(position: Int): RoomEntity? {
         return getItem(position)
+    }
+
+    fun getSectionCallback(sectionField: String): RecyclerSectionItemDecoration.SectionCallback {
+        return object : RecyclerSectionItemDecoration.SectionCallback {
+            override fun isSection(position: Int): Boolean {
+                if (position > 0) {
+                    val section1 =
+                        getItem(position - 1)?.let { ReflectionUtils.getInstanceProperty(it, sectionField) }
+                    val section2 =
+                        getItem(position)?.let { ReflectionUtils.getInstanceProperty(it, sectionField) }
+                    return section1 != section2
+                }
+                return (position == 0 && itemCount > 0)
+            }
+
+            override fun getSectionHeader(position: Int): CharSequence {
+                val section1 =
+                    getItem(position)?.let { ReflectionUtils.getInstanceProperty(it, sectionField) } ?: ""
+                return section1.toString()
+            }
+        }
     }
 }

@@ -39,6 +39,7 @@ import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.sort.Sort
 import com.qmobile.qmobileui.action.utils.ActionHelper
+import com.qmobile.qmobileui.action.utils.ActionUIHelper
 import com.qmobile.qmobileui.databinding.FragmentListBinding
 import com.qmobile.qmobileui.list.swipe.ItemActionButton
 import com.qmobile.qmobileui.list.swipe.SwipeToActionCallback
@@ -216,6 +217,18 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         }
 
         binding.fragmentListRecyclerView.adapter = adapter
+
+        // Add section itemDecoration if defined for this table
+        val sectionField = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.name
+        if (!sectionField.isNullOrEmpty()) {
+            val sectionItemDecoration = RecyclerSectionItemDecoration(
+                resources.getDimensionPixelSize(R.dimen.recycler_section_header_height),
+                true,
+                adapter.getSectionCallback(sectionField)
+            )
+            binding.fragmentListRecyclerView.addItemDecoration(sectionItemDecoration)
+        }
+
         binding.fragmentListRecyclerView.edgeEffectFactory = BounceEdgeEffectFactory()
     }
 
@@ -238,7 +251,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         }
         if (hasCurrentRecordActions) {
             ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
-            currentRecordActionsListAdapter = ActionHelper.getActionArrayAdapter(requireContext(), currentRecordActions)
+            currentRecordActionsListAdapter =
+                ActionUIHelper.getActionArrayAdapter(requireContext(), currentRecordActions)
         }
     }
 

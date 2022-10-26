@@ -7,10 +7,13 @@
 package com.qmobile.qmobileui
 
 import androidx.sqlite.db.SimpleSQLiteQuery
+import com.qmobile.qmobileapi.model.entity.TableInfo
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.utils.FieldMapping
+import com.qmobile.qmobiledatasync.utils.GenericTableHelper
 import com.qmobile.qmobiledatasync.utils.RuntimeDataHolder
+import com.qmobile.qmobiledatasync.utils.TableInfoHelper.buildTableInfo
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import io.mockk.mockkObject
 import org.json.JSONObject
@@ -34,6 +37,8 @@ class SqlBuilderTest {
 
     @Test
     fun testSqlGetAllQuery() {
+        val mockGenericTableHelper = Mockito.mock(GenericTableHelper::class.java)
+        BaseApp.genericTableHelper = mockGenericTableHelper
         val formQueryBuilder =
             FormQueryBuilder(tableName = "Service", searchFields = searchFieldsService, customSortFields = linkedMapOf())
         val actualQueryResult = formQueryBuilder.getQuery().sql
@@ -45,7 +50,8 @@ class SqlBuilderTest {
     fun testSqlSortQuery() {
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
         mockRuntimeDataHolder.customFormatters = mapOf()
-        BaseApp.runtimeDataHolder = mockRuntimeDataHolder
+        val mockGenericTableHelper = Mockito.mock(GenericTableHelper::class.java)
+        BaseApp.genericTableHelper = mockGenericTableHelper
 
         val formQueryBuilder =
             FormQueryBuilder(tableName = "Service", searchFields = searchFieldsService, customSortFields = linkedMapOf())
@@ -72,9 +78,8 @@ class SqlBuilderTest {
 
     @Test
     fun testSqlSortActionQueryWithOneField() {
-        val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
-        mockRuntimeDataHolder.customFormatters = mapOf()
-        BaseApp.runtimeDataHolder = mockRuntimeDataHolder
+        val mockGenericTableHelper = Mockito.mock(GenericTableHelper::class.java)
+        BaseApp.genericTableHelper = mockGenericTableHelper
         val formQueryBuilder =
             FormQueryBuilder(tableName = "Service", searchFields = searchFieldsService, customSortFields = linkedMapOf("name COLLATE NOCASE" to "DESC"))
         val actualQueryResult = formQueryBuilder.getQuery("abc").sql
@@ -87,6 +92,10 @@ class SqlBuilderTest {
     fun testSqlSortQueryWithRelation() {
         val searchFields = listOf("LastName", "relation4.field_x")
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
+
+        val mockGenericTableHelper = Mockito.mock(GenericTableHelper::class.java)
+        BaseApp.genericTableHelper = mockGenericTableHelper
+
         mockRuntimeDataHolder.customFormatters = mapOf()
         mockRuntimeDataHolder.relations = listOf(
             Relation("Table_3", "RELATED_TABLE", "relation4", "inverse", Relation.Type.MANY_TO_ONE)
@@ -104,6 +113,9 @@ class SqlBuilderTest {
     fun testSqlSortQueryWithCustomFormatNotFound() {
         val searchFields = listOf("LastName", "field_x")
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
+        val mockGenericTableHelper = Mockito.mock(GenericTableHelper::class.java)
+        BaseApp.genericTableHelper = mockGenericTableHelper
+
         val customFormattersJsonObj = JSONObject(customFormattersJson)
         mockRuntimeDataHolder.customFormatters =
             FieldMapping.buildCustomFormatterBinding(customFormattersJsonObj)
@@ -120,6 +132,9 @@ class SqlBuilderTest {
     fun testSqlSortQueryWithCustomFormatFound() {
         val searchFields = listOf("LastName", "field_x")
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
+        val mockGenericTableHelper = Mockito.mock(GenericTableHelper::class.java)
+        BaseApp.genericTableHelper = mockGenericTableHelper
+
         val customFormattersJsonObj = JSONObject(customFormattersJson)
         mockRuntimeDataHolder.customFormatters =
             FieldMapping.buildCustomFormatterBinding(customFormattersJsonObj)
@@ -136,6 +151,8 @@ class SqlBuilderTest {
     fun testSqlSortQueryWithRelationWithCustomFormatFound() {
         val searchFields = listOf("LastName", "relationField.field_1")
         val mockRuntimeDataHolder = Mockito.mock(RuntimeDataHolder::class.java)
+        val mockGenericTableHelper = Mockito.mock(GenericTableHelper::class.java)
+        BaseApp.genericTableHelper = mockGenericTableHelper
         val customFormattersJsonObj = JSONObject(customFormattersJson)
         mockRuntimeDataHolder.customFormatters =
             FieldMapping.buildCustomFormatterBinding(customFormattersJsonObj)

@@ -16,7 +16,7 @@ import android.view.MotionEvent
 import androidx.core.content.ContextCompat
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.model.Action
-import com.qmobile.qmobileui.action.utils.ActionHelper
+import com.qmobile.qmobileui.action.utils.ActionUIHelper
 import com.qmobile.qmobileui.binding.ImageHelper.DRAWABLE_32
 import com.qmobile.qmobileui.binding.ImageHelper.getDrawableFromString
 import com.qmobile.qmobileui.binding.getColorFromAttr
@@ -45,7 +45,7 @@ class ItemActionButton(
     }
     val iconIntrinsicWidth = icon?.intrinsicWidth?.toFloat() ?: 0f
     val iconIntrinsicHeight = icon?.intrinsicHeight?.toFloat() ?: 0f
-    val backgroundColor = ActionHelper.getActionButtonColor(context, horizontalIndex)
+    val backgroundColor = ActionUIHelper.getActionButtonColor(context, horizontalIndex)
     val textColor = context.getColorFromAttr(R.attr.colorOnPrimary)
 
     val textPaint: Paint = Paint().apply {

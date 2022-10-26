@@ -9,7 +9,9 @@ package com.qmobile.qmobileui.utils
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.RelationHelper
+import com.qmobile.qmobiledatasync.relation.RelationQueryBuilderSection
 import com.qmobile.qmobileui.action.sort.Sort
+import com.qmobile.qmobileui.action.utils.SectionHelper
 import timber.log.Timber
 
 class FormQueryBuilder(
@@ -21,10 +23,29 @@ class FormQueryBuilder(
     private val baseQuery = "SELECT * FROM $tableName"
 
     fun getQuery(pattern: String = ""): SimpleSQLiteQuery {
-        val sortQuery = getSortQuery()
+        var query = baseQuery
+        val sortFields = customSortFields ?: Sort.getSortFieldsFromSharedPrefs(tableName)
+        val sortFieldsWithSection = SectionHelper.addSectionSortIfNeeded(tableName, sortFields)
+        val sectionPath = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.path
+
+        if (!sectionPath.isNullOrEmpty()) {
+            if (sectionPath.contains(".")) {
+                val sectionRelation = RelationHelper.getRelation(
+                    tableName,
+                    sectionPath.split(".").first()
+                )
+                sectionRelation.let {
+                    query += RelationQueryBuilderSection.createQuery(
+                        it
+                    ).sql
+                }
+            }
+        }
+
+        val sortQuery = getSortQuery(sortFieldsWithSection)
 
         if (pattern.isEmpty()) {
-            return SimpleSQLiteQuery(baseQuery + sortQuery)
+            return SimpleSQLiteQuery(query + sortQuery)
         }
 
         val stringBuilder = StringBuilder("SELECT * FROM $tableName AS T1 WHERE ")
@@ -66,8 +87,8 @@ class FormQueryBuilder(
         }
     }
 
-    private fun getSortQuery(): String {
-        val sortFields = customSortFields ?: Sort.getSortFieldsFromSharedPrefs(tableName) ?: return ""
+    private fun getSortQuery(fields: LinkedHashMap<String, String>? = null): String {
+        val sortFields = fields ?: customSortFields ?: Sort.getSortFieldsFromSharedPrefs(tableName) ?: return ""
         val sortStringBuffer = StringBuffer()
         sortFields.entries.forEach {
             if (sortStringBuffer.isEmpty()) {
