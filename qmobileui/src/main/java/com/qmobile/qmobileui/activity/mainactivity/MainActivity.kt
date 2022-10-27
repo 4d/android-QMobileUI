@@ -138,6 +138,9 @@ class MainActivity :
             type(navigationBars = true) {
                 padding(animated = true)
             }
+            type(ime = true) {
+                padding()
+            }
         }
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {

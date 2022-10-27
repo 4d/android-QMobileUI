@@ -16,6 +16,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.qmobile.qmobileapi.auth.AuthenticationState
+import com.qmobile.qmobileapi.auth.isPortValid
 import com.qmobile.qmobileapi.auth.isUrlValid
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiClient
@@ -111,7 +112,7 @@ abstract class BaseActivity : AppCompatActivity() {
                 setOnShowListener {
                     getButton(AlertDialog.BUTTON_POSITIVE).setOnSingleClickListener {
                         val newRemoteUrl = remoteUrlEditLayout.editText?.text.toString()
-                        if (newRemoteUrl.isUrlValid()) {
+                        if (newRemoteUrl.isRemoteUrlValid()) {
                             remoteUrlChanger.onValidRemoteUrlChange(newRemoteUrl)
                             queryNetwork(remoteUrlChanger)
                             dismiss()
@@ -126,6 +127,16 @@ abstract class BaseActivity : AppCompatActivity() {
                     window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
                 }
             }.show()
+    }
+
+    private fun String.isRemoteUrlValid(): Boolean {
+        val validUrl = this.isUrlValid()
+        val port = this.substringAfterLast(":")
+        return if (port.toIntOrNull() != null) {
+            validUrl && port.isPortValid()
+        } else {
+            validUrl
+        }
     }
 
     fun queryNetwork(networkChecker: NetworkChecker, toastError: Boolean = false) {
