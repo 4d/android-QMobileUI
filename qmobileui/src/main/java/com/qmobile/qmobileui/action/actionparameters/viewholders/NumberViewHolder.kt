@@ -44,8 +44,13 @@ class NumberViewHolder(itemView: View, format: String) : BaseTextViewHolder(item
     override fun onTextChanged(s: CharSequence) {
         when {
             apu.isSpellOut() -> {
-                numberValueForSpellOut = s.toString().toIntOrNull()?.toString().takeIf { it != "null" } ?: ""
-                onValueChanged(parameterName, s.toString(), null, validate(false))
+                val intValue = s.toString().toIntOrNull()
+                if (intValue != null) {
+                    numberValueForSpellOut = intValue.toString()
+                    onValueChanged(parameterName, numberValueForSpellOut, null, validate(false))
+                } else {
+                    numberValueForSpellOut = ""
+                }
             }
             else -> onValueChanged(parameterName, getValueToSend(), null, validate(false))
         }
