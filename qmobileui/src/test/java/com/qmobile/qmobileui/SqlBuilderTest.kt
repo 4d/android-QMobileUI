@@ -7,13 +7,11 @@
 package com.qmobile.qmobileui
 
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.qmobile.qmobileapi.model.entity.TableInfo
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.utils.FieldMapping
 import com.qmobile.qmobiledatasync.utils.GenericTableHelper
 import com.qmobile.qmobiledatasync.utils.RuntimeDataHolder
-import com.qmobile.qmobiledatasync.utils.TableInfoHelper.buildTableInfo
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import io.mockk.mockkObject
 import org.json.JSONObject

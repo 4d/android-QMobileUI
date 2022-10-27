@@ -6,6 +6,8 @@
 
 package com.qmobile.qmobileui.action.inputcontrols
 
+import com.qmobile.qmobileapi.utils.getJSONObjectList
+import com.qmobile.qmobileapi.utils.getSafeBoolean
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileapi.utils.getStringList
 import com.qmobile.qmobileapi.utils.parseToString
@@ -121,22 +123,63 @@ object InputControl {
                 }
             }
         }
+        map.getSort(dataSource)
+        return map
+    }
+
+    private fun LinkedHashMap<String, String>.getSort(dataSource: Map<String, Any>) {
         when (val sort = dataSource["sort"]) {
-            is JSONArray -> { // list of fields with default ascending
-                (sort as? JSONArray)?.getStringList()?.forEach {
-                    map[it.fieldAdjustment()] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
+            is String -> {
+                val fields = sort.trim().split(",")
+                fields.forEach {
+                    this[it.fieldAdjustment()] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
                 }
             }
+            is JSONArray -> { // list of fields with default ascending
+                this.checkJSONArray(sort)
+            }
             is JSONObject -> { // map of <field, order>
-                (sort as? JSONObject)?.let { json ->
-                    json.keys().forEach { key ->
-                        val value = json.getSafeString(key)
-                        map[key.fieldAdjustment()] = sortMatchingKeywords(value)
+                this.checkJSONObject(sort)
+            }
+        }
+    }
+
+    private fun LinkedHashMap<String, String>.checkJSONArray(array: JSONArray) {
+        if (array.length() > 0) {
+            when (array.get(0)) {
+                is JSONObject -> {
+                    array.getJSONObjectList().forEach { json ->
+                        this.checkJSONObject(json)
+                    }
+                }
+                is String -> {
+                    array.getStringList().forEach {
+                        this[it.fieldAdjustment()] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
                     }
                 }
             }
         }
-        return map
+    }
+
+    private fun LinkedHashMap<String, String>.checkJSONObject(json: JSONObject) {
+        json.getSafeString("field")?.let { field ->
+            this[field.fieldAdjustment()] = getOrder(json)
+        }
+    }
+
+    private fun getOrder(jsonObject: JSONObject): String {
+        var order = jsonObject.getSafeString("order") ?: sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
+        jsonObject.getSafeBoolean("ascending")?.let { boolValue ->
+            if (boolValue) {
+                order = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
+            }
+        }
+        jsonObject.getSafeBoolean("descending")?.let { boolValue ->
+            if (boolValue) {
+                order = sortMatchingKeywords(Sort.Order.DESCENDING.verbose)
+            }
+        }
+        return order
     }
 
     fun applyEntityFormat(item: RoomEntity, entityFormat: String? = null): String {
