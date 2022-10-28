@@ -113,9 +113,6 @@ object InputControl {
 
     fun getSortFields(dataSource: Map<String, Any>): LinkedHashMap<String, String> {
         val map = LinkedHashMap<String, String>()
-        (dataSource["field"] as? String)?.let { // default value
-            map[it.fieldAdjustment()] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
-        }
         when (val order = dataSource["order"]) {
             is String -> { // ascending / descending to apply to "field"
                 (dataSource["field"] as? String)?.let {
@@ -124,6 +121,9 @@ object InputControl {
             }
         }
         map.getSort(dataSource)
+        (dataSource["field"] as? String)?.let { // default value
+            map[it.fieldAdjustment()] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
+        }
         return map
     }
 
@@ -168,7 +168,10 @@ object InputControl {
     }
 
     private fun getOrder(jsonObject: JSONObject): String {
-        var order = jsonObject.getSafeString("order") ?: sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
+        var order: String = jsonObject.getSafeString("order")?.let { strOrder ->
+            sortMatchingKeywords(strOrder)
+        } ?: sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
+
         jsonObject.getSafeBoolean("ascending")?.let { boolValue ->
             if (boolValue) {
                 order = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
