@@ -35,8 +35,8 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
     // views
     internal var viewPager: ViewPager2? = null
     lateinit var adapter: ViewPagerAdapter
-
     //    lateinit var adapter: ViewPagerAdapter2
+
     private lateinit var actionPrevious: MenuItem
     private lateinit var actionNext: MenuItem
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
