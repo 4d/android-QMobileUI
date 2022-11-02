@@ -32,6 +32,7 @@ class PickerViewHolder(
 
     private val chipGroup: ChipGroup = itemView.findViewById(R.id.scroll_group)
     private var isAChipChecked = false
+    private var reselectionInProgress = false
 
     companion object {
         private const val chipPadding = 18
@@ -89,11 +90,17 @@ class PickerViewHolder(
     private fun onChipChecked(position: Int) {
         val chip = chipGroup.getChildAt(position) as? Chip
         if (chip?.isChecked == true) {
+            if (isAChipChecked) {
+                reselectionInProgress = true
+            }
             isAChipChecked = true
             onItemSelected(position)
         } else {
-            isAChipChecked = false
-            onItemDeselected()
+            if (!reselectionInProgress) {
+                isAChipChecked = false
+                onItemDeselected()
+            }
+            reselectionInProgress = false
         }
     }
 

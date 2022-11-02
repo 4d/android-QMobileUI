@@ -35,8 +35,8 @@ class SegmentedViewHolder(
 
     private val horizontalScrollView: HorizontalScrollView = itemView.findViewById(R.id.horizontalScrollView)
     private val toggleButton: MaterialButtonToggleGroup = itemView.findViewById(R.id.toggleButton)
-
     private var isAButtonChecked = false
+    private var reselectionInProgress = false
 
     companion object {
         private const val segmentedButtonIconPadding = 35
@@ -65,12 +65,18 @@ class SegmentedViewHolder(
         toggleButton.children.forEachIndexed { index, view ->
             if (view.id == checkedId) {
                 if (isChecked) {
+                    if (isAButtonChecked) {
+                        reselectionInProgress = true
+                    }
                     isAButtonChecked = true
                     onItemSelected(index)
                     return@forEachIndexed
                 } else {
-                    isAButtonChecked = false
-                    onItemDeselected()
+                    if (!reselectionInProgress) {
+                        isAButtonChecked = false
+                        onItemDeselected()
+                    }
+                    reselectionInProgress = false
                 }
             }
         }
