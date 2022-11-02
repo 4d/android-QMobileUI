@@ -49,8 +49,6 @@ class RecyclerSectionItemDecoration(
         for (i in 0 until parent.childCount) {
             val child = parent.getChildAt(i)
             val position = parent.getChildAdapterPosition(child)
-            // Handle weired exception while typing in search field
-            // "java.lang.IndexOutOfBoundsException: Index: -1, Size: 0"
             if (position > -1) {
                 val title = sectionCallback.getSectionHeader(position)
                 header.text = title
