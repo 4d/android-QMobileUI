@@ -33,7 +33,6 @@ object SearchQueryBuilder {
                 } else { // basic relation
                     RelationHelper.getRelations(tableName).find { rel -> rel.name == pathWithoutFieldName }
                 }
-
                 relation?.let { rel ->
                     appendRelationQuery(tableName, stringBuilder, fieldName, pattern, rel, sortQuery)
                 }
@@ -44,8 +43,10 @@ object SearchQueryBuilder {
         }
 
         sortQuery?.let { query ->
-            stringBuilder.removeSuffix(" OR ")
-            stringBuilder.append(query)
+            if (!stringBuilder.contains("ORDER BY")) {
+                stringBuilder.removeSuffix(" OR ")
+                stringBuilder.append(query)
+            }
         }
     }
 

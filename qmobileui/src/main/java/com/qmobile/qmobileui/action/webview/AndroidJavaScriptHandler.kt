@@ -18,8 +18,6 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import timber.log.Timber
 
-const val TAG = "WebView info"
-
 class AndroidJavaScriptHandler(var activity: FragmentActivity) {
     @JavascriptInterface
     fun onDismiss() {
