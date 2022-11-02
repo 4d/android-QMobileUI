@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/colorSurface"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/section_background_color"
+        android:backgroundTint="@color/divider_color"
+        android:backgroundTintMode="src_over" />
 
     <TextView
         android:id="@+id/list_item_section_text"
         android:layout_width="match_parent"
         android:layout_height="@dimen/recycler_section_header_height"
+        android:background="@color/section_background_color"
         android:gravity="center_vertical"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:textAppearance="?attr/textAppearanceTitleMedium"
-        android:textColor="?attr/colorOnSurface"
-        android:textStyle="bold" />
+        android:paddingHorizontal="28dp"
+        android:textAppearance="?attr/textAppearanceTitleSmall"
+        android:textColor="?attr/colorOnSurfaceVariant" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/divider_color" />
+        android:layout_marginBottom="4dp"
+        android:background="@color/section_background_color"
+        android:backgroundTint="@color/divider_color"
+        android:backgroundTintMode="src_over" />
+
 </LinearLayout>
-
-
-
-
-
-

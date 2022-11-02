@@ -227,6 +227,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
                 adapter.getSectionCallback(sectionField)
             )
             binding.fragmentListRecyclerView.addItemDecoration(sectionItemDecoration)
+            binding.fragmentListRecyclerView.isVerticalScrollBarEnabled = false
         }
 
         binding.fragmentListRecyclerView.edgeEffectFactory = BounceEdgeEffectFactory()

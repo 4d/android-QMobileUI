@@ -8,7 +8,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.binding.getColorFromAttr
+import com.qmobile.qmobileui.ui.isNightMode
 import kotlin.math.max
 
 class RecyclerSectionItemDecoration(
@@ -37,6 +40,9 @@ class RecyclerSectionItemDecoration(
         if (!this::headerView.isInitialized) {
             headerView = inflateHeaderView(parent)
             header = headerView.findViewById(R.id.list_item_section_text)
+            if (BaseApp.instance.isNightMode()) {
+                header.setBackgroundColor(parent.context.getColorFromAttr(R.attr.colorSurfaceVariant))
+            }
             fixLayoutSize(headerView, parent)
         }
         var previousHeader: CharSequence = ""
