@@ -39,7 +39,7 @@ class EntityListAdapter internal constructor(
                 oldItem: RoomEntity,
                 newItem: RoomEntity
             ) = (oldItem.__entity as? EntityModel)?.__STAMP == (newItem.__entity as? EntityModel)?.__STAMP &&
-                BaseApp.genericRelationHelper.relationsEquals(oldItem, newItem)
+                    BaseApp.genericRelationHelper.relationsEquals(oldItem, newItem)
         }
     }
 
@@ -79,7 +79,8 @@ class EntityListAdapter internal constructor(
 
             override fun getSectionHeader(position: Int): CharSequence {
                 val section1 =
-                    getItem(position)?.let { ReflectionUtils.getInstanceProperty(it, sectionField) } ?: ""
+                    getItem(position)?.let { ReflectionUtils.getInstanceProperty(it, sectionField) }
+                        ?: ""
                 return section1.toString()
             }
         }

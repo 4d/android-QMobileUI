@@ -28,6 +28,8 @@ class FormQueryBuilder(
         val sortFieldsWithSection = SectionHelper.addSectionSortIfNeeded(tableName, sortFields)
         val sectionPath = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.path
 
+        var relationPartQuery: String = ""
+
         if (!sectionPath.isNullOrEmpty()) {
             if (sectionPath.contains(".")) {
                 val sectionRelation = RelationHelper.getRelation(
@@ -35,7 +37,7 @@ class FormQueryBuilder(
                     sectionPath.split(".").first()
                 )
                 sectionRelation.let {
-                    query += RelationQueryBuilderSection.createQuery(
+                    relationPartQuery = RelationQueryBuilderSection.createQuery(
                         it
                     ).sql
                 }
@@ -43,12 +45,15 @@ class FormQueryBuilder(
         }
 
         val sortQuery = getSortQuery(sortFieldsWithSection)
-
         if (pattern.isEmpty()) {
-            return SimpleSQLiteQuery(query + sortQuery)
+            return SimpleSQLiteQuery(query + relationPartQuery + sortQuery)
         }
 
-        val stringBuilder = StringBuilder("SELECT * FROM $tableName AS T1 WHERE ")
+        val stringBuilder = if (relationPartQuery.isNotEmpty()) {
+            StringBuilder("SELECT * FROM $tableName $relationPartQuery AND ")
+        } else {
+            StringBuilder("SELECT * FROM $tableName AS T1 WHERE ")
+        }
         searchFields?.let { columnsToFilter ->
             SearchQueryBuilder
                 .appendPredicate(tableName, stringBuilder, columnsToFilter, pattern, sortQuery)
