@@ -180,11 +180,13 @@ interface BaseInputControlViewHolder : InputControlDataHandler {
         itemJsonObject.getSafeString(ActionParametersFragment.INPUT_CONTROL_DISPLAY_TEXT_INJECT_KEY + "_$position")
             ?: currentText.ifEmpty { placeHolder }
 
-    private fun getFieldValue(position: Int, currentText: String, placeHolder: String): Any? =
-        itemJsonObject.getSafeAny(ActionParametersFragment.INPUT_CONTROL_FIELD_VALUE_INJECT_KEY + "_$position")
-            ?: if (currentText != placeHolder) {
-                currentText
-            } else {
-                null
-            }
+    private fun getFieldValue(position: Int, currentText: String, placeHolder: String): Any? {
+        val injectedJsonValue =
+            itemJsonObject.getSafeAny(ActionParametersFragment.INPUT_CONTROL_FIELD_VALUE_INJECT_KEY + "_$position")
+        return when {
+            injectedJsonValue != null -> InputControl.getTypedValue(itemJsonObject, injectedJsonValue)
+            currentText != placeHolder -> currentText
+            else -> null
+        }
+    }
 }

@@ -39,7 +39,7 @@ class EntityListAdapter internal constructor(
                 oldItem: RoomEntity,
                 newItem: RoomEntity
             ) = (oldItem.__entity as? EntityModel)?.__STAMP == (newItem.__entity as? EntityModel)?.__STAMP &&
-                    BaseApp.genericRelationHelper.relationsEquals(oldItem, newItem)
+                BaseApp.genericRelationHelper.relationsEquals(oldItem, newItem)
         }
     }
 
