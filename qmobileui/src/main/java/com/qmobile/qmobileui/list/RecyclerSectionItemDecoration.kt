@@ -45,7 +45,7 @@ class RecyclerSectionItemDecoration(
             }
             fixLayoutSize(headerView, parent)
         }
-        var previousHeader: CharSequence = ""
+        var previousHeader: CharSequence? = null
         for (i in 0 until parent.childCount) {
             val child = parent.getChildAt(i)
             val position = parent.getChildAdapterPosition(child)
