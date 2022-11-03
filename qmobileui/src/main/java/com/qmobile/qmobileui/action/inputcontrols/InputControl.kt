@@ -122,7 +122,9 @@ object InputControl {
         }
         map.getSort(dataSource)
         (dataSource["field"] as? String)?.let { // default value
-            map[it.fieldAdjustment()] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
+            if (!map.contains(it.fieldAdjustment())) {
+                map[it.fieldAdjustment()] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
+            }
         }
         return map
     }

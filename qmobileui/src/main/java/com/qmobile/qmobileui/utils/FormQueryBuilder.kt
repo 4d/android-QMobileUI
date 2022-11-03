@@ -9,7 +9,6 @@ package com.qmobile.qmobileui.utils
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.RelationHelper
-import com.qmobile.qmobiledatasync.relation.RelationQueryBuilderSection
 import com.qmobile.qmobileui.action.sort.Sort
 import com.qmobile.qmobileui.action.utils.SectionHelper
 import timber.log.Timber
@@ -23,37 +22,35 @@ class FormQueryBuilder(
     private val baseQuery = "SELECT * FROM $tableName"
 
     fun getQuery(pattern: String = ""): SimpleSQLiteQuery {
-        var query = baseQuery
-        val sortFields = customSortFields ?: Sort.getSortFieldsFromSharedPrefs(tableName)
-        val sortFieldsWithSection = SectionHelper.addSectionSortIfNeeded(tableName, sortFields)
-        val sectionPath = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.path
-
-        var relationPartQuery: String = ""
-
-        if (!sectionPath.isNullOrEmpty()) {
-            if (sectionPath.contains(".")) {
-                val sectionRelation = RelationHelper.getRelation(
-                    tableName,
-                    sectionPath.split(".").first()
-                )
-                sectionRelation.let {
-                    relationPartQuery = RelationQueryBuilderSection.createQuery(
-                        it
-                    ).sql
-                }
-            }
-        }
-
+        val sortFieldsWithSection = SectionHelper.addSectionSortIfNeeded(tableName)
         val sortQuery = getSortQuery(sortFieldsWithSection)
+
+        val sectionRelationQuery = SectionHelper.getSectionRelationQuery(tableName)
+
         if (pattern.isEmpty()) {
-            return SimpleSQLiteQuery(query + relationPartQuery + sortQuery)
+            return SimpleSQLiteQuery(baseQuery + sectionRelationQuery + sortQuery)
         }
 
-        val stringBuilder = if (relationPartQuery.isNotEmpty()) {
-            StringBuilder("SELECT * FROM $tableName $relationPartQuery AND ")
+        val stringBuilder = if (sectionRelationQuery.isNotEmpty()) {
+            StringBuilder("SELECT * FROM $tableName $sectionRelationQuery AND ")
         } else {
             StringBuilder("SELECT * FROM $tableName AS T1 WHERE ")
         }
+        searchFields?.let { columnsToFilter ->
+            SearchQueryBuilder
+                .appendPredicate(tableName, stringBuilder, columnsToFilter, pattern, sortQuery)
+        }
+        return SimpleSQLiteQuery(stringBuilder.toString().removeSuffix(" OR "))
+    }
+
+    fun getInputControlQuery(pattern: String = ""): SimpleSQLiteQuery {
+        val sortQuery = getSortQuery()
+
+        if (pattern.isEmpty()) {
+            return SimpleSQLiteQuery(baseQuery + sortQuery)
+        }
+
+        val stringBuilder = StringBuilder("SELECT * FROM $tableName AS T1 WHERE ")
         searchFields?.let { columnsToFilter ->
             SearchQueryBuilder
                 .appendPredicate(tableName, stringBuilder, columnsToFilter, pattern, sortQuery)

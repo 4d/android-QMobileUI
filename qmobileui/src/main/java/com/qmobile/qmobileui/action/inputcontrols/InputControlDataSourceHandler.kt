@@ -76,7 +76,7 @@ class InputControlDataSourceHandler(private val fragment: Fragment, private val 
     }
 
     fun setSearchQuery(searchPattern: String = "") {
-        val formQuery = formQueryBuilder.getQuery(searchPattern)
+        val formQuery = formQueryBuilder.getInputControlQuery(searchPattern)
         entityListViewModel.setSearchQuery(formQuery)
     }
 }
