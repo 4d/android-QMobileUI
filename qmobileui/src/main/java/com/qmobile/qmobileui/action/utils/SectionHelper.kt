@@ -19,7 +19,10 @@ object SectionHelper {
     // To group items by a field section, we should add the field in the first position of sortFields list. This function
     // takes the sortList (used for sort actions) as parameter and add the section field (if exists) in the first
     // position. Returns all in LinkedHashMap (LinkedHashMap keeps order of item)
-    fun addSectionSortIfNeeded(tableName: String): LinkedHashMap<String, String>? {
+    fun addSectionSortIfNeeded(
+        tableName: String,
+        customSortFields: LinkedHashMap<String, String>? = null // here for unit tests
+    ): LinkedHashMap<String, String>? {
         var sectionField = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.name
 
         if (!sectionField.isNullOrEmpty()) {
@@ -28,7 +31,7 @@ object SectionHelper {
             }
         }
 
-        val sortFields = Sort.getSortFieldsFromSharedPrefs(tableName)
+        val sortFields = customSortFields ?: Sort.getSortFieldsFromSharedPrefs(tableName)
 
         val sectionFieldType = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.type
         if (!sectionField.isNullOrEmpty()) {

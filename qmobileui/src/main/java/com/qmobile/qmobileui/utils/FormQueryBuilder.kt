@@ -22,7 +22,7 @@ class FormQueryBuilder(
     private val baseQuery = "SELECT * FROM $tableName"
 
     fun getQuery(pattern: String = ""): SimpleSQLiteQuery {
-        val sortFieldsWithSection = SectionHelper.addSectionSortIfNeeded(tableName)
+        val sortFieldsWithSection = SectionHelper.addSectionSortIfNeeded(tableName, customSortFields)
         val sortQuery = getSortQuery(sortFieldsWithSection)
 
         val sectionRelationQuery = SectionHelper.getSectionRelationQuery(tableName)
