@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.utils
 
 import androidx.sqlite.db.SimpleSQLiteQuery
+import com.qmobile.qmobiledatastore.SqlUtils.toSql
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobileui.action.sort.Sort
@@ -28,7 +29,7 @@ class FormQueryBuilder(
         val sectionRelationQuery = SectionHelper.getSectionRelationQuery(tableName)
 
         if (pattern.isEmpty()) {
-            return SimpleSQLiteQuery(baseQuery + sectionRelationQuery + sortQuery)
+            return (baseQuery + sectionRelationQuery + sortQuery).toSql()
         }
 
         val stringBuilder = if (sectionRelationQuery.isNotEmpty()) {
@@ -40,14 +41,14 @@ class FormQueryBuilder(
             SearchQueryBuilder
                 .appendPredicate(tableName, stringBuilder, columnsToFilter, pattern, sortQuery)
         }
-        return SimpleSQLiteQuery(stringBuilder.toString().removeSuffix(" OR "))
+        return stringBuilder.toString().removeSuffix(" OR ").toSql()
     }
 
     fun getInputControlQuery(pattern: String = ""): SimpleSQLiteQuery {
         val sortQuery = getSortQuery()
 
         if (pattern.isEmpty()) {
-            return SimpleSQLiteQuery(baseQuery + sortQuery)
+            return (baseQuery + sortQuery).toSql()
         }
 
         val stringBuilder = StringBuilder("SELECT * FROM $tableName AS T1 WHERE ")
@@ -55,7 +56,7 @@ class FormQueryBuilder(
             SearchQueryBuilder
                 .appendPredicate(tableName, stringBuilder, columnsToFilter, pattern, sortQuery)
         }
-        return SimpleSQLiteQuery(stringBuilder.toString().removeSuffix(" OR "))
+        return stringBuilder.toString().removeSuffix(" OR ").toSql()
     }
 
     fun getRelationQuery(
@@ -75,17 +76,17 @@ class FormQueryBuilder(
         relation?.let {
             val query = DeepQueryBuilder.createQuery(relation, parentItemId)
             return if (pattern.isEmpty()) {
-                SimpleSQLiteQuery(query + sortQuery)
+                (query + sortQuery).toSql()
             } else {
                 val stringBuilder = StringBuilder("$query AND ( ")
                 searchFields?.let { columnsToFilter ->
                     SearchQueryBuilder.appendPredicate(tableName, stringBuilder, columnsToFilter, pattern)
                 }
-                SimpleSQLiteQuery(stringBuilder.toString().removeSuffix(" OR ").plus(" )"))
+                stringBuilder.toString().removeSuffix(" OR ").plus(" )").toSql()
             }
         } ?: kotlin.run {
             Timber.e("Missing relation with path [$path] from table [$tableName]")
-            return SimpleSQLiteQuery("$baseQuery WHERE __KEY = -1")
+            return "$baseQuery WHERE __KEY = -1".toSql()
         }
     }
 
