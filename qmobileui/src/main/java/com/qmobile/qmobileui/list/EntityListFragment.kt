@@ -213,22 +213,24 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
                     LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
                 val divider = DividerItemDecoration(activity, LinearLayoutManager.VERTICAL)
                 binding.fragmentListRecyclerView.addItemDecoration(divider)
+
+                // Add section itemDecoration if defined for this table
+                val sectionField = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.name
+                if (!sectionField.isNullOrEmpty()) {
+                    val sectionItemDecoration = RecyclerSectionItemDecoration(
+                        resources.getDimensionPixelSize(R.dimen.recycler_section_header_height),
+                        true,
+                        adapter.getSectionCallback(sectionField)
+                    )
+                    binding.fragmentListRecyclerView.addItemDecoration(sectionItemDecoration)
+                    binding.fragmentListRecyclerView.isVerticalScrollBarEnabled = false
+                }
             }
         }
 
         binding.fragmentListRecyclerView.adapter = adapter
 
-        // Add section itemDecoration if defined for this table
-        val sectionField = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.name
-        if (!sectionField.isNullOrEmpty()) {
-            val sectionItemDecoration = RecyclerSectionItemDecoration(
-                resources.getDimensionPixelSize(R.dimen.recycler_section_header_height),
-                true,
-                adapter.getSectionCallback(sectionField)
-            )
-            binding.fragmentListRecyclerView.addItemDecoration(sectionItemDecoration)
-            binding.fragmentListRecyclerView.isVerticalScrollBarEnabled = false
-        }
+
 
         binding.fragmentListRecyclerView.edgeEffectFactory = BounceEdgeEffectFactory()
     }
