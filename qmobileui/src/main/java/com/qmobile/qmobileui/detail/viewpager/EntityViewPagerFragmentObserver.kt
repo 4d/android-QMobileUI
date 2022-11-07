@@ -23,16 +23,26 @@ class EntityViewPagerFragmentObserver(
 
     // Observe entity list
     private fun observeEntityList() {
-        entityListViewModel.entityListPagedListSharedFlow.launchAndCollectIn(
+        entityListViewModel.entityListSharedFlow.launchAndCollectIn(
             fragment.viewLifecycleOwner,
             Lifecycle.State.STARTED
         ) {
-            fragment.adapter.submitList(it)
+            fragment.adapter.updateData(it)
             val index = it.indexOfFirst { roomEntity -> (roomEntity.__entity as? EntityModel)?.__KEY == fragment.key }
             if (index > -1) {
                 fragment.viewPager?.setCurrentItem(index, false)
             }
         }
+//        entityListViewModel.entityListPagedListSharedFlow.launchAndCollectIn(
+//            fragment.viewLifecycleOwner,
+//            Lifecycle.State.STARTED
+//        ) {
+//            fragment.adapter.submitList(it)
+//            val index = it.indexOfFirst { roomEntity -> (roomEntity.__entity as? EntityModel)?.__KEY == fragment.key }
+//            if (index > -1) {
+//                fragment.viewPager?.setCurrentItem(index, false)
+//            }
+//        }
 //        fragment.lifecycleScope.launch {
 //            entityListViewModel.entityListPagingDataFlow.distinctUntilChanged().collectLatest {
 //                fragment.adapter.submitData(it)

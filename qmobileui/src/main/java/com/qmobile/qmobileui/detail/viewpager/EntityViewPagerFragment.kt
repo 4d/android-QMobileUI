@@ -34,8 +34,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
 
     // views
     internal var viewPager: ViewPager2? = null
-    lateinit var adapter: ViewPagerAdapter
-    //    lateinit var adapter: ViewPagerAdapter2
+    lateinit var adapter: SimpleViewPagerAdapter
 
     private lateinit var actionPrevious: MenuItem
     private lateinit var actionNext: MenuItem
@@ -98,21 +97,15 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        adapter = ViewPagerAdapter(this, tableName)
-//        adapter = ViewPagerAdapter2(tableName, this.viewLifecycleOwner)
+        adapter = SimpleViewPagerAdapter(requireActivity(), tableName)
         viewPager?.adapter = adapter
         viewPager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                adapter.getValue(position)?.let { roomEntity ->
+                adapter.getSelectedItem(position)?.let { roomEntity ->
                     actionActivity.setCurrentEntityModel(roomEntity)
                     key = (roomEntity.__entity as? EntityModel)?.__KEY ?: ""
                     arguments?.putString("key", key)
                 }
-//                adapter.getSelectedItem(position)?.let { roomEntity ->
-//                    actionActivity.setCurrentEntityModel(roomEntity)
-//                    key = (roomEntity.__entity as? EntityModel)?.__KEY ?: ""
-//                    arguments?.putString("key", key)
-//                }
                 handleActionPreviousEnability(position)
                 handleActionNextEnability(position)
             }
