@@ -230,8 +230,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
 
         binding.fragmentListRecyclerView.adapter = adapter
 
-
-
         binding.fragmentListRecyclerView.edgeEffectFactory = BounceEdgeEffectFactory()
     }
 

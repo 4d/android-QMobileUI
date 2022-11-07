@@ -51,11 +51,11 @@ class SegmentedViewHolder(
         serverError: String?,
         onValueChanged: (String, Any?, String?, Boolean) -> Unit
     ) {
-        super.bind(item, currentEntity, isLastParameter, alreadyFilledValue, serverError, onValueChanged)
-
         toggleButton.addOnButtonCheckedListener { _, checkedId, isChecked ->
             onButtonChecked(checkedId, isChecked)
         }
+
+        super.bind(item, currentEntity, isLastParameter, alreadyFilledValue, serverError, onValueChanged)
 
         showServerError()
     }
