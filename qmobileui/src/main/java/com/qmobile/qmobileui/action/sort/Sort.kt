@@ -55,6 +55,16 @@ object Sort {
         }
     }
 
+    fun getTypeConstraints(field: String, type: String?): String {
+        // if the field is a time we have to convert it from string to int, otherwise the AM/PM sort will not work
+        // if type is string we make the sort case insensitive
+        return when (type) {
+            "time" -> "CAST ($field AS INT)"
+            "string" -> "$field COLLATE NOCASE"
+            else -> field
+        }
+    }
+
     enum class Order(val value: String, val verbose: String) {
         ASCENDING("ASC", "ascending"),
         DESCENDING("DESC", "descending")

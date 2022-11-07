@@ -111,61 +111,71 @@ object InputControl {
         return list
     }
 
-    fun getSortFields(dataSource: Map<String, Any>): LinkedHashMap<String, String> {
+    fun getSortFields(dataSource: Map<String, Any>, hasTextType: Boolean): LinkedHashMap<String, String> {
         val map = LinkedHashMap<String, String>()
+        val fieldType = if (hasTextType) {
+            "string"
+        } else {
+            null
+        }
         when (val order = dataSource["order"]) {
             is String -> { // ascending / descending to apply to "field"
                 (dataSource["field"] as? String)?.let {
-                    map[it.fieldAdjustment()] = sortMatchingKeywords(order)
+                    val key = Sort.getTypeConstraints(it.fieldAdjustment(), fieldType)
+                    map[key] = sortMatchingKeywords(order)
                 }
             }
         }
-        map.getSort(dataSource)
+        map.getSort(dataSource, fieldType)
         (dataSource["field"] as? String)?.let { // default value
             if (!map.contains(it.fieldAdjustment())) {
-                map[it.fieldAdjustment()] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
+                val key = Sort.getTypeConstraints(it.fieldAdjustment(), fieldType)
+                map[key] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
             }
         }
         return map
     }
 
-    private fun LinkedHashMap<String, String>.getSort(dataSource: Map<String, Any>) {
+    private fun LinkedHashMap<String, String>.getSort(dataSource: Map<String, Any>, fieldType: String?) {
         when (val sort = dataSource["sort"]) {
             is String -> {
                 val fields = sort.trim().split(",")
                 fields.forEach {
-                    this[it.fieldAdjustment()] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
+                    val key = Sort.getTypeConstraints(it.fieldAdjustment(), fieldType)
+                    this[key] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
                 }
             }
             is JSONArray -> { // list of fields with default ascending
-                this.checkJSONArray(sort)
+                this.checkJSONArray(sort, fieldType)
             }
             is JSONObject -> { // map of <field, order>
-                this.checkJSONObject(sort)
+                this.checkJSONObject(sort, fieldType)
             }
         }
     }
 
-    private fun LinkedHashMap<String, String>.checkJSONArray(array: JSONArray) {
+    private fun LinkedHashMap<String, String>.checkJSONArray(array: JSONArray, fieldType: String?) {
         if (array.length() > 0) {
             when (array.get(0)) {
                 is JSONObject -> {
                     array.getJSONObjectList().forEach { json ->
-                        this.checkJSONObject(json)
+                        this.checkJSONObject(json, fieldType)
                     }
                 }
                 is String -> {
                     array.getStringList().forEach {
-                        this[it.fieldAdjustment()] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
+                        val key = Sort.getTypeConstraints(it.fieldAdjustment(), fieldType)
+                        this[key] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
                     }
                 }
             }
         }
     }
 
-    private fun LinkedHashMap<String, String>.checkJSONObject(json: JSONObject) {
+    private fun LinkedHashMap<String, String>.checkJSONObject(json: JSONObject, fieldType: String?) {
         json.getSafeString("field")?.let { field ->
-            this[field.fieldAdjustment()] = getOrder(json)
+            val key = Sort.getTypeConstraints(field.fieldAdjustment(), fieldType)
+            this[key] = getOrder(json)
         }
     }
 

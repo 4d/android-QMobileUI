@@ -58,7 +58,7 @@ interface InputControlDataHandler {
     ): InputControlDataSourceHandler {
         val dataSource = InputControl.getDataSource(fieldMapping.choiceList)
         val searchFields = InputControl.getSearchFields(dataSource)
-        val sortFields = InputControl.getSortFields(dataSource)
+        val sortFields = InputControl.getSortFields(dataSource, fieldMapping.hasTextType())
 
         val dataSourceHandler = InputControlDataSourceHandler(fragment, dataSource)
 

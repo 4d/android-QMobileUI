@@ -105,7 +105,7 @@ object ActionHelper {
             val type = parameter.getSafeString("type")
             parameter.getSafeString("name")?.let { name ->
                 val fieldName = name.fieldAdjustment()
-                val key = getSortFieldKeyForType(type, fieldName)
+                val key = Sort.getTypeConstraints(fieldName, type)
 
                 if (format.isNotEmpty()) {
                     fieldsToSortBy[key] = format
@@ -141,15 +141,5 @@ object ActionHelper {
     fun getBase64EncodedContext(actionContent: Map<String, Any>): String {
         val context = BaseApp.mapper.parseToString(actionContent["context"])
         return Base64.encodeToString(context.toByteArray(), Base64.NO_WRAP)
-    }
-
-    fun getSortFieldKeyForType(type: String?, field: String): String {
-        // if the field is a time we have to convert it from string to int, otherwise the AM/PM sort will not work
-        // if type is string we make the sort case insensitive
-        return when (type) {
-            "time" -> "CAST ($field AS INT)"
-            "string" -> "$field COLLATE NOCASE"
-            else -> field
-        }
     }
 }

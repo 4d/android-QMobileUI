@@ -35,7 +35,7 @@ object SectionHelper {
 
         val sectionFieldType = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.type
         if (!sectionField.isNullOrEmpty()) {
-            val key = ActionHelper.getSortFieldKeyForType(sectionFieldType, sectionField)
+            val key = Sort.getTypeConstraints(sectionField, sectionFieldType)
             val sortListWithSection = linkedMapOf(key to Sort.Order.ASCENDING.value)
             if (sortFields != null) {
                 sortListWithSection.putAll(sortFields.filter { !it.key.contains(sectionField) })
