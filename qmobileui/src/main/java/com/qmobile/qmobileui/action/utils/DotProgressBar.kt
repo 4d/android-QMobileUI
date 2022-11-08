@@ -65,7 +65,7 @@ class DotProgressBar : FrameLayout {
         progressBar.clipToPadding = false
         addView(progressBar)
         animators.clear()
-        repeat((0 until NUMBER_OF_DOTS).count()) {
+        repeat(NUMBER_OF_DOTS) {
             val dot = View(context)
             val layoutParams = LayoutParams(dotRadius * 2, dotRadius * 2)
             layoutParams.setMargins(margin, margin, margin, margin)
