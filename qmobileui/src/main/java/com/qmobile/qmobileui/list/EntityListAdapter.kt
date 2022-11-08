@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.DiffUtil
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.utils.ReflectionUtils
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
@@ -78,10 +79,16 @@ class EntityListAdapter internal constructor(
             }
 
             override fun getSectionHeader(position: Int): CharSequence {
-                val section1 =
+                val sectionFieldType =
+                    BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.type
+                val value =
                     getItem(position)?.let { ReflectionUtils.getInstanceProperty(it, sectionField) }
                         ?: ""
-                return section1.toString()
+                return when (sectionFieldType) {
+                    "date" -> FormatterUtils.applyFormat("shortDate", value.toString())
+                    "time" -> FormatterUtils.applyFormat("shortTime", value.toString())
+                    else -> value.toString()
+                }
             }
         }
     }
