@@ -17,7 +17,7 @@ import com.qmobile.qmobileui.ui.setOnSingleClickListener
 class ListItemViewHolder(
     private val dataBinding: ViewDataBinding,
     private val tableName: String,
-    private val onItemClick: (ViewDataBinding, String) -> Unit,
+    private val onItemClick: (ViewDataBinding, String, Int) -> Unit,
     private val onItemLongClick: (RoomEntity) -> Unit
 ) :
     RecyclerView.ViewHolder(dataBinding.root) {
@@ -36,7 +36,7 @@ class ListItemViewHolder(
     private fun setupClickListeners(roomEntity: RoomEntity) {
         (roomEntity.__entity as? EntityModel)?.__KEY?.let { key ->
             itemView.setOnSingleClickListener {
-                onItemClick(dataBinding, key)
+                onItemClick(dataBinding, key, bindingAdapterPosition)
             }
             itemView.setOnLongClickListener {
                 onItemLongClick(roomEntity)

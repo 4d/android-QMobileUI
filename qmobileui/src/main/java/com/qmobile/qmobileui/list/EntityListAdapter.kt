@@ -22,7 +22,7 @@ import com.qmobile.qmobileui.utils.ResourcesHelper
 class EntityListAdapter internal constructor(
     private val tableName: String,
     private val lifecycleOwner: LifecycleOwner,
-    private val onItemClick: (ViewDataBinding, String) -> Unit,
+    private val onItemClick: (ViewDataBinding, String, Int) -> Unit,
     private val onItemLongClick: (RoomEntity) -> Unit
 ) :
     PagingDataAdapter<RoomEntity, ListItemViewHolder>(DIFF_CALLBACK) {

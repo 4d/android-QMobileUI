@@ -6,11 +6,15 @@
 
 package com.qmobile.qmobileui.detail.viewpager
 
-import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class EntityViewPagerFragmentObserver(
     private val fragment: EntityViewPagerFragment,
@@ -23,35 +27,20 @@ class EntityViewPagerFragmentObserver(
 
     // Observe entity list
     private fun observeEntityList() {
-        entityListViewModel.entityListSharedFlow.launchAndCollectIn(
-            fragment.viewLifecycleOwner,
-            Lifecycle.State.STARTED
-        ) {
-            fragment.adapter.updateData(it)
-            val index = it.indexOfFirst { roomEntity -> (roomEntity.__entity as? EntityModel)?.__KEY == fragment.key }
-            if (index > -1) {
-                fragment.viewPager?.setCurrentItem(index, false)
+        fragment.lifecycleScope.launchWhenCreated {
+            fragment.adapter.loadStateFlow.map { it.refresh }
+                .distinctUntilChanged()
+                .collect {
+                    if (it is LoadState.NotLoading) {
+                        fragment.viewPager?.setCurrentItem(fragment.position, false)
+                    }
+                }
+        }
+
+        fragment.lifecycleScope.launch {
+            entityListViewModel.entityListPagingDataFlow.distinctUntilChanged().collectLatest {
+                fragment.adapter.submitData(it)
             }
         }
-//        entityListViewModel.entityListPagedListSharedFlow.launchAndCollectIn(
-//            fragment.viewLifecycleOwner,
-//            Lifecycle.State.STARTED
-//        ) {
-//            fragment.adapter.submitList(it)
-//            val index = it.indexOfFirst { roomEntity -> (roomEntity.__entity as? EntityModel)?.__KEY == fragment.key }
-//            if (index > -1) {
-//                fragment.viewPager?.setCurrentItem(index, false)
-//            }
-//        }
-//        fragment.lifecycleScope.launch {
-//            entityListViewModel.entityListPagingDataFlow.distinctUntilChanged().collectLatest {
-//                fragment.adapter.submitData(it)
-//                val index = it.indexOfFirst { roomEntity -> (roomEntity.__entity as? EntityModel)?.__KEY == fragment.key }
-//                if (index > -1) {
-//                    fragment.viewPager?.setCurrentItem(index, false)
-//                }
-//                fragment.viewPager?.adapter = fragment.adapter
-//            }
-//        }
     }
 }
