@@ -34,7 +34,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
 
     // views
     internal var viewPager: ViewPager2? = null
-    lateinit var adapter: SimpleViewPagerAdapter
+    lateinit var adapter: ViewPagerAdapter
 
     private lateinit var actionPrevious: MenuItem
     private lateinit var actionNext: MenuItem
@@ -47,6 +47,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
     private var parentItemId = ""
     private var path = ""
     private var relation: Relation? = null
+    internal var position = 0
 
     private lateinit var formQueryBuilder: FormQueryBuilder
     private lateinit var actionActivity: ActionActivity
@@ -59,6 +60,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
         arguments?.getString("key")?.let { key = it }
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("searchQueryPattern")?.let { searchQueryPattern = it }
+        arguments?.getInt("position")?.let { position = it }
 
         arguments?.getString("relationName")?.let { relationName ->
             if (relationName.isNotEmpty()) {
@@ -97,7 +99,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        adapter = SimpleViewPagerAdapter(requireActivity(), tableName)
+        adapter = ViewPagerAdapter(tableName, viewLifecycleOwner)
         viewPager?.adapter = adapter
         viewPager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {

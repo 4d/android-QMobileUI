@@ -6,81 +6,25 @@
 
 package com.qmobile.qmobileui.detail.viewpager
 
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.BR
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
-class ViewPagerAdapter(fragment: Fragment, private val tableName: String) :
-    PagedListPagerAdapter<RoomEntity>(fragment) {
-
-    override var isSmoothScroll = true
-
-    override fun createItem(position: Int): Fragment {
-        var itemId = "0"
-        getValue(position)?.let { roomEntity ->
-            (roomEntity.__entity as? EntityModel)?.__KEY?.let { itemId = it }
-        }
-        return BaseApp.genericTableFragmentHelper.getDetailFragment(tableName).apply {
-            arguments = Bundle().apply {
-                putString("itemId", itemId)
-                putString("tableName", tableName)
-            }
-        }
-    }
-}
-
-class SimpleViewPagerAdapter(fa: FragmentActivity, private val tableName: String) : FragmentStateAdapter(fa) {
-
-    var items: List<RoomEntity> = listOf()
-
-    override fun getItemCount(): Int = items.size
-
-    override fun createFragment(position: Int): Fragment {
-        var itemId = "0"
-        getSelectedItem(position)?.let { roomEntity ->
-            (roomEntity.__entity as? EntityModel)?.__KEY?.let { itemId = it }
-        }
-        return BaseApp.genericTableFragmentHelper.getDetailFragment(tableName).apply {
-            arguments = Bundle().apply {
-                putString("itemId", itemId)
-                putString("tableName", tableName)
-            }
-        }
-    }
-
-    fun updateData(data: List<RoomEntity>) {
-        items = data
-        notifyItemChanged(0)
-    }
-
-    fun getSelectedItem(position: Int): RoomEntity? {
-        return items.getOrNull(position)
-    }
-}
-
-/**
- * Not used as we are not using ViewPager with PagedList.
- * Unfortunately could not find a way to use PagingData with ViewPager so far
- */
-class ViewPagerAdapter2 internal constructor(
+class ViewPagerAdapter internal constructor(
     private val tableName: String,
     private val lifecycleOwner: LifecycleOwner
 ) :
-    PagingDataAdapter<RoomEntity, ViewPagerAdapter2.BaseViewHolder2>(DIFF_CALLBACK) {
+    PagingDataAdapter<RoomEntity, ViewPagerAdapter.BaseViewHolder2>(DIFF_CALLBACK) {
 
     companion object {
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<RoomEntity>() {
@@ -107,12 +51,16 @@ class ViewPagerAdapter2 internal constructor(
                 parent,
                 false
             )
-        dataBinding.lifecycleOwner = this@ViewPagerAdapter2.lifecycleOwner
+        dataBinding.lifecycleOwner = this@ViewPagerAdapter.lifecycleOwner
         return BaseViewHolder2(dataBinding)
     }
 
     override fun onBindViewHolder(holder: BaseViewHolder2, position: Int) {
         holder.bind(getItem(position))
+    }
+
+    fun getSelectedItem(position: Int): RoomEntity? {
+        return getItem(position)
     }
 
     inner class BaseViewHolder2(
