@@ -128,8 +128,8 @@ object InputControl {
         }
         map.getSort(dataSource, fieldType)
         (dataSource["field"] as? String)?.let { // default value
-            if (!map.contains(it.fieldAdjustment())) {
-                val key = Sort.getTypeConstraints(it.fieldAdjustment(), fieldType)
+            val key = Sort.getTypeConstraints(it.fieldAdjustment(), fieldType)
+            if (!map.contains(key)) {
                 map[key] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
             }
         }
