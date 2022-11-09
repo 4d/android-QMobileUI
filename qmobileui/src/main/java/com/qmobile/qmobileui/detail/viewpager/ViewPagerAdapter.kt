@@ -6,10 +6,12 @@
 
 package com.qmobile.qmobileui.detail.viewpager
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -20,11 +22,30 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.BR
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
-class ViewPagerAdapter internal constructor(
+class ViewPagerAdapter(fragment: Fragment, private val tableName: String) :
+    PagedListPagerAdapter<RoomEntity>(fragment) {
+
+    override var isSmoothScroll = true
+
+    override fun createItem(position: Int): Fragment {
+        var itemId = "0"
+        getValue(position)?.let { roomEntity ->
+            (roomEntity.__entity as? EntityModel)?.__KEY?.let { itemId = it }
+        }
+        return BaseApp.genericTableFragmentHelper.getDetailFragment(tableName).apply {
+            arguments = Bundle().apply {
+                putString("itemId", itemId)
+                putString("tableName", tableName)
+            }
+        }
+    }
+}
+
+class ViewPagerAdapter2 internal constructor(
     private val tableName: String,
     private val lifecycleOwner: LifecycleOwner
 ) :
-    PagingDataAdapter<RoomEntity, ViewPagerAdapter.BaseViewHolder2>(DIFF_CALLBACK) {
+    PagingDataAdapter<RoomEntity, ViewPagerAdapter2.BaseViewHolder2>(DIFF_CALLBACK) {
 
     companion object {
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<RoomEntity>() {
@@ -51,7 +72,7 @@ class ViewPagerAdapter internal constructor(
                 parent,
                 false
             )
-        dataBinding.lifecycleOwner = this@ViewPagerAdapter.lifecycleOwner
+        dataBinding.lifecycleOwner = this@ViewPagerAdapter2.lifecycleOwner
         return BaseViewHolder2(dataBinding)
     }
 

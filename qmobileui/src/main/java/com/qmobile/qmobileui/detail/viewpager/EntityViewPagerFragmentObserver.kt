@@ -6,9 +6,11 @@
 
 package com.qmobile.qmobileui.detail.viewpager
 
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import kotlinx.coroutines.flow.collectLatest
@@ -27,7 +29,7 @@ class EntityViewPagerFragmentObserver(
 
     // Observe entity list
     private fun observeEntityList() {
-        fragment.lifecycleScope.launchWhenCreated {
+        /*fragment.lifecycleScope.launchWhenCreated {
             fragment.adapter.loadStateFlow.map { it.refresh }
                 .distinctUntilChanged()
                 .collect {
@@ -41,6 +43,14 @@ class EntityViewPagerFragmentObserver(
             entityListViewModel.entityListPagingDataFlow.distinctUntilChanged().collectLatest {
                 fragment.adapter.submitData(it)
             }
+        }*/
+
+        entityListViewModel.entityListPagedListSharedFlow.launchAndCollectIn(
+            fragment.viewLifecycleOwner,
+            Lifecycle.State.STARTED
+        ) {
+            fragment.adapter.submitList(it)
+            fragment.viewPager?.setCurrentItem(fragment.position, false)
         }
     }
 }

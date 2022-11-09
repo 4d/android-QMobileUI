@@ -16,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MenuProvider
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
@@ -35,6 +36,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
     // views
     internal var viewPager: ViewPager2? = null
     lateinit var adapter: ViewPagerAdapter
+    private lateinit var circularProgressIndicator: CircularProgressIndicator
 
     private lateinit var actionPrevious: MenuItem
     private lateinit var actionNext: MenuItem
@@ -79,14 +81,17 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
         savedInstanceState: Bundle?
     ): View? {
         activity?.setupToolbarTitle(tableName)
-        viewPager = inflater.inflate(R.layout.fragment_pager, container, false) as ViewPager2
+        val view = inflater.inflate(R.layout.fragment_pager, container, false)
+
+        viewPager = view.findViewById(R.id.view_pager) as ViewPager2
+        circularProgressIndicator = view.findViewById(R.id.circular_progress)
 
         formQueryBuilder = FormQueryBuilder(tableName)
 
         initMenuProvider()
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-        return viewPager
+        return view
     }
 
     override fun onAttach(context: Context) {
@@ -99,11 +104,13 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        adapter = ViewPagerAdapter(tableName, viewLifecycleOwner)
+        adapter = ViewPagerAdapter(this, tableName)
         viewPager?.adapter = adapter
         viewPager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                adapter.getSelectedItem(position)?.let { roomEntity ->
+                adapter.getValue(position)?.let { roomEntity ->
+                    circularProgressIndicator.visibility = View.GONE
+                    viewPager?.visibility = View.VISIBLE
                     actionActivity.setCurrentEntityModel(roomEntity)
                     key = (roomEntity.__entity as? EntityModel)?.__KEY ?: ""
                     arguments?.putString("key", key)
