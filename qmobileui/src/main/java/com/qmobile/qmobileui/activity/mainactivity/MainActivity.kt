@@ -633,6 +633,8 @@ class MainActivity :
             containerId = R.id.nav_host_container,
             intent = intent
         ) {
+            // If we are on a fullscreen activity and we change nav item, we need to cancel fullscreen mode
+            setFullScreenMode(false)
             binding.appbar.setExpanded(true, true)
         }
         // Whenever the selected controller changes, setup the action bar.
