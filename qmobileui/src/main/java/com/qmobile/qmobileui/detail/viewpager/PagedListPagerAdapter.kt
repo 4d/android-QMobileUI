@@ -8,9 +8,7 @@ package com.qmobile.qmobileui.detail.viewpager
 
 import androidx.fragment.app.Fragment
 import androidx.paging.PagedList
-import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import timber.log.Timber
 import java.lang.IndexOutOfBoundsException
