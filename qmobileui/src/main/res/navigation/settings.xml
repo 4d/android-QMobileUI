@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by qmarciset on 20/10/2022.
+  ~ 4D SAS
+  ~ Copyright (c) 2022 qmarciset. All rights reserved.
+  -->
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settings"
+    app:startDestination="@id/settingsFragment">
+
+    <include app:graph="@navigation/action_parameters" />
+    <include app:graph="@navigation/pending_tasks" />
+    <include app:graph="@navigation/base_action_nav" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.qmobile.qmobileui.settings.SettingsFragment"
+        android:label="@string/nav_settings"
+        tools:layout="@xml/preferences">
+
+        <action
+            android:id="@+id/to_action_form"
+            app:destination="@id/action_parameters" />
+
+        <action
+            android:id="@+id/to_pending_tasks"
+            app:destination="@id/pending_tasks" />
+
+    </fragment>
+
+</navigation>

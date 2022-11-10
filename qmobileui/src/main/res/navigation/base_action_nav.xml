@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by qmarciset on 20/10/2022.
+  ~ 4D SAS
+  ~ Copyright (c) 2022 qmarciset. All rights reserved.
+  -->
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/base_action_nav">
+
+    <include app:graph="@navigation/action_parameters" />
+    <include app:graph="@navigation/action_webview" />
+
+    <action
+        android:id="@+id/to_action_form"
+        app:destination="@id/action_parameters">
+
+        <argument
+            android:name="tableName"
+            app:argType="string" />
+
+        <argument
+            android:name="itemId"
+            app:argType="string" />
+
+        <argument
+            android:name="relationName"
+            app:argType="string" />
+
+        <argument
+            android:name="parentItemId"
+            app:argType="string" />
+
+        <argument
+            android:name="taskId"
+            app:argType="string" />
+
+        <argument
+            android:name="actionUUID"
+            app:argType="string" />
+
+        <argument
+            android:name="navbarTitle"
+            app:argType="string" />
+
+    </action>
+
+    <action
+        android:id="@+id/to_action_webview"
+        app:destination="@+id/action_webview">
+
+        <argument
+            android:name="path"
+            app:argType="string" />
+
+        <argument
+            android:name="actionName"
+            app:argType="string" />
+
+        <argument
+            android:name="actionLabel"
+            app:argType="string" />
+
+        <argument
+            android:name="actionShortLabel"
+            app:argType="string" />
+
+        <argument
+            android:name="base64EncodedContext"
+            app:argType="string" />
+
+    </action>
+
+</navigation>
