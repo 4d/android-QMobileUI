@@ -35,6 +35,7 @@
     <dimen name="top_action_button_padding">12dp</dimen>
 
     <!-- Navigation -->
+    <dimen name="nav_view_height_no_icon">48dp</dimen>
     <dimen name="nav_view_height">64dp</dimen>
 
     <!-- List Section -->
