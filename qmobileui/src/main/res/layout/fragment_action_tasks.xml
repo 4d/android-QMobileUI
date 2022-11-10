@@ -16,10 +16,10 @@
             android:layout_height="match_parent">
 
             <LinearLayout
+                android:id="@+id/tasks_linear"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:paddingBottom="@dimen/nav_view_height"
                 android:transitionGroup="true">
 
                 <com.google.android.material.chip.Chip

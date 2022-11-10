@@ -102,6 +102,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
      * Initialize recyclerView
      */
     private fun initRecyclerViews() {
+        binding.tasksLinear.setPadding(0, 0, 0, getPaddingBottom())
         val divider = MaterialDividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL)
         divider.isLastItemDecorated = false
         divider.dividerInsetStart = DIVIDER_INSET_START.px

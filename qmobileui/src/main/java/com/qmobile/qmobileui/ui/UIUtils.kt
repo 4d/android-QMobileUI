@@ -21,11 +21,17 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 
 object UIConstants {
     const val longClickDuration = 1500L
     const val clickDebounceTime = 600L
+}
+
+fun hasNavIcon(): Boolean {
+    val tableName = BaseApp.runtimeDataHolder.tableInfo.keys.firstOrNull() ?: ""
+    return BaseApp.genericTableFragmentHelper.getNavIcon(tableName) != null
 }
 
 fun FragmentActivity?.setupToolbarTitle(title: String) {

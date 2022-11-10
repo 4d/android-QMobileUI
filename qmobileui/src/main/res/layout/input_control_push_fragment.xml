@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/push_constraint_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="@dimen/nav_view_height">
+        android:layout_height="match_parent">
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/circular_progress"

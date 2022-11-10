@@ -224,6 +224,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
             }
         }
 
+        binding.fragmentListRecyclerView.setPadding(0, 0, 0, getPaddingBottom())
         binding.fragmentListRecyclerView.adapter = adapter
 
         binding.fragmentListRecyclerView.edgeEffectFactory = BounceEdgeEffectFactory()

@@ -95,6 +95,7 @@ class PushInputControlFragment : BaseFragment(), MenuProvider, InputControlDataH
     }
 
     private fun initRecyclerView() {
+        binding.pushConstraintLayout.setPadding(0, 0, 0, getPaddingBottom())
         binding.inputControlListRecyclerView.layoutManager =
             LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         val divider = DividerItemDecoration(activity, LinearLayoutManager.VERTICAL)

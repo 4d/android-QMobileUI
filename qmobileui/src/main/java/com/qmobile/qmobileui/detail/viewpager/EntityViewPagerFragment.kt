@@ -85,6 +85,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
         val view = inflater.inflate(R.layout.fragment_pager, container, false)
 
         viewPager = view.findViewById(R.id.view_pager) as ViewPager2
+        viewPager?.setPadding(0, 0, 0, getPaddingBottom())
         circularProgressIndicator = view.findViewById(R.id.circular_progress)
 
         formQueryBuilder = FormQueryBuilder(tableName)

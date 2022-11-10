@@ -25,6 +25,7 @@ import com.qmobile.qmobileui.action.inputcontrols.PushInputControlFragment
 import com.qmobile.qmobileui.action.pendingtasks.TasksFragment
 import com.qmobile.qmobileui.detail.EntityDetailFragment
 import com.qmobile.qmobileui.list.EntityListFragment
+import com.qmobile.qmobileui.ui.hasNavIcon
 import com.qmobile.qmobileui.utils.hideKeyboard
 
 abstract class BaseFragment : Fragment() {
@@ -40,14 +41,20 @@ abstract class BaseFragment : Fragment() {
         }
     }
 
-    protected fun MenuProvider.initMenuProvider() {
-        val menuHost: MenuHost = requireActivity() as MenuHost
-        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupAppBar()
+    }
+
+    protected fun getPaddingBottom(): Int = if (hasNavIcon()) {
+        resources.getDimension(R.dimen.nav_view_height).toInt()
+    } else {
+        resources.getDimension(R.dimen.nav_view_height_no_icon).toInt()
+    }
+
+    protected fun MenuProvider.initMenuProvider() {
+        val menuHost: MenuHost = requireActivity() as MenuHost
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     private fun setupAppBar() {
