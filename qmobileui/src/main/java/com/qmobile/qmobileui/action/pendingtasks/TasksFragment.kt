@@ -38,9 +38,9 @@ import java.util.*
 class TasksFragment : BaseFragment(), NetworkChecker {
 
     private var _binding: FragmentActionTasksBinding? = null
-    val binding get() = _binding!!
-    lateinit var pendingAdapter: TaskListAdapter
-    lateinit var completedAdapter: TaskListAdapter
+    private val binding get() = _binding!!
+    internal lateinit var pendingAdapter: TaskListAdapter
+    internal lateinit var completedAdapter: TaskListAdapter
 
     internal lateinit var actionActivity: ActionActivity
 

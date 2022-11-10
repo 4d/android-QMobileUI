@@ -106,7 +106,7 @@ object ActionHelper {
             val type = parameter.getSafeString("type")
             parameter.getSafeString("name")?.let { name ->
                 val fieldName = name.fieldAdjustment()
-                val key = getTypeConstraints(fieldName, type,  format)
+                val key = getTypeConstraints(fieldName, type, format)
 
                 if (format.isNotEmpty()) {
                     fieldsToSortBy[key] = format

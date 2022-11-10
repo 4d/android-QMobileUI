@@ -18,11 +18,12 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import timber.log.Timber
 
-class AndroidJavaScriptHandler(var activity: FragmentActivity) {
+class AndroidJavaScriptHandler(private val activity: FragmentActivity?) {
+
     @JavascriptInterface
     fun onDismiss() {
         CoroutineScope(Dispatchers.Main.immediate).launch {
-            activity.onBackPressed()
+            activity?.onBackPressed()
         }
     }
 
@@ -39,11 +40,11 @@ class AndroidJavaScriptHandler(var activity: FragmentActivity) {
     @JavascriptInterface
     fun status(message: String) {
         val jsonObject = JSONObject(message)
-        // case of message is {message: String, success: Boolean}
+        // case of message is { message: String, success: Boolean }
         jsonObject.getSafeString("message")?.let { text ->
             return when (jsonObject.getSafeBoolean("success")) {
                 null -> {
-                    // case of message is {message: String}
+                    // case of message is { message: String }
                     SnackbarHelper.show(activity, text, ToastMessage.Type.NEUTRAL)
                 }
                 true -> {
@@ -58,7 +59,7 @@ class AndroidJavaScriptHandler(var activity: FragmentActivity) {
         jsonObject.getSafeString("statusText")?.let { text ->
             val level = jsonObject.getSafeString("level")
             level?.let {
-                // case of message is {statusText: String, level: string}
+                // case of message is { statusText: String, level: String }
                 val type = when (it) {
                     "debug" -> ToastMessage.Type.NEUTRAL
                     "info" -> ToastMessage.Type.NEUTRAL

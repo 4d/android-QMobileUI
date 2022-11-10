@@ -123,7 +123,7 @@ class MainActivity :
             ?.first()
 
     // ViewModels
-    lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
+    internal lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
 
     private lateinit var taskViewModel: TaskViewModel
 

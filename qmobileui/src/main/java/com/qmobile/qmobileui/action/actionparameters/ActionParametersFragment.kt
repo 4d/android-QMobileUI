@@ -126,7 +126,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         const val INPUT_CONTROL_FIELD_VALUE_INJECT_KEY = "input_control_field_value_inject"
     }
 
-    val lastVisibleItemPosition: Int
+    private val lastVisibleItemPosition: Int
         get() = (binding.parametersRecyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
 
     private val onScrollToValidationListener = object : RecyclerView.OnScrollListener() {

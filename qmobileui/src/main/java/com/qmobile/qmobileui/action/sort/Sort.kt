@@ -63,15 +63,16 @@ object Sort {
             "string" -> "$field COLLATE NOCASE"
             "date" -> { // order by year then month and finally day
                 "replace($field, rtrim($field," +
-                        " replace($field, '!', '')), '') ${order?: Order.ASCENDING.value} ," +   //year
-                        "  substr(replace ($field, substr($field, 0, 1+instr($field, '!')),\"\"), 0, " + // Month
-                        "instr(   replace ($field, substr($field, 0, 1+instr($field, '!')),\"\"), " +
-                        "'!')) ${order?: Order.ASCENDING.value} ," +
-                        "   substr($field, 0, instr($field, '!'))" // Day
+                    " replace($field, '!', '')), '') ${order ?: Order.ASCENDING.value} ," + // year
+                    "  substr(replace ($field, substr($field, 0, 1+instr($field, '!')),\"\"), 0, " + // Month
+                    "instr(   replace ($field, substr($field, 0, 1+instr($field, '!')),\"\"), " +
+                    "'!')) ${order ?: Order.ASCENDING.value} ," +
+                    "   substr($field, 0, instr($field, '!'))" // Day
             }
             else -> field
         }
     }
+
     enum class Order(val value: String, val verbose: String) {
         ASCENDING("ASC", "ascending"),
         DESCENDING("DESC", "descending")

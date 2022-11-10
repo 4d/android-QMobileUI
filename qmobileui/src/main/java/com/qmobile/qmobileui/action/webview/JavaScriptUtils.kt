@@ -7,22 +7,14 @@
 package com.qmobile.qmobileui.action.webview
 
 import android.util.Base64
-import android.webkit.WebResourceResponse
 import android.webkit.WebView
-import com.qmobile.qmobileapi.network.ApiClient.REQUEST_TIMEOUT
-import com.qmobile.qmobiledatasync.app.BaseApp
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
 import timber.log.Timber
 import java.io.IOException
 import java.io.InputStream
-import java.net.SocketTimeoutException
-import java.util.concurrent.TimeUnit
 
-object WebClientHelper {
+object JavaScriptUtils {
 
-    fun injectScriptFile(view: WebView, actionName: String, actionLabel: String, actionShortLabel: String) {
+    fun WebView.injectScriptFile(actionName: String, actionLabel: String, actionShortLabel: String) {
         val input: InputStream
         try {
             input = getScriptForAction(actionName, actionLabel, actionShortLabel).byteInputStream()
@@ -30,7 +22,7 @@ object WebClientHelper {
             input.read(buffer)
             input.close()
             val encoded = Base64.encodeToString(buffer, Base64.NO_WRAP)
-            view.loadUrl(
+            this.loadUrl(
                 "javascript:(function() {" +
                     "var parent = document.getElementsByTagName('head').item(0);" +
                     "var script = document.createElement('script');" +
@@ -81,5 +73,4 @@ object WebClientHelper {
        }
       }  """
     }
-
 }

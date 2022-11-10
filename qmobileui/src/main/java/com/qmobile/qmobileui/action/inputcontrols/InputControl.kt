@@ -18,6 +18,7 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.FieldMapping
 import com.qmobile.qmobiledatasync.utils.fieldAdjustment
 import com.qmobile.qmobileui.action.sort.Sort
+import com.qmobile.qmobileui.action.sort.Sort.getTypeConstraints
 import com.qmobile.qmobileui.action.sort.Sort.sortMatchingKeywords
 import com.qmobile.qmobileui.utils.ReflectionUtils
 import com.qmobile.qmobileui.utils.ResourcesHelper
@@ -121,14 +122,14 @@ object InputControl {
         when (val order = dataSource["order"]) {
             is String -> { // ascending / descending to apply to "field"
                 (dataSource["field"] as? String)?.let {
-                    val key = Sort.getTypeConstraints(it.fieldAdjustment(), fieldType)
+                    val key = getTypeConstraints(it.fieldAdjustment(), fieldType)
                     map[key] = sortMatchingKeywords(order)
                 }
             }
         }
         map.getSort(dataSource, fieldType)
         (dataSource["field"] as? String)?.let { // default value
-            val key = Sort.getTypeConstraints(it.fieldAdjustment(), fieldType)
+            val key = getTypeConstraints(it.fieldAdjustment(), fieldType)
             if (!map.contains(key)) {
                 map[key] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
             }
@@ -141,7 +142,7 @@ object InputControl {
             is String -> {
                 val fields = sort.trim().split(",")
                 fields.forEach {
-                    val key = Sort.getTypeConstraints(it.fieldAdjustment(), fieldType)
+                    val key = getTypeConstraints(it.fieldAdjustment(), fieldType)
                     this[key] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
                 }
             }
@@ -164,7 +165,7 @@ object InputControl {
                 }
                 is String -> {
                     array.getStringList().forEach {
-                        val key = Sort.getTypeConstraints(it.fieldAdjustment(), fieldType)
+                        val key = getTypeConstraints(it.fieldAdjustment(), fieldType)
                         this[key] = sortMatchingKeywords(Sort.Order.ASCENDING.verbose)
                     }
                 }
@@ -174,7 +175,7 @@ object InputControl {
 
     private fun LinkedHashMap<String, String>.checkJSONObject(json: JSONObject, fieldType: String?) {
         json.getSafeString("field")?.let { field ->
-            val key = Sort.getTypeConstraints(field.fieldAdjustment(), fieldType)
+            val key = getTypeConstraints(field.fieldAdjustment(), fieldType)
             this[key] = getOrder(json)
         }
     }

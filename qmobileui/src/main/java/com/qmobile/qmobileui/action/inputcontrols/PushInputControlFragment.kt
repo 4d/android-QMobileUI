@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 class PushInputControlFragment : BaseFragment(), MenuProvider, InputControlDataHandler {
 
     private var _binding: InputControlPushFragmentBinding? = null
-    val binding get() = _binding!!
+    private val binding get() = _binding!!
 
     override var fieldMapping: FieldMapping? = null
 

@@ -39,13 +39,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 class BarcodeScannerFragment : BaseFragment() {
 
     private var _binding: FragmentBarcodeBinding? = null
-    val binding get() = _binding!!
+    private val binding get() = _binding!!
 
     private lateinit var cameraExecutor: ExecutorService
     private val alreadyScanned = AtomicBoolean(false)
 
     companion object {
-        const val PROGRESS_DELAY: Long = 1000
+        private const val PROGRESS_DELAY: Long = 1000
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

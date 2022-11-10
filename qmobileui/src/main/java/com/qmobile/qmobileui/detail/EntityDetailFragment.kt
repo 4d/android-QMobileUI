@@ -15,7 +15,9 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.core.view.MenuProvider
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
@@ -33,7 +35,6 @@ import com.qmobile.qmobileui.ui.setFadeThroughExitTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.ResourcesHelper
-import com.qmobile.qmobileui.webview.MyWebViewClient
 import com.qmobile.qmobileui.webview.WebViewHelper.adjustSize
 import com.qmobile.qmobileui.webview.WebViewHelper.checkIfChildIsWebView
 
@@ -81,7 +82,11 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
 
         binding.root.checkIfChildIsWebView()?.let { foundWebView ->
             webView = foundWebView
-            webView.webViewClient = MyWebViewClient()
+            webView.webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                    return false
+                }
+            }
             webView.adjustSize()
         }
         initMenuProvider()

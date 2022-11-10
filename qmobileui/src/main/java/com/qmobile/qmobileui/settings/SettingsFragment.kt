@@ -37,14 +37,14 @@ class SettingsFragment :
     Preference.OnPreferenceClickListener,
     RemoteUrlChanger {
 
-    var firstTime = true
+    internal var firstTime = true
     private var logoutDialogTitle = ""
     private var logoutDialogMessage = ""
     private var logoutDialogMessageIfPendingTask = ""
     private var logoutDialogPositive = ""
     private var logoutDialogNegative = ""
     private var remoteUrlPref: Preference? = null
-    var pendingTaskPref: Preference? = null
+    internal var pendingTaskPref: Preference? = null
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
     private lateinit var accountCategoryKey: String

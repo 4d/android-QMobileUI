@@ -63,7 +63,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
 
     // views
     private var _binding: FragmentListBinding? = null
-    val binding get() = _binding!!
+    internal val binding get() = _binding!!
     internal lateinit var adapter: EntityListAdapter
     private lateinit var currentRecordActionsListAdapter: ListAdapter
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>

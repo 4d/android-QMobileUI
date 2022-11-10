@@ -48,7 +48,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
 
     private var loggedOut = false
 
-    lateinit var binding: ActivityLoginBinding
+    internal lateinit var binding: ActivityLoginBinding
     private var remoteUrl = ""
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null

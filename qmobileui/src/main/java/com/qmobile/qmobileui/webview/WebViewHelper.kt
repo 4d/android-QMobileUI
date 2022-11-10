@@ -10,10 +10,14 @@ object WebViewHelper {
 
     private const val DEFAULT_INITIAL_SCALE = 110
 
-    fun loadUrl(view: WebView, url: String?) {
+    fun loadUrl(view: WebView, url: String?, extraHeaders: Map<String, String>? = null) {
         if (url.isNullOrEmpty()) return
         BaseApp.sharedPreferencesHolder.injectCookies(url)
-        view.loadUrl(url)
+        if (extraHeaders != null) {
+            view.loadUrl(url, extraHeaders)
+        } else {
+            view.loadUrl(url)
+        }
     }
 
     fun WebView.adjustSize() = apply {

@@ -6,7 +6,6 @@
 
 package com.qmobile.qmobileui.action.webview
 
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,21 +16,25 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.webview.JavaScriptUtils.injectScriptFile
 import com.qmobile.qmobileui.databinding.FragmentActionWebviewBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
-
-const val HEADER_CONTEXT_KEY = "X-QMobile-Context"
+import com.qmobile.qmobileui.webview.WebViewHelper
 
 class ActionWebViewFragment : BaseFragment() {
 
     private var _binding: FragmentActionWebviewBinding? = null
-    val binding get() = _binding!!
-    var path: String = ""
-    var actionName = ""
-    var actionLabel = ""
-    var actionShortLabel = ""
-    var base64EncodedContext = ""
+    private val binding get() = _binding!!
+    private var path: String = ""
+    private var actionName = ""
+    private var actionLabel = ""
+    private var actionShortLabel = ""
+    private var base64EncodedContext = ""
+
+    companion object {
+        private const val HEADER_CONTEXT_KEY = "X-QMobile-Context"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,9 +44,7 @@ class ActionWebViewFragment : BaseFragment() {
         arguments?.getString("actionShortLabel")?.let {
             actionShortLabel = it
         }
-        arguments?.getString("base64EncodedContext")?.let {
-            base64EncodedContext = it
-        }
+        arguments?.getString("base64EncodedContext")?.let { base64EncodedContext = it }
 
         setSharedAxisZEnterTransition()
     }
@@ -68,25 +69,21 @@ class ActionWebViewFragment : BaseFragment() {
                 binding.webView.settings.javaScriptEnabled = true
                 binding.webView.settings.domStorageEnabled = true
 
-                binding.webView.addJavascriptInterface(AndroidJavaScriptHandler(requireActivity()), "Android")
+                val javaScriptHandler = AndroidJavaScriptHandler(activity)
+                binding.webView.addJavascriptInterface(javaScriptHandler, "Android")
                 binding.webView.settings.builtInZoomControls = true
-                val url = BaseApp.sharedPreferencesHolder.remoteUrl + path
 
                 binding.webView.webViewClient = object : WebViewClient() {
-                    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                        super.onPageStarted(view, url, favicon)
-                    }
-
                     override fun onPageFinished(view: WebView, url: String) {
                         super.onPageFinished(view, url)
                         binding.progressCircular.visibility = View.INVISIBLE
-                        WebClientHelper.injectScriptFile(view, actionName, actionLabel, actionShortLabel)
+                        view.injectScriptFile(actionName, actionLabel, actionShortLabel)
                     }
                 }
 
-                BaseApp.sharedPreferencesHolder.injectCookies(url)
+                val url = BaseApp.sharedPreferencesHolder.remoteUrl + path
                 val extraHeaders = mapOf(HEADER_CONTEXT_KEY to base64EncodedContext)
-                binding.webView.loadUrl(url, extraHeaders)
+                WebViewHelper.loadUrl(binding.webView, url, extraHeaders)
             }
 
             override fun onServerInaccessible() {
