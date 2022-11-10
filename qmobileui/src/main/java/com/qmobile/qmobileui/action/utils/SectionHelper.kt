@@ -10,6 +10,7 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobileui.action.sort.Sort
+import com.qmobile.qmobileui.action.sort.Sort.getTypeConstraints
 
 object SectionHelper {
 
@@ -35,7 +36,7 @@ object SectionHelper {
 
         val sectionFieldType = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.type
         if (!sectionField.isNullOrEmpty()) {
-            val key = Sort.getTypeConstraints(sectionField, sectionFieldType)
+            val key = getTypeConstraints(sectionField,sectionFieldType, Sort.Order.ASCENDING.value)
             val sortListWithSection = linkedMapOf(key to Sort.Order.ASCENDING.value)
             if (sortFields != null) {
                 sortListWithSection.putAll(sortFields.filter { !it.key.contains(sectionField) })

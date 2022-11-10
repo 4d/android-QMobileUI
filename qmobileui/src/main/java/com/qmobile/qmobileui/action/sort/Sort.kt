@@ -55,16 +55,23 @@ object Sort {
         }
     }
 
-    fun getTypeConstraints(field: String, type: String?): String {
+    fun getTypeConstraints(field: String, type: String?, order: String? = null): String {
         // if the field is a time we have to convert it from string to int, otherwise the AM/PM sort will not work
         // if type is string we make the sort case insensitive
         return when (type) {
             "time" -> "CAST ($field AS INT)"
             "string" -> "$field COLLATE NOCASE"
+            "date" -> { // order by year then month and finally day
+                "replace($field, rtrim($field," +
+                        " replace($field, '!', '')), '') ${order?: Order.ASCENDING.value} ," +   //year
+                        "  substr(replace ($field, substr($field, 0, 1+instr($field, '!')),\"\"), 0, " + // Month
+                        "instr(   replace ($field, substr($field, 0, 1+instr($field, '!')),\"\"), " +
+                        "'!')) ${order?: Order.ASCENDING.value} ," +
+                        "   substr($field, 0, instr($field, '!'))" // Day
+            }
             else -> field
         }
     }
-
     enum class Order(val value: String, val verbose: String) {
         ASCENDING("ASC", "ascending"),
         DESCENDING("DESC", "descending")

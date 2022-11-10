@@ -18,6 +18,7 @@ import com.qmobile.qmobiledatasync.utils.fieldAdjustment
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.model.ActionMetaData
 import com.qmobile.qmobileui.action.sort.Sort
+import com.qmobile.qmobileui.action.sort.Sort.getTypeConstraints
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
@@ -105,7 +106,7 @@ object ActionHelper {
             val type = parameter.getSafeString("type")
             parameter.getSafeString("name")?.let { name ->
                 val fieldName = name.fieldAdjustment()
-                val key = Sort.getTypeConstraints(fieldName, type)
+                val key = getTypeConstraints(fieldName, type,  format)
 
                 if (format.isNotEmpty()) {
                     fieldsToSortBy[key] = format

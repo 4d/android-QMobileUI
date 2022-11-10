@@ -82,40 +82,4 @@ object WebClientHelper {
       }  """
     }
 
-    fun getResponseWithHeader(
-        url: String,
-        headerName: String,
-        headerValue: String,
-        onError: () -> Unit
-    ): WebResourceResponse? {
-        try {
-            val request: Request = Request.Builder()
-                .url(url.trim { it <= ' ' })
-                // Add cookie as header
-                .addHeader("Cookie", BaseApp.sharedPreferencesHolder.cookies)
-                .addHeader(headerName, headerValue)
-                .build()
-            val response: Response = HttpClient.instance.newCall(request).execute()
-            return WebResourceResponse(
-                null,
-                response.header("content-encoding", "utf-8"),
-                response.body.byteStream()
-            )
-        } catch (exception: SocketTimeoutException) {
-            Timber.e("WebClientHelper: ${exception.localizedMessage}")
-            onError()
-            return null
-        }
-    }
-
-    // Singleton http client
-    object HttpClient {
-        private const val timeOut = REQUEST_TIMEOUT.toLong()
-        val instance =
-            OkHttpClient().newBuilder()
-                .connectTimeout(timeOut, TimeUnit.SECONDS) // connect timeout
-                .writeTimeout(timeOut, TimeUnit.SECONDS) // write timeout
-                .readTimeout(timeOut, TimeUnit.SECONDS) // read timeout
-                .build()
-    }
 }

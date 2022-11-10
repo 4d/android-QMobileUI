@@ -84,11 +84,7 @@ class EntityListAdapter internal constructor(
                 val value =
                     getItem(position)?.let { ReflectionUtils.getInstanceProperty(it, sectionField) }
                         ?: ""
-                return when (sectionFieldType) {
-                    "date" -> FormatterUtils.applyFormat("shortDate", value.toString())
-                    "time" -> FormatterUtils.applyFormat("shortTime", value.toString())
-                    else -> value.toString()
-                }
+                return FormatterUtils.applyFormat(sectionFieldType ?: "", value.toString())
             }
         }
     }
