@@ -9,8 +9,8 @@ package com.qmobile.qmobileui.ui
 import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.getColorFromAttr
@@ -53,8 +53,8 @@ object SnackbarHelper {
         if (!message.isNullOrEmpty()) {
             activity?.apply {
                 val snackbar = Snackbar.make(findViewById(R.id.main_container), message, Snackbar.LENGTH_LONG)
-                findViewById<BottomNavigationView>(R.id.bottom_nav)?.let { bottomNav ->
-                    snackbar.anchorView = bottomNav
+                findViewById<TabLayout>(R.id.scrollable_tab_layout)?.let { tabLayout ->
+                    snackbar.anchorView = tabLayout
                 }
                 snackbar.setColors(this, type)
                 duration?.let {

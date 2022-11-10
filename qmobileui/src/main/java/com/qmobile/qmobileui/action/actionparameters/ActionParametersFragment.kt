@@ -54,6 +54,7 @@ import com.qmobile.qmobileui.action.utils.UriHelper.uriToString
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.writeBitmap
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
+import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
 import com.qmobile.qmobileui.ui.CenterLayoutManager
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.setFadeThroughEnterTransition
@@ -236,6 +237,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     private fun setupRecyclerView() {
         val smoothScroller = CenterLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
         binding.parametersRecyclerView.layoutManager = smoothScroller
+        binding.parametersRecyclerView.edgeEffectFactory = BounceEdgeEffectFactory()
         binding.parametersRecyclerView.adapter = adapter
         binding.parametersRecyclerView.addOnScrollListener(onScrollToValidationListener)
         // Important line : prevent recycled views to get their content reset

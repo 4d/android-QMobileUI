@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by qmarciset on 20/10/2022.
+  ~ 4D SAS
+  ~ Copyright (c) 2022 qmarciset. All rights reserved.
+  -->
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/pending_tasks"
+    app:startDestination="@id/tasksFragment">
+
+    <fragment
+        android:id="@+id/tasksFragment"
+        android:name="com.qmobile.qmobileui.action.pendingtasks.TasksFragment"
+        android:label="@string/nav_pending_tasks">
+
+        <action
+            android:id="@+id/to_action_form"
+            app:destination="@id/action_parameters" />
+
+    </fragment>
+
+</navigation>

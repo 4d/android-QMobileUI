@@ -24,10 +24,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.google.android.material.elevation.SurfaceColors
 import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.ApiClient
@@ -94,7 +95,6 @@ class MainActivity :
     private var onLaunch = true
     private var authenticationRequested = true
     private var shouldDelayOnForegroundEvent = AtomicBoolean(false)
-    private var currentNavController: LiveData<NavController>? = null
     private lateinit var binding: ActivityMainBinding
     private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
@@ -108,9 +108,13 @@ class MainActivity :
     private var noInternetString = ""
     private var noInternetActionString = ""
     private var pendingTaskString = ""
+    private var settingsString = ""
 
     override val activityResultControllerImpl = ActivityResultControllerImpl(this)
     override val permissionCheckerImpl = PermissionCheckerImpl(this)
+
+    val navController: NavController
+        get() = (supportFragmentManager.findFragmentById(R.id.nav_host_container) as NavHostFragment).navController
 
     val currentNavigationFragment: Fragment?
         get() = supportFragmentManager.findFragmentById(R.id.nav_host_container)
@@ -145,6 +149,14 @@ class MainActivity :
             }
         }
 
+        binding.scrollableTabLayout.applyInsetter {
+            type(navigationBars = true) {
+                padding(animated = true)
+            }
+        }
+
+        binding.scrollableTabLayout.setBackgroundColor(SurfaceColors.SURFACE_2.getColor(this))
+
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
             WindowCompat.setDecorFitsSystemWindows(window, false)
         }
@@ -152,9 +164,9 @@ class MainActivity :
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
             if (imeVisible) {
-                binding.bottomNav.visibility = View.GONE
+                binding.scrollableTabLayout.visibility = View.GONE
             } else {
-                binding.bottomNav.visibility = View.VISIBLE
+                binding.scrollableTabLayout.visibility = View.VISIBLE
             }
             insets
         }
@@ -164,6 +176,7 @@ class MainActivity :
         noInternetString = getString(R.string.no_internet)
         noInternetActionString = getString(R.string.action_send_no_internet)
         pendingTaskString = getString(R.string.pending_task_menu_item)
+        settingsString = getString(R.string.settings_navbar_title)
 
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -171,7 +184,7 @@ class MainActivity :
         if (savedInstanceState == null) {
             // Retrieve bundled parameter to know if there was a successful login with statusText
             loginStatusText = intent.getStringExtra(LOGIN_STATUS_TEXT) ?: ""
-            setupBottomNavigationBar()
+            setupTabLayout()
         } // Else, need to wait for onRestoreInstanceState
 
         // Init ApiClients
@@ -192,15 +205,15 @@ class MainActivity :
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        // Now that BottomNavigationBar has restored its instance state
+        // Now that TabLayout has restored its instance state
         // and its selectedItemId, we can proceed with setting up the
-        // BottomNavigationBar with Navigation
-        setupBottomNavigationBar()
+        // TabLayout with Navigation
+        setupTabLayout()
     }
 
     // Back button from appbar
     override fun onSupportNavigateUp(): Boolean {
-        return currentNavController?.value?.navigateUp() ?: false
+        return navController.navigateUp()
     }
 
     // Get EntityListViewModel list
@@ -377,7 +390,7 @@ class MainActivity :
     ) {
         (menu as? MenuBuilder)?.setOptionalIconsVisible(true)
 
-        val withIcons = actions.firstOrNull { it.getIconDrawablePath() != null } != null
+        val withIcons = actions.firstOrNull { it.getIconDrawablePath() != null } != null || actions.isEmpty()
         var order = 0
         actions.forEach { action ->
             val drawable = if (withIcons) ActionUIHelper.getActionIconDrawable(this, action) else null
@@ -399,7 +412,7 @@ class MainActivity :
             order++
         }
 
-        // Ps: if we have only one action and having (preset = sort) it should be applied by default and already deleted from actions list)
+        // If we have only one action and having (preset = sort) it should be applied by default and already deleted from actions list)
         // Check if actions is not empty and contains at least one regular (non sort or openUrl) action
         if (actions.isNotEmpty() && actions.firstOrNull { !(it.isSortAction() || it.isOpenUrlAction()) } != null) {
             // Add pendingTasks menu item at the end
@@ -416,6 +429,19 @@ class MainActivity :
                 .setIcon(drawable?.adjustActionDrawableMargins())
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         }
+
+        // Add Settings
+        val drawable =
+            if (withIcons) ContextCompat.getDrawable(this, R.drawable.settings) else null
+        drawable?.paramMenuActionDrawable(this)
+        menu.add(1, Random().nextInt(), order, settingsString)
+            .setOnMenuItemClickListener {
+                BaseApp.genericNavigationResolver.navigateToSettings(this)
+                true
+            }
+            .setIcon(drawable?.adjustActionDrawableMargins())
+            .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1) {
             menu.setGroupDividerEnabled(true)
         }
@@ -618,24 +644,14 @@ class MainActivity :
     /**
      * Called on first creation and when restoring state.
      */
-    private fun setupBottomNavigationBar() {
-        binding.bottomNav.menu.clear() // clear old inflated items.
-        BaseApp.bottomNavigationMenu?.let {
-            binding.bottomNav.inflateMenu(it)
-        }
-
-        val navGraphIds = BaseApp.navGraphIds
-
-        // Setup the bottom navigation view with a list of navigation graphs
-        val controller = binding.bottomNav.setupWithNavController(
-            navGraphIds = navGraphIds,
+    private fun setupTabLayout() {
+        // Setup the TabLayout with a list of navigation graphs
+        val controller = binding.scrollableTabLayout.setupWithNavController(
             fragmentManager = supportFragmentManager,
-            containerId = R.id.nav_host_container,
             intent = intent
         ) {
             // If we are on a fullscreen activity and we change nav item, we need to cancel fullscreen mode
             setFullScreenMode(false)
-            binding.appbar.setExpanded(true, true)
         }
         // Whenever the selected controller changes, setup the action bar.
         controller.observe(
@@ -643,7 +659,6 @@ class MainActivity :
         ) { navController ->
             setupActionBarWithNavController(navController)
         }
-        currentNavController = controller
     }
 
     override fun sendPendingTasks() {
@@ -695,10 +710,10 @@ class MainActivity :
         setMaterialFadeTransition(binding.mainContainer, true)
         if (isFullScreen) {
             binding.collapsingToolbar.visibility = View.GONE
-            binding.bottomNav.visibility = View.GONE
+            binding.scrollableTabLayout.visibility = View.GONE
         } else {
             binding.collapsingToolbar.visibility = View.VISIBLE
-            binding.bottomNav.visibility = View.VISIBLE
+            binding.scrollableTabLayout.visibility = View.VISIBLE
         }
     }
 

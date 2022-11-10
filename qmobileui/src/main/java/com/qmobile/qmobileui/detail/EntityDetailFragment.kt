@@ -51,7 +51,6 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
 
     override lateinit var actionActivity: ActionActivity
     private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
-    private var hasActions = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,8 +70,6 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
         // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
         entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
 
-        hasActions = currentRecordActionsJsonObject.has(tableName)
-
         _binding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
             ResourcesHelper.detailLayoutFromTable(inflater.context, tableName),
@@ -87,10 +84,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
             webView.webViewClient = MyWebViewClient()
             webView.adjustSize()
         }
-
-        if (::webView.isInitialized || hasActions) {
-            initMenuProvider()
-        }
+        initMenuProvider()
 
         return binding.root
     }
@@ -102,7 +96,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.menu_webview, menu)
-        setupActionsMenuIfNeeded(menu)
+        setupActionsMenu(menu)
         setupWebViewMenuIfNeeded(menu)
     }
 
@@ -110,14 +104,12 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
         return false
     }
 
-    private fun setupActionsMenuIfNeeded(menu: Menu) {
-        if (hasActions) {
-            val currentRecordActions = mutableListOf<Action>()
-            ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
-            // actionActivity.setCurrentEntityModel() is called in EntityViewPagerFragment#onPageSelected()
-            actionActivity.setupActionsMenu(menu, currentRecordActions, this) {
-                // Nothing to do
-            }
+    private fun setupActionsMenu(menu: Menu) {
+        val currentRecordActions = mutableListOf<Action>()
+        ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
+        // actionActivity.setCurrentEntityModel() is called in EntityViewPagerFragment#onPageSelected()
+        actionActivity.setupActionsMenu(menu, currentRecordActions, this) {
+            // Nothing to do
         }
     }
 

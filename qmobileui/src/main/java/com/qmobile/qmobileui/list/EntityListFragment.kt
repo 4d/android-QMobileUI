@@ -81,7 +81,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     private val tableActions = mutableListOf<Action>()
     private val currentRecordActions = mutableListOf<Action>()
     private var hasSearch = false
-    private var hasTableActions = false
     private var hasCurrentRecordActions = false
     private var isSwipable = false
     private var searchPattern = "" // search area
@@ -122,16 +121,12 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         formQueryBuilder = FormQueryBuilder(tableName)
 
         hasSearch = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchFields?.isNotEmpty() == true
-        hasTableActions = tableActionsJsonObject.has(tableName)
         hasCurrentRecordActions = currentRecordActionsJsonObject.has(tableName)
         isSwipable = BaseApp.genericTableFragmentHelper.isSwipeAllowed(tableName)
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-        if (hasSearch || hasTableActions) {
-            initMenuProvider()
-        } else {
-            setSearchQuery()
-        }
+
+        initMenuProvider()
 
         _binding = FragmentListBinding.inflate(inflater, container, false).apply {
             viewModel = entityListViewModel
@@ -178,10 +173,10 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
                 setSharedAxisXExitTransition()
                 BaseApp.genericNavigationResolver.navigateFromListToViewPager(
                     viewDataBinding = dataBinding,
+                    sourceTable = relation?.source ?: tableName,
                     key = key,
                     position = position,
                     query = searchPattern,
-                    sourceTable = relation?.source ?: tableName,
                     relationName = relation?.name ?: "",
                     parentItemId = parentItemId,
                     path = path
@@ -248,7 +243,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     private fun initActions() {
         tableActions.clear()
         currentRecordActions.clear()
-        if (hasTableActions) {
+        if (tableActionsJsonObject.has(tableName)) {
             ActionHelper.fillActionList(tableActionsJsonObject, tableName, tableActions)
         }
         if (hasCurrentRecordActions) {
@@ -335,7 +330,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        setupActionsMenuIfNeeded(menu)
+        setupActionsMenu(menu)
         setupSearchMenuIfNeeded(menu, menuInflater)
         setSearchQuery()
     }
@@ -359,7 +354,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         super.onPrepareMenu(menu)
     }
 
-    private fun setupActionsMenuIfNeeded(menu: Menu) {
+    private fun setupActionsMenu(menu: Menu) {
         val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
         val sortActions = tableActions.filter { it.isSortAction() }
         // If user already applied a sort, we need no more to apply default sort
@@ -380,11 +375,9 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
             tableActions
         }
 
-        if (hasTableActions) {
-            actionActivity.setupActionsMenu(menu, actionsForMenu, this) { onSortAction ->
-                Sort.saveSortChoice(tableName, onSortAction.sortFields)
-                setSearchQuery()
-            }
+        actionActivity.setupActionsMenu(menu, actionsForMenu, this) { onSortAction ->
+            Sort.saveSortChoice(tableName, onSortAction.sortFields)
+            setSearchQuery()
         }
     }
 

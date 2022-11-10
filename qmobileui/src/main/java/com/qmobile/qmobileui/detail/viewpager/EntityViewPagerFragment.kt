@@ -26,6 +26,7 @@ import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.binding.ImageHelper
+import com.qmobile.qmobileui.ui.DepthPageTransformer
 import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
@@ -104,6 +105,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewPager?.setPageTransformer(DepthPageTransformer())
         adapter = ViewPagerAdapter(this, tableName)
         viewPager?.adapter = adapter
         viewPager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
