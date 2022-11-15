@@ -78,7 +78,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:enabled="@{safeUnbox(viewModel.emailValid) ? true : false}"
-            android:padding="@dimen/login_button_padding"
             android:text="@string/login_button_text"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

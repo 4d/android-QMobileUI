@@ -183,7 +183,11 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
     private fun login() {
         if (connectivityViewModel.isConnected()) {
             binding.loginButtonAuth.isEnabled = false
-            loginViewModel.login(email = binding.loginEmailInput.text.toString()) { }
+            loginViewModel.login(email = binding.loginEmailInput.text.toString()) { success ->
+                if (!success) {
+                    binding.loginButtonAuth.isEnabled = true
+                }
+            }
         } else {
             SnackbarHelper.show(this, getString(R.string.no_internet), ToastMessage.Type.WARNING)
         }
@@ -256,17 +260,10 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
 
     // Observe authentication state
     override fun handleAuthenticationState(authenticationState: AuthenticationState) {
-        when (authenticationState) {
-            AuthenticationState.AUTHENTICATED -> {
-                startMainActivity(false, loginViewModel.statusMessage)
-            }
-            AuthenticationState.INVALID_AUTHENTICATION -> {
-                binding.loginButtonAuth.isEnabled = true
-            }
-            else -> {
-                // Default state in LoginActivity
-                binding.loginButtonAuth.isEnabled = true
-            }
+        if (authenticationState == AuthenticationState.AUTHENTICATED) {
+            startMainActivity(false, loginViewModel.statusMessage)
+        } else {
+            binding.loginButtonAuth.isEnabled = true
         }
     }
 

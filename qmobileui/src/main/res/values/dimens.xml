@@ -6,7 +6,6 @@
 
 <resources>
     <!--    Login -->
-    <dimen name="login_button_padding">10dp</dimen>
     <dimen name="login_layout_margin">24dp</dimen>
     <dimen name="login_layout_margin_small">8dp</dimen>
 
