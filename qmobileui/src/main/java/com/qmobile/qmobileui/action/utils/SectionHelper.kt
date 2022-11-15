@@ -39,7 +39,7 @@ object SectionHelper {
             val key = getTypeConstraints(sectionField, sectionFieldType, Sort.Order.ASCENDING.value)
             val sortListWithSection = linkedMapOf(key to Sort.Order.ASCENDING.value)
             if (sortFields != null) {
-                sortListWithSection.putAll(sortFields.filter { !it.key.contains(sectionField) })
+                sortListWithSection.putAll(sortFields)
             }
             return sortListWithSection
         }
