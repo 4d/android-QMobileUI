@@ -32,7 +32,7 @@ abstract class BaseFragment : Fragment() {
 
     internal lateinit var delegate: FragmentCommunication
 
-    internal var navbarTitle = ""
+    internal var navbarTitle: String? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

@@ -19,6 +19,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.core.view.MenuProvider
+import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import com.qmobile.qmobileapi.model.entity.EntityModel
@@ -67,7 +68,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        activity?.setupToolbarTitle(navbarTitle)
+        navbarTitle?.let { activity?.setupToolbarTitle(it) }
         // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
         entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
 
@@ -90,6 +91,9 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
             webView.adjustSize()
         }
         initMenuProvider()
+
+        binding.root.findViewById<NestedScrollView>(R.id.base_detail_scroll_view)
+            ?.setPadding(0, 0, 0, getPaddingBottom())
 
         return binding.root
     }

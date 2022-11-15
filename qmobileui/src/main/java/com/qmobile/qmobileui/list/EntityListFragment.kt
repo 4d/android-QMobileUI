@@ -93,10 +93,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         setSharedAxisXEnterTransition()
 
         // Base entity list fragment
-        arguments?.getString("tableName")?.let {
-            tableName = it
-            navbarTitle = it
-        }
+        arguments?.getString("tableName")?.let { tableName = it }
+        arguments?.getString("navbarTitle")?.let { navbarTitle = it }
         // Entity list fragment from relation
         arguments?.getString("relationName")?.let { relationName ->
             if (relationName.isNotEmpty()) {
@@ -106,7 +104,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
                 tableName = relation?.dest ?: tableName
                 arguments?.getString("parentItemId")?.let { parentItemId = it }
                 arguments?.getString("path")?.let { path = it }
-                arguments?.getString("navbarTitle")?.let { navbarTitle = it }
                 setSharedAxisZEnterTransition()
             }
         }
@@ -117,7 +114,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        activity?.setupToolbarTitle(navbarTitle)
+        navbarTitle?.let { activity?.setupToolbarTitle(it) }
         formQueryBuilder = FormQueryBuilder(tableName)
 
         hasSearch = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchFields?.isNotEmpty() == true
@@ -148,6 +145,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
 
         initActions()
         initCellSwipe()
+        initAdapter()
         initRecyclerView()
         initOnRefreshListener()
         EntityListFragmentObserver(this, entityListViewModel).initObservers()
@@ -162,10 +160,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         super.onDestroyView()
     }
 
-    /**
-     * Initialize recyclerView
-     */
-    private fun initRecyclerView() {
+    private fun initAdapter() {
         adapter = EntityListAdapter(
             tableName = tableName,
             lifecycleOwner = viewLifecycleOwner,
@@ -179,7 +174,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
                     query = searchPattern,
                     relationName = relation?.name ?: "",
                     parentItemId = parentItemId,
-                    path = path
+                    path = path,
+                    navbarTitle = navbarTitle ?: ""
                 )
             },
             onItemLongClick = { currentEntity ->
@@ -191,7 +187,12 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
                 }
             }
         )
+    }
 
+    /**
+     * Initialize recyclerView
+     */
+    private fun initRecyclerView() {
         when (BaseApp.genericTableFragmentHelper.layoutType(tableName)) {
             LayoutType.GRID -> {
                 val gridSpanCount = resources.getInteger(R.integer.grid_span_count)

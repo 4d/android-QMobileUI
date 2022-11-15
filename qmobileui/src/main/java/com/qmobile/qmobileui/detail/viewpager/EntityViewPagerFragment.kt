@@ -64,6 +64,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("searchQueryPattern")?.let { searchQueryPattern = it }
         arguments?.getInt("position")?.let { position = it }
+        arguments?.getString("navbarTitle")?.let { navbarTitle = it }
 
         arguments?.getString("relationName")?.let { relationName ->
             if (relationName.isNotEmpty()) {
@@ -81,11 +82,10 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        activity?.setupToolbarTitle(tableName)
+        navbarTitle?.let { activity?.setupToolbarTitle(it) }
         val view = inflater.inflate(R.layout.fragment_pager, container, false)
 
         viewPager = view.findViewById(R.id.view_pager) as ViewPager2
-        viewPager?.setPadding(0, 0, 0, getPaddingBottom())
         circularProgressIndicator = view.findViewById(R.id.circular_progress)
 
         formQueryBuilder = FormQueryBuilder(tableName)

@@ -185,7 +185,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         savedInstanceState: Bundle?
     ): View {
         initMenuProvider()
-        activity?.setupToolbarTitle(navbarTitle)
+        navbarTitle?.let { activity?.setupToolbarTitle(it) }
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
             bundle.getString(BARCODE_VALUE_KEY)?.let {
