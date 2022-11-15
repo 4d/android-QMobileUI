@@ -12,6 +12,8 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -121,12 +123,26 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         shakeAnimation = AnimationUtils.loadAnimation(this, R.anim.shake)
 
         binding.loginEmailInput.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                validateText()
-            } else {
+            if (hasFocus) {
                 binding.loginEmailContainer.error = null
+            } else {
+                validateText(true)
             }
         }
+
+        binding.loginEmailInput.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                // Nothing to do
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Nothing to do
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                s?.let { validateText(false) }
+            }
+        })
 
         binding.loginEmailInput.setOnEditorActionListener { textView, actionId, keyEvent ->
             if ((keyEvent?.keyCode == KeyEvent.KEYCODE_ENTER && keyEvent.action == KeyEvent.ACTION_UP) ||
@@ -134,7 +150,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
             ) {
                 hideKeyboard(this)
                 textView.clearFocus()
-                if (validateText()) {
+                if (validateText(true)) {
                     login()
                 }
             }
@@ -150,14 +166,16 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         }
     }
 
-    private fun validateText(): Boolean =
+    private fun validateText(displayError: Boolean): Boolean =
         if (binding.loginEmailInput.text.toString().isEmailValid()) {
             loginViewModel.setEmailValidState(true)
             binding.loginEmailContainer.error = null
             true
         } else {
-            binding.loginEmailInput.startAnimation(shakeAnimation)
-            binding.loginEmailContainer.error = getString(R.string.login_invalid_email)
+            if (displayError) {
+                binding.loginEmailInput.startAnimation(shakeAnimation)
+                binding.loginEmailContainer.error = getString(R.string.login_invalid_email)
+            }
             loginViewModel.setEmailValidState(false)
             false
         }
