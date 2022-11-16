@@ -11,14 +11,17 @@ import com.qmobile.qmobileapi.utils.getJSONObjectList
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileapi.utils.parseToString
+import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper.inverseAliasPath
 import com.qmobile.qmobiledatasync.utils.fieldAdjustment
+import com.qmobile.qmobileui.action.inputcontrols.InputControl
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.model.ActionMetaData
 import com.qmobile.qmobileui.action.sort.Sort
 import com.qmobile.qmobileui.action.sort.Sort.getTypeConstraints
+import com.qmobile.qmobileui.formatters.TimeFormat
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
@@ -142,5 +145,33 @@ object ActionHelper {
     fun getBase64EncodedContext(actionContent: Map<String, Any>): String {
         val context = BaseApp.mapper.parseToString(actionContent["context"])
         return Base64.encodeToString(context.toByteArray(), Base64.NO_WRAP)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun ActionTask.cleanActionContent(): MutableMap<String, Any> {
+        val newActionContent = this.actionContent?.toMutableMap() ?: return mutableMapOf()
+        cleanInputControlFormatHolders(this, newActionContent)
+        (newActionContent["parameters"] as? MutableMap<String, Any?>)?.let { parameters ->
+            this.getParametersAsList().forEach { actionParameter ->
+                convertTimeToSeconds(actionParameter, parameters)
+            }
+        }
+        return newActionContent
+    }
+
+    private fun cleanInputControlFormatHolders(actionTask: ActionTask, content: MutableMap<String, Any>) {
+        for (i in 0 until actionTask.getNbParameters()) {
+            content.remove(InputControl.INPUT_CONTROL_FORMAT_HOLDER_KEY + "_$i")
+        }
+    }
+
+    private fun convertTimeToSeconds(actionParameter: JSONObject, parameters: MutableMap<String, Any?>) {
+        if (actionParameter.getSafeString("type") == "time") {
+            actionParameter.getSafeString("name")?.let { parameterName ->
+                (parameters[parameterName] as? Long?)?.let { millisValue ->
+                    parameters[parameterName] = millisValue / TimeFormat.INT_1000
+                }
+            }
+        }
     }
 }

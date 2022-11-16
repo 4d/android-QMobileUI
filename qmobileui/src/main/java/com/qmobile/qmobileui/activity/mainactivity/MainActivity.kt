@@ -57,9 +57,9 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
 import com.qmobile.qmobileui.action.barcode.BarcodeScannerFragment
-import com.qmobile.qmobileui.action.inputcontrols.InputControl.Format.cleanActionContent
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
+import com.qmobile.qmobileui.action.utils.ActionHelper.cleanActionContent
 import com.qmobile.qmobileui.action.utils.ActionUIHelper
 import com.qmobile.qmobileui.action.utils.ActionUIHelper.getMenuDrawable
 import com.qmobile.qmobileui.action.utils.ActionUIHelper.setMenuItemColorFilter
@@ -521,6 +521,7 @@ class MainActivity :
             override fun onServerAccessible() {
                 val savedActionContent = actionTask.actionContent
                 val cleanedActionContent = actionTask.cleanActionContent()
+
                 entityListViewModelList.firstOrNull()
                     ?.sendAction(actionTask.actionInfo.actionName, cleanedActionContent) { actionResponse ->
                         actionResponse?.let {

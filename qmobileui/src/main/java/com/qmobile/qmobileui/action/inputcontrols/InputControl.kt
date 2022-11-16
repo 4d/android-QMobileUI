@@ -28,7 +28,7 @@ import kotlin.collections.LinkedHashMap
 
 object InputControl {
 
-    private const val INPUT_CONTROL_FORMAT_HOLDER_KEY = "__temporary_input_control_format_holder_"
+    const val INPUT_CONTROL_FORMAT_HOLDER_KEY = "__temporary_input_control_format_holder_"
 
     enum class Types(val format: String) {
         PUSH("/push"),
@@ -244,14 +244,6 @@ object InputControl {
                 return BaseApp.mapper.parseToType(it.toString())
             }
             return null
-        }
-
-        fun ActionTask.cleanActionContent(): MutableMap<String, Any> {
-            val newActionContent = this.actionContent?.toMutableMap() ?: return mutableMapOf()
-            for (i in 0 until this.getNbParameters()) {
-                newActionContent.remove(INPUT_CONTROL_FORMAT_HOLDER_KEY + "_$i")
-            }
-            return newActionContent
         }
     }
 }

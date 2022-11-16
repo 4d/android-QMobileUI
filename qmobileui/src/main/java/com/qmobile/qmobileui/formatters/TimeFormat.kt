@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit
 @Suppress("MagicNumber")
 object TimeFormat {
 
+    const val INT_1000 = 1000
+
     fun applyFormat(format: String, baseText: String): String {
         val longText = baseText.toLongOrNull() ?: return ""
         return when (format) {
@@ -26,7 +28,7 @@ object TimeFormat {
     }
 
     fun getShortAMPMTime(millis: Long): String {
-        val totalSecs = millis / 1000
+        val totalSecs = millis / INT_1000
         val days = TimeUnit.SECONDS.toDays(totalSecs).toInt()
         val hours = (TimeUnit.SECONDS.toHours(totalSecs) - days * 24).toInt()
         val minutes = (TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60).toInt()
@@ -39,7 +41,7 @@ object TimeFormat {
     }
 
     private fun getLongAMPMTime(millis: Long): String {
-        val totalSecs = millis / 1000
+        val totalSecs = millis / INT_1000
         val days = TimeUnit.SECONDS.toDays(totalSecs).toInt()
         val hours = (TimeUnit.SECONDS.toHours(totalSecs) - days * 24).toInt()
         val minutes = (TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60).toInt()
@@ -53,7 +55,7 @@ object TimeFormat {
     }
 
     fun toVerboseDuration(millis: Long): String {
-        val totalSecs = millis / 1000
+        val totalSecs = millis / INT_1000
         val days = TimeUnit.SECONDS.toDays(totalSecs).toInt()
         val hours = (TimeUnit.SECONDS.toHours(totalSecs) - days * 24).toInt()
         val minutes = (TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60).toInt()
@@ -70,7 +72,7 @@ object TimeFormat {
 
     @Suppress("UnnecessaryVariable")
     private fun toShortDuration(millis: Long): String {
-        val totalSecs = millis / 1000
+        val totalSecs = millis / INT_1000
         val hours = TimeUnit.SECONDS.toHours(totalSecs)
         val minutes = TimeUnit.SECONDS.toMinutes(totalSecs) - TimeUnit.SECONDS.toHours(totalSecs) * 60
         val seconds = TimeUnit.SECONDS.toSeconds(totalSecs) - TimeUnit.SECONDS.toMinutes(totalSecs) * 60
@@ -84,11 +86,12 @@ object TimeFormat {
         return timeString
     }
 
-    fun convertToMillis(hour: Int, minute: Int, seconds: Int = 0): Int = (hour * 3600 + minute * 60 + seconds) * 1000
+    fun convertToMillis(hour: Int, minute: Int, seconds: Int = 0): Int =
+        (hour * 3600 + minute * 60 + seconds) * INT_1000
 
     fun getElapsedTime(date: Date): String {
         val diff: Long = Date().time - date.time
-        val totalSecs = diff / 1000
+        val totalSecs = diff / INT_1000
         val days = TimeUnit.SECONDS.toDays(totalSecs).toInt()
         val hours = TimeUnit.SECONDS.toHours(totalSecs).toInt()
         val minutes = TimeUnit.SECONDS.toMinutes(totalSecs).toInt()
