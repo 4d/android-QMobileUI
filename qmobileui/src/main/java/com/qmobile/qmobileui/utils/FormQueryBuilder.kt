@@ -33,7 +33,7 @@ class FormQueryBuilder(
         }
 
         val stringBuilder = if (sectionRelationQuery.isNotEmpty()) {
-            StringBuilder("SELECT * FROM $tableName $sectionRelationQuery AND ")
+            StringBuilder("SELECT * FROM $tableName ${sectionRelationQuery.removePrefix(" ")} AND ")
         } else {
             StringBuilder("SELECT * FROM $tableName AS T1 WHERE ")
         }

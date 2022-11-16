@@ -58,8 +58,8 @@ object SectionHelper {
     }
 
     private fun getQuery(relation: Relation): String {
-        return " AS $SOURCE_TABLE_SQL_NAME LEFT  JOIN ${relation.dest} " +
-            " $DESTINATION_TABLE_SQL_NAME WHERE " +
+        return " AS $SOURCE_TABLE_SQL_NAME LEFT JOIN ${relation.dest} " +
+            "$DESTINATION_TABLE_SQL_NAME WHERE " +
             "$DESTINATION_TABLE_SQL_NAME.__KEY = $SOURCE_TABLE_SQL_NAME.__${relation.name}KEY"
     }
 }

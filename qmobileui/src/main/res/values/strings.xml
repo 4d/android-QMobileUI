@@ -71,7 +71,7 @@
     <string name="search_title">search_title</string>
 
     <!-- Actions -->
-    <string name="action_send_no_internet">Check your connexion, your action will be executed later</string>
+    <string name="action_send_no_internet">Check your Internet connection, your action will be executed later</string>
     <string name="action_send_server_not_accessible">The server is not available, your action will be executed later</string>
     <string name="retry_action">Retry</string>
     <string name="open_url_retry_dialog">Try again</string>
