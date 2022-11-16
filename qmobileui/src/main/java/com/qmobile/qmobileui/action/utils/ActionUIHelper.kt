@@ -20,32 +20,29 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
+import com.qmobile.qmobileui.binding.ImageHelper.getDrawableFromResId
 import com.qmobile.qmobileui.binding.getColorFromAttr
 import com.qmobile.qmobileui.binding.px
 
 object ActionUIHelper {
 
-    fun getActionIconDrawable(context: Context, action: Action): Drawable? {
-        var drawable: Drawable? = ImageHelper.getDrawableFromString(
-            context,
-            action.icon,
-            ImageHelper.DRAWABLE_32.px,
-            ImageHelper.DRAWABLE_32.px
-        )
+    fun getActionIconDrawable(context: Context, action: Action, size: Int): Drawable? {
+        var drawable: Drawable? = ImageHelper.getDrawableFromString(context, action.icon, size, size)
 
         if (drawable == null) {
-            drawable = ContextCompat.getDrawable(context, R.drawable.empty_action)
+            drawable = getDrawableFromResId(context, R.drawable.empty_action, size, size)
         }
 
         return drawable?.adjustActionDrawableMargins()
     }
 
-    fun Drawable.paramMenuActionDrawable(context: Context) {
-        this.setMenuItemColorFilter(context)
-        this.setBounds(0, 0, ImageHelper.DRAWABLE_24.px, ImageHelper.DRAWABLE_24.px)
+    fun getMenuDrawable(context: Context, resId: Int): Drawable? {
+        val drawable = ContextCompat.getDrawable(context, resId)
+        drawable?.setMenuItemColorFilter(context)
+        return drawable?.adjustActionDrawableMargins()
     }
 
-    private fun Drawable.setMenuItemColorFilter(context: Context) {
+    fun Drawable.setMenuItemColorFilter(context: Context) {
         this.colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
             context.getColorFromAttr(R.attr.colorOnSurface),
             BlendModeCompat.SRC_ATOP
@@ -71,7 +68,7 @@ object ActionUIHelper {
                 val action = actionList[position]
 
                 if (withIcons) {
-                    val drawable = getActionIconDrawable(context, action)
+                    val drawable = getActionIconDrawable(context, action, ImageHelper.DRAWABLE_32.px)
                     textView.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
                     TextViewCompat.setCompoundDrawableTintList(textView, textView.textColors)
                     // Add margin between image and text (support various screen densities)

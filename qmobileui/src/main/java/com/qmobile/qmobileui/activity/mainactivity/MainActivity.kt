@@ -16,7 +16,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.view.menu.MenuBuilder
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -62,11 +61,13 @@ import com.qmobile.qmobileui.action.inputcontrols.InputControl.Format.cleanActio
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.action.utils.ActionUIHelper
-import com.qmobile.qmobileui.action.utils.ActionUIHelper.paramMenuActionDrawable
+import com.qmobile.qmobileui.action.utils.ActionUIHelper.getMenuDrawable
+import com.qmobile.qmobileui.action.utils.ActionUIHelper.setMenuItemColorFilter
 import com.qmobile.qmobileui.action.webview.ActionWebViewFragment
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
-import com.qmobile.qmobileui.binding.ImageHelper.adjustActionDrawableMargins
+import com.qmobile.qmobileui.binding.ImageHelper
+import com.qmobile.qmobileui.binding.px
 import com.qmobile.qmobileui.databinding.ActivityMainBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
@@ -393,8 +394,9 @@ class MainActivity :
         val withIcons = actions.firstOrNull { it.getIconDrawablePath() != null } != null || actions.isEmpty()
         var order = 0
         actions.forEach { action ->
-            val drawable = if (withIcons) ActionUIHelper.getActionIconDrawable(this, action) else null
-            drawable?.paramMenuActionDrawable(this)
+            val drawable =
+                if (withIcons) ActionUIHelper.getActionIconDrawable(this, action, ImageHelper.DRAWABLE_24.px) else null
+            drawable?.setMenuItemColorFilter(this)
 
             // not giving a simple string because we want a divider before pending tasks
             menu.add(0, action.hashCode(), order, action.getPreferredName())
@@ -417,8 +419,7 @@ class MainActivity :
         if (actions.isNotEmpty() && actions.firstOrNull { !(it.isSortAction() || it.isOpenUrlAction()) } != null) {
             // Add pendingTasks menu item at the end
             val drawable =
-                if (withIcons) ContextCompat.getDrawable(this, R.drawable.pending_actions) else null
-            drawable?.paramMenuActionDrawable(this)
+                if (withIcons) getMenuDrawable(this, R.drawable.pending_actions) else null
 
             // not giving a simple string because we want a divider before pending tasks
             menu.add(1, Random().nextInt(), order, pendingTaskString)
@@ -426,20 +427,20 @@ class MainActivity :
                     actionNavigable.navigateToPendingTasks()
                     true
                 }
-                .setIcon(drawable?.adjustActionDrawableMargins())
+                .setIcon(drawable)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         }
 
         // Add Settings
         val drawable =
-            if (withIcons) ContextCompat.getDrawable(this, R.drawable.settings) else null
-        drawable?.paramMenuActionDrawable(this)
+            if (withIcons) getMenuDrawable(this, R.drawable.settings) else null
+
         menu.add(1, Random().nextInt(), order, settingsString)
             .setOnMenuItemClickListener {
                 BaseApp.genericNavigationResolver.navigateToSettings(this)
                 true
             }
-            .setIcon(drawable?.adjustActionDrawableMargins())
+            .setIcon(drawable)
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1) {

@@ -131,17 +131,22 @@ object ImageHelper {
         }
     }
 
+    fun getDrawableFromResId(context: Context, resId: Int, width: Int, height: Int): Drawable? {
+        var drawable = ContextCompat.getDrawable(context, resId)
+        drawable?.let {
+            val wrappedDrawable = WrappedDrawable(it)
+            wrappedDrawable.setBounds(0, 0, width, height)
+            val bitmap = wrappedDrawable.toBitmap()
+            drawable = BitmapDrawable(context.resources, bitmap)
+        }
+        return drawable
+    }
+
     fun getDrawableFromString(context: Context, drawablePath: String?, width: Int, height: Int): Drawable? {
         var drawable: Drawable? = null
         val resId = getResId(context, drawablePath)
         if (resId != 0) {
-            drawable = ContextCompat.getDrawable(context, resId)
-            drawable?.let {
-                val wrappedDrawable = WrappedDrawable(it)
-                wrappedDrawable.setBounds(0, 0, width, height)
-                val bitmap = wrappedDrawable.toBitmap()
-                drawable = BitmapDrawable(context.resources, bitmap)
-            }
+            drawable = getDrawableFromResId(context, resId, width, height)
         }
         return drawable
     }
