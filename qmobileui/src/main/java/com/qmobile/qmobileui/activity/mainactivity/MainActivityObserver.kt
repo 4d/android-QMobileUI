@@ -52,7 +52,7 @@ class MainActivityObserver(
             when (dataSyncState) {
                 DataSync.State.SYNCHRONIZING, DataSync.State.RESYNC -> {
                     if (entityListViewModel.isToSync.getAndSet(false)) {
-                        entityListViewModel.getEntities {
+                        entityListViewModel.getEntities(true) {
                             Timber.v("Requested data for ${entityListViewModel.getAssociatedTableName()}")
                         }
                     }
