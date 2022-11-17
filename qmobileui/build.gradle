@@ -6,9 +6,9 @@ apply plugin: 'kotlin-kapt'
 apply from: "$rootDir/buildscripts/ktlint.gradle"
 apply from: "$rootDir/buildscripts/testlog.gradle"
 apply from: "$rootDir/buildscripts/detekt.gradle"
-apply from: "$rootDir/buildscripts/jacoco.gradle"
-apply from: "$rootDir/buildscripts/maven-check.gradle"
-apply from: "$rootDir/buildscripts/git-hash.gradle"
+apply from: "../buildscripts/jacoco.gradle"
+apply from: "../buildscripts/maven-check.gradle"
+apply from: "../buildscripts/git-hash.gradle"
 
 dependencies {
 
