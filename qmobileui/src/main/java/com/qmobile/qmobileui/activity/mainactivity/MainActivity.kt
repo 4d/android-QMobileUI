@@ -307,7 +307,7 @@ class MainActivity :
                     when (entityListViewModel?.dataSynchronized?.value) {
                         DataSync.State.UNSYNCHRONIZED -> mainActivityDataSync.dataSync()
                         DataSync.State.SYNCHRONIZED -> {
-                            entityListViewModel.getEntities(false) { shouldSyncData ->
+                            entityListViewModel.getEntities { shouldSyncData ->
                                 if (shouldSyncData) {
                                     mainActivityDataSync.shouldDataSync(currentTableName)
                                 } else {
