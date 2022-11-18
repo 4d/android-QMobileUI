@@ -44,15 +44,17 @@ class NumberViewHolder(itemView: View, format: String) : BaseTextViewHolder(item
     override fun onTextChanged(s: CharSequence) {
         when {
             apu.isSpellOut() -> {
-                val intValue = s.toString().toIntOrNull()
-                if (intValue != null) {
-                    numberValueForSpellOut = intValue.toString()
-                    onValueChanged(parameterName, numberValueForSpellOut, null, validate(false))
-                } else {
-                    numberValueForSpellOut = ""
-                }
+                sendIntValueForSpellOut(s.toString())
             }
             else -> onValueChanged(parameterName, getValueToSend(), null, validate(false))
+        }
+    }
+
+    private fun sendIntValueForSpellOut(input: String) {
+        val intValue = input.toIntOrNull()
+        if (intValue != null) {
+            numberValueForSpellOut = intValue.toString()
+            onValueChanged(parameterName, numberValueForSpellOut, null, validate(false))
         }
     }
 
@@ -134,7 +136,10 @@ class NumberViewHolder(itemView: View, format: String) : BaseTextViewHolder(item
     override fun formattedValue(input: String): String {
         return when {
             apu.isScientific() -> input.toDoubleOrNull()?.toString() ?: input
-            apu.isSpellOut() -> SpellOutFormat.convertNumberToWord(input)
+            apu.isSpellOut() -> {
+                sendIntValueForSpellOut(input)
+                SpellOutFormat.convertNumberToWord(input)
+            }
             apu.isPercentage() -> getPercentageToDisplay(input)
             else -> input
         }
