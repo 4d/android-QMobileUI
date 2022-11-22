@@ -1,5 +1,6 @@
 package com.qmobile.qmobileui.action.sort
 
+import android.util.Log
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.fieldAdjustment
@@ -39,9 +40,13 @@ object Sort {
     }
 
     fun getDefaultSortField(tableName: String): Map<String, String>? {
-        val defaultFieldToSortWith = BaseApp.runtimeDataHolder.tableInfo[tableName]?.defaultSortField
-        return if (defaultFieldToSortWith != null) {
-            mapOf(defaultFieldToSortWith.fieldAdjustment() to Order.ASCENDING.value)
+        val defaultSortField = BaseApp.genericTableHelper.getDefaultSortFieldForTable(tableName)
+
+        val  formattedField = defaultSortField?.name?.fieldAdjustment()
+            ?.let { getTypeConstraints(it, defaultSortField.type, Order.ASCENDING.value) }
+
+        return if (formattedField != null) {
+            mapOf(formattedField to Order.ASCENDING.value)
         } else {
             null
         }
@@ -59,15 +64,16 @@ object Sort {
         // if the field is a time we have to convert it from string to int, otherwise the AM/PM sort will not work
         // if type is string we make the sort case insensitive
         return when (type) {
-            "time" -> "CAST ($field AS INT)"
+            "timeInteger", "shortTime", "mediumTime", "duration" -> "CAST ($field AS INT)"
             "string" -> "$field COLLATE NOCASE"
-            "date" -> { // order by year then month and finally day
-                "replace($field, rtrim($field," +
-                    " replace($field, '!', '')), '') ${order ?: Order.ASCENDING.value} ," + // year
-                    "  substr(replace ($field, substr($field, 0, 1+instr($field, '!')),\"\"), 0, " + // Month
-                    "instr(   replace ($field, substr($field, 0, 1+instr($field, '!')),\"\"), " +
-                    "'!')) ${order ?: Order.ASCENDING.value} ," +
-                    "   substr($field, 0, instr($field, '!'))" // Day
+            "fullDate", "longDate", "mediumDate", "shortDate" -> { // order by year then month and finally day
+                " CAST ( replace($field, rtrim($field, replace($field, '!', '')), '')" +
+                        " AS INT) ${order ?: Order.ASCENDING.value}" + // year
+
+                        " , CAST (REPLACE(substr($field , LENGTH(substr($field, 0, instr($field, '!')))+2,2) ,'!' ,'') " +
+                        "AS INT) ${order ?: Order.ASCENDING.value}" +  //month
+
+                        " ,  CAST (substr($field, 0, instr($field, '!'))AS INT)" // Day
             }
             else -> field
         }
