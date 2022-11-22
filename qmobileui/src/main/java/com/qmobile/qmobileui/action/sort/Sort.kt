@@ -70,7 +70,8 @@ object Sort {
                 " CAST ( replace($field, rtrim($field, replace($field, '!', '')), '')" +
                         " AS INT) ${order ?: Order.ASCENDING.value}" + // year
 
-                        " , CAST (REPLACE(substr($field , LENGTH(substr($field, 0, instr($field, '!')))+2,2) ,'!' ,'') " +
+                        " , CAST (REPLACE(substr($field , " +
+                        "LENGTH(substr($field, 0, instr($field, '!')))+2,2) ,'!' ,'') " +
                         "AS INT) ${order ?: Order.ASCENDING.value}" +  //month
 
                         " ,  CAST (substr($field, 0, instr($field, '!'))AS INT)" // Day
