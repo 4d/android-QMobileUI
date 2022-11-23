@@ -26,7 +26,7 @@ class SettingsFragmentObserver(
         connectivityViewModel.networkStateMonitor.observe(
             fragment.viewLifecycleOwner
         ) { networkState ->
-            if (fragment.firstTime || !fragment.firstTime && networkState == NetworkState.CONNECTED) {
+            if (fragment.firstTime || (!fragment.firstTime && networkState == NetworkState.CONNECTED)) {
                 fragment.firstTime = false
                 fragment.delegate.checkNetwork(fragment)
             }
