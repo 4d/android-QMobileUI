@@ -61,6 +61,20 @@ class TasksFragment : BaseFragment(), NetworkChecker {
         private const val DIVIDER_INSET_START = 56
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is ActionActivity) {
+            actionActivity = context
+        }
+        noInternetString = resources.getString(R.string.no_internet)
+        serverAccessibleString = resources.getString(R.string.server_accessible)
+        serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
+        checkingString = resources.getString(R.string.remote_url_checking)
+        serverAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.domain)
+        serverNotAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.domain_disabled)
+        noInternetDrawable = ContextCompat.getDrawable(context, R.drawable.signal_disconnected)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.getString("tableName")?.let { tableName = it }
@@ -82,14 +96,15 @@ class TasksFragment : BaseFragment(), NetworkChecker {
         _binding = FragmentActionTasksBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner
         }
-        binding.serverStatus.setOnSingleClickListener {
-            onServerStatusClick()
-        }
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.serverStatus.setOnSingleClickListener {
+            onServerStatusClick()
+        }
         initSwipeToDelete()
         setupAdapters()
         initRecyclerViews()
@@ -146,20 +161,6 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                 duration = UNDO_ACTION_DURATION
             )
         }
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is ActionActivity) {
-            actionActivity = context
-        }
-        noInternetString = resources.getString(R.string.no_internet)
-        serverAccessibleString = resources.getString(R.string.server_accessible)
-        serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
-        checkingString = resources.getString(R.string.remote_url_checking)
-        serverAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.domain)
-        serverNotAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.domain_disabled)
-        noInternetDrawable = ContextCompat.getDrawable(context, R.drawable.signal_disconnected)
     }
 
     /**

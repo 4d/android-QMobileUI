@@ -49,6 +49,23 @@ class PushInputControlFragment : BaseFragment(), MenuProvider, InputControlDataH
         private const val SEARCHABLE_THRESHOLD = 10
     }
 
+    private val searchListener: SearchView.OnQueryTextListener =
+        object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                newText?.let {
+                    if (searchPattern != it) {
+                        searchPattern = it
+                        dataSourceHandler?.setSearchQuery(searchPattern)
+                    }
+                }
+                return true
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.getString("name")?.let { inputControlName ->
@@ -62,15 +79,26 @@ class PushInputControlFragment : BaseFragment(), MenuProvider, InputControlDataH
         _binding = InputControlPushFragmentBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner
         }
-
-        setupInputControlData(isMandatory)
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setupInputControlData(isMandatory)
+
         initRecyclerView()
+    }
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        if (hasSearch) {
+            setupSearchView(menu, menuInflater)
+            searchView.setOnQueryTextListener(searchListener)
+        }
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        return false
     }
 
     override fun FieldMapping.prepareStaticData(isMandatory: Boolean) {
@@ -137,33 +165,5 @@ class PushInputControlFragment : BaseFragment(), MenuProvider, InputControlDataH
             parentFragmentManager.setFragmentResult(INPUT_CONTROL_PUSH_FRAGMENT_REQUEST_KEY, result)
         }
         activity?.onBackPressed()
-    }
-
-    private val searchListener: SearchView.OnQueryTextListener =
-        object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                newText?.let {
-                    if (searchPattern != it) {
-                        searchPattern = it
-                        dataSourceHandler?.setSearchQuery(searchPattern)
-                    }
-                }
-                return true
-            }
-        }
-
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        if (hasSearch) {
-            setupSearchView(menu, menuInflater)
-            searchView.setOnQueryTextListener(searchListener)
-        }
-    }
-
-    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        return false
     }
 }

@@ -86,6 +86,31 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     private var searchPattern = "" // search area
     private var relation: Relation? = null
 
+    private val searchListener: SearchView.OnQueryTextListener =
+        object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                newText?.let {
+                    if (searchPattern != it) {
+                        searchPattern = it
+                        setSearchQuery()
+                    }
+                }
+                return true
+            }
+        }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is ActionActivity) {
+            actionActivity = context
+        }
+        // Access resources elements
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         savedInstanceState?.getString(CURRENT_SEARCH_QUERY_KEY, "")?.let { searchPattern = it }
@@ -115,16 +140,8 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         savedInstanceState: Bundle?
     ): View {
         navbarTitle?.let { activity?.setupToolbarTitle(it) }
-        formQueryBuilder = FormQueryBuilder(tableName)
-
-        hasSearch = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchFields?.isNotEmpty() == true
-        hasCurrentRecordActions = currentRecordActionsJsonObject.has(tableName)
-        isSwipable = BaseApp.genericTableFragmentHelper.isSwipeAllowed(tableName)
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-
-        initMenuProvider()
-
         _binding = FragmentListBinding.inflate(inflater, container, false).apply {
             viewModel = entityListViewModel
             lifecycleOwner = viewLifecycleOwner
@@ -132,17 +149,15 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         return binding.root
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is ActionActivity) {
-            actionActivity = context
-        }
-        // Access resources elements
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        formQueryBuilder = FormQueryBuilder(tableName)
 
+        hasSearch = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchFields?.isNotEmpty() == true
+        hasCurrentRecordActions = currentRecordActionsJsonObject.has(tableName)
+        isSwipable = BaseApp.genericTableFragmentHelper.isSwipeAllowed(tableName)
+
+        initMenuProvider()
         initActions()
         initCellSwipe()
         initAdapter()
@@ -158,6 +173,31 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         binding.fragmentListRecyclerView.adapter = null
         _binding = null
         super.onDestroyView()
+    }
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        setupActionsMenu(menu)
+        setupSearchMenuIfNeeded(menu, menuInflater)
+        setSearchQuery()
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
+        if (hasSearch) {
+            searchView.setOnQueryTextListener(searchListener)
+
+            if (searchPattern.isEmpty()) {
+                searchView.onActionViewCollapsed()
+            } else {
+                searchView.setQuery(searchPattern, true)
+                searchView.isIconified = false
+                searchPlate.clearFocus()
+            }
+        }
+        super.onPrepareMenu(menu)
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        return false
     }
 
     private fun initAdapter() {
@@ -311,48 +351,6 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
                 }
             }
         }
-    }
-
-    private val searchListener: SearchView.OnQueryTextListener =
-        object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                newText?.let {
-                    if (searchPattern != it) {
-                        searchPattern = it
-                        setSearchQuery()
-                    }
-                }
-                return true
-            }
-        }
-
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        setupActionsMenu(menu)
-        setupSearchMenuIfNeeded(menu, menuInflater)
-        setSearchQuery()
-    }
-
-    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        return false
-    }
-
-    override fun onPrepareMenu(menu: Menu) {
-        if (hasSearch) {
-            searchView.setOnQueryTextListener(searchListener)
-
-            if (searchPattern.isEmpty()) {
-                searchView.onActionViewCollapsed()
-            } else {
-                searchView.setQuery(searchPattern, true)
-                searchView.isIconified = false
-                searchPlate.clearFocus()
-            }
-        }
-        super.onPrepareMenu(menu)
     }
 
     private fun setupActionsMenu(menu: Menu) {

@@ -154,6 +154,13 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
     private val getCameraImage: ActivityResultLauncher<Uri> = registerCameraImage()
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is ActionActivity) {
+            actionActivity = context
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -184,7 +191,6 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        initMenuProvider()
         navbarTitle?.let { activity?.setupToolbarTitle(it) }
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
@@ -217,6 +223,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initMenuProvider()
         action = retrieveAction()
 
         setupAdapter()
@@ -232,6 +239,33 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
             shouldInitObservers = false
         }
         onHideKeyboardCallback()
+    }
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_actions_parameters, menu)
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
+        validateMenuItem = menu.findItem(R.id.validate)
+        if (fromPendingTasks) {
+            currentTask?.isErrorServer()?.let { isErrorServer ->
+                validateMenuItem.title = if (isErrorServer) { // error server tasks
+                    getString(R.string.retry_action)
+                } else { // pending tasks
+                    getString(R.string.validate_action)
+                }
+            }
+        } else {
+            validateMenuItem.title = getString(R.string.validate_action)
+        }
+        super.onPrepareMenu(menu)
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        if (menuItem.itemId == R.id.validate) {
+            onValidateClick()
+        }
+        return false
     }
 
     private fun setupRecyclerView() {
@@ -324,33 +358,6 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         }
     }
 
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        menuInflater.inflate(R.menu.menu_actions_parameters, menu)
-    }
-
-    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        if (menuItem.itemId == R.id.validate) {
-            onValidateClick()
-        }
-        return false
-    }
-
-    override fun onPrepareMenu(menu: Menu) {
-        validateMenuItem = menu.findItem(R.id.validate)
-        if (fromPendingTasks) {
-            currentTask?.isErrorServer()?.let { isErrorServer ->
-                validateMenuItem.title = if (isErrorServer) { // error server tasks
-                    getString(R.string.retry_action)
-                } else { // pending tasks
-                    getString(R.string.validate_action)
-                }
-            }
-        } else {
-            validateMenuItem.title = getString(R.string.validate_action)
-        }
-        super.onPrepareMenu(menu)
-    }
-
     private fun onValidateClick() {
         if (fromPendingTasks && currentTask?.status == ActionTask.Status.PENDING) {
             // When coming from pending task
@@ -411,13 +418,6 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
                     sendAction()
                 }
             }
-        }
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is ActionActivity) {
-            actionActivity = context
         }
     }
 
@@ -578,7 +578,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         }
     }
 
-    // Callback triggered with an input control datasource has done loading its data and displayed it
+    // Callback triggered when an input control datasource has done loading its data and displayed it
     private fun onDataLoadedCallback() {
         scrollTo(position = parameterPosition, shouldHideKeyboard = false, triggerError = false)
     }

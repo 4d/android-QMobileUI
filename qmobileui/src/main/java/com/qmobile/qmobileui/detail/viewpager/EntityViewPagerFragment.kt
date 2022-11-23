@@ -81,17 +81,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
         savedInstanceState: Bundle?
     ): View? {
         navbarTitle?.let { activity?.setupToolbarTitle(it) }
-        val view = inflater.inflate(R.layout.fragment_pager, container, false)
-
-        viewPager = view.findViewById(R.id.view_pager) as ViewPager2
-        circularProgressIndicator = view.findViewById(R.id.circular_progress)
-
-        formQueryBuilder = FormQueryBuilder(tableName)
-
-        initMenuProvider()
-
-        entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-        return view
+        return inflater.inflate(R.layout.fragment_pager, container, false)
     }
 
     override fun onAttach(context: Context) {
@@ -104,6 +94,16 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        viewPager = view.findViewById(R.id.view_pager) as ViewPager2
+        circularProgressIndicator = view.findViewById(R.id.circular_progress)
+
+        formQueryBuilder = FormQueryBuilder(tableName)
+
+        initMenuProvider()
+
+        entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
+
         viewPager?.setPageTransformer(DepthPageTransformer())
         adapter = ViewPagerAdapter(this, tableName)
         viewPager?.adapter = adapter

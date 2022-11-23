@@ -54,6 +54,14 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
     override lateinit var actionActivity: ActionActivity
     private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is ActionActivity) {
+            actionActivity = context
+        }
+        // Access resources elements
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.getString("navbarTitle")?.let { navbarTitle = it }
@@ -69,8 +77,6 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
         savedInstanceState: Bundle?
     ): View? {
         navbarTitle?.let { activity?.setupToolbarTitle(it) }
-        // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
-        entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
 
         _binding = DataBindingUtil.inflate<ViewDataBinding>(
             inflater,
@@ -80,6 +86,14 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
         ).apply {
             lifecycleOwner = viewLifecycleOwner
         }
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Do not give activity as viewModelStoreOwner as it will always give the same detail form fragment
+        entityViewModel = getEntityViewModel(this, tableName, itemId, delegate.apiService)
 
         binding.root.checkIfChildIsWebView()?.let { foundWebView ->
             webView = foundWebView
@@ -94,12 +108,6 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
 
         binding.root.findViewById<NestedScrollView>(R.id.base_detail_scroll_view)
             ?.setPadding(0, 0, 0, getPaddingBottom())
-
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         EntityDetailFragmentObserver(this, entityViewModel).initObservers()
     }
 
@@ -149,14 +157,6 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
                 }
             }
         }
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is ActionActivity) {
-            actionActivity = context
-        }
-        // Access resources elements
     }
 
     override fun navigateToPendingTasks() {

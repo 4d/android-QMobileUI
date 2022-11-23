@@ -62,6 +62,11 @@ class ActionWebViewFragment : BaseFragment() {
         setupWebView()
     }
 
+    override fun onDetach() {
+        super.onDetach()
+        delegate.setFullScreenMode(false)
+    }
+
     private fun setupWebView() {
         binding.progressCircular.visibility = View.VISIBLE
         delegate.checkNetwork(object : NetworkChecker {
@@ -115,10 +120,5 @@ class ActionWebViewFragment : BaseFragment() {
                 }
                 .show()
         }
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        delegate.setFullScreenMode(false)
     }
 }

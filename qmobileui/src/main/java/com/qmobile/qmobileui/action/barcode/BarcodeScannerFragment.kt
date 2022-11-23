@@ -55,27 +55,26 @@ class BarcodeScannerFragment : BaseFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        cameraExecutor = Executors.newSingleThreadExecutor()
-
         _binding = FragmentBarcodeBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner
         }
+        return binding.root
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        cameraExecutor = Executors.newSingleThreadExecutor()
         binding.topActionBarInLiveCamera.closeButton.setOnSingleClickListener {
             activity?.onBackPressed()
         }
-        return binding.root
+        delegate.setFullScreenMode(true)
+        bindCameraUseCases()
     }
 
     override fun onDestroy() {
         cameraExecutor.shutdown()
         super.onDestroy()
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        delegate.setFullScreenMode(true)
-        bindCameraUseCases()
     }
 
     private fun bindCameraUseCases() {
