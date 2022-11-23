@@ -59,7 +59,6 @@ dependencies {
     implementation Libs.barcode_scanning
 
     // Utils
-    implementation Libs.dynamic_toasts
     implementation Libs.insetter
     implementation Libs.material
     implementation Libs.okhttp_jvm
