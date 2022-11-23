@@ -8,7 +8,6 @@ package com.qmobile.qmobileui.list
 
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
-import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobileui.BR
@@ -17,7 +16,7 @@ import com.qmobile.qmobileui.ui.setOnSingleClickListener
 class ListItemViewHolder(
     private val dataBinding: ViewDataBinding,
     private val tableName: String,
-    private val onItemClick: (ViewDataBinding, String, Int) -> Unit,
+    private val onItemClick: (ViewDataBinding, Int) -> Unit,
     private val onItemLongClick: (RoomEntity) -> Unit
 ) :
     RecyclerView.ViewHolder(dataBinding.root) {
@@ -34,14 +33,12 @@ class ListItemViewHolder(
     }
 
     private fun setupClickListeners(roomEntity: RoomEntity) {
-        (roomEntity.__entity as? EntityModel)?.__KEY?.let { key ->
-            itemView.setOnSingleClickListener {
-                onItemClick(dataBinding, key, bindingAdapterPosition)
-            }
-            itemView.setOnLongClickListener {
-                onItemLongClick(roomEntity)
-                true
-            }
+        itemView.setOnSingleClickListener {
+            onItemClick(dataBinding, bindingAdapterPosition)
+        }
+        itemView.setOnLongClickListener {
+            onItemLongClick(roomEntity)
+            true
         }
     }
 }

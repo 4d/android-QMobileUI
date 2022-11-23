@@ -44,7 +44,6 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
     private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
 
     // fragment parameters
-    internal var key = ""
     private var tableName = ""
     private var searchQueryPattern = ""
     private var parentItemId = ""
@@ -60,7 +59,6 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
 
         setSharedAxisXEnterTransition()
 
-        arguments?.getString("key")?.let { key = it }
         arguments?.getString("tableName")?.let { tableName = it }
         arguments?.getString("searchQueryPattern")?.let { searchQueryPattern = it }
         arguments?.getInt("position")?.let { position = it }
@@ -115,8 +113,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
                     circularProgressIndicator.visibility = View.GONE
                     viewPager?.visibility = View.VISIBLE
                     actionActivity.setCurrentEntityModel(roomEntity)
-                    key = (roomEntity.__entity as? EntityModel)?.__KEY ?: ""
-                    arguments?.putString("key", key)
+                    this@EntityViewPagerFragment.position = position
                 }
                 handleActionPreviousEnability(position)
                 handleActionNextEnability(position)

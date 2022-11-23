@@ -164,12 +164,11 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         adapter = EntityListAdapter(
             tableName = tableName,
             lifecycleOwner = viewLifecycleOwner,
-            onItemClick = { dataBinding, key, position ->
+            onItemClick = { dataBinding, position ->
                 setSharedAxisXExitTransition()
                 BaseApp.genericNavigationResolver.navigateFromListToViewPager(
                     viewDataBinding = dataBinding,
                     sourceTable = relation?.source ?: tableName,
-                    key = key,
                     position = position,
                     query = searchPattern,
                     relationName = relation?.name ?: "",
