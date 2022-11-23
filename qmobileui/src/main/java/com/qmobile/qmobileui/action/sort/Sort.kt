@@ -1,6 +1,5 @@
 package com.qmobile.qmobileui.action.sort
 
-import android.util.Log
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.fieldAdjustment
@@ -40,16 +39,15 @@ object Sort {
     }
 
     fun getDefaultSortField(tableName: String): Map<String, String>? {
-        val defaultSortField = BaseApp.genericTableHelper.getDefaultSortFieldForTable(tableName)
-
-        val  formattedField = defaultSortField?.name?.fieldAdjustment()
-            ?.let { getTypeConstraints(it, defaultSortField.type, Order.ASCENDING.value) }
-
-        return if (formattedField != null) {
-            mapOf(formattedField to Order.ASCENDING.value)
-        } else {
-            null
+        BaseApp.genericTableHelper.getDefaultSortFieldForTable(tableName)?.let { defaultSortField ->
+            val formattedField = getTypeConstraints(
+                defaultSortField.name.fieldAdjustment(),
+                defaultSortField.type,
+                Order.ASCENDING.value
+            )
+            return mapOf(formattedField to Order.ASCENDING.value)
         }
+        return null
     }
 
     fun sortMatchingKeywords(format: String?): String {
@@ -68,13 +66,13 @@ object Sort {
             "string" -> "$field COLLATE NOCASE"
             "fullDate", "longDate", "mediumDate", "shortDate" -> { // order by year then month and finally day
                 " CAST ( replace($field, rtrim($field, replace($field, '!', '')), '')" +
-                        " AS INT) ${order ?: Order.ASCENDING.value}" + // year
+                    " AS INT) ${order ?: Order.ASCENDING.value}" + // year
 
-                        " , CAST (REPLACE(substr($field , " +
-                        "LENGTH(substr($field, 0, instr($field, '!')))+2,2) ,'!' ,'') " +
-                        "AS INT) ${order ?: Order.ASCENDING.value}" +  //month
+                    " , CAST (REPLACE(substr($field , " +
+                    "LENGTH(substr($field, 0, instr($field, '!')))+2,2) ,'!' ,'') " +
+                    "AS INT) ${order ?: Order.ASCENDING.value}" + // month
 
-                        " ,  CAST (substr($field, 0, instr($field, '!'))AS INT)" // Day
+                    " ,  CAST (substr($field, 0, instr($field, '!'))AS INT)" // Day
             }
             else -> field
         }
