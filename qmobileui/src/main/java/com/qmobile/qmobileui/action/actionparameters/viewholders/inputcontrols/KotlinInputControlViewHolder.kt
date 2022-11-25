@@ -30,7 +30,7 @@ class KotlinInputControlViewHolder(itemView: View, format: String = "") : BaseIn
 
         val format = itemJsonObject.getSafeString("format")
 
-        BaseApp.genericActionHelper.getKotlinInputControl(itemView, format)?.let { inputControl ->
+        BaseApp.genericResourceHelper.getKotlinInputControl(itemView, format)?.let { inputControl ->
 
             if (inputControl.getIconName().isNotEmpty()) {
                 container.endIconDrawable =

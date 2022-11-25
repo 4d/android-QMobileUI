@@ -4,7 +4,7 @@
  * Copyright (c) 2022 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.action.barcode
+package com.qmobile.qmobileui.barcode
 
 import android.content.Context
 import android.content.res.Configuration

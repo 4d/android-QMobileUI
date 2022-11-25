@@ -30,6 +30,7 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.activity.mainactivity.ActivityResultController
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.network.RemoteUrlChanger
@@ -37,12 +38,13 @@ import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.clearViewInParent
 import com.qmobile.qmobileui.ui.getShakeAnimation
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
+import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.ResourcesHelper
 
 /**
  * Base AppCompatActivity for activities
  */
-abstract class BaseActivity : AppCompatActivity() {
+abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityResultController {
 
     companion object {
         // Constant used when returning to LoginActivity to display a toast message about logout

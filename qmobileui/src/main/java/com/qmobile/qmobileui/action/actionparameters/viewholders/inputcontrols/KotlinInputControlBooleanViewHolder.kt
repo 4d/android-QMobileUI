@@ -27,7 +27,7 @@ class KotlinInputControlBooleanViewHolder(itemView: View, format: String = "") :
 
         val format = itemJsonObject.getSafeString("format")
 
-        BaseApp.genericActionHelper.getKotlinInputControl(itemView, format)?.let { inputControl ->
+        BaseApp.genericResourceHelper.getKotlinInputControl(itemView, format)?.let { inputControl ->
             inputControl.process(inputValue = compoundButton.isChecked) { output ->
                 if (output is Boolean) {
                     error.visibility = View.GONE

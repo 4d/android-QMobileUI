@@ -12,21 +12,14 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.databinding.DataBindingUtil
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.auth.isEmailValid
@@ -34,27 +27,27 @@ import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.network.NetworkState
 import com.qmobile.qmobiledatasync.toast.ToastMessage
+import com.qmobile.qmobiledatasync.utils.LoginHandler
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
+import com.qmobile.qmobileui.activity.mainactivity.ActivityResultController
+import com.qmobile.qmobileui.activity.mainactivity.ActivityResultControllerImpl
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
-import com.qmobile.qmobileui.binding.bindImageFromDrawable
-import com.qmobile.qmobileui.databinding.ActivityLoginBinding
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.clearViewInParent
-import com.qmobile.qmobileui.ui.setOnSingleClickListener
-import com.qmobile.qmobileui.ui.setOnVeryLongClickListener
+import com.qmobile.qmobileui.utils.PermissionChecker
+import com.qmobile.qmobileui.utils.PermissionCheckerImpl
 import com.qmobile.qmobileui.utils.hideKeyboard
 
-class LoginActivity : BaseActivity(), RemoteUrlChanger {
+class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, ActivityResultController {
 
     private var loggedOut = false
 
-    internal lateinit var binding: ActivityLoginBinding
     private var remoteUrl = ""
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
-    private lateinit var shakeAnimation: Animation
+    private lateinit var loginHandler: LoginHandler
 
     // UI strings
     private lateinit var noInternetString: String
@@ -66,6 +59,9 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
     private lateinit var remoteUrlDisplayDialog: View
     private lateinit var imageNetworkStatus: ImageView
     private lateinit var remoteUrlMessage: TextView
+
+    override val activityResultControllerImpl = ActivityResultControllerImpl(this)
+    override val permissionCheckerImpl = PermissionCheckerImpl(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,13 +90,11 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
                 mapper = BaseApp.mapper
             )
 
-            binding =
-                DataBindingUtil.setContentView(this, R.layout.activity_login)
-            binding.lifecycleOwner = this
+            loginHandler = BaseApp.genericResourceHelper.getLoginForm(this)
 
             initViewModels()
             initLayout()
-            LoginActivityObserver(this, loginViewModel).initObservers()
+            LoginActivityObserver(this, loginViewModel, loginHandler).initObservers()
         }
     }
 
@@ -108,89 +102,38 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
      * Initializes layout components
      */
     private fun initLayout() {
-        bindImageFromDrawable(binding.loginLogo, BaseApp.loginLogoDrawable)
-
         if (loggedOut) {
             SnackbarHelper.show(this, getString(R.string.login_logged_out), ToastMessage.Type.SUCCESS)
+            loginHandler.onLogout()
         }
 
-        // Login button
-        binding.loginButtonAuth.setOnSingleClickListener {
-            login()
-        }
-
-        // Define a shake animation for when input is not valid
-        shakeAnimation = AnimationUtils.loadAnimation(this, R.anim.shake)
-
-        binding.loginEmailInput.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                binding.loginEmailContainer.error = null
-            } else {
-                validateText(true)
-            }
-        }
-
-        binding.loginEmailInput.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                // Nothing to do
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Nothing to do
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                s?.let { validateText(false) }
-            }
-        })
-
-        binding.loginEmailInput.setOnEditorActionListener { textView, actionId, keyEvent ->
-            if ((keyEvent?.keyCode == KeyEvent.KEYCODE_ENTER && keyEvent.action == KeyEvent.ACTION_UP) ||
-                actionId == EditorInfo.IME_ACTION_DONE
-            ) {
-                hideKeyboard(this)
-                textView.clearFocus()
-                if (validateText(true)) {
-                    login()
-                }
-            }
-            true
-        }
+        loginHandler.initLayout()
 
         this.remoteUrl = BaseApp.sharedPreferencesHolder.remoteUrl
         initRemoteUrlDisplayDialog()
+    }
 
-        binding.loginLogo.setOnVeryLongClickListener {
-            queryNetwork(this)
-            showRemoteUrlDisplayDialog()
+    fun login(input: String) {
+        if ((validateMail(input) || !loginHandler.ensureValidMail) && loginHandler.validate(input)) {
+            if (connectivityViewModel.isConnected()) {
+                loginViewModel.login(email = input) { success ->
+                    if (success) {
+                        loginHandler.onLoginSuccessful()
+                    } else {
+                        loginHandler.onLoginUnsuccessful()
+                    }
+                }
+            } else {
+                SnackbarHelper.show(this, getString(R.string.no_internet), ToastMessage.Type.WARNING)
+                loginHandler.onLoginUnsuccessful()
+            }
+        } else {
+            loginHandler.onInputInvalid()
         }
     }
 
-    private fun validateText(displayError: Boolean): Boolean =
-        if (binding.loginEmailInput.text.toString().isEmailValid()) {
-            loginViewModel.setEmailValidState(true)
-            binding.loginEmailContainer.error = null
-            true
-        } else {
-            if (displayError) {
-                binding.loginEmailInput.startAnimation(shakeAnimation)
-                binding.loginEmailContainer.error = getString(R.string.login_invalid_email)
-            }
-            loginViewModel.setEmailValidState(false)
-            false
-        }
-
-    private fun login() {
-        if (connectivityViewModel.isConnected()) {
-            binding.loginButtonAuth.isEnabled = false
-            loginViewModel.login(email = binding.loginEmailInput.text.toString()) { success ->
-                if (!success) {
-                    binding.loginButtonAuth.isEnabled = true
-                }
-            }
-        } else {
-            SnackbarHelper.show(this, getString(R.string.no_internet), ToastMessage.Type.WARNING)
-        }
+    fun validateMail(input: String): Boolean {
+        return input.isEmailValid()
     }
 
     private fun showRemoteUrlDisplayDialog() {
@@ -262,8 +205,6 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
     override fun handleAuthenticationState(authenticationState: AuthenticationState) {
         if (authenticationState == AuthenticationState.AUTHENTICATED) {
             startMainActivity(false, loginViewModel.statusMessage)
-        } else {
-            binding.loginButtonAuth.isEnabled = true
         }
     }
 
@@ -292,5 +233,10 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger {
         remoteUrl = newRemoteUrl
         remoteUrlMessage.text = checkingString
         refreshApiClients()
+    }
+
+    fun showRemoteUrlDialog() {
+        queryNetwork(this)
+        showRemoteUrlDisplayDialog()
     }
 }

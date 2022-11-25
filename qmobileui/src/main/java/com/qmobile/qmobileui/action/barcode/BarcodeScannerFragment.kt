@@ -7,33 +7,17 @@
 package com.qmobile.qmobileui.action.barcode
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.content.ContextCompat
-import com.google.mlkit.vision.barcode.BarcodeScanner
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.common.InputImage
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_FRAGMENT_REQUEST_KEY
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_VALUE_KEY
+import com.qmobile.qmobileui.barcode.Scanner
 import com.qmobile.qmobileui.databinding.FragmentBarcodeBinding
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
-import timber.log.Timber
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
 
 @ExperimentalGetImage
 class BarcodeScannerFragment : BaseFragment() {
@@ -41,12 +25,7 @@ class BarcodeScannerFragment : BaseFragment() {
     private var _binding: FragmentBarcodeBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var cameraExecutor: ExecutorService
-    private val alreadyScanned = AtomicBoolean(false)
-
-    companion object {
-        private const val PROGRESS_DELAY: Long = 1000
-    }
+    private val scanner = Scanner()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,92 +43,32 @@ class BarcodeScannerFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        cameraExecutor = Executors.newSingleThreadExecutor()
         binding.topActionBarInLiveCamera.closeButton.setOnSingleClickListener {
             activity?.onBackPressed()
         }
         delegate.setFullScreenMode(true)
-        bindCameraUseCases()
+        scanner.start(
+            context = requireContext(),
+            lifecycleOwner = this,
+            previewView = binding.cameraView,
+            barcodeOverlay = binding.barcodeOverlay,
+            progressIndicator = binding.progress,
+            onScanned = { value -> onScanned(value) }
+        )
     }
 
     override fun onDestroy() {
-        cameraExecutor.shutdown()
+        scanner.shutdown()
         super.onDestroy()
     }
 
-    private fun bindCameraUseCases() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
-
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-            val previewUseCase = Preview.Builder()
-                .build()
-                .also {
-                    it.setSurfaceProvider(binding.cameraView.surfaceProvider)
-                }
-
-            val options = BarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS).build()
-            val scanner = BarcodeScanning.getClient(options)
-
-            val analysisUseCase = ImageAnalysis.Builder().build()
-            analysisUseCase.setAnalyzer(cameraExecutor) { imageProxy ->
-                processImageProxy(scanner, imageProxy)
-            }
-
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-            try {
-                cameraProvider.bindToLifecycle(this, cameraSelector, previewUseCase, analysisUseCase)
-            } catch (illegalStateException: IllegalStateException) {
-                Timber.e(illegalStateException.message.orEmpty())
-            } catch (illegalArgumentException: IllegalArgumentException) {
-                Timber.e(illegalArgumentException.message.orEmpty())
-            }
-        }, ContextCompat.getMainExecutor(requireContext()))
-    }
-
-    private fun processImageProxy(barcodeScanner: BarcodeScanner, imageProxy: ImageProxy) {
-        imageProxy.image?.let { image ->
-            val inputImage = InputImage.fromMediaImage(image, imageProxy.imageInfo.rotationDegrees)
-
-            barcodeScanner.process(inputImage)
-                .addOnSuccessListener { barcodeList ->
-
-                    if (!alreadyScanned.getAndSet(true)) {
-                        barcodeList.getOrNull(0)?.rawValue?.let { value ->
-                            binding.progress.visibility = View.VISIBLE
-
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                binding.progress.visibility = View.GONE
-
-                                val result = Bundle().apply {
-                                    putString(BARCODE_VALUE_KEY, value)
-                                }
-                                if (isAdded) {
-                                    parentFragmentManager.setFragmentResult(BARCODE_FRAGMENT_REQUEST_KEY, result)
-                                }
-                                activity?.onBackPressed()
-                            }, PROGRESS_DELAY)
-                        } ?: run {
-                            alreadyScanned.set(false)
-                        }
-                    }
-                }
-                .addOnFailureListener {
-                    Timber.e(it.localizedMessage)
-                }
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        task.result?.let { result ->
-                            inputImage.mediaImage?.let {
-                                binding.barcodeOverlay.update(it, result)
-                            }
-                        }
-                    } else {
-                        Timber.e("failed to scan image: ${task.exception?.message}")
-                    }
-                    imageProxy.image?.close()
-                    imageProxy.close()
-                }
+    private fun onScanned(value: String) {
+        val result = Bundle().apply {
+            putString(BARCODE_VALUE_KEY, value)
         }
+        if (isAdded) {
+            parentFragmentManager.setFragmentResult(BARCODE_FRAGMENT_REQUEST_KEY, result)
+        }
+        activity?.onBackPressed()
     }
 }

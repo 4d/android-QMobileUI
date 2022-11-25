@@ -7,13 +7,6 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <data>
-
-        <variable
-            name="viewModel"
-            type="com.qmobile.qmobiledatasync.viewmodel.LoginViewModel" />
-    </data>
-
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/main_container"
         android:layout_width="match_parent"
@@ -77,7 +70,8 @@
             android:id="@+id/login_button_auth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:enabled="@{safeUnbox(viewModel.emailValid) ? true : false}"
+            android:layout_marginBottom="@dimen/login_button_bottom_margin"
+            android:enabled="false"
             android:text="@string/login_button_text"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
