@@ -58,13 +58,15 @@
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/scrollable_tab_layout"
+        style="?attr/tabSecondaryStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:elevation="3dp"
         app:tabGravity="center"
+        app:tabIndicatorAnimationMode="elastic"
+        app:tabIndicatorFullWidth="false"
         app:tabIndicatorGravity="top"
         app:tabMode="scrollable" />
-    <!--    app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"-->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

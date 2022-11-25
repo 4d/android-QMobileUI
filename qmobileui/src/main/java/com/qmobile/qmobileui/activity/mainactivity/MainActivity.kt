@@ -73,7 +73,6 @@ import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.setMaterialFadeTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZExitTransition
-import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.PermissionCheckerImpl
 import com.qmobile.qmobileui.utils.setupWithNavController
 import dev.chrisbanes.insetter.applyInsetter
@@ -88,9 +87,7 @@ class MainActivity :
     FragmentCommunication,
     ActivitySettingsInterface,
     LifecycleEventObserver,
-    PermissionChecker,
-    ActionActivity,
-    ActivityResultController {
+    ActionActivity {
 
     private var loginStatusText = ""
     private var onLaunch = true
