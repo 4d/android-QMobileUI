@@ -20,7 +20,7 @@ class TasksFragmentObserver(
     }
 
     private fun observeAllTasks() {
-        fragment.actionActivity.getTaskViewModel().allTasks.observe(fragment.viewLifecycleOwner) { allTasks ->
+        fragment.actionActivity.getTaskVM().allTasks.observe(fragment.viewLifecycleOwner) { allTasks ->
             Timber.d("Tasks list updated, size : ${allTasks.size}")
 
             if (fragment.tableName.isNotEmpty()) {
@@ -54,7 +54,7 @@ class TasksFragmentObserver(
 
         if (allHistory.size > MAX_PENDING_TASKS) {
             val idToDelete = allHistory.subList(MAX_PENDING_TASKS - 1, allHistory.size - 1).map { it.id }
-            fragment.actionActivity.getTaskViewModel().deleteList(idToDelete)
+            fragment.actionActivity.getTaskVM().deleteList(idToDelete)
         }
     }
 }

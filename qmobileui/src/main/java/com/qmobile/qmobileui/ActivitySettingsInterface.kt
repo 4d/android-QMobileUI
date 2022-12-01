@@ -26,8 +26,8 @@ interface ActivitySettingsInterface {
     fun showRemoteUrlEditDialog(
         remoteUrl: String,
         remoteUrlChanger: RemoteUrlChanger,
-        onDialogDismiss: (() -> Unit)? = null
+        onDialogDismiss: () -> Unit = {}
     )
 
-    fun logout()
+    fun logout(isUnauthorized: Boolean)
 }

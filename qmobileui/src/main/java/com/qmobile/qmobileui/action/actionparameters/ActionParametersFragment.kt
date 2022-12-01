@@ -367,7 +367,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
             if (currentTask?.status == ActionTask.Status.ERROR_SERVER) {
                 // should delete current failed task to re-store it as new task after sending
                 currentTask?.let {
-                    actionActivity.getTaskViewModel().deleteOne(it.id)
+                    actionActivity.getTaskVM().deleteOne(it.id)
                 }
             }
             validateAction()
@@ -402,7 +402,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
                 actionTask.saveInputControlFormatHolders(inputControlFormatHolders)
 
-                actionActivity.getTaskViewModel().insert(actionTask)
+                actionActivity.getTaskVM().insert(actionTask)
             }
             activity?.onBackPressed()
         }

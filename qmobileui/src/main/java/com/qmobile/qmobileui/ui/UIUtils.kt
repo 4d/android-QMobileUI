@@ -79,7 +79,7 @@ fun View.setOnVeryLongClickListener(listener: () -> Unit) {
                     handler.postDelayed(
                         {
                             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                            listener.invoke()
+                            listener()
                         },
                         UIConstants.longClickDuration
                     )

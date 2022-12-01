@@ -11,11 +11,11 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.view.menu.MenuBuilder
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -28,10 +28,10 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.elevation.SurfaceColors
+import com.google.android.material.snackbar.Snackbar
 import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobileapi.network.ApiClient
-import com.qmobile.qmobileapi.network.ApiService
+import com.qmobile.qmobileapi.model.error.AuthorizedStatus
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobileapi.utils.UploadHelper.UPLOADED_METADATA_STRING
 import com.qmobile.qmobileapi.utils.UploadHelper.getBodies
@@ -45,11 +45,7 @@ import com.qmobile.qmobiledatasync.sync.resetIsToSync
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.utils.ScheduleRefresh
-import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
-import com.qmobile.qmobiledatasync.viewmodel.deleteAll
-import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getTaskViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.FragmentCommunication
@@ -70,6 +66,7 @@ import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.px
 import com.qmobile.qmobileui.databinding.ActivityMainBinding
 import com.qmobile.qmobileui.network.NetworkChecker
+import com.qmobile.qmobileui.ui.NoSwipeBehavior
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.setMaterialFadeTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZExitTransition
@@ -96,17 +93,13 @@ class MainActivity :
     private lateinit var binding: ActivityMainBinding
     private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
+    private var snackbar: Snackbar? = null
+    private var snackBarRequired = false
 
     // FragmentCommunication
-    override lateinit var apiService: ApiService
     private var currentEntity: RoomEntity? = null
-
-    private var serverNotAccessibleString = ""
-    private var serverNotAccessibleActionString = ""
-    private var noInternetString = ""
-    private var noInternetActionString = ""
-    private var pendingTaskString = ""
-    private var settingsString = ""
+    private var authorizedStatus = AuthorizedStatus.AUTHORIZED
+    private val logoutRequested = AtomicBoolean(false)
 
     override val activityResultControllerImpl = ActivityResultControllerImpl(this)
     override val permissionCheckerImpl = PermissionCheckerImpl(this)
@@ -120,12 +113,8 @@ class MainActivity :
             ?.fragments
             ?.first()
 
-    // ViewModels
-    internal lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
-
-    private lateinit var taskViewModel: TaskViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -169,13 +158,6 @@ class MainActivity :
             insets
         }
 
-        serverNotAccessibleString = getString(R.string.server_not_accessible)
-        serverNotAccessibleActionString = getString(R.string.action_send_server_not_accessible)
-        noInternetString = getString(R.string.no_internet)
-        noInternetActionString = getString(R.string.action_send_no_internet)
-        pendingTaskString = getString(R.string.pending_task_menu_item)
-        settingsString = getString(R.string.settings_navbar_title)
-
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -185,12 +167,26 @@ class MainActivity :
             setupTabLayout()
         } // Else, need to wait for onRestoreInstanceState
 
+        snackbar = SnackbarHelper.build(
+            this@MainActivity,
+            getString(R.string.max_device_connection_reached),
+            ToastMessage.Type.ERROR,
+            Snackbar.LENGTH_INDEFINITE,
+            NoSwipeBehavior()
+        )
+
+        snackbar?.addCallback(object : Snackbar.Callback() {
+            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                if (snackBarRequired) {
+                    snackbar?.show()
+                }
+            }
+        })
+
         // Init ApiClients
         refreshAllApiClients()
 
         initViewModels()
-        getEntityListViewModelList()
-        taskViewModel = getTaskViewModel(this)
         mainActivityObserver = MainActivityObserver(this, entityListViewModelList, taskViewModel).apply {
             initObservers()
         }
@@ -214,38 +210,23 @@ class MainActivity :
         return navController.navigateUp()
     }
 
-    // Get EntityListViewModel list
-    private fun getEntityListViewModelList() {
-        entityListViewModelList = mutableListOf()
-        BaseApp.runtimeDataHolder.tableInfo.keys.forEach { tableName ->
-            val entityListViewModel = getEntityListViewModel(this, tableName, apiService)
-            entityListViewModelList.add(entityListViewModel)
-        }
-    }
-
     /**
      * If remoteUrl has been changed, we refresh ApiClient with new parameters (which are stored
      * in SharedPreferences)
      */
     override fun refreshAllApiClients() {
-        super.refreshApiClients()
-
         // Interceptor notifies the MainActivity that we need to go to login page. First, stop syncing
         val loginRequiredCallbackForInterceptor: LoginRequiredCallback = {
-            if (!BaseApp.runtimeDataHolder.guestLogin) {
+            if (BaseApp.runtimeDataHolder.guestLogin) {
+                snackBarRequired = false
+                snackbar?.dismiss()
+                resetViewModelIsUnauthorized()
+            } else {
                 mainActivityDataSync.dataSync.loginRequired.set(true)
             }
         }
-        apiService = ApiClient.getApiService(
-            loginApiService = loginApiService,
-            loginRequiredCallback = loginRequiredCallbackForInterceptor,
-            sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
-            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE,
-            mapper = BaseApp.mapper
-        )
-        if (this::entityListViewModelList.isInitialized) {
-            entityListViewModelList.forEach { it.refreshRestRepository(apiService) }
-        }
+
+        super.refreshApiClients(loginRequiredCallbackForInterceptor)
     }
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
@@ -257,7 +238,7 @@ class MainActivity :
             Lifecycle.Event.ON_START -> {
                 if (loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED) {
                     Timber.d("[${Lifecycle.Event.ON_START}]")
-                    applyOnForegroundEvent()
+                    onStartCallback()
                 } else {
                     Timber.d("[${Lifecycle.Event.ON_START} - Delayed event, waiting for authentication]")
                     shouldDelayOnForegroundEvent.set(true)
@@ -268,7 +249,7 @@ class MainActivity :
         }
     }
 
-    private fun applyOnForegroundEvent() {
+    private fun onStartCallback() {
         Timber.d("applyOnForegroundEvent")
         if (onLaunch) {
             Timber.d("applyOnForegroundEvent on Launch")
@@ -333,23 +314,35 @@ class MainActivity :
         })
     }
 
-    private fun onServerInaccessible(tableName: String, isFromAction: Boolean = false) {
+    internal fun onServerInaccessible(tableName: String, isFromAction: Boolean = false) {
         if (isFromAction) {
             connectivityViewModel.toastMessage
-                .showMessage(serverNotAccessibleActionString, tableName, ToastMessage.Type.NEUTRAL)
+                .showMessage(
+                    getString(R.string.action_send_server_not_accessible),
+                    tableName,
+                    ToastMessage.Type.NEUTRAL
+                )
             onBackPressed()
         } else {
             connectivityViewModel.toastMessage
-                .showMessage(serverNotAccessibleString, tableName, ToastMessage.Type.ERROR)
+                .showMessage(getString(R.string.server_not_accessible), tableName, ToastMessage.Type.ERROR)
         }
     }
 
-    private fun onNoInternet(tableName: String, isFromAction: Boolean = false) {
+    internal fun onNoInternet(tableName: String, isFromAction: Boolean = false) {
         if (isFromAction) {
-            connectivityViewModel.toastMessage.showMessage(noInternetActionString, tableName, ToastMessage.Type.NEUTRAL)
+            connectivityViewModel.toastMessage.showMessage(
+                getString(R.string.action_send_no_internet),
+                tableName,
+                ToastMessage.Type.NEUTRAL
+            )
             onBackPressed()
         } else {
-            connectivityViewModel.toastMessage.showMessage(noInternetString, tableName, ToastMessage.Type.ERROR)
+            connectivityViewModel.toastMessage.showMessage(
+                getString(R.string.no_internet),
+                tableName,
+                ToastMessage.Type.ERROR
+            )
         }
     }
 
@@ -361,13 +354,16 @@ class MainActivity :
                     loginStatusText = ""
                 }
                 if (shouldDelayOnForegroundEvent.getAndSet(false)) {
-                    applyOnForegroundEvent()
+                    onStartCallback()
                 }
             }
             AuthenticationState.LOGOUT -> {
-                // Logout performed
-                if (!BaseApp.runtimeDataHolder.guestLogin) {
-                    startLoginActivity()
+                if (!isAlreadyLoggedIn()) {
+                    if (BaseApp.runtimeDataHolder.guestLogin) {
+                        tryAutoLogin()
+                    } else {
+                        startLoginActivity(authorizedStatus)
+                    }
                 }
             }
             else -> {
@@ -421,7 +417,7 @@ class MainActivity :
                 if (withIcons) getMenuDrawable(this, R.drawable.pending_actions) else null
 
             // not giving a simple string because we want a divider before pending tasks
-            menu.add(1, Random().nextInt(), order, pendingTaskString)
+            menu.add(1, Random().nextInt(), order, getString(R.string.pending_task_menu_item))
                 .setOnMenuItemClickListener {
                     actionNavigable.navigateToPendingTasks()
                     true
@@ -434,7 +430,7 @@ class MainActivity :
         val drawable =
             if (withIcons) getMenuDrawable(this, R.drawable.settings) else null
 
-        menu.add(1, Random().nextInt(), order, settingsString)
+        menu.add(1, Random().nextInt(), order, getString(R.string.settings_navbar_title))
             .setOnMenuItemClickListener {
                 BaseApp.genericNavigationResolver.navigateToSettings(this)
                 true
@@ -614,16 +610,17 @@ class MainActivity :
         mainActivityObserver.observeEntityToastMessage(message)
     }
 
-    override fun getTaskViewModel(): TaskViewModel {
+    override fun getTaskVM(): TaskViewModel {
         return taskViewModel
     }
 
     /**
      * Goes back to login page
      */
-    fun startLoginActivity() {
+    private fun startLoginActivity(authorizedStatus: AuthorizedStatus) {
         val intent = Intent(this, LoginActivity::class.java)
         intent.putExtra(LOGGED_OUT, true)
+        intent.putExtra(AUTHORIZED_STATUS, authorizedStatus)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
         finish()
@@ -633,13 +630,48 @@ class MainActivity :
      * Tries to login while in guest mode. Might fail if no Internet connection
      */
     private fun tryAutoLogin() {
-        if (connectivityViewModel.isConnected()) {
-            loginViewModel.login { }
-        } else {
-            authenticationRequested = true
-            Timber.d("No Internet connection, authenticationRequested")
-            SnackbarHelper.show(this, getString(R.string.no_internet_auto_login), ToastMessage.Type.WARNING)
-        }
+        queryNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                loginViewModel.login { success, isMaxLicenseReached ->
+                    when {
+                        success -> {
+                            logoutRequested.set(false)
+                            resetViewModelIsUnauthorized()
+                        }
+                        isMaxLicenseReached -> {
+                            if (snackbar?.isShown == false) {
+                                snackBarRequired = true
+                                snackbar?.show()
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onServerInaccessible() {
+                authenticationRequested = true
+                Timber.d("No Internet connection, authenticationRequested")
+                SnackbarHelper.show(
+                    this@MainActivity,
+                    getString(R.string.server_not_accessible_auto_login),
+                    ToastMessage.Type.WARNING
+                )
+            }
+
+            override fun onNoInternet() {
+                authenticationRequested = true
+                Timber.d("No Internet connection, authenticationRequested")
+                SnackbarHelper.show(
+                    this@MainActivity,
+                    getString(R.string.no_internet_auto_login),
+                    ToastMessage.Type.WARNING
+                )
+            }
+        })
+    }
+
+    private fun resetViewModelIsUnauthorized() {
+        entityListViewModelList.forEach { it.setIsUnauthorizedState(false) }
     }
 
     /**
@@ -726,19 +758,23 @@ class MainActivity :
         super.onBackPressed()
     }
 
-    override fun logout() {
-        // delete data of table that has user specific queries
-        entityListViewModelList.forEach { entityListViewModel ->
-            val hasUserQuery =
-                BaseApp.runtimeDataHolder.tableInfo[entityListViewModel.getAssociatedTableName()]?.hasUserQuery()
-                    ?: false
-            if (hasUserQuery) {
-                entityListViewModel.deleteAll()
-                entityListViewModel.resetGlobalStamp()
+    override fun logout(isUnauthorized: Boolean) {
+        if (!logoutRequested.getAndSet(true) && BaseApp.sharedPreferencesHolder.sessionToken.isNotEmpty()) {
+            when {
+                !isUnauthorized -> {
+                    authorizedStatus = AuthorizedStatus.AUTHORIZED
+                    clearSpecificData()
+                }
+                taskViewModel.pendingTasks.value.isNullOrEmpty() -> {
+                    authorizedStatus = AuthorizedStatus.UNAUTHORIZED
+                }
+                else -> {
+                    authorizedStatus = AuthorizedStatus.UNAUTHORIZED_WITH_TASKS
+                }
             }
+
+            loginViewModel.disconnectUser(voluntaryLogout = !isUnauthorized) {}
         }
-        taskViewModel.deleteAll()
-        loginViewModel.disconnectUser {}
     }
 
     override fun checkNetwork(networkChecker: NetworkChecker) {

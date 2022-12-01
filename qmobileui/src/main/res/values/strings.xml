@@ -44,6 +44,7 @@
     <string name="no_internet_auto_login">No Internet connection, you won\'t be able to perform server requests</string>
     <string name="server_accessible">Server is accessible</string>
     <string name="server_not_accessible">Server is not accessible</string>
+    <string name="server_not_accessible_auto_login">Server is not accessible, you won\'t be able to perform server requests</string>
     <string name="server_not_reachable">The server is not reachable</string>
     <string name="open_url_server_not_reachable">The server is not reachable</string>
     <string name="remote_url_placeholder">%1$s - %2$s</string>
@@ -63,7 +64,7 @@
     <string name="remote_url_invalid">Invalid remote url</string>
     <string name="network_status_image">Network Status Image</string>
     <string name="https_hint">https://…</string>
-    <string name="login_qrcode_caption">Scan QR Code to Login</string>
+    <string name="login_qrcode_caption">Scan QR Code to log in</string>
     <string name="login_qrcode_retry">Retry</string>
     <string name="login_google_signing_out">Signing out from Google account</string>
     <string name="login_google_signed_out">Signed out from Google account</string>
@@ -134,4 +135,10 @@
     <string name="input_control_datasource_no_data">Could not get any data for input control \"%s\"</string>
     <string name="input_control_datasource_no_table">There is no table \"%1$s\" (input control \"%2$s\")</string>
     <string name="input_control_datasource_no_field">There is no field \"%1$s\" in table \"%2$s\" (input control \"%3$s\")</string>
+
+    <!-- Sessions -->
+    <string name="missing_session_file_logout">You have been logged out, please log in again</string>
+    <string name="missing_session_file_logout_with_pending_tasks">You have been logged out with pending actions, please log in again in order to execute these actions</string>
+    <string name="max_device_connection_reached">You have exceeded the number of available licenses, please contact your server administrator</string>
+
 </resources>

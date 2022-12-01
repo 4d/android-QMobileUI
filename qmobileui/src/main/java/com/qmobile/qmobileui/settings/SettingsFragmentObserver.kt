@@ -34,7 +34,7 @@ class SettingsFragmentObserver(
     }
 
     private fun observePendingTasks() {
-        fragment.actionActivity.getTaskViewModel().pendingTasks.observe(fragment.viewLifecycleOwner) { pendingTasks ->
+        fragment.actionActivity.getTaskVM().pendingTasks.observe(fragment.viewLifecycleOwner) { pendingTasks ->
             fragment.pendingTaskPref?.summary = fragment.getString(R.string.pref_pending_tasks_count, pendingTasks.size)
         }
     }

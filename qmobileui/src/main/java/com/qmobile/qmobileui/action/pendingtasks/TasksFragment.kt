@@ -149,14 +149,14 @@ class TasksFragment : BaseFragment(), NetworkChecker {
 
     private fun removeTask(actionTask: ActionTask) {
         activity?.let {
-            actionActivity.getTaskViewModel().deleteOne(actionTask.id)
+            actionActivity.getTaskVM().deleteOne(actionTask.id)
 
             SnackbarHelper.showAction(
                 activity = it,
                 message = resources.getString(R.string.pending_task_cancelled),
                 actionText = resources.getString(R.string.pending_task_cancelled_undo),
                 onActionClick = {
-                    actionActivity.getTaskViewModel().insert(actionTask)
+                    actionActivity.getTaskVM().insert(actionTask)
                 },
                 duration = UNDO_ACTION_DURATION
             )
@@ -202,7 +202,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
                 )
             }
             actionTask.isErrorServer() -> {
-                actionActivity.getTaskViewModel().deleteOne(actionTask.id)
+                actionActivity.getTaskVM().deleteOne(actionTask.id)
                 // As it's sent as a new action we have to update the date with the current date
                 actionTask.date = Date()
                 // UUID.randomUUID() to send action as new fresh action otherwise will be ignored by the
