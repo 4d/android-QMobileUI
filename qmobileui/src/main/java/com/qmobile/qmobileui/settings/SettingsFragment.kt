@@ -167,7 +167,7 @@ class SettingsFragment :
      * Displays a dialog to confirm logout
      */
     private fun showLogoutDialog() {
-        val nbPendingTask = actionActivity.getTaskViewModel().pendingTasks.value?.size ?: 0
+        val nbPendingTask = actionActivity.getTaskVM().pendingTasks.value?.size ?: 0
         val title = if (nbPendingTask > 0) {
             logoutDialogMessageIfPendingTask
         } else {
@@ -189,7 +189,7 @@ class SettingsFragment :
     private fun logout() {
         when {
             isReady() -> {
-                activitySettingsInterface.logout()
+                activitySettingsInterface.logout(false)
             }
             !connectivityViewModel.isConnected() -> {
                 SnackbarHelper.show(activity, activity?.getString(R.string.no_internet), ToastMessage.Type.WARNING)

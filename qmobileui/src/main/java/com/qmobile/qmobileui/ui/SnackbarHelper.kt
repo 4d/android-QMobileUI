@@ -9,6 +9,7 @@ package com.qmobile.qmobileui.ui
 import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.qmobile.qmobiledatasync.toast.ToastMessage
@@ -23,9 +24,10 @@ object SnackbarHelper {
         activity: FragmentActivity?,
         message: String?,
         type: ToastMessage.Type = ToastMessage.Type.NEUTRAL,
-        duration: Int? = null
+        duration: Int? = null,
+        behavior: BaseTransientBottomBar.Behavior? = null
     ) {
-        build(activity, message, type, duration)?.showSnackbar()
+        build(activity, message, type, duration, behavior)?.showSnackbar()
     }
 
     fun showAction(
@@ -34,9 +36,10 @@ object SnackbarHelper {
         actionText: String,
         onActionClick: () -> Unit,
         type: ToastMessage.Type = ToastMessage.Type.NEUTRAL,
-        duration: Int? = null
+        duration: Int? = null,
+        behavior: BaseTransientBottomBar.Behavior? = null
     ) {
-        build(activity, message, type, duration)?.apply {
+        build(activity, message, type, duration, behavior)?.apply {
             setAction(actionText) {
                 onActionClick()
             }
@@ -44,11 +47,12 @@ object SnackbarHelper {
         }
     }
 
-    private fun build(
+    fun build(
         activity: FragmentActivity?,
         message: String?,
         type: ToastMessage.Type = ToastMessage.Type.NEUTRAL,
-        duration: Int?
+        duration: Int? = null,
+        behavior: BaseTransientBottomBar.Behavior? = null
     ): Snackbar? {
         if (!message.isNullOrEmpty()) {
             activity?.apply {
@@ -59,6 +63,9 @@ object SnackbarHelper {
                 snackbar.setColors(this, type)
                 duration?.let {
                     snackbar.setDuration(duration)
+                }
+                behavior?.let {
+                    snackbar.behavior = it
                 }
                 return snackbar
             }

@@ -27,7 +27,7 @@ class ActionParametersFragmentObserver(
     private fun observeTask() {
         // If from pendingTasks
         fragment.taskId?.let { id ->
-            fragment.actionActivity.getTaskViewModel().getTask(id).observe(fragment.viewLifecycleOwner) { task ->
+            fragment.actionActivity.getTaskVM().getTask(id).observe(fragment.viewLifecycleOwner) { task ->
                 task?.let { // task can be null after deletion
                     task.actionInfo.validationMap?.let { map -> fragment.validationMap = map }
                     task.actionInfo.paramsToSubmit?.let { params -> fragment.paramsToSubmit = params }

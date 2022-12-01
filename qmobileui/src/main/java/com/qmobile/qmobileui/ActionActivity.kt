@@ -42,7 +42,7 @@ interface ActionActivity {
 
     fun setCurrentEntityModel(roomEntity: RoomEntity?)
 
-    fun getTaskViewModel(): TaskViewModel
+    fun getTaskVM(): TaskViewModel
 
     fun sendPendingTasks()
 }

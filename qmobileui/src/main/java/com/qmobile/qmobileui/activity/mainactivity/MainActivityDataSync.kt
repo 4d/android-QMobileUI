@@ -11,10 +11,7 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.sync.notifyDataUnSynced
 import com.qmobile.qmobiledatasync.sync.syncDeletedRecords
-import com.qmobile.qmobiledatasync.toast.ToastMessage
-import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.network.NetworkChecker
-import com.qmobile.qmobileui.ui.SnackbarHelper
 import timber.log.Timber
 
 class MainActivityDataSync(private val activity: MainActivity) {
@@ -23,7 +20,7 @@ class MainActivityDataSync(private val activity: MainActivity) {
     private val loginRequiredCallbackForDataSync: LoginRequiredCallback = {
         if (!BaseApp.runtimeDataHolder.guestLogin) {
             activity.entityListViewModelList.notifyDataUnSynced()
-            activity.startLoginActivity()
+            activity.logout(true)
         }
     }
 
@@ -44,11 +41,11 @@ class MainActivityDataSync(private val activity: MainActivity) {
                 }
 
                 override fun onServerInaccessible() {
-                    // Nothing to do, errors already provided in isServerConnectionOk
+                    activity.onServerInaccessible("")
                 }
 
                 override fun onNoInternet() {
-                    SnackbarHelper.show(activity, activity.getString(R.string.no_internet), ToastMessage.Type.WARNING)
+                    activity.onNoInternet("")
                 }
             },
             toastError = true

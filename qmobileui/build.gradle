@@ -30,6 +30,7 @@ dependencies {
     // Common
     implementation Libs.androidx_fragment_ktx
     implementation Libs.androidx_preference_ktx
+    implementation Libs.splashscreen
     implementation Libs.swiperefreshlayout
 
     // Room

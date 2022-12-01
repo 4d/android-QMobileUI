@@ -30,6 +30,7 @@ class MainActivityObserver(
             observeDataSynchronized(entityListViewModel)
             observeJSONRelation(entityListViewModel)
             observeEntityListToastMessage(entityListViewModel)
+            observeIsUnauthorized(entityListViewModel)
         }
         observePendingTasks()
     }
@@ -74,6 +75,14 @@ class MainActivityObserver(
     private fun observeEntityListToastMessage(entityListViewModel: EntityListViewModel<EntityModel>) {
         entityListViewModel.toastMessage.message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
             activity.handleEvent(event)
+        }
+    }
+
+    private fun observeIsUnauthorized(entityListViewModel: EntityListViewModel<EntityModel>) {
+        entityListViewModel.isUnauthorized.launchAndCollectIn(activity, Lifecycle.State.STARTED) { isUnauthorized ->
+            if (isUnauthorized) {
+                activity.logout(true)
+            }
         }
     }
 
