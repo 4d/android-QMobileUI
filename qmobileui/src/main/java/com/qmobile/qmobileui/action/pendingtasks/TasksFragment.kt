@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.divider.MaterialDividerItemDecoration
+import com.google.android.material.progressindicator.CircularProgressIndicatorSpec
+import com.google.android.material.progressindicator.IndeterminateDrawable
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.ActionActivity
@@ -55,6 +57,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
     private var noInternetDrawable: Drawable? = null
+    private lateinit var progressIndicatorDrawable: IndeterminateDrawable<CircularProgressIndicatorSpec>
 
     companion object {
         internal const val MAX_PENDING_TASKS = 10
@@ -73,6 +76,13 @@ class TasksFragment : BaseFragment(), NetworkChecker {
         serverAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.domain)
         serverNotAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.domain_disabled)
         noInternetDrawable = ContextCompat.getDrawable(context, R.drawable.signal_disconnected)
+        val spec = CircularProgressIndicatorSpec(
+            context,
+            null,
+            0,
+            R.style.Widget_Material3_CircularProgressIndicator_ExtraSmall
+        )
+        progressIndicatorDrawable = IndeterminateDrawable.createCircularDrawable(context, spec)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -232,6 +242,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
 
     private fun onServerStatusClick() {
         binding.serverStatus.text = checkingString
+        binding.serverStatus.chipIcon = progressIndicatorDrawable
         delegate.checkNetwork(this)
         actionActivity.sendPendingTasks()
     }

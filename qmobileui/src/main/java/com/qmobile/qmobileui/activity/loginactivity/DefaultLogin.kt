@@ -14,6 +14,8 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
 import androidx.databinding.DataBindingUtil
+import com.google.android.material.progressindicator.CircularProgressIndicatorSpec
+import com.google.android.material.progressindicator.IndeterminateDrawable
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.LoginForm
 import com.qmobile.qmobiledatasync.utils.LoginHandler
@@ -32,6 +34,7 @@ class DefaultLogin(private val activity: LoginActivity) : LoginHandler {
 
     override val ensureValidMail = true
     private lateinit var shakeAnimation: Animation
+    private lateinit var progressIndicatorDrawable: IndeterminateDrawable<CircularProgressIndicatorSpec>
 
     init {
         _binding = DataBindingUtil.setContentView<ActivityLoginBinding?>(activity, R.layout.activity_login).apply {
@@ -40,6 +43,14 @@ class DefaultLogin(private val activity: LoginActivity) : LoginHandler {
     }
 
     override fun initLayout() {
+        val spec = CircularProgressIndicatorSpec(
+            activity,
+            null,
+            0,
+            R.style.Widget_Material3_CircularProgressIndicator_ExtraSmall
+        )
+        progressIndicatorDrawable = IndeterminateDrawable.createCircularDrawable(activity, spec)
+
         bindImageFromDrawable(binding.loginLogo, BaseApp.loginLogoDrawable)
 
         // Login button
@@ -100,7 +111,7 @@ class DefaultLogin(private val activity: LoginActivity) : LoginHandler {
     }
 
     override fun onLoginInProgress(inProgress: Boolean) {
-        binding.loginProgressbar.visibility = if (inProgress) View.VISIBLE else View.GONE
+        binding.loginButtonAuth.icon = if (inProgress) progressIndicatorDrawable else null
     }
 
     override fun onLoginSuccessful() {

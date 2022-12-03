@@ -58,7 +58,6 @@
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/scrollable_tab_layout"
-        style="?attr/tabSecondaryStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
