@@ -26,6 +26,7 @@ import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.auth.isEmailValid
 import com.qmobile.qmobileapi.model.error.AuthorizedStatus
 import com.qmobile.qmobileapi.network.ApiClient
+import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.network.NetworkState
 import com.qmobile.qmobiledatasync.toast.ToastMessage
@@ -42,6 +43,9 @@ import com.qmobile.qmobileui.ui.clearViewInParent
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.PermissionCheckerImpl
 import com.qmobile.qmobileui.utils.hideKeyboard
+import org.json.JSONException
+import org.json.JSONObject
+import timber.log.Timber
 
 class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, ActivityResultController {
 
@@ -135,12 +139,21 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, Activ
     }
 
     fun login(input: String) {
-        if ((validateMail(input) || !loginHandler.ensureValidMail) && loginHandler.validate(input)) {
+        var mail = input
+        var parameters = JSONObject()
+        try {
+            val json = JSONObject(input)
+            mail = json.getSafeString("email") ?: ""
+            parameters = json.apply { remove("email") }
+        } catch (e: JSONException) {
+            Timber.d("login input is not a JSONObject")
+        }
+        if ((validateMail(mail) || !loginHandler.ensureValidMail) && loginHandler.validate(input)) {
             queryNetwork(object : NetworkChecker {
                 override fun onServerAccessible() {
-                    loginViewModel.login(email = input) { success, _ ->
+                    loginViewModel.login(email = mail, parameters = parameters) { success, _ ->
                         if (success) {
-                            checkIfShouldClearPreviousUserData(input)
+                            checkIfShouldClearPreviousUserData(mail)
                             loginHandler.onLoginSuccessful()
                         } else {
                             loginHandler.onLoginUnsuccessful()
