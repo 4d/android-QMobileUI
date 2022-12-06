@@ -42,9 +42,11 @@ class EntityViewPagerFragmentObserver(
         entityListViewModel.entityListPagedListSharedFlow.launchAndCollectIn(
             fragment.viewLifecycleOwner,
             Lifecycle.State.STARTED
-        ) {
-            fragment.adapter.submitList(it)
-            fragment.viewPager?.setCurrentItem(fragment.position, false)
+        ) { pagedList ->
+            if (pagedList.isNotEmpty()) {
+                fragment.adapter.submitList(pagedList)
+                fragment.viewPager?.setCurrentItem(fragment.position, false)
+            }
         }
     }
 }

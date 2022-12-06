@@ -17,6 +17,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.transition.MaterialFadeThrough
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.R
 
@@ -144,10 +145,9 @@ fun TabLayout.setupWithNavController(
                         // Commit a transaction that cleans the back stack and adds the first fragment
                         // to it, creating the fixed started destination.
 
-                        // Can't set transition as MenuHost won't trigger onCreateMenu in EntityDetailFragment
-//                        selectedFragment.enterTransition = MaterialFadeThrough().apply {
-//                            duration = resources.getInteger(R.integer.motion_duration_large).toLong()
-//                        }
+                        selectedFragment.enterTransition = MaterialFadeThrough().apply {
+                            duration = resources.getInteger(R.integer.motion_duration_large).toLong()
+                        }
 
                         fragmentManager.beginTransaction()
 //                        .setCustomAnimations(

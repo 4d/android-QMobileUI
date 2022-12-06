@@ -171,7 +171,7 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
     }
 
     private fun shadowDisabledButton(menuItem: MenuItem) {
-        menuItem.icon.alpha = if (!menuItem.isEnabled) {
+        menuItem.icon?.alpha = if (!menuItem.isEnabled) {
             ImageHelper.ARGB_HALF_VALUE
         } else {
             ImageHelper.ARGB_MAX_VALUE
