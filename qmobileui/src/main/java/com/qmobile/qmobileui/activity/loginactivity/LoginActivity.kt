@@ -43,6 +43,7 @@ import com.qmobile.qmobileui.ui.clearViewInParent
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.PermissionCheckerImpl
 import com.qmobile.qmobileui.utils.hideKeyboard
+import com.qmobile.qmobileui.utils.serializable
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
@@ -75,8 +76,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, Activ
         } else {
             // Retrieve bundled parameter to know if we are coming from a logout action
             loggedOut = intent.getBooleanExtra(LOGGED_OUT, false)
-            authorizedStatus =
-                (intent.getSerializableExtra(AUTHORIZED_STATUS) as? AuthorizedStatus?) ?: AuthorizedStatus.AUTHORIZED
+            authorizedStatus = intent.serializable(AUTHORIZED_STATUS) ?: AuthorizedStatus.AUTHORIZED
 
             // Init system services in onCreate()
             connectivityManager =
