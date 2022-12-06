@@ -51,6 +51,7 @@ import com.qmobile.qmobileui.action.inputcontrols.InputControlFormatHolder
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.action.utils.UriHelper.uriToString
+import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.writeBitmap
 import com.qmobile.qmobileui.databinding.FragmentActionParametersBinding
@@ -404,7 +405,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
                 actionActivity.getTaskVM().insert(actionTask)
             }
-            activity?.onBackPressed()
+
+            (activity as? MainActivity?)?.navController?.navigateUp()
         }
     }
 
@@ -509,7 +511,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     private fun sendAction() {
         val pendingTask = createPendingTask()
         actionActivity.sendAction(actionTask = pendingTask, tableName = tableName) {
-            activity?.onBackPressed()
+            (activity as? MainActivity?)?.navController?.navigateUp()
         }
     }
 

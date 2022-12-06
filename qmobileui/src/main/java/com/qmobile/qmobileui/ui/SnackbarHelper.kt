@@ -27,7 +27,9 @@ object SnackbarHelper {
         duration: Int? = null,
         behavior: BaseTransientBottomBar.Behavior? = null
     ) {
-        build(activity, message, type, duration, behavior)?.showSnackbar()
+        if (!message.isNullOrEmpty()) {
+            build(activity, message, type, duration, behavior)?.showSnackbar()
+        }
     }
 
     fun showAction(
@@ -39,36 +41,38 @@ object SnackbarHelper {
         duration: Int? = null,
         behavior: BaseTransientBottomBar.Behavior? = null
     ) {
-        build(activity, message, type, duration, behavior)?.apply {
-            setAction(actionText) {
-                onActionClick()
+        if (!message.isNullOrEmpty()) {
+            build(activity, message, type, duration, behavior)?.apply {
+                setAction(actionText) {
+                    onActionClick()
+                }
+                show()
             }
-            show()
         }
     }
 
     fun build(
         activity: FragmentActivity?,
-        message: String?,
+        message: String,
         type: ToastMessage.Type = ToastMessage.Type.NEUTRAL,
         duration: Int? = null,
         behavior: BaseTransientBottomBar.Behavior? = null
     ): Snackbar? {
-        if (!message.isNullOrEmpty()) {
-            activity?.apply {
-                val snackbar = Snackbar.make(findViewById(R.id.main_container), message, Snackbar.LENGTH_LONG)
+        activity?.apply {
+            val snackbar = Snackbar.make(findViewById(R.id.main_container), message, Snackbar.LENGTH_LONG)
+            if (!noTabLayoutUI) {
                 findViewById<TabLayout>(R.id.scrollable_tab_layout)?.let { tabLayout ->
                     snackbar.anchorView = tabLayout
                 }
-                snackbar.setColors(this, type)
-                duration?.let {
-                    snackbar.setDuration(duration)
-                }
-                behavior?.let {
-                    snackbar.behavior = it
-                }
-                return snackbar
             }
+            snackbar.setColors(this, type)
+            duration?.let {
+                snackbar.setDuration(duration)
+            }
+            behavior?.let {
+                snackbar.behavior = it
+            }
+            return snackbar
         }
         return null
     }

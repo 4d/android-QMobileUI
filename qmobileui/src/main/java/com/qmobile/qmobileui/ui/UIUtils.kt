@@ -40,6 +40,8 @@ fun FragmentActivity?.setupToolbarTitle(title: String) {
     }
 }
 
+val noTabLayoutUI: Boolean = BaseApp.runtimeDataHolder.tableInfo.keys.size == 0 // SET TO 1 FOR MISC FEATURE
+
 // Provides if dark mode is enabled
 fun Application.isNightMode(): Boolean =
     when (this.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {

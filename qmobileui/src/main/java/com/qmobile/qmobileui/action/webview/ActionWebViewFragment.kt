@@ -12,11 +12,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.addCallback
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.webview.JavaScriptUtils.injectScriptFile
+import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.databinding.FragmentActionWebviewBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
@@ -47,6 +49,12 @@ class ActionWebViewFragment : BaseFragment() {
         arguments?.getString("base64EncodedContext")?.let { base64EncodedContext = it }
 
         setSharedAxisZEnterTransition()
+
+        activity?.onBackPressedDispatcher?.addCallback {
+            delegate.setFullScreenMode(false)
+            (activity as? MainActivity?)?.navController?.navigateUp()
+            this.isEnabled = false
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -116,7 +124,7 @@ class ActionWebViewFragment : BaseFragment() {
                 .setNegativeButton(
                     requireActivity().getString(R.string.open_url_dialog_cancel)
                 ) { _, _ ->
-                    activity?.onBackPressed()
+                    activity?.onBackPressedDispatcher?.onBackPressed()
                 }
                 .show()
         }

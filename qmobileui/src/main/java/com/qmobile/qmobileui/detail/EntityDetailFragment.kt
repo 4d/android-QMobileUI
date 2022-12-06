@@ -32,6 +32,7 @@ import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
+import com.qmobile.qmobileui.ui.noTabLayoutUI
 import com.qmobile.qmobileui.ui.setFadeThroughExitTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
@@ -106,8 +107,11 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
         }
         initMenuProvider()
 
-        binding.root.findViewById<NestedScrollView>(R.id.base_detail_scroll_view)
-            ?.setPadding(0, 0, 0, getPaddingBottom())
+        if (!noTabLayoutUI) {
+            binding.root.findViewById<NestedScrollView>(R.id.base_detail_scroll_view)
+                ?.setPadding(0, 0, 0, getPaddingBottom())
+        }
+
         EntityDetailFragmentObserver(this, entityViewModel).initObservers()
     }
 

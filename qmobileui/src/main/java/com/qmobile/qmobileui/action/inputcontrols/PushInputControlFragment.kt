@@ -24,8 +24,10 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.INPUT_CONTROL_PUSH_DISPLAY_TEXT_KEY
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.INPUT_CONTROL_PUSH_FIELD_VALUE_KEY
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.INPUT_CONTROL_PUSH_FRAGMENT_REQUEST_KEY
+import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.databinding.InputControlPushFragmentBinding
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
+import com.qmobile.qmobileui.ui.noTabLayoutUI
 import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
 import java.util.LinkedList
 import java.util.concurrent.atomic.AtomicBoolean
@@ -123,7 +125,9 @@ class PushInputControlFragment : BaseFragment(), MenuProvider, InputControlDataH
     }
 
     private fun initRecyclerView() {
-        binding.pushConstraintLayout.setPadding(0, 0, 0, getPaddingBottom())
+        if (!noTabLayoutUI) {
+            binding.pushConstraintLayout.setPadding(0, 0, 0, getPaddingBottom())
+        }
         binding.inputControlListRecyclerView.layoutManager =
             LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         val divider = DividerItemDecoration(activity, LinearLayoutManager.VERTICAL)
@@ -164,6 +168,6 @@ class PushInputControlFragment : BaseFragment(), MenuProvider, InputControlDataH
         if (isAdded) {
             parentFragmentManager.setFragmentResult(INPUT_CONTROL_PUSH_FRAGMENT_REQUEST_KEY, result)
         }
-        activity?.onBackPressed()
+        (activity as? MainActivity?)?.navController?.navigateUp()
     }
 }

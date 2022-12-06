@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentActivity
 import com.qmobile.qmobileapi.utils.getSafeBoolean
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.toast.ToastMessage
+import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,7 @@ class AndroidJavaScriptHandler(private val activity: FragmentActivity?) {
     @JavascriptInterface
     fun onDismiss() {
         CoroutineScope(Dispatchers.Main.immediate).launch {
-            activity?.onBackPressed()
+            (activity as? MainActivity?)?.navController?.navigateUp()
         }
     }
 

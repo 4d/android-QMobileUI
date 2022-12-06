@@ -10,10 +10,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.camera.core.ExperimentalGetImage
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_FRAGMENT_REQUEST_KEY
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_VALUE_KEY
+import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.barcode.Scanner
 import com.qmobile.qmobileui.databinding.FragmentBarcodeBinding
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
@@ -31,6 +33,12 @@ class BarcodeScannerFragment : BaseFragment() {
         super.onCreate(savedInstanceState)
         setSharedAxisZEnterTransition()
         activity?.actionBar?.hide()
+
+        activity?.onBackPressedDispatcher?.addCallback {
+            delegate.setFullScreenMode(false)
+            (activity as? MainActivity?)?.navController?.navigateUp()
+            this.isEnabled = false
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -44,7 +52,7 @@ class BarcodeScannerFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.topActionBarInLiveCamera.closeButton.setOnSingleClickListener {
-            activity?.onBackPressed()
+            activity?.onBackPressedDispatcher?.onBackPressed()
         }
         delegate.setFullScreenMode(true)
         scanner.start(
@@ -63,12 +71,12 @@ class BarcodeScannerFragment : BaseFragment() {
     }
 
     private fun onScanned(value: String) {
-        val result = Bundle().apply {
-            putString(BARCODE_VALUE_KEY, value)
-        }
         if (isAdded) {
+            val result = Bundle().apply {
+                putString(BARCODE_VALUE_KEY, value)
+            }
             parentFragmentManager.setFragmentResult(BARCODE_FRAGMENT_REQUEST_KEY, result)
         }
-        activity?.onBackPressed()
+        activity?.onBackPressedDispatcher?.onBackPressed()
     }
 }
