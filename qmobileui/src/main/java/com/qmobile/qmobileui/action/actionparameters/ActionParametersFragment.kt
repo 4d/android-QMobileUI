@@ -633,7 +633,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
     private fun scan() {
         setSharedAxisZExitTransition()
-        BaseApp.genericNavigationResolver.navigateToActionScanner(binding, parameterPosition)
+        BaseApp.genericNavigationResolver.navigateToActionScanner(binding)
     }
 
     private fun registerImageFromGallery(): ActivityResultLauncher<String> {

@@ -26,13 +26,7 @@
     <fragment
         android:id="@+id/barCodeFragment"
         android:name="com.qmobile.qmobileui.action.barcode.BarcodeScannerFragment"
-        android:label="@string/nav_barcode_scan">
-
-        <argument
-            android:name="position"
-            app:argType="integer" />
-
-    </fragment>
+        android:label="@string/nav_barcode_scan" />
 
     <fragment
         android:id="@+id/input_control_push"
