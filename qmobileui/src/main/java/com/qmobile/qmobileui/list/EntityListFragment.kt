@@ -45,6 +45,7 @@ import com.qmobile.qmobileui.list.swipe.ItemActionButton
 import com.qmobile.qmobileui.list.swipe.SwipeToActionCallback
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
 import com.qmobile.qmobileui.ui.GridDividerDecoration
+import com.qmobile.qmobileui.ui.noTabLayoutUI
 import com.qmobile.qmobileui.ui.setFadeThroughExitTransition
 import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
 import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
@@ -264,7 +265,9 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
             }
         }
 
-        binding.fragmentListRecyclerView.setPadding(0, 0, 0, getPaddingBottom())
+        if (!noTabLayoutUI) {
+            binding.fragmentListRecyclerView.setPadding(0, 0, 0, getPaddingBottom())
+        }
         binding.fragmentListRecyclerView.adapter = adapter
 
         binding.fragmentListRecyclerView.edgeEffectFactory = BounceEdgeEffectFactory()

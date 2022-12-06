@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.addCallback
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
@@ -52,14 +53,12 @@ import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
-import com.qmobile.qmobileui.action.barcode.BarcodeScannerFragment
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.action.utils.ActionHelper.cleanActionContent
 import com.qmobile.qmobileui.action.utils.ActionUIHelper
 import com.qmobile.qmobileui.action.utils.ActionUIHelper.getMenuDrawable
 import com.qmobile.qmobileui.action.utils.ActionUIHelper.setMenuItemColorFilter
-import com.qmobile.qmobileui.action.webview.ActionWebViewFragment
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.binding.ImageHelper
@@ -68,6 +67,7 @@ import com.qmobile.qmobileui.databinding.ActivityMainBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.NoSwipeBehavior
 import com.qmobile.qmobileui.ui.SnackbarHelper
+import com.qmobile.qmobileui.ui.noTabLayoutUI
 import com.qmobile.qmobileui.ui.setMaterialFadeTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZExitTransition
 import com.qmobile.qmobileui.utils.PermissionCheckerImpl
@@ -93,6 +93,8 @@ class MainActivity :
     private lateinit var binding: ActivityMainBinding
     private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
+
+    private var isFullScreen = false
     private var snackbar: Snackbar? = null
     private var snackBarRequired = false
 
@@ -116,10 +118,40 @@ class MainActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        setupUI()
+
+        // Init system services in onCreate()
+        connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        if (savedInstanceState == null) {
+            // Retrieve bundled parameter to know if there was a successful login with statusText
+            loginStatusText = intent.getStringExtra(LOGIN_STATUS_TEXT) ?: ""
+            setupTabLayout()
+        } // Else, need to wait for onRestoreInstanceState
+
+        // Init ApiClients
+        refreshAllApiClients()
+
+        initViewModels()
+        mainActivityObserver = MainActivityObserver(this, entityListViewModelList, taskViewModel).apply {
+            initObservers()
+        }
+
+        mainActivityDataSync = MainActivityDataSync(this)
+
+        // Follow activity lifecycle and check when activity enters foreground for data sync
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+    }
+
+    private fun setupUI() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
+
+        if (noTabLayoutUI) {
+            binding.scrollableTabLayout.visibility = View.GONE
+        }
 
         binding.appbar.applyInsetter {
             type(statusBars = true) {
@@ -136,36 +168,33 @@ class MainActivity :
             }
         }
 
-        binding.scrollableTabLayout.applyInsetter {
-            type(navigationBars = true) {
-                padding(animated = true)
+        if (!noTabLayoutUI) {
+            binding.scrollableTabLayout.applyInsetter {
+                type(navigationBars = true) {
+                    padding(animated = true)
+                }
+            }
+
+            binding.scrollableTabLayout.setBackgroundColor(SurfaceColors.SURFACE_2.getColor(this))
+
+            ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+                val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+                when {
+                    imeVisible -> binding.scrollableTabLayout.visibility = View.GONE
+                    isFullScreen -> binding.scrollableTabLayout.visibility = View.GONE
+                    else -> binding.scrollableTabLayout.visibility = View.VISIBLE
+                }
+                insets
             }
         }
-
-        binding.scrollableTabLayout.setBackgroundColor(SurfaceColors.SURFACE_2.getColor(this))
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
             WindowCompat.setDecorFitsSystemWindows(window, false)
         }
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
-            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            if (imeVisible) {
-                binding.scrollableTabLayout.visibility = View.GONE
-            } else {
-                binding.scrollableTabLayout.visibility = View.VISIBLE
-            }
-            insets
+        onBackPressedDispatcher.addCallback(this) {
+            finish()
         }
-
-        // Init system services in onCreate()
-        connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        if (savedInstanceState == null) {
-            // Retrieve bundled parameter to know if there was a successful login with statusText
-            loginStatusText = intent.getStringExtra(LOGIN_STATUS_TEXT) ?: ""
-            setupTabLayout()
-        } // Else, need to wait for onRestoreInstanceState
 
         snackbar = SnackbarHelper.build(
             this@MainActivity,
@@ -182,19 +211,6 @@ class MainActivity :
                 }
             }
         })
-
-        // Init ApiClients
-        refreshAllApiClients()
-
-        initViewModels()
-        mainActivityObserver = MainActivityObserver(this, entityListViewModelList, taskViewModel).apply {
-            initObservers()
-        }
-
-        mainActivityDataSync = MainActivityDataSync(this)
-
-        // Follow activity lifecycle and check when activity enters foreground for data sync
-        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -316,13 +332,12 @@ class MainActivity :
 
     internal fun onServerInaccessible(tableName: String, isFromAction: Boolean = false) {
         if (isFromAction) {
-            connectivityViewModel.toastMessage
-                .showMessage(
-                    getString(R.string.action_send_server_not_accessible),
-                    tableName,
-                    ToastMessage.Type.NEUTRAL
-                )
-            onBackPressed()
+            connectivityViewModel.toastMessage.showMessage(
+                getString(R.string.action_send_server_not_accessible),
+                tableName,
+                ToastMessage.Type.NEUTRAL
+            )
+            navController.navigateUp()
         } else {
             connectivityViewModel.toastMessage
                 .showMessage(getString(R.string.server_not_accessible), tableName, ToastMessage.Type.ERROR)
@@ -336,7 +351,7 @@ class MainActivity :
                 tableName,
                 ToastMessage.Type.NEUTRAL
             )
-            onBackPressed()
+            navController.navigateUp()
         } else {
             connectivityViewModel.toastMessage.showMessage(
                 getString(R.string.no_internet),
@@ -740,22 +755,19 @@ class MainActivity :
     }
 
     override fun setFullScreenMode(isFullScreen: Boolean) {
+        this.isFullScreen = isFullScreen
         setMaterialFadeTransition(binding.mainContainer, true)
         if (isFullScreen) {
             binding.collapsingToolbar.visibility = View.GONE
-            binding.scrollableTabLayout.visibility = View.GONE
+            if (!noTabLayoutUI) {
+                binding.scrollableTabLayout.visibility = View.GONE
+            }
         } else {
             binding.collapsingToolbar.visibility = View.VISIBLE
-            binding.scrollableTabLayout.visibility = View.VISIBLE
+            if (!noTabLayoutUI) {
+                binding.scrollableTabLayout.visibility = View.VISIBLE
+            }
         }
-    }
-
-    override fun onBackPressed() {
-        // If fullscreen fragment, set back ActionBar
-        when (currentNavigationFragment) {
-            is BarcodeScannerFragment, is ActionWebViewFragment -> setFullScreenMode(false)
-        }
-        super.onBackPressed()
     }
 
     override fun logout(isUnauthorized: Boolean) {

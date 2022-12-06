@@ -30,6 +30,7 @@ import com.qmobile.qmobileui.databinding.FragmentActionTasksBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.SnackbarHelper.UNDO_ACTION_DURATION
+import com.qmobile.qmobileui.ui.noTabLayoutUI
 import com.qmobile.qmobileui.ui.setFadeThroughEnterTransition
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
@@ -127,7 +128,9 @@ class TasksFragment : BaseFragment(), NetworkChecker {
      * Initialize recyclerView
      */
     private fun initRecyclerViews() {
-        binding.tasksLinear.setPadding(0, 0, 0, getPaddingBottom())
+        if (!noTabLayoutUI) {
+            binding.tasksLinear.setPadding(0, 0, 0, getPaddingBottom())
+        }
         val divider = MaterialDividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL)
         divider.isLastItemDecorated = false
         divider.dividerInsetStart = DIVIDER_INSET_START.px
