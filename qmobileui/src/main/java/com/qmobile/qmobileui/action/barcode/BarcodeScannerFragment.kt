@@ -13,8 +13,6 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.camera.core.ExperimentalGetImage
 import com.qmobile.qmobileui.BaseFragment
-import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_FRAGMENT_REQUEST_KEY
-import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment.Companion.BARCODE_VALUE_KEY
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.barcode.Scanner
 import com.qmobile.qmobileui.databinding.FragmentBarcodeBinding
@@ -28,9 +26,16 @@ class BarcodeScannerFragment : BaseFragment() {
     private val binding get() = _binding!!
 
     private val scanner = Scanner()
+    private var fragmentResultKey = ""
+
+    companion object {
+        const val BARCODE_VALUE_KEY = "barcode_value"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        arguments?.getString("fragmentResultKey")?.let { fragmentResultKey = it }
+
         setSharedAxisZEnterTransition()
         activity?.actionBar?.hide()
 
@@ -75,7 +80,7 @@ class BarcodeScannerFragment : BaseFragment() {
             val result = Bundle().apply {
                 putString(BARCODE_VALUE_KEY, value)
             }
-            parentFragmentManager.setFragmentResult(BARCODE_FRAGMENT_REQUEST_KEY, result)
+            parentFragmentManager.setFragmentResult(fragmentResultKey, result)
         }
         activity?.onBackPressedDispatcher?.onBackPressed()
     }

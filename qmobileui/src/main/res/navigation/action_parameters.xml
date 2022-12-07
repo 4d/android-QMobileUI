@@ -9,24 +9,25 @@
     android:id="@+id/action_parameters"
     app:startDestination="@id/actionParametersFragment">
 
+    <include app:graph="@navigation/scanner" />
+
     <fragment
         android:id="@+id/actionParametersFragment"
         android:name="com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment">
 
         <action
             android:id="@+id/action_parameters_to_scanner"
-            app:destination="@id/barCodeFragment" />
+            app:destination="@id/scanner" />
 
         <action
             android:id="@+id/action_parameters_to_push_input_control"
             app:destination="@id/input_control_push" />
 
-    </fragment>
+        <action
+            android:id="@+id/to_scanner"
+            app:destination="@id/scanner" />
 
-    <fragment
-        android:id="@+id/barCodeFragment"
-        android:name="com.qmobile.qmobileui.action.barcode.BarcodeScannerFragment"
-        android:label="@string/nav_barcode_scan" />
+    </fragment>
 
     <fragment
         android:id="@+id/input_control_push"

@@ -188,12 +188,12 @@ class MainActivity :
             }
         }
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-        }
-
         onBackPressedDispatcher.addCallback(this) {
             finish()
+        }
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
         }
 
         snackbar = SnackbarHelper.build(
