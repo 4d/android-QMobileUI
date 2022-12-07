@@ -9,6 +9,7 @@
     android:id="@+id/base_nav">
 
     <include app:graph="@navigation/pending_tasks" />
+    <include app:graph="@navigation/scanner" />
     <include app:graph="@navigation/settings" />
 
     <action
@@ -21,6 +22,16 @@
 
         <argument
             android:name="currentItemId"
+            app:argType="string" />
+
+    </action>
+
+    <action
+        android:id="@+id/to_scanner"
+        app:destination="@id/scanner">
+
+        <argument
+            android:name="fragmentResultKey"
             app:argType="string" />
 
     </action>

@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.list
 
+import android.Manifest
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,8 +17,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ListAdapter
 import androidx.appcompat.widget.SearchView
+import androidx.camera.core.ExperimentalGetImage
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
+import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -36,6 +39,7 @@ import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionNavigable
+import com.qmobile.qmobileui.action.barcode.BarcodeScannerFragment.Companion.BARCODE_VALUE_KEY
 import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.sort.Sort
 import com.qmobile.qmobileui.action.utils.ActionHelper
@@ -52,6 +56,7 @@ import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.FormQueryBuilder
+import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.hideKeyboard
 
 open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
@@ -60,6 +65,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         private const val CURRENT_SEARCH_QUERY_KEY = "currentSearchQuery_key"
         private const val MAX_ACTIONS_THRESHOLD = 2
         private const val MAX_ACTIONS_VISIBLE = 3
+        private const val BARCODE_FRAGMENT_REQUEST_KEY = "entity_list_fragment_scan_request"
     }
 
     // views
@@ -82,6 +88,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     private val tableActions = mutableListOf<Action>()
     private val currentRecordActions = mutableListOf<Action>()
     private var hasSearch = false
+    private var searchableWithBarcode = false
     private var hasCurrentRecordActions = false
     private var isSwipable = false
     private var searchPattern = "" // search area
@@ -135,12 +142,19 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         }
     }
 
+    @ExperimentalGetImage
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         navbarTitle?.let { activity?.setupToolbarTitle(it) }
+
+        setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
+            bundle.getString(BARCODE_VALUE_KEY)?.let {
+                searchPattern = it
+            }
+        }
 
         entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
         _binding = FragmentListBinding.inflate(inflater, container, false).apply {
@@ -155,6 +169,7 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
         formQueryBuilder = FormQueryBuilder(tableName)
 
         hasSearch = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchFields?.isNotEmpty() == true
+        searchableWithBarcode = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchableWithBarcode ?: false
         hasCurrentRecordActions = currentRecordActionsJsonObject.has(tableName)
         isSwipable = BaseApp.genericTableFragmentHelper.isSwipeAllowed(tableName)
 
@@ -384,8 +399,23 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
     }
 
     private fun setupSearchMenuIfNeeded(menu: Menu, inflater: MenuInflater) {
-        if (hasSearch) {
-            setupSearchView(menu, inflater)
+        if (hasSearch || searchableWithBarcode) {
+            setupSearchView(menu, inflater, searchableWithBarcode) {
+                activity?.apply {
+                    (this as? PermissionChecker)?.askPermission(
+                        context = this,
+                        permission = Manifest.permission.CAMERA,
+                        rationale = this.resources.getString(R.string.permission_rationale_barcode)
+                    ) { isGranted ->
+                        if (isGranted) {
+                            BaseApp.genericNavigationResolver.navigateToActionScanner(
+                                this,
+                                BARCODE_FRAGMENT_REQUEST_KEY
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 

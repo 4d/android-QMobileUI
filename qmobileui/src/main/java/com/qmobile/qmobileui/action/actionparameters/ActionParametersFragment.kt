@@ -19,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.ExperimentalGetImage
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,6 +47,7 @@ import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.action.ActionProvider
 import com.qmobile.qmobileui.action.actionparameters.viewholders.BaseViewHolder
+import com.qmobile.qmobileui.action.barcode.BarcodeScannerFragment.Companion.BARCODE_VALUE_KEY
 import com.qmobile.qmobileui.action.inputcontrols.InputControl.Format.saveInputControlFormatHolders
 import com.qmobile.qmobileui.action.inputcontrols.InputControlFormatHolder
 import com.qmobile.qmobileui.action.model.Action
@@ -116,8 +118,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
     companion object {
         // barcode
-        const val BARCODE_FRAGMENT_REQUEST_KEY = "scan_request"
-        const val BARCODE_VALUE_KEY = "barcode_value"
+        private const val BARCODE_FRAGMENT_REQUEST_KEY = "action_parameters_scan_request"
 
         // push input control
         const val INPUT_CONTROL_PUSH_FRAGMENT_REQUEST_KEY = "input_control_push_request"
@@ -187,6 +188,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         }
     }
 
+    @ExperimentalGetImage
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -634,8 +636,10 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     }
 
     private fun scan() {
-        setSharedAxisZExitTransition()
-        BaseApp.genericNavigationResolver.navigateToActionScanner(binding)
+        activity?.apply {
+            setSharedAxisZExitTransition()
+            BaseApp.genericNavigationResolver.navigateToActionScanner(this, BARCODE_FRAGMENT_REQUEST_KEY)
+        }
     }
 
     private fun registerImageFromGallery(): ActivityResultLauncher<String> {

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by qmarciset on 20/10/2022.
+  ~ 4D SAS
+  ~ Copyright (c) 2022 qmarciset. All rights reserved.
+  -->
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scanner"
+    app:startDestination="@id/barCodeFragment">
+
+    <fragment
+        android:id="@+id/barCodeFragment"
+        android:name="com.qmobile.qmobileui.action.barcode.BarcodeScannerFragment"
+        android:label="@string/nav_barcode_scan" />
+
+</navigation>
