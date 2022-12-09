@@ -28,6 +28,7 @@ import com.qmobile.qmobileui.action.inputcontrols.PushInputControlFragment
 import com.qmobile.qmobileui.action.pendingtasks.TasksFragment
 import com.qmobile.qmobileui.detail.EntityDetailFragment
 import com.qmobile.qmobileui.list.EntityListFragment
+import com.qmobile.qmobileui.list.maps.MapsFragment
 import com.qmobile.qmobileui.ui.hasNavIcon
 import com.qmobile.qmobileui.ui.setSharedAxisZExitTransition
 import com.qmobile.qmobileui.utils.hideKeyboard
@@ -71,6 +72,7 @@ abstract class BaseFragment : Fragment() {
                 is TasksFragment -> appBarLayout.liftOnScrollTargetViewId = R.id.task_nested_scroll_view
                 is PushInputControlFragment ->
                     appBarLayout.liftOnScrollTargetViewId = R.id.input_control_list_recycler_view
+                is MapsFragment -> appBarLayout.setExpanded(false)
             }
         }
     }

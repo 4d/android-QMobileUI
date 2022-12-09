@@ -38,6 +38,7 @@ class KotlinInputControlViewHolder(itemView: View, format: String = "") : BaseIn
             }
 
             if (inputControl.autocomplete && alreadyFilledValue == null) {
+                container.isExpandedHintEnabled = false
                 processInputControl(inputControl)
             }
             setOnSingleClickListener {

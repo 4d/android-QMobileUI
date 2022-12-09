@@ -6,265 +6,50 @@
 
 package com.qmobile.qmobileui.list
 
-import android.Manifest
-import android.content.Context
-import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ListAdapter
-import androidx.appcompat.widget.SearchView
-import androidx.camera.core.ExperimentalGetImage
 import androidx.core.content.ContextCompat
-import androidx.core.view.MenuProvider
-import androidx.fragment.app.setFragmentResultListener
+import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmobile.qmobileapi.model.entity.EntityModel
-import com.qmobile.qmobiledatastore.data.RoomEntity
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.relation.Relation
-import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.utils.LayoutType
-import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
-import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
-import com.qmobile.qmobileui.ActionActivity
-import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.action.ActionNavigable
-import com.qmobile.qmobileui.action.barcode.BarcodeScannerFragment.Companion.BARCODE_VALUE_KEY
-import com.qmobile.qmobileui.action.model.Action
-import com.qmobile.qmobileui.action.sort.Sort
-import com.qmobile.qmobileui.action.utils.ActionHelper
-import com.qmobile.qmobileui.action.utils.ActionUIHelper
 import com.qmobile.qmobileui.databinding.FragmentListBinding
-import com.qmobile.qmobileui.list.swipe.ItemActionButton
-import com.qmobile.qmobileui.list.swipe.SwipeToActionCallback
 import com.qmobile.qmobileui.ui.BounceEdgeEffectFactory
 import com.qmobile.qmobileui.ui.GridDividerDecoration
 import com.qmobile.qmobileui.ui.noTabLayoutUI
-import com.qmobile.qmobileui.ui.setFadeThroughExitTransition
-import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
-import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
-import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
-import com.qmobile.qmobileui.ui.setupToolbarTitle
-import com.qmobile.qmobileui.utils.FormQueryBuilder
-import com.qmobile.qmobileui.utils.PermissionChecker
-import com.qmobile.qmobileui.utils.hideKeyboard
 
-open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
+open class EntityListFragment : ListFormFragment() {
 
-    companion object {
-        private const val CURRENT_SEARCH_QUERY_KEY = "currentSearchQuery_key"
-        private const val MAX_ACTIONS_THRESHOLD = 2
-        private const val MAX_ACTIONS_VISIBLE = 3
-        private const val BARCODE_FRAGMENT_REQUEST_KEY = "entity_list_fragment_scan_request"
-    }
-
-    // views
-    private var _binding: FragmentListBinding? = null
-    internal val binding get() = _binding!!
-    internal lateinit var adapter: EntityListAdapter
-    private lateinit var currentRecordActionsListAdapter: ListAdapter
-    private lateinit var entityListViewModel: EntityListViewModel<EntityModel>
-
-    override lateinit var actionActivity: ActionActivity
-    private var tableActionsJsonObject = BaseApp.runtimeDataHolder.tableActions
-    private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
-    private lateinit var formQueryBuilder: FormQueryBuilder
-
-    // fragment parameters
-    override var tableName = ""
-    private var path = ""
-    private var parentItemId = ""
-
-    private val tableActions = mutableListOf<Action>()
-    private val currentRecordActions = mutableListOf<Action>()
-    private var hasSearch = false
-    private var searchableWithBarcode = false
-    private var hasCurrentRecordActions = false
-    private var isSwipable = false
-    private var searchPattern = "" // search area
-    private var relation: Relation? = null
-
-    private val searchListener: SearchView.OnQueryTextListener =
-        object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                newText?.let {
-                    if (searchPattern != it) {
-                        searchPattern = it
-                        setSearchQuery()
-                    }
-                }
-                return true
-            }
-        }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is ActionActivity) {
-            actionActivity = context
-        }
-        // Access resources elements
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        savedInstanceState?.getString(CURRENT_SEARCH_QUERY_KEY, "")?.let { searchPattern = it }
-
-        setSharedAxisXEnterTransition()
-
-        // Base entity list fragment
-        arguments?.getString("tableName")?.let { tableName = it }
-        arguments?.getString("navbarTitle")?.let { navbarTitle = it }
-        // Entity list fragment from relation
-        arguments?.getString("relationName")?.let { relationName ->
-            if (relationName.isNotEmpty()) {
-                var parentTableName = ""
-                arguments?.getString("parentTableName")?.let { parentTableName = it }
-                relation = RelationHelper.getRelation(parentTableName, relationName)
-                tableName = relation?.dest ?: tableName
-                arguments?.getString("parentItemId")?.let { parentItemId = it }
-                arguments?.getString("path")?.let { path = it }
-                setSharedAxisZEnterTransition()
-            }
-        }
-    }
-
-    @ExperimentalGetImage
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        navbarTitle?.let { activity?.setupToolbarTitle(it) }
-
-        setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
-            bundle.getString(BARCODE_VALUE_KEY)?.let {
-                searchPattern = it
-            }
-        }
-
-        entityListViewModel = getEntityListViewModel(activity, tableName, delegate.apiService)
-        _binding = FragmentListBinding.inflate(inflater, container, false).apply {
+    override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): ViewDataBinding {
+        return FragmentListBinding.inflate(inflater, container, false).apply {
             viewModel = entityListViewModel
             lifecycleOwner = viewLifecycleOwner
         }
-        return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        formQueryBuilder = FormQueryBuilder(tableName)
-
-        hasSearch = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchFields?.isNotEmpty() == true
-        searchableWithBarcode = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchableWithBarcode ?: false
-        hasCurrentRecordActions = currentRecordActionsJsonObject.has(tableName)
-        isSwipable = BaseApp.genericTableFragmentHelper.isSwipeAllowed(tableName)
-
-        initMenuProvider()
-        initActions()
-        initCellSwipe()
-        initAdapter()
-        initRecyclerView()
-        initOnRefreshListener()
-        EntityListFragmentObserver(this, entityListViewModel).initObservers()
-        hideKeyboard(activity)
-        BaseApp.genericTableFragmentHelper.getCustomEntityListFragment(tableName, binding)
-            ?.onViewCreated(view, savedInstanceState)
-    }
-
-    override fun onDestroyView() {
-        binding.fragmentListRecyclerView.adapter = null
-        _binding = null
-        super.onDestroyView()
-    }
-
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        setupActionsMenu(menu)
-        setupSearchMenuIfNeeded(menu, menuInflater)
-        setSearchQuery()
-    }
-
-    override fun onPrepareMenu(menu: Menu) {
-        if (hasSearch) {
-            searchView.setOnQueryTextListener(searchListener)
-
-            if (searchPattern.isEmpty()) {
-                searchView.onActionViewCollapsed()
-            } else {
-                searchView.setQuery(searchPattern, true)
-                searchView.isIconified = false
-                searchPlate.clearFocus()
-            }
-        }
-        super.onPrepareMenu(menu)
-    }
-
-    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        return false
-    }
-
-    private fun initAdapter() {
-        adapter = EntityListAdapter(
-            tableName = tableName,
-            lifecycleOwner = viewLifecycleOwner,
-            onItemClick = { dataBinding, position ->
-                setSharedAxisXExitTransition()
-                BaseApp.genericNavigationResolver.navigateFromListToViewPager(
-                    viewDataBinding = dataBinding,
-                    sourceTable = relation?.source ?: tableName,
-                    position = position,
-                    query = searchPattern,
-                    relationName = relation?.name ?: "",
-                    parentItemId = parentItemId,
-                    path = path,
-                    navbarTitle = navbarTitle ?: ""
-                )
-            },
-            onItemLongClick = { currentEntity ->
-                if (hasCurrentRecordActions && !isSwipable) {
-                    showDialog { action ->
-                        actionActivity.setCurrentEntityModel(currentEntity)
-                        actionActivity.onActionClick(action, this@EntityListFragment)
-                    }
-                }
-            }
-        )
-    }
-
-    /**
-     * Initialize recyclerView
-     */
-    private fun initRecyclerView() {
+    override fun initRecyclerView() {
         when (BaseApp.genericTableFragmentHelper.layoutType(tableName)) {
             LayoutType.GRID -> {
                 val gridSpanCount = resources.getInteger(R.integer.grid_span_count)
-                binding.fragmentListRecyclerView.layoutManager =
+                recyclerView.layoutManager =
                     GridLayoutManager(activity, gridSpanCount, GridLayoutManager.VERTICAL, false)
                 val divider = GridDividerDecoration(
                     resources.getDimensionPixelSize(R.dimen.grid_divider_size),
                     ContextCompat.getColor(requireContext(), R.color.divider_color),
                     gridSpanCount
                 )
-                binding.fragmentListRecyclerView.addItemDecoration(divider)
+                recyclerView.addItemDecoration(divider)
             }
             else -> {
-                binding.fragmentListRecyclerView.layoutManager =
+                recyclerView.layoutManager =
                     LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
                 val divider = DividerItemDecoration(activity, LinearLayoutManager.VERTICAL)
-                binding.fragmentListRecyclerView.addItemDecoration(divider)
+                recyclerView.addItemDecoration(divider)
 
                 // Add section itemDecoration if defined for this table
                 val sectionField = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.name
@@ -274,202 +59,26 @@ open class EntityListFragment : BaseFragment(), ActionNavigable, MenuProvider {
                         true,
                         adapter.getSectionCallback(sectionField)
                     )
-                    binding.fragmentListRecyclerView.addItemDecoration(sectionItemDecoration)
-                    binding.fragmentListRecyclerView.isVerticalScrollBarEnabled = false
+                    recyclerView.addItemDecoration(sectionItemDecoration)
+                    recyclerView.isVerticalScrollBarEnabled = false
                 }
             }
         }
 
         if (!noTabLayoutUI) {
-            binding.fragmentListRecyclerView.setPadding(0, 0, 0, getPaddingBottom())
+            recyclerView.setPadding(0, 0, 0, getPaddingBottom())
         }
-        binding.fragmentListRecyclerView.adapter = adapter
-
-        binding.fragmentListRecyclerView.edgeEffectFactory = BounceEdgeEffectFactory()
+        recyclerView.adapter = adapter
+        recyclerView.edgeEffectFactory = BounceEdgeEffectFactory()
     }
 
-    /**
-     * Initialize Pull to refresh
-     */
-    private fun initOnRefreshListener() {
-        binding.fragmentListSwipeToRefresh.setOnRefreshListener {
-            delegate.requestDataSync(tableName)
-            binding.fragmentListRecyclerView.adapter = adapter
-            binding.fragmentListSwipeToRefresh.isRefreshing = false
-        }
-    }
-
-    private fun initActions() {
-        tableActions.clear()
-        currentRecordActions.clear()
-        if (tableActionsJsonObject.has(tableName)) {
-            ActionHelper.fillActionList(tableActionsJsonObject, tableName, tableActions)
-        }
-        if (hasCurrentRecordActions) {
-            ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
-            currentRecordActionsListAdapter =
-                ActionUIHelper.getActionArrayAdapter(requireContext(), currentRecordActions)
-        }
-    }
-
-    /**
-     * Initialize Swipe to actions
-     */
-    private fun initCellSwipe() {
-        if (hasCurrentRecordActions && isSwipable) {
-            val itemTouchHelper =
-                ItemTouchHelper(object : SwipeToActionCallback(binding.fragmentListRecyclerView) {
-                    override fun instantiateUnderlayButton(position: Int): List<ItemActionButton> {
-                        val swipeButtons = mutableListOf<ItemActionButton>()
-                        for (i in 0 until (currentRecordActions.size)) {
-                            val hasMoreButton =
-                                (i + 1) > MAX_ACTIONS_THRESHOLD && currentRecordActions.size > MAX_ACTIONS_VISIBLE
-                            val action = if (hasMoreButton) {
-                                null
-                            } else {
-                                currentRecordActions[i]
-                            }
-                            val swipeButton = createSwipeButton(position, action, i) { clickedAction, entity ->
-                                actionActivity.setCurrentEntityModel(entity)
-                                actionActivity.onActionClick(clickedAction, this@EntityListFragment)
-                            }
-                            swipeButtons.add(swipeButton)
-                            if (action == null) break
-                        }
-                        return swipeButtons
-                    }
-                })
-            itemTouchHelper.attachToRecyclerView(binding.fragmentListRecyclerView)
-        }
-    }
-
-    private fun showDialog(onClick: (action: Action) -> Unit) {
-        MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_Material3_MaterialAlertDialog)
-            .setTitle(requireContext().getString(R.string.action_list_title))
-            .setAdapter(currentRecordActionsListAdapter) { _, position ->
-                onClick(currentRecordActions[position])
+    override fun initOnRefreshListener() {
+        binding.root.findViewById<SwipeRefreshLayout>(R.id.fragment_list_swipe_to_refresh)?.apply {
+            setOnRefreshListener {
+                delegate.requestDataSync(tableName)
+                recyclerView.adapter = adapter
+                this.isRefreshing = false
             }
-            .show()
-    }
-
-    private fun createSwipeButton(
-        position: Int,
-        action: Action?,
-        horizontalIndex: Int,
-        onActionClick: (action: Action, roomEntity: RoomEntity) -> Unit
-    ): ItemActionButton {
-        return ItemActionButton(requireContext(), action, horizontalIndex) {
-            adapter.getSelectedItem(position)?.let { entity ->
-                if (action == null) { // the case of "..." button
-                    showDialog { clickedAction ->
-                        onActionClick(clickedAction, entity)
-                    }
-                } else {
-                    onActionClick(action, entity)
-                }
-            }
-        }
-    }
-
-    private fun setupActionsMenu(menu: Menu) {
-        val parametersToSortWith = BaseApp.sharedPreferencesHolder.parametersToSortWith
-        val sortActions = tableActions.filter { it.isSortAction() }
-        // If user already applied a sort, we need no more to apply default sort
-        if (!parametersToSortWith.has(tableName)) {
-            // if 1, no call for sort item here, just save it in shared prefs to be used in sortItems()
-            // if more than one, we apply by default the first one
-            val fieldsToSortBy: Map<String, String>? = if (sortActions.isEmpty()) {
-                Sort.getDefaultSortField(tableName)
-            } else {
-                sortActions.firstOrNull()?.sortFields
-            }
-            Sort.saveSortChoice(tableName, fieldsToSortBy)
-        }
-
-        val actionsForMenu = if (sortActions.size == 1) {
-            tableActions.filter { !it.isSortAction() }
-        } else {
-            tableActions
-        }
-
-        actionActivity.setupActionsMenu(menu, actionsForMenu, this) { onSortAction ->
-            Sort.saveSortChoice(tableName, onSortAction.sortFields)
-            setSearchQuery()
-        }
-    }
-
-    private fun setupSearchMenuIfNeeded(menu: Menu, inflater: MenuInflater) {
-        if (hasSearch || searchableWithBarcode) {
-            setupSearchView(menu, inflater, searchableWithBarcode) {
-                activity?.apply {
-                    (this as? PermissionChecker)?.askPermission(
-                        context = this,
-                        permission = Manifest.permission.CAMERA,
-                        rationale = this.resources.getString(R.string.permission_rationale_barcode)
-                    ) { isGranted ->
-                        if (isGranted) {
-                            BaseApp.genericNavigationResolver.navigateToActionScanner(
-                                this,
-                                BARCODE_FRAGMENT_REQUEST_KEY
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString(CURRENT_SEARCH_QUERY_KEY, searchPattern)
-    }
-
-    private fun setSearchQuery() {
-        val formQuery = if (relation != null) {
-            formQueryBuilder.getRelationQuery(
-                parentItemId = parentItemId,
-                pattern = searchPattern,
-                parentTableName = relation?.source ?: "",
-                path = path
-            )
-        } else {
-            formQueryBuilder.getQuery(searchPattern)
-        }
-        entityListViewModel.setSearchQuery(formQuery)
-    }
-
-    override fun getActionContent(actionUUID: String, itemId: String?): MutableMap<String, Any> {
-        return ActionHelper.getActionContent(
-            tableName = tableName,
-            actionUUID = actionUUID,
-            itemId = itemId ?: "",
-            parentItemId = parentItemId,
-            relation = relation
-        )
-    }
-
-    override fun navigateToActionForm(action: Action, itemId: String?) {
-        setFadeThroughExitTransition()
-        BaseApp.genericNavigationResolver.navigateToActionForm(
-            viewDataBinding = binding,
-            tableName = relation?.source ?: tableName,
-            itemId = itemId ?: "",
-            relationName = relation?.name ?: "",
-            parentItemId = parentItemId,
-            pendingTaskId = "",
-            actionUUID = action.uuid,
-            navbarTitle = action.getPreferredShortName()
-        )
-    }
-
-    override fun navigateToPendingTasks() {
-        activity?.let {
-            setFadeThroughExitTransition()
-            BaseApp.genericNavigationResolver.navigateToPendingTasks(
-                fragmentActivity = it,
-                tableName = relation?.source ?: tableName,
-                currentItemId = ""
-            )
         }
     }
 }

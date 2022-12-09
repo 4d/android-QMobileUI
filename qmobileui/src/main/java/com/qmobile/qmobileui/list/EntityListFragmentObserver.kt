@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class EntityListFragmentObserver(
-    private val fragment: EntityListFragment,
+    private val fragment: ListFormFragment,
     private val entityListViewModel: EntityListViewModel<EntityModel>
 ) : BaseObserver {
 
@@ -44,9 +44,9 @@ class EntityListFragmentObserver(
         entityListViewModel.scheduleRefresh.launchAndCollectIn(fragment, Lifecycle.State.STARTED) { scheduleRefresh ->
             if (scheduleRefresh == ScheduleRefresh.PERFORM) {
                 entityListViewModel.setScheduleRefreshState(ScheduleRefresh.NO)
-                val layoutManager = fragment.binding.fragmentListRecyclerView.layoutManager as LinearLayoutManager
+                val layoutManager = fragment.recyclerView.layoutManager as LinearLayoutManager
                 val firstVisible = layoutManager.findFirstVisibleItemPosition()
-                val childCount = fragment.binding.fragmentListRecyclerView.childCount
+                val childCount = fragment.recyclerView.childCount
                 fragment.adapter.notifyItemRangeChanged(firstVisible, childCount)
             }
         }

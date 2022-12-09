@@ -64,6 +64,11 @@ dependencies {
     implementation Libs.androidx_camera_view
     implementation Libs.barcode_scanning
 
+    // Maps
+    implementation Libs.play_services_maps
+    implementation Libs.maps_ktx
+    implementation Libs.maps_utils_ktx
+
     // Utils
     implementation Libs.insetter
     implementation Libs.material

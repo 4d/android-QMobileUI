@@ -13,6 +13,8 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.activity.mainactivity.MainActivity
+import com.qmobile.qmobileui.list.maps.MapsFragment
 
 /**
  * Use Glide to load image url in a view
@@ -71,4 +73,18 @@ fun bindRelationLinkColor(view: TextView, textColor: Boolean?) {
 )
 fun buttonText(view: Button, buttonText: String?, entryRelation: Any?, altButtonText: String?) {
     view.text = if (entryRelation == null) altButtonText else buttonText
+}
+
+@BindingAdapter(
+    value = ["mapDataSource", "mapDataSourceKey"],
+    requireAll = true
+)
+fun bindMapDataSource(view: View, address: String?, key: String?) {
+    if (address != null && key != null) {
+        (view.context as? MainActivity)?.currentNavigationFragment?.let { fragment ->
+            if (fragment is MapsFragment) {
+                fragment.refreshAddressMap(address, key)
+            }
+        }
+    }
 }

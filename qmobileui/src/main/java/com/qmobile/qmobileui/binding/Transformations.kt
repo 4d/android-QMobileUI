@@ -20,7 +20,7 @@ object Transformations {
     private const val CROP_CIRCLE_WITH_BORDER_SIZE = 4
     private const val BLUR_RADIUS = 50
     private const val BLUR_SAMPLING = 3
-    private const val ROUNDED_CORNERS_RADIUS = 128
+    private const val ROUNDED_CORNERS_RADIUS = 20
     private const val ROUNDED_CORNERS_MARGIN = 0
 
     fun getTransformation(transform: String?, @ColorInt borderColor: Int? = null): Transformation<Bitmap>? {
@@ -31,7 +31,7 @@ object Transformations {
             "RoundedCorners" -> RoundedCornersTransformation(
                 ROUNDED_CORNERS_RADIUS,
                 ROUNDED_CORNERS_MARGIN,
-                RoundedCornersTransformation.CornerType.BOTTOM
+                RoundedCornersTransformation.CornerType.ALL
             )
             "CropSquare" -> CropSquareTransformation()
 //        "ColorFilter" -> ColorFilterTransformation()

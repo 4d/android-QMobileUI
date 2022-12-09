@@ -68,6 +68,7 @@
     <string name="login_qrcode_retry">Retry</string>
     <string name="login_google_signing_out">Signing out from Google account</string>
     <string name="login_google_signed_out">Signed out from Google account</string>
+    <string name="login_google_no_server_client_id">String resource \"server_client_id\" has not been defined</string>
 
     <string name="web_view_refresh">Refresh</string>
     <string name="web_view_share">Share</string>

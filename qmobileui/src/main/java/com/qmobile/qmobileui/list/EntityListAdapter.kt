@@ -19,6 +19,7 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.utils.ReflectionUtils
 import com.qmobile.qmobileui.utils.ResourcesHelper
+import timber.log.Timber
 
 class EntityListAdapter internal constructor(
     private val tableName: String,
@@ -61,8 +62,15 @@ class EntityListAdapter internal constructor(
         holder.bind(getItem(position))
     }
 
+    @Suppress("TooGenericExceptionCaught")
     fun getSelectedItem(position: Int): RoomEntity? {
-        return getItem(position)
+        return try {
+            getItem(position)
+        } catch (e: IndexOutOfBoundsException) {
+            Timber.d(e.message.orEmpty())
+            Timber.d("PagingData not set yet")
+            null
+        }
     }
 
     fun getSectionCallback(sectionField: String): RecyclerSectionItemDecoration.SectionCallback {
