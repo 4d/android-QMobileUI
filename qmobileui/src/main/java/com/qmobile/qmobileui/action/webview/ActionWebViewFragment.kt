@@ -114,15 +114,15 @@ class ActionWebViewFragment : BaseFragment() {
         // Checking context as we may be gone from fragment
         context?.let {
             MaterialAlertDialogBuilder(it)
-                .setTitle(requireActivity().getString(R.string.server_not_reachable))
+                .setTitle(getString(R.string.server_not_reachable))
                 .setCancelable(false)
                 .setPositiveButton(
-                    requireActivity().getString(R.string.open_url_retry_dialog)
+                    getString(R.string.open_url_retry_dialog)
                 ) { _, _ ->
                     setupWebView()
                 }
                 .setNegativeButton(
-                    requireActivity().getString(R.string.open_url_dialog_cancel)
+                    getString(R.string.open_url_dialog_cancel)
                 ) { _, _ ->
                     activity?.onBackPressedDispatcher?.onBackPressed()
                 }

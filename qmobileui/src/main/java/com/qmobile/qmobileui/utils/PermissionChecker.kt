@@ -44,12 +44,12 @@ class PermissionCheckerImpl(private val fragmentActivity: FragmentActivity) {
             ) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
                     MaterialAlertDialogBuilder(this)
-                        .setTitle(getString(R.string.permission_dialog_title))
+                        .setTitle(resources.getString(R.string.permission_dialog_title))
                         .setMessage(rationale)
-                        .setPositiveButton(getString(R.string.permission_dialog_positive)) { _, _ ->
+                        .setPositiveButton(resources.getString(R.string.permission_dialog_positive)) { _, _ ->
                             requestPermission(permission, callback)
                         }
-                        .setNegativeButton(getString(R.string.permission_dialog_negative)) { dialog, _ ->
+                        .setNegativeButton(resources.getString(R.string.permission_dialog_negative)) { dialog, _ ->
                             dialog.cancel()
                         }
                         .show()

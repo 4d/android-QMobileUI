@@ -59,7 +59,7 @@ open class TextViewHolder(itemView: View, format: String) :
     override fun validate(displayError: Boolean): Boolean {
         if (isMandatory() && input.text.toString().trim().isEmpty()) {
             if (displayError) {
-                showError(itemView.context.getString(R.string.action_parameter_mandatory_error))
+                showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
             }
             return false
         }
@@ -70,14 +70,14 @@ open class TextViewHolder(itemView: View, format: String) :
 
         if (apu.isEmail() && !input.text.toString().isEmailValid()) {
             if (displayError) {
-                showError(itemView.context.getString(R.string.action_parameter_invalid_email_error))
+                showError(itemView.context.resources.getString(R.string.action_parameter_invalid_email_error))
             }
             return false
         }
 
         if (apu.isUrl() && !input.text.toString().isUrlValid()) {
             if (displayError) {
-                showError(itemView.context.getString(R.string.action_parameter_invalid_url_error))
+                showError(itemView.context.resources.getString(R.string.action_parameter_invalid_url_error))
             }
             return false
         }

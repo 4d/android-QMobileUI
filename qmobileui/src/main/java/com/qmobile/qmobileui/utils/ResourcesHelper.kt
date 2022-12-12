@@ -43,7 +43,7 @@ object ResourcesHelper {
      */
     fun fetchResourceString(context: Context, string: String): String {
         return when (string) {
-            "try_refresh_data" -> context.getString(R.string.try_refresh_data)
+            "try_refresh_data" -> context.resources.getString(R.string.try_refresh_data)
             else -> string
         }
     }

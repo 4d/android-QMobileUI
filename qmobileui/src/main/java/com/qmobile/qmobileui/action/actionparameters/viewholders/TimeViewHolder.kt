@@ -76,8 +76,8 @@ class TimeViewHolder(
                 .setMinute(defaultMinute)
                 .setTitleText(container.hint)
                 .setInputMode(MaterialTimePicker.INPUT_MODE_KEYBOARD)
-                .setPositiveButtonText(itemView.context.getString(R.string.action_time_dialog_positive))
-                .setNegativeButtonText(itemView.context.getString(R.string.action_time_dialog_negative))
+                .setPositiveButtonText(itemView.context.resources.getString(R.string.action_time_dialog_positive))
+                .setNegativeButtonText(itemView.context.resources.getString(R.string.action_time_dialog_negative))
                 .build()
 
             timePicker.addOnPositiveButtonClickListener {

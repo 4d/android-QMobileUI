@@ -38,7 +38,7 @@ class MenuViewHolder(
 
     override val fragMng: FragmentManager? = fragmentManager
     override var fieldMapping: FieldMapping? = null
-    override val placeHolder = itemView.context.getString(R.string.input_control_menu_baseline)
+    override val placeHolder = itemView.context.resources.getString(R.string.input_control_menu_baseline)
     override var currentEditEntityValue: Any? = null
     override val circularProgressBar: CircularProgressIndicator? = null
     override val fieldValueMap = mutableMapOf<Int, Any?>()
@@ -156,7 +156,7 @@ class MenuViewHolder(
     override fun validate(displayError: Boolean): Boolean {
         if (isMandatory() && isInputValid(autoCompleteTextView.text.toString())) {
             if (displayError) {
-                showError(itemView.context.getString(R.string.action_parameter_mandatory_error))
+                showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
             }
             return false
         }

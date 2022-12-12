@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.settings
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -38,30 +37,18 @@ class SettingsFragment :
     RemoteUrlChanger {
 
     internal var firstTime = true
-    private var logoutDialogTitle = ""
-    private var logoutDialogMessage = ""
-    private var logoutDialogMessageIfPendingTask = ""
-    private var logoutDialogPositive = ""
-    private var logoutDialogNegative = ""
-    private var remoteUrlPref: Preference? = null
-    internal var pendingTaskPref: Preference? = null
-    private var serverAccessibleDrawable: Drawable? = null
-    private var serverNotAccessibleDrawable: Drawable? = null
-    private lateinit var accountCategoryKey: String
-    private lateinit var remoteUrlPrefKey: String
-    private lateinit var pendingTaskPrefKey: String
-    private lateinit var logoutPrefKey: String
+    private val remoteUrlPrefKey by lazy { getString(R.string.pref_remote_url_key) }
+    private val accountCategoryKey by lazy { getString(R.string.cat_account_key) }
+    private val pendingTaskPrefKey by lazy { getString(R.string.pref_pending_tasks_key) }
+    private val logoutPrefKey by lazy { getString(R.string.pref_logout_key) }
+
+    private val remoteUrlPref by lazy { findPreference<Preference>(remoteUrlPrefKey) }
+    internal val pendingTaskPref by lazy { findPreference<Preference>(pendingTaskPrefKey) }
     private lateinit var remoteUrl: String
 
     private lateinit var activitySettingsInterface: ActivitySettingsInterface
     internal lateinit var actionActivity: ActionActivity
     internal lateinit var delegate: FragmentCommunication
-
-    // UI strings
-    private lateinit var noInternetString: String
-    private lateinit var serverAccessibleString: String
-    private lateinit var serverNotAccessibleString: String
-    private lateinit var checkingString: String
 
     // ViewModels
     private lateinit var loginViewModel: LoginViewModel
@@ -82,29 +69,11 @@ class SettingsFragment :
         if (context is ActionActivity) {
             actionActivity = context
         }
-        // Access resources elements
-        remoteUrlPrefKey = resources.getString(R.string.pref_remote_url_key)
-        pendingTaskPrefKey = resources.getString(R.string.pref_pending_tasks_key)
-        accountCategoryKey = resources.getString(R.string.cat_account_key)
-        logoutPrefKey = resources.getString(R.string.pref_logout_key)
-        serverAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.network_ok_circle)
-        serverNotAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.network_nok_circle)
-        noInternetString = resources.getString(R.string.no_internet)
-        serverAccessibleString = resources.getString(R.string.server_accessible)
-        serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
-        checkingString = resources.getString(R.string.remote_url_checking)
-
-        logoutDialogTitle = resources.getString(R.string.logout_dialog_title)
-        logoutDialogMessage = resources.getString(R.string.logout_dialog_message)
-        logoutDialogMessageIfPendingTask =
-            resources.getString(R.string.logout_dialog_message_if_pending_task)
-        logoutDialogPositive = resources.getString(R.string.logout_dialog_positive)
-        logoutDialogNegative = resources.getString(R.string.logout_dialog_negative)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        activity?.setupToolbarTitle(resources.getString(R.string.settings_navbar_title))
+        activity?.setupToolbarTitle(getString(R.string.settings_navbar_title))
         loginViewModel = getLoginViewModel(activity, activitySettingsInterface.loginApiService)
 
         connectivityViewModel = getConnectivityViewModel(
@@ -127,10 +96,7 @@ class SettingsFragment :
             findPreference<PreferenceCategory>(accountCategoryKey)?.isVisible = true
         }
         findPreference<Preference>(logoutPrefKey)?.onPreferenceClickListener = this
-        remoteUrlPref = findPreference(remoteUrlPrefKey)
         remoteUrlPref?.onPreferenceClickListener = this
-
-        pendingTaskPref = findPreference(pendingTaskPrefKey)
         pendingTaskPref?.onPreferenceClickListener = this
     }
 
@@ -156,7 +122,6 @@ class SettingsFragment :
                 }
                 true
             }
-
             else -> {
                 false
             }
@@ -169,15 +134,15 @@ class SettingsFragment :
     private fun showLogoutDialog() {
         val nbPendingTask = actionActivity.getTaskVM().pendingTasks.value?.size ?: 0
         val title = if (nbPendingTask > 0) {
-            logoutDialogMessageIfPendingTask
+            getString(R.string.logout_dialog_message_if_pending_task)
         } else {
-            logoutDialogTitle
+            getString(R.string.logout_dialog_title)
         }
         MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_QMobile_MaterialAlertDialog_FullWidthButtons)
             .setTitle(title)
-            .setMessage(logoutDialogMessage)
-            .setNegativeButton(logoutDialogNegative, null)
-            .setPositiveButton(logoutDialogPositive) { _, _ ->
+            .setMessage(getString(R.string.logout_dialog_message))
+            .setNegativeButton(getString(R.string.logout_dialog_negative), null)
+            .setPositiveButton(getString(R.string.logout_dialog_positive)) { _, _ ->
                 logout()
             }
             .show()
@@ -192,7 +157,7 @@ class SettingsFragment :
                 activitySettingsInterface.logout(false)
             }
             !connectivityViewModel.isConnected() -> {
-                SnackbarHelper.show(activity, activity?.getString(R.string.no_internet), ToastMessage.Type.WARNING)
+                SnackbarHelper.show(activity, getString(R.string.no_internet), ToastMessage.Type.WARNING)
                 Timber.d("No Internet connection")
             }
             loginViewModel.authenticationState.value != AuthenticationState.AUTHENTICATED -> {
@@ -217,31 +182,39 @@ class SettingsFragment :
     override fun onServerAccessible() {
         activity?.apply {
             remoteUrlPref?.summary =
-                this.getString(R.string.remote_url_placeholder, remoteUrl, serverAccessibleString)
+                this.getString(
+                    R.string.remote_url_placeholder,
+                    remoteUrl,
+                    getString(R.string.server_accessible)
+                )
         }
-        remoteUrlPref?.icon = serverAccessibleDrawable
+        remoteUrlPref?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.network_ok_circle)
     }
 
     override fun onServerInaccessible() {
         activity?.apply {
             remoteUrlPref?.summary =
-                this.getString(R.string.remote_url_placeholder, remoteUrl, serverNotAccessibleString)
+                this.getString(
+                    R.string.remote_url_placeholder,
+                    remoteUrl,
+                    getString(R.string.server_not_accessible)
+                )
         }
-        remoteUrlPref?.icon = serverNotAccessibleDrawable
+        remoteUrlPref?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.network_nok_circle)
     }
 
     override fun onNoInternet() {
         activity?.apply {
             remoteUrlPref?.summary =
-                this.getString(R.string.remote_url_placeholder, remoteUrl, noInternetString)
+                this.getString(R.string.remote_url_placeholder, remoteUrl, getString(R.string.no_internet))
         }
-        remoteUrlPref?.icon = serverNotAccessibleDrawable
+        remoteUrlPref?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.network_nok_circle)
     }
 
     override fun onValidRemoteUrlChange(newRemoteUrl: String) {
         BaseApp.sharedPreferencesHolder.remoteUrl = newRemoteUrl
         remoteUrl = newRemoteUrl
-        remoteUrlPref?.summary = checkingString
+        remoteUrlPref?.summary = getString(R.string.remote_url_checking)
         this@SettingsFragment.activitySettingsInterface.refreshAllApiClients()
     }
 }

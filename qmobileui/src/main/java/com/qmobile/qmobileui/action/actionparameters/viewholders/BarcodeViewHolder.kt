@@ -39,7 +39,7 @@ class BarcodeViewHolder(
             (itemView.context as? PermissionChecker)?.askPermission(
                 context = itemView.context,
                 permission = Manifest.permission.CAMERA,
-                rationale = itemView.context.getString(R.string.permission_rationale_barcode)
+                rationale = itemView.context.resources.getString(R.string.permission_rationale_barcode)
             ) { isGranted ->
                 if (isGranted) {
                     actionTypesCallback(Action.Type.SCAN, bindingAdapterPosition)

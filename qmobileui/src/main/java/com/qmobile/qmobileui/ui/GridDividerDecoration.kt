@@ -26,8 +26,7 @@ import androidx.recyclerview.widget.RecyclerView.ItemDecoration
  * will only draw dividers that are internal to the grid, meaning it will not draw lines for the
  * outermost left, top, right, or bottom edges.
  */
-class GridDividerDecoration(@Px dividerSize: Int, @ColorInt dividerColor: Int, spanCount: Int) :
-    RecyclerView.ItemDecoration() {
+class GridDividerDecoration(@Px dividerSize: Int, @ColorInt dividerColor: Int, spanCount: Int) : ItemDecoration() {
 
     private val spanCount: Int
     private val dividerPaint: Paint = Paint()

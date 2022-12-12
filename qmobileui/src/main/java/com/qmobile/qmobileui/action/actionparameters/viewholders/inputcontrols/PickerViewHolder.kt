@@ -107,7 +107,7 @@ class PickerViewHolder(
     override fun validate(displayError: Boolean): Boolean {
         if (isMandatory() && !isAChipChecked) {
             if (displayError) {
-                showError(itemView.context.getString(R.string.action_parameter_mandatory_error))
+                showError(itemView.context.resources.getString(R.string.action_parameter_mandatory_error))
             }
             return false
         }

@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.action.pendingtasks
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -50,14 +49,6 @@ class TasksFragment : BaseFragment(), NetworkChecker {
     internal var tableName: String = ""
     internal var currentItemId: String = ""
 
-    private lateinit var noInternetString: String
-    private lateinit var serverAccessibleString: String
-    private lateinit var serverNotAccessibleString: String
-    private lateinit var checkingString: String
-
-    private var serverAccessibleDrawable: Drawable? = null
-    private var serverNotAccessibleDrawable: Drawable? = null
-    private var noInternetDrawable: Drawable? = null
     private lateinit var progressIndicatorDrawable: IndeterminateDrawable<CircularProgressIndicatorSpec>
 
     companion object {
@@ -70,13 +61,6 @@ class TasksFragment : BaseFragment(), NetworkChecker {
         if (context is ActionActivity) {
             actionActivity = context
         }
-        noInternetString = resources.getString(R.string.no_internet)
-        serverAccessibleString = resources.getString(R.string.server_accessible)
-        serverNotAccessibleString = resources.getString(R.string.server_not_accessible)
-        checkingString = resources.getString(R.string.remote_url_checking)
-        serverAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.domain)
-        serverNotAccessibleDrawable = ContextCompat.getDrawable(context, R.drawable.domain_disabled)
-        noInternetDrawable = ContextCompat.getDrawable(context, R.drawable.signal_disconnected)
         val spec = CircularProgressIndicatorSpec(
             context,
             null,
@@ -102,7 +86,7 @@ class TasksFragment : BaseFragment(), NetworkChecker {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        activity?.setupToolbarTitle(resources.getString(R.string.pending_task_navbar_title))
+        activity?.setupToolbarTitle(getString(R.string.pending_task_navbar_title))
 
         _binding = FragmentActionTasksBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner
@@ -166,8 +150,8 @@ class TasksFragment : BaseFragment(), NetworkChecker {
 
             SnackbarHelper.showAction(
                 activity = it,
-                message = resources.getString(R.string.pending_task_cancelled),
-                actionText = resources.getString(R.string.pending_task_cancelled_undo),
+                message = getString(R.string.pending_task_cancelled),
+                actionText = getString(R.string.pending_task_cancelled_undo),
                 onActionClick = {
                     actionActivity.getTaskVM().insert(actionTask)
                 },
@@ -229,22 +213,22 @@ class TasksFragment : BaseFragment(), NetworkChecker {
     }
 
     override fun onServerAccessible() {
-        binding.serverStatus.text = serverAccessibleString
-        binding.serverStatus.chipIcon = serverAccessibleDrawable
+        binding.serverStatus.text = getString(R.string.server_accessible)
+        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.domain)
     }
 
     override fun onServerInaccessible() {
-        binding.serverStatus.text = serverNotAccessibleString
-        binding.serverStatus.chipIcon = serverNotAccessibleDrawable
+        binding.serverStatus.text = getString(R.string.server_not_accessible)
+        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.domain_disabled)
     }
 
     override fun onNoInternet() {
-        binding.serverStatus.text = noInternetString
-        binding.serverStatus.chipIcon = noInternetDrawable
+        binding.serverStatus.text = getString(R.string.no_internet)
+        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.signal_disconnected)
     }
 
     private fun onServerStatusClick() {
-        binding.serverStatus.text = checkingString
+        binding.serverStatus.text = getString(R.string.remote_url_checking)
         binding.serverStatus.chipIcon = progressIndicatorDrawable
         delegate.checkNetwork(this)
         actionActivity.sendPendingTasks()

@@ -87,7 +87,7 @@ class ItemActionButton(
 
     private fun getTitle(action: Action?, paint: Paint, intrinsicWidth: Float): String {
         return if (action == null) {
-            context.getString(R.string.action_more_button_title)
+            context.resources.getString(R.string.action_more_button_title)
         } else {
             val title = action.getPreferredShortName()
             ellipsize(title, paint, intrinsicWidth - HORIZONTAL_PADDING)

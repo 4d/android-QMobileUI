@@ -23,11 +23,11 @@ class ImageViewHolder(
 
     override fun onImageClick() {
         MaterialAlertDialogBuilder(itemView.context)
-            .setTitle(itemView.context.getString(R.string.action_parameter_image_dialog_title))
+            .setTitle(itemView.context.resources.getString(R.string.action_parameter_image_dialog_title))
             .setItems(
                 arrayOf(
-                    itemView.context.getString(R.string.action_parameter_image_dialog_photo),
-                    itemView.context.getString(R.string.action_parameter_image_dialog_gallery)
+                    itemView.context.resources.getString(R.string.action_parameter_image_dialog_photo),
+                    itemView.context.resources.getString(R.string.action_parameter_image_dialog_gallery)
                 )
             ) { _, which ->
                 when (which) {
@@ -42,7 +42,7 @@ class ImageViewHolder(
         (itemView.context as? PermissionChecker)?.askPermission(
             context = itemView.context,
             permission = Manifest.permission.CAMERA,
-            rationale = itemView.context.getString(R.string.permission_rationale_camera)
+            rationale = itemView.context.resources.getString(R.string.permission_rationale_camera)
         ) { isGranted ->
             if (isGranted) {
                 actionTypesCallback(Action.Type.TAKE_PICTURE_CAMERA, bindingAdapterPosition)

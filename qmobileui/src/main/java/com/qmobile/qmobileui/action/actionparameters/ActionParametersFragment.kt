@@ -440,7 +440,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         if (!allSeen && lastVisibleItemPosition < adapter.itemCount - 1) { // Second condition is if we never scrolled
             maxSeen = max(maxSeen, lastVisibleItemPosition)
             if (maxSeen < adapter.itemCount - 1) {
-                SnackbarHelper.show(activity, activity?.getString(R.string.scroll_to_not_seen))
+                SnackbarHelper.show(activity, getString(R.string.scroll_to_not_seen))
                 scrollTo(position = maxSeen + 2, shouldHideKeyboard = true, triggerError = true)
             }
             return false

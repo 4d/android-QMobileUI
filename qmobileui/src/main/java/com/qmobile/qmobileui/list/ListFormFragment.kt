@@ -296,7 +296,7 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
 
     private fun showDialog(onClick: (action: Action) -> Unit) {
         MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_Material3_MaterialAlertDialog)
-            .setTitle(requireContext().getString(R.string.action_list_title))
+            .setTitle(getString(R.string.action_list_title))
             .setAdapter(currentRecordActionsListAdapter) { _, position ->
                 onClick(currentRecordActions[position])
             }
@@ -356,7 +356,7 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
                     (this as? PermissionChecker)?.askPermission(
                         context = this,
                         permission = Manifest.permission.CAMERA,
-                        rationale = this.resources.getString(R.string.permission_rationale_barcode)
+                        rationale = getString(R.string.permission_rationale_barcode)
                     ) { isGranted ->
                         if (isGranted) {
                             BaseApp.genericNavigationResolver.navigateToActionScanner(
