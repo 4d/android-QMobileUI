@@ -24,7 +24,6 @@
     <string name="cat_title_server">SERVER</string>
     <string name="pref_remote_url_key">remote_url</string>
     <string name="pref_remote_url_title">Remote URL</string>
-    <string name="cat_server_key">server_category</string>
     <string name="cat_account_key">account_category</string>
     <string name="cat_title_account">ACCOUNT</string>
     <string name="pref_logout_key">logout</string>

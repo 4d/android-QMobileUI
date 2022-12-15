@@ -28,6 +28,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.snackbar.Snackbar
 import com.qmobile.qmobileapi.auth.AuthenticationState
@@ -68,11 +69,14 @@ import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.px
 import com.qmobile.qmobileui.databinding.ActivityMainBinding
+import com.qmobile.qmobileui.feedback.FeedbackHandler
 import com.qmobile.qmobileui.network.NetworkChecker
+import com.qmobile.qmobileui.settings.SettingsFragment
 import com.qmobile.qmobileui.ui.NoSwipeBehavior
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.noTabLayoutUI
 import com.qmobile.qmobileui.ui.setMaterialFadeTransition
+import com.qmobile.qmobileui.ui.setOnMultipleClickListener
 import com.qmobile.qmobileui.ui.setSharedAxisZExitTransition
 import com.qmobile.qmobileui.utils.PermissionCheckerImpl
 import com.qmobile.qmobileui.utils.setupWithNavController
@@ -224,6 +228,8 @@ class MainActivity :
                 }
             }
         })
+
+        setupFeedbackTrigger()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -282,6 +288,16 @@ class MainActivity :
             else -> {
             }
         }
+    }
+
+    private fun setupFeedbackTrigger() {
+        findViewById<CollapsingToolbarLayout>(R.id.collapsing_toolbar)
+            ?.setOnMultipleClickListener(FeedbackHandler.numberClickToTrigger) {
+                val currentFragment = currentNavigationFragment
+                if (currentFragment is SettingsFragment) {
+                    currentFragment.initFeedbackUI()
+                }
+            }
     }
 
     private fun onStartCallback() {

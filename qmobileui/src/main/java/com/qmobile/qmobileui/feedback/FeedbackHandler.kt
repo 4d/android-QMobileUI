@@ -20,7 +20,7 @@ import org.json.JSONObject
 class FeedbackHandler(fragment: Fragment, private val feedbackViewModel: FeedbackViewModel) {
 
     companion object {
-        const val numberClickToTrigger = 10
+        const val numberClickToTrigger = 5
     }
 
     enum class Type {

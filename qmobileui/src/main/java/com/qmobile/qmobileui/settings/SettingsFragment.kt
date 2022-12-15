@@ -18,8 +18,10 @@ import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.FeedbackViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getFeedbackViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
@@ -53,6 +55,7 @@ class SettingsFragment :
     // ViewModels
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var connectivityViewModel: ConnectivityViewModel
+    private lateinit var feedbackViewModel: FeedbackViewModel
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preferences)
@@ -81,6 +84,8 @@ class SettingsFragment :
             activitySettingsInterface.connectivityManager,
             activitySettingsInterface.accessibilityApiService
         )
+
+        feedbackViewModel = getFeedbackViewModel(this, activitySettingsInterface.feedbackApiService)
 
         initLayout()
         SettingsFragmentObserver(this, connectivityViewModel).initObservers()
@@ -126,6 +131,10 @@ class SettingsFragment :
                 false
             }
         }
+    }
+
+    fun initFeedbackUI() {
+//        FeedbackHandler(this, feedbackViewModel)
     }
 
     /**
