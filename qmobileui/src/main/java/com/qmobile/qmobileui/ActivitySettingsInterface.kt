@@ -8,12 +8,15 @@ package com.qmobile.qmobileui
 
 import android.net.ConnectivityManager
 import com.qmobile.qmobileapi.network.AccessibilityApiService
+import com.qmobile.qmobileapi.network.FeedbackApiService
 import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 
 interface ActivitySettingsInterface {
 
     val loginApiService: LoginApiService
+
+    val feedbackApiService: FeedbackApiService
 
     val accessibilityApiService: AccessibilityApiService
 

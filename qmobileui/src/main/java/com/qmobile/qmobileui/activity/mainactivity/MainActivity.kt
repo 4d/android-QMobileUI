@@ -46,7 +46,11 @@ import com.qmobile.qmobiledatasync.sync.resetIsToSync
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.utils.ScheduleRefresh
+import com.qmobile.qmobiledatasync.viewmodel.ActionViewModel
+import com.qmobile.qmobiledatasync.viewmodel.DeletedRecordsViewModel
 import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getActionViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getDeletedRecordsViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.ActivitySettingsInterface
 import com.qmobile.qmobileui.FragmentCommunication
@@ -93,6 +97,8 @@ class MainActivity :
     private lateinit var binding: ActivityMainBinding
     private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
+    private lateinit var actionViewModel: ActionViewModel
+    internal lateinit var deletedRecordsViewModel: DeletedRecordsViewModel
 
     private var isFullScreen = false
     private var snackbar: Snackbar? = null
@@ -133,6 +139,7 @@ class MainActivity :
         refreshAllApiClients()
 
         initViewModels()
+
         mainActivityObserver = MainActivityObserver(this, entityListViewModelList, taskViewModel).apply {
             initObservers()
         }
@@ -141,6 +148,12 @@ class MainActivity :
 
         // Follow activity lifecycle and check when activity enters foreground for data sync
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+    }
+
+    override fun initViewModels() {
+        super.initViewModels()
+        actionViewModel = getActionViewModel(this, apiService)
+        deletedRecordsViewModel = getDeletedRecordsViewModel(this, apiService)
     }
 
     private fun setupUI() {
@@ -243,6 +256,12 @@ class MainActivity :
         }
 
         super.refreshApiClients(loginRequiredCallbackForInterceptor)
+        if (::deletedRecordsViewModel.isInitialized) {
+            deletedRecordsViewModel.refreshRestRepository(apiService)
+        }
+        if (::actionViewModel.isInitialized) {
+            actionViewModel.refreshActionRepository(apiService)
+        }
     }
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
@@ -532,27 +551,26 @@ class MainActivity :
                 val savedActionContent = actionTask.actionContent
                 val cleanedActionContent = actionTask.cleanActionContent()
 
-                entityListViewModelList.firstOrNull()
-                    ?.sendAction(actionTask.actionInfo.actionName, cleanedActionContent) { actionResponse ->
-                        actionResponse?.let {
-                            if (actionResponse.success) {
-                                actionTask.status = ActionTask.Status.SUCCESS
-                            } else {
-                                actionTask.status = ActionTask.Status.ERROR_SERVER
-                                actionTask.actionContent = savedActionContent
-                            }
-
-                            actionTask.message = actionResponse.statusText
-                            actionTask.actionInfo.errors =
-                                actionResponse.errors?.associateBy({ it.parameter }, { it.message })
-                            taskViewModel.insert(actionTask)
-
-                            if (actionResponse.dataSynchro == true) {
-                                requestDataSync(tableName)
-                            }
+                actionViewModel.sendAction(actionTask.actionInfo.actionName, cleanedActionContent) { actionResponse ->
+                    actionResponse?.let {
+                        if (actionResponse.success) {
+                            actionTask.status = ActionTask.Status.SUCCESS
+                        } else {
+                            actionTask.status = ActionTask.Status.ERROR_SERVER
+                            actionTask.actionContent = savedActionContent
                         }
-                        proceed()
+
+                        actionTask.message = actionResponse.statusText
+                        actionTask.actionInfo.errors =
+                            actionResponse.errors?.associateBy({ it.parameter }, { it.message })
+                        taskViewModel.insert(actionTask)
+
+                        if (actionResponse.dataSynchro == true) {
+                            requestDataSync(tableName)
+                        }
                     }
+                    proceed()
+                }
             }
 
             override fun onServerInaccessible() {
@@ -575,7 +593,7 @@ class MainActivity :
     ) {
         queryNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
-                entityListViewModelList.firstOrNull()?.uploadImage(
+                actionViewModel.uploadImage(
                     imagesToUpload = bodies,
                     onImageUploaded = { parameterName, receivedId ->
                         onImageUploaded(parameterName, receivedId)

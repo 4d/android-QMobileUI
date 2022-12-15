@@ -49,9 +49,7 @@ class PermissionCheckerImpl(private val fragmentActivity: FragmentActivity) {
                         .setPositiveButton(resources.getString(R.string.permission_dialog_positive)) { _, _ ->
                             requestPermission(permission, callback)
                         }
-                        .setNegativeButton(resources.getString(R.string.permission_dialog_negative)) { dialog, _ ->
-                            dialog.cancel()
-                        }
+                        .setNegativeButton(resources.getString(R.string.permission_dialog_negative), null)
                         .show()
                 } else {
                     requestPermission(permission, callback)

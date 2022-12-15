@@ -28,6 +28,7 @@ class MainActivityDataSync(private val activity: MainActivity) {
         DataSync(
             activity,
             activity.entityListViewModelList,
+            activity.deletedRecordsViewModel,
             BaseApp.sharedPreferencesHolder,
             loginRequiredCallbackForDataSync
         )
@@ -68,7 +69,7 @@ class MainActivityDataSync(private val activity: MainActivity) {
             dataSync(currentTableName)
         } else {
             Timber.i("The only table has already been synced. Only checking deletedRecords now")
-            activity.entityListViewModelList.syncDeletedRecords()
+            dataSync.syncDeletedRecords()
         }
     }
 }

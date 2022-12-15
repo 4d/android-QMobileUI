@@ -22,6 +22,8 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.network.ApiService
+import com.qmobile.qmobileapi.network.FeedbackApiClient
+import com.qmobile.qmobileapi.network.FeedbackApiService
 import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobiledatasync.app.BaseApp
@@ -30,6 +32,7 @@ import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.viewmodel.ConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.FeedbackViewModel
 import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobiledatasync.viewmodel.deleteAll
@@ -37,11 +40,13 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.EntityListViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.EntityViewModelFactory
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getFeedbackViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getTaskViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.mainactivity.ActivityResultController
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
+import com.qmobile.qmobileui.log.CrashHandler
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.SnackbarHelper
@@ -71,20 +76,25 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
     lateinit var loginViewModel: LoginViewModel
     lateinit var connectivityViewModel: ConnectivityViewModel
     lateinit var taskViewModel: TaskViewModel
+    lateinit var feedbackViewModel: FeedbackViewModel
     lateinit var connectivityManager: ConnectivityManager
     lateinit var accessibilityApiService: AccessibilityApiService
     lateinit var loginApiService: LoginApiService
     lateinit var apiService: ApiService
+    lateinit var feedbackApiService: FeedbackApiService
 
     abstract fun handleAuthenticationState(authenticationState: AuthenticationState)
     abstract fun handleNetworkState(networkState: NetworkState)
 
-    fun initViewModels() {
+    open fun initViewModels() {
         loginViewModel = getLoginViewModel(this, loginApiService)
         connectivityViewModel =
             getConnectivityViewModel(this, connectivityManager, accessibilityApiService)
         taskViewModel = getTaskViewModel(this)
+        feedbackViewModel = getFeedbackViewModel(this, feedbackApiService)
         getEntityListViewModelList()
+
+        CrashHandler(this, feedbackViewModel)
     }
 
     // Get EntityListViewModel list
@@ -104,6 +114,7 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
 
     fun refreshApiClients(loginRequiredCallbackForInterceptor: LoginRequiredCallback = {}) {
         ApiClient.clearApiClients()
+        feedbackApiService = FeedbackApiClient.getApiService()
         loginApiService = ApiClient.getLoginApiService(
             sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
             logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE,

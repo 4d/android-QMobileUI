@@ -24,6 +24,7 @@
     <string name="cat_title_server">SERVER</string>
     <string name="pref_remote_url_key">remote_url</string>
     <string name="pref_remote_url_title">Remote URL</string>
+    <string name="cat_server_key">server_category</string>
     <string name="cat_account_key">account_category</string>
     <string name="cat_title_account">ACCOUNT</string>
     <string name="pref_logout_key">logout</string>
@@ -141,5 +142,23 @@
     <string name="missing_session_file_logout">You have been logged out, please log in again</string>
     <string name="missing_session_file_logout_with_pending_tasks">You have been logged out with pending actions, please log in again in order to execute these actions</string>
     <string name="max_device_connection_reached">You have exceeded the number of available licenses, please contact your server administrator</string>
+
+    <!-- Crash Logs -->
+    <string name="crash_log_dialog_title">Oops! It looks like your app didn\'t close correctly</string>
+    <string name="crash_log_dialog_message">Want to help us get better?\nAn error report has been generated, please send it to 4D.com. We\'ll keep your information confidential</string>
+    <string name="crash_log_dialog_save_for_later">Save report for later</string>
+    <string name="crash_log_dialog_send">Send report</string>
+    <string name="crash_log_dialog_deny">Don\'t send a report</string>
+    <string name="crash_log_dialog_response_title">Report sent</string>
+    <string name="crash_log_dialog_response_message_success">Thank you for helping us improve this app!\nPlease keep the reference %1$s to follow the report</string>
+    <string name="crash_log_dialog_response_message_fail">The server did not accept the crash file</string>
+    <string name="crash_log_dialog_response_action">OK</string>
+
+    <!-- Feedback -->
+    <string name="feedback_talk_to_us">Talk to us</string>
+    <string name="feedback_suggest_improvement">Suggest an improvement</string>
+    <string name="feedback_show_current_log">Show current log</string>
+    <string name="feedback_report_a_problem">Report a problem</string>
+    <string name="feedback_report_previous_crash">Report previous crash</string>
 
 </resources>

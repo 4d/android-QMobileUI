@@ -7,13 +7,15 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="@string/cat_title_server">
+    <PreferenceCategory
+        android:title="@string/cat_title_server"
+        app:key="@string/cat_server_key">
 
         <Preference
+            android:icon="@drawable/network_nok_circle"
             app:key="@string/pref_remote_url_key"
             app:summary="@string/remote_url_checking"
-            app:title="@string/pref_remote_url_title"
-            android:icon="@drawable/network_nok_circle"/>
+            app:title="@string/pref_remote_url_title" />
 
         <Preference
             app:key="@string/pref_pending_tasks_key"
