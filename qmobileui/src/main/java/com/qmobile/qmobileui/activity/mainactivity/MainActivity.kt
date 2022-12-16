@@ -107,6 +107,7 @@ class MainActivity :
     private var isFullScreen = false
     private var snackbar: Snackbar? = null
     private var snackBarRequired = false
+    private var licenseCheckRequired = AtomicBoolean(false) // SET TO TRUE FOR FEATURE
 
     // FragmentCommunication
     private var currentEntity: RoomEntity? = null
@@ -152,6 +153,8 @@ class MainActivity :
 
         // Follow activity lifecycle and check when activity enters foreground for data sync
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+
+        performLicenseCheck()
     }
 
     override fun initViewModels() {
@@ -253,9 +256,7 @@ class MainActivity :
         // Interceptor notifies the MainActivity that we need to go to login page. First, stop syncing
         val loginRequiredCallbackForInterceptor: LoginRequiredCallback = {
             if (BaseApp.runtimeDataHolder.guestLogin) {
-                snackBarRequired = false
-                snackbar?.dismiss()
-                resetViewModelIsUnauthorized()
+                dismissSnackbar()
             } else {
                 mainActivityDataSync.dataSync.loginRequired.set(true)
             }
@@ -637,6 +638,10 @@ class MainActivity :
     override fun handleNetworkState(networkState: NetworkState) {
         when (networkState) {
             NetworkState.CONNECTED -> {
+                if (licenseCheckRequired.get()) {
+                    performLicenseCheck()
+                }
+
                 // Setting the authenticationState to its initial value
                 if (isAlreadyLoggedIn()) {
                     loginViewModel.setAuthenticationState(AuthenticationState.AUTHENTICATED)
@@ -675,6 +680,43 @@ class MainActivity :
         finish()
     }
 
+    private fun performLicenseCheck() {
+        queryNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                if (licenseCheckRequired.getAndSet(false)) {
+                    loginViewModel.checkLicenses { isOk ->
+                        if (isOk) {
+                            dismissSnackbar()
+                        } else {
+                            showSnackbar()
+                        }
+                    }
+                }
+            }
+
+            override fun onServerInaccessible() {
+                Timber.d(getString(R.string.server_not_accessible))
+            }
+
+            override fun onNoInternet() {
+                Timber.d(getString(R.string.no_internet))
+            }
+        })
+    }
+
+    private fun showSnackbar() {
+        if (snackbar?.isShown == false) {
+            snackBarRequired = true
+            snackbar?.show()
+        }
+    }
+
+    private fun dismissSnackbar() {
+        snackBarRequired = false
+        snackbar?.dismiss()
+        resetViewModelIsUnauthorized()
+    }
+
     /**
      * Tries to login while in guest mode. Might fail if no Internet connection
      */
@@ -688,10 +730,7 @@ class MainActivity :
                             resetViewModelIsUnauthorized()
                         }
                         isMaxLicenseReached -> {
-                            if (snackbar?.isShown == false) {
-                                snackBarRequired = true
-                                snackbar?.show()
-                            }
+                            showSnackbar()
                         }
                     }
                 }
