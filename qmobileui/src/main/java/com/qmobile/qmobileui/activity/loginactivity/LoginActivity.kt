@@ -51,7 +51,7 @@ import timber.log.Timber
 class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, ActivityResultController {
 
     private var loggedOut = false
-    private var authorizedStatus = AuthorizedStatus.AUTHORIZED
+    internal var authorizedStatus = AuthorizedStatus.AUTHORIZED
 
     private var remoteUrl = ""
     private var serverAccessibleDrawable: Drawable? = null

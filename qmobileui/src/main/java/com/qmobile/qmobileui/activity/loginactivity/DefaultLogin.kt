@@ -16,6 +16,7 @@ import android.view.inputmethod.EditorInfo
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.progressindicator.CircularProgressIndicatorSpec
 import com.google.android.material.progressindicator.IndeterminateDrawable
+import com.qmobile.qmobileapi.model.error.AuthorizedStatus
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.LoginForm
 import com.qmobile.qmobiledatasync.utils.LoginHandler
@@ -98,6 +99,11 @@ class DefaultLogin(private val activity: LoginActivity) : LoginHandler {
 
         binding.loginLogo.setOnVeryLongClickListener {
             activity.showRemoteUrlDialog()
+        }
+
+        if (activity.authorizedStatus != AuthorizedStatus.AUTHORIZED) {
+            binding.loginEmailInput.setText(BaseApp.sharedPreferencesHolder.lastLoginMail)
+            binding.loginButtonAuth.isEnabled = true
         }
     }
 
