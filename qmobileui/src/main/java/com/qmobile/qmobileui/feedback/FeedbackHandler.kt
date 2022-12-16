@@ -19,10 +19,6 @@ import org.json.JSONObject
 
 class FeedbackHandler(fragment: Fragment, private val feedbackViewModel: FeedbackViewModel) {
 
-    companion object {
-        const val numberClickToTrigger = 10
-    }
-
     enum class Type {
         TALK_TO_US, SUGGEST_IMPROVEMENT, SHOW_CURRENT_LOG, REPORT_A_PROBLEM, REPORT_PREVIOUS_CRASH
     }

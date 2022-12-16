@@ -27,7 +27,6 @@ import com.qmobile.qmobileui.R
 object UIConstants {
     const val longClickDuration = 1500L
     const val clickDebounceTime = 600L
-    const val multiClickDebounceTime = 800L
 }
 
 fun hasNavIcon(): Boolean {
@@ -95,31 +94,6 @@ fun View.setOnVeryLongClickListener(listener: () -> Unit) {
             return true
         }
     })
-}
-
-class OnMultipleClickListener(private val number: Int, private val block: () -> Unit) : View.OnClickListener {
-
-    private var lastClickTime = SystemClock.elapsedRealtime()
-    private val debounceTime = UIConstants.multiClickDebounceTime
-    private var nbClick = 0
-
-    override fun onClick(view: View) {
-        nbClick++
-        when {
-            SystemClock.elapsedRealtime() - lastClickTime >= debounceTime -> {
-                nbClick = 0
-            }
-            nbClick >= number -> {
-                nbClick = 0
-                block()
-            }
-        }
-        lastClickTime = SystemClock.elapsedRealtime()
-    }
-}
-
-fun View.setOnMultipleClickListener(number: Int, block: () -> Unit) {
-    setOnClickListener(OnMultipleClickListener(number, block))
 }
 
 fun View.clearViewInParent() {
