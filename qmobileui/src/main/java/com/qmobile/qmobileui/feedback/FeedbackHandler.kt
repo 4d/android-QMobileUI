@@ -70,6 +70,7 @@ class FeedbackHandler(private val fragment: Fragment) {
     }
 
     private fun showCurrentLog() {
+        println()
 //        MaterialAlertDialogBuilder(fragment.requireContext())
 //            .setMessage(log)
 //            .setPositiveButton(fragment.resources.getString(R.string.crash_log_dialog_response_action), null)
@@ -77,6 +78,12 @@ class FeedbackHandler(private val fragment: Fragment) {
     }
 
     private fun reportPreviousCrash() {
+        println()
+//        findCrashLogFile(fragment.requireContext())?.let { logFile ->
+//            compress(logFile)?.let { zipFile ->
+//                checkNetwork(logFile, zipFile)
+//            }
+//        }
     }
 
     private fun openFeedbackFragment(type: FeedbackType) {
