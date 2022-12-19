@@ -11,21 +11,23 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.qmobile.qmobiledatasync.viewmodel.FeedbackViewModel
+import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.utils.FeedbackType
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.log.LogFileHelper.findCrashLogFile
 import com.qmobile.qmobileui.ui.getStatusBarHeight
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
-import org.json.JSONObject
+import com.qmobile.qmobileui.ui.setSharedAxisYExitTransition
+import java.io.File
 
-class FeedbackHandler(fragment: Fragment, private val feedbackViewModel: FeedbackViewModel) {
+class FeedbackHandler(private val fragment: Fragment) {
 
-    enum class Type {
-        TALK_TO_US, SUGGEST_IMPROVEMENT, SHOW_CURRENT_LOG, REPORT_A_PROBLEM, REPORT_PREVIOUS_CRASH
-    }
+    private val bottomSheetDialog: BottomSheetDialog
+    private var currentCrashLog: File? = null
 
     init {
         fragment.requireContext().apply {
-            val bottomSheetDialog = BottomSheetDialog(this)
+            bottomSheetDialog = BottomSheetDialog(this)
             bottomSheetDialog.setContentView(R.layout.feedback_options)
             bottomSheetDialog.findViewById<View>(R.id.design_bottom_sheet)?.let {
                 val marginHeight =
@@ -33,36 +35,54 @@ class FeedbackHandler(fragment: Fragment, private val feedbackViewModel: Feedbac
                 BottomSheetBehavior.from(it).peekHeight = marginHeight
             }
             bottomSheetDialog.findViewById<TextView>(R.id.talk_to_us)?.setOnSingleClickListener {
-                showForm(Type.TALK_TO_US)
+                showForm(FeedbackType.TALK_TO_US)
             }
             bottomSheetDialog.findViewById<TextView>(R.id.suggest_improvement)?.setOnSingleClickListener {
-                showForm(Type.SUGGEST_IMPROVEMENT)
+                showForm(FeedbackType.SUGGEST_IMPROVEMENT)
             }
             bottomSheetDialog.findViewById<TextView>(R.id.show_current_log)?.setOnSingleClickListener {
-                showForm(Type.SHOW_CURRENT_LOG)
+                showForm(FeedbackType.SHOW_CURRENT_LOG)
             }
             bottomSheetDialog.findViewById<TextView>(R.id.report_a_problem)?.setOnSingleClickListener {
-                showForm(Type.REPORT_A_PROBLEM)
+                showForm(FeedbackType.REPORT_A_PROBLEM)
             }
             bottomSheetDialog.findViewById<TextView>(R.id.report_previous_crash)?.setOnSingleClickListener {
-                showForm(Type.REPORT_PREVIOUS_CRASH)
+                showForm(FeedbackType.REPORT_PREVIOUS_CRASH)
             }
+
+            currentCrashLog = findCrashLogFile(this)
+
+            if (currentCrashLog?.exists() != true) {
+                bottomSheetDialog.findViewById<TextView>(R.id.report_previous_crash)?.visibility = View.GONE
+            }
+
             bottomSheetDialog.show()
         }
     }
 
-    private fun showForm(type: Type) {
+    private fun showForm(type: FeedbackType) {
+        bottomSheetDialog.dismiss()
         when (type) {
-            Type.TALK_TO_US -> {}
-            Type.SUGGEST_IMPROVEMENT -> {}
-            Type.SHOW_CURRENT_LOG -> {}
-            Type.REPORT_A_PROBLEM -> {}
-            Type.REPORT_PREVIOUS_CRASH -> {}
+            FeedbackType.SHOW_CURRENT_LOG -> showCurrentLog()
+            FeedbackType.REPORT_PREVIOUS_CRASH -> reportPreviousCrash()
+            else -> openFeedbackFragment(type)
         }
     }
 
-    private fun sendFeedback(feedback: JSONObject) {
-        feedbackViewModel.sendFeedback(feedback) { isSuccess ->
+    private fun showCurrentLog() {
+//        MaterialAlertDialogBuilder(fragment.requireContext())
+//            .setMessage(log)
+//            .setPositiveButton(fragment.resources.getString(R.string.crash_log_dialog_response_action), null)
+//            .show()
+    }
+
+    private fun reportPreviousCrash() {
+    }
+
+    private fun openFeedbackFragment(type: FeedbackType) {
+        fragment.activity?.apply {
+            fragment.setSharedAxisYExitTransition()
+            BaseApp.genericNavigationResolver.navigateToFeedback(this, type)
         }
     }
 }

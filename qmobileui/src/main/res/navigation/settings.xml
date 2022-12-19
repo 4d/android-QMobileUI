@@ -12,6 +12,7 @@
 
     <include app:graph="@navigation/action_parameters" />
     <include app:graph="@navigation/pending_tasks" />
+    <include app:graph="@navigation/feedback" />
     <include app:graph="@navigation/base_action_nav" />
 
     <fragment
@@ -27,6 +28,16 @@
         <action
             android:id="@+id/to_pending_tasks"
             app:destination="@id/pending_tasks" />
+
+        <action
+            android:id="@+id/to_feedback"
+            app:destination="@id/feedback">
+
+            <argument
+                android:name="type"
+                app:argType="com.qmobile.qmobiledatasync.utils.FeedbackType" />
+
+        </action>
 
     </fragment>
 

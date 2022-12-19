@@ -29,7 +29,7 @@ object LogFileHelper {
 
     fun createLogFile(context: Context, content: String) {
         try {
-            val fileName = "${logFilePrefix}${logFileTimeFormat.format(Date())}.txt"
+            val fileName = "${logFilePrefix}${getCurrentDateTimeLogFormat()}.txt"
             val newFile = File(context.filesDir.absolutePath + File.separator + logsFolder + File.separator + fileName)
             newFile.apply {
                 parentFile?.mkdirs()
@@ -43,6 +43,10 @@ object LogFileHelper {
             Log.e("LogFileHelper", ioe.message.orEmpty())
             Log.e("LogFileHelper", "Could not write to crash log file to log UncaughtException")
         }
+    }
+
+    fun getCurrentDateTimeLogFormat(): String {
+        return logFileTimeFormat.format(Date())
     }
 
     fun findCrashLogFile(context: Context): File? {

@@ -18,12 +18,20 @@ fun Fragment.setSharedAxisXEnterTransition() {
     this.setSharedAxisEnterTransition(MaterialSharedAxis.X)
 }
 
+fun Fragment.setSharedAxisYEnterTransition() {
+    this.setSharedAxisEnterTransition(MaterialSharedAxis.Y)
+}
+
 fun Fragment.setSharedAxisZEnterTransition() {
     this.setSharedAxisEnterTransition(MaterialSharedAxis.Z)
 }
 
 fun Fragment.setSharedAxisXExitTransition() {
     this.setSharedAxisExitTransition(MaterialSharedAxis.X)
+}
+
+fun Fragment.setSharedAxisYExitTransition() {
+    this.setSharedAxisExitTransition(MaterialSharedAxis.Y)
 }
 
 fun Fragment.setSharedAxisZExitTransition() {

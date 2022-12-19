@@ -55,6 +55,7 @@ import com.qmobile.qmobileui.ui.getShakeAnimation
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.ResourcesHelper
+import timber.log.Timber
 
 /**
  * Base AppCompatActivity for activities
@@ -207,22 +208,31 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
         }
     }
 
-    fun queryNetwork(networkChecker: NetworkChecker, toastError: Boolean = false) {
+    fun queryNetwork(networkChecker: NetworkChecker, toastError: Boolean = false, feedbackServer: Boolean = false) {
         if (connectivityViewModel.isConnected()) {
             if (this is MainActivity) {
                 setCheckInProgress(true)
             }
-            connectivityViewModel.isServerConnectionOk(toastError) { isAccessible ->
+            Timber.d("device is connected to internet")
+            val onResult: (Boolean) -> Unit = { success ->
                 if (this is MainActivity) {
                     setCheckInProgress(false)
                 }
-                if (isAccessible) {
+                if (success) {
+                    Timber.d("server is accessible")
                     networkChecker.onServerAccessible()
                 } else {
+                    Timber.d("server is not accessible")
                     networkChecker.onServerInaccessible()
                 }
             }
+            if (feedbackServer) {
+                feedbackViewModel.isFeedbackServerConnectionOk(toastError, onResult)
+            } else {
+                connectivityViewModel.isServerConnectionOk(toastError, onResult)
+            }
         } else {
+            Timber.d("device is not connected to internet")
             networkChecker.onNoInternet()
         }
     }

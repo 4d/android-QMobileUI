@@ -44,6 +44,7 @@ fun TabLayout.setupWithNavController(
     val settingsNavLabel = this.resources.getString(R.string.nav_settings)
     val pendingTasksNavLabel = this.resources.getString(R.string.nav_pending_tasks)
     val barcodeScanNavLabel = this.resources.getString(R.string.nav_barcode_scan)
+    val feedbackNavLabel = this.resources.getString(R.string.nav_feedback)
 
     val isWithIcons = isWithIcons(navGraphIds, fragmentManager, containerId)
 
@@ -124,7 +125,7 @@ fun TabLayout.setupWithNavController(
                     // If SettingsFragment, TaskFragment or BarcodeScannerFragment, we want to pop it
                     val previousSelectedFragment = fragmentManager.findFragmentByTag(selectedItemTag) as NavHostFragment
                     when (previousSelectedFragment.navController.currentBackStackEntry?.destination?.label) {
-                        settingsNavLabel, pendingTasksNavLabel, barcodeScanNavLabel ->
+                        settingsNavLabel, pendingTasksNavLabel, barcodeScanNavLabel, feedbackNavLabel ->
                             previousSelectedFragment.navController.popBackStack()
                     }
                     // If we were in Settings' pending tasks, we need to pop twice

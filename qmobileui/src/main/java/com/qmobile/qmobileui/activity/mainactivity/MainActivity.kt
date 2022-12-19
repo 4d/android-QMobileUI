@@ -860,8 +860,8 @@ class MainActivity :
         }
     }
 
-    override fun checkNetwork(networkChecker: NetworkChecker) {
-        queryNetwork(networkChecker)
+    override fun checkNetwork(networkChecker: NetworkChecker, feedbackServer: Boolean) {
+        queryNetwork(networkChecker, toastError = false, feedbackServer = feedbackServer)
     }
 
     internal fun setCheckInProgress(inProgress: Boolean) {

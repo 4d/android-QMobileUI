@@ -11,6 +11,7 @@
     <string name="nav_settings">Settings</string>
     <string name="nav_pending_tasks">Pending Tasks</string>
     <string name="nav_barcode_scan">Barcode Scan</string>
+    <string name="nav_feedback">Feedback</string>
 
     <!--    Placeholders -->
     <string name="placeholder_title">___TITLE___</string>
@@ -36,7 +37,7 @@
     <string name="logout_dialog_positive">Logout</string>
     <string name="logout_dialog_title">Are you sure you want to Logout ?</string>
     <string name="logout_dialog_message">You will need to log in again</string>
-    <string name="logout_dialog_message_if_pending_task">Pending tasks will be deleted. Are you sure you want to log out?</string>
+    <string name="logout_dialog_message_if_pending_task">Pending tasks will be deleted. Are you sure you want to log out ?</string>
     <string name="settings_navbar_title">Settings</string>
 
     <!--    Network -->
@@ -143,21 +144,27 @@
     <string name="max_device_connection_reached">You have exceeded the number of available licenses, please contact your server administrator</string>
 
     <!-- Crash Logs -->
-    <string name="crash_log_dialog_title">Oops! It looks like your app didn\'t close correctly</string>
-    <string name="crash_log_dialog_message">Want to help us get better?\nAn error report has been generated, please send it to 4D.com. We\'ll keep your information confidential</string>
+    <string name="crash_log_dialog_title">Oops ! It looks like your app didn\'t close correctly</string>
+    <string name="crash_log_dialog_message">Want to help us get better ?\nAn error report has been generated, please send it to 4D.com. We\'ll keep your information confidential</string>
     <string name="crash_log_dialog_save_for_later">Save report for later</string>
     <string name="crash_log_dialog_send">Send report</string>
     <string name="crash_log_dialog_deny">Don\'t send a report</string>
     <string name="crash_log_dialog_response_title">Report sent</string>
-    <string name="crash_log_dialog_response_message_success">Thank you for helping us improve this app!\nPlease keep the reference %1$s to follow the report</string>
+    <string name="crash_log_dialog_response_message_success">Thank you for helping us improve this app !\nPlease keep the reference %1$s to follow the report</string>
     <string name="crash_log_dialog_response_message_fail">The server did not accept the crash file</string>
     <string name="crash_log_dialog_response_action">OK</string>
 
     <!-- Feedback -->
     <string name="feedback_talk_to_us">Talk to us</string>
+    <string name="feedback_talk_to_us_body">Give us your feedback</string>
     <string name="feedback_suggest_improvement">Suggest an improvement</string>
+    <string name="feedback_suggest_improvement_body">Suggest an improvement here</string>
     <string name="feedback_show_current_log">Show current log</string>
     <string name="feedback_report_a_problem">Report a problem</string>
+    <string name="feedback_report_a_problem_body">What when wrong ?</string>
     <string name="feedback_report_previous_crash">Report previous crash</string>
+    <string name="feedback_email_hint">Enter your email</string>
+    <string name="feedback_send">Send</string>
+    <string name="feedback_send_success">Thank you for your feedback !</string>
 
 </resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by qmarciset on 20/10/2022.
+  ~ 4D SAS
+  ~ Copyright (c) 2022 qmarciset. All rights reserved.
+  -->
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/feedback"
+    app:startDestination="@id/feedbackFragment">
+
+    <fragment
+        android:id="@+id/feedbackFragment"
+        android:name="com.qmobile.qmobileui.feedback.FeedbackFragment" />
+
+</navigation>

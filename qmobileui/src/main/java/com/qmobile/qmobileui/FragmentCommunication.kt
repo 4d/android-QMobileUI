@@ -19,7 +19,7 @@ interface FragmentCommunication {
 
     val apiService: ApiService // list, viewpager, detail
 
-    fun checkNetwork(networkChecker: NetworkChecker)
+    fun checkNetwork(networkChecker: NetworkChecker, feedbackServer: Boolean = false)
 
     fun requestDataSync(currentTableName: String) // list
 

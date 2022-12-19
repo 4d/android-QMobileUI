@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.action.actionparameters.viewholders
 
 import android.text.InputType
+import android.view.Gravity
 import android.view.View
 import com.qmobile.qmobileapi.auth.isEmailValid
 import com.qmobile.qmobileapi.auth.isUrlValid
@@ -35,6 +36,7 @@ open class TextViewHolder(itemView: View, format: String) :
         if (apu.isTextArea()) {
             input.maxLines = maxLines
             input.minLines = minLines
+            input.gravity = Gravity.TOP
         }
     }
 
