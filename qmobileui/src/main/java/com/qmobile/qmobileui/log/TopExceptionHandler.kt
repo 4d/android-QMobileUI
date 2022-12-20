@@ -8,8 +8,8 @@ package com.qmobile.qmobileui.log
 
 import android.content.Context
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobileui.log.LogFileHelper.cleanOlderCrashLogs
-import com.qmobile.qmobileui.log.LogFileHelper.createLogFile
+import com.qmobile.qmobiledatasync.log.LogFileHelper.cleanOlderCrashLogs
+import com.qmobile.qmobiledatasync.log.LogFileHelper.createLogFile
 
 class TopExceptionHandler(private val context: Context) : Thread.UncaughtExceptionHandler {
 

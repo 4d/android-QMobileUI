@@ -12,7 +12,6 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -25,7 +24,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.auth.isEmailValid
 import com.qmobile.qmobileapi.model.error.AuthorizedStatus
-import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.network.NetworkState
@@ -81,19 +79,6 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, Activ
             // Init system services in onCreate()
             connectivityManager =
                 getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-            // Init Api service
-            loginApiService = ApiClient.getLoginApiService(
-                sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
-                logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE,
-                mapper = BaseApp.mapper
-            )
-
-            accessibilityApiService = ApiClient.getAccessibilityApiService(
-                sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
-                logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE,
-                mapper = BaseApp.mapper
-            )
 
             loginHandler = BaseApp.genericResourceHelper.getLoginForm(this)
 

@@ -22,9 +22,10 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.ActionActivity
-import com.qmobile.qmobileui.ActivitySettingsInterface
+import com.qmobile.qmobileui.FeedbackActivity
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.SettingsActivity
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
@@ -46,8 +47,9 @@ class SettingsFragment :
     internal val pendingTaskPref by lazy { findPreference<Preference>(pendingTaskPrefKey) }
     private lateinit var remoteUrl: String
 
-    private lateinit var activitySettingsInterface: ActivitySettingsInterface
+    private lateinit var settingsActivity: SettingsActivity
     internal lateinit var actionActivity: ActionActivity
+    internal lateinit var feedbackActivity: FeedbackActivity
     internal lateinit var delegate: FragmentCommunication
 
     // ViewModels
@@ -60,8 +62,8 @@ class SettingsFragment :
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is ActivitySettingsInterface) {
-            activitySettingsInterface = context
+        if (context is SettingsActivity) {
+            settingsActivity = context
         }
         if (context is FragmentCommunication) {
             delegate = context
@@ -69,17 +71,20 @@ class SettingsFragment :
         if (context is ActionActivity) {
             actionActivity = context
         }
+        if (context is FeedbackActivity) {
+            feedbackActivity = context
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         activity?.setupToolbarTitle(getString(R.string.settings_navbar_title))
-        loginViewModel = getLoginViewModel(activity, activitySettingsInterface.loginApiService)
+        loginViewModel = getLoginViewModel(activity, settingsActivity.loginApiService)
 
         connectivityViewModel = getConnectivityViewModel(
             activity,
-            activitySettingsInterface.connectivityManager,
-            activitySettingsInterface.accessibilityApiService
+            settingsActivity.connectivityManager,
+            settingsActivity.accessibilityApiService
         )
 
         initLayout()
@@ -103,7 +108,7 @@ class SettingsFragment :
     override fun onPreferenceClick(preference: Preference): Boolean {
         return when (preference.key) {
             remoteUrlPrefKey -> {
-                activitySettingsInterface.showRemoteUrlEditDialog(remoteUrl, this)
+                settingsActivity.showRemoteUrlEditDialog(remoteUrl, this)
                 true
             }
             logoutPrefKey -> {
@@ -129,7 +134,7 @@ class SettingsFragment :
     }
 
     fun initFeedbackUI() {
-//        FeedbackHandler(this)
+//        FeedbackHandler(this, feedbackActivity.crashHandler)
     }
 
     /**
@@ -158,7 +163,7 @@ class SettingsFragment :
     private fun logout() {
         when {
             isReady() -> {
-                activitySettingsInterface.logout(false)
+                settingsActivity.logout(false)
             }
             !connectivityViewModel.isConnected() -> {
                 SnackbarHelper.show(activity, getString(R.string.no_internet), ToastMessage.Type.WARNING)
@@ -176,7 +181,7 @@ class SettingsFragment :
     private fun isReady(): Boolean {
         if (loginViewModel.authenticationState.value == AuthenticationState.INVALID_AUTHENTICATION) {
             // For example server was not responding when trying to auto-login
-            activitySettingsInterface.requestAuthentication()
+            settingsActivity.requestAuthentication()
             return false
         }
         return loginViewModel.authenticationState.value == AuthenticationState.AUTHENTICATED &&
@@ -219,6 +224,6 @@ class SettingsFragment :
         BaseApp.sharedPreferencesHolder.remoteUrl = newRemoteUrl
         remoteUrl = newRemoteUrl
         remoteUrlPref?.summary = getString(R.string.remote_url_checking)
-        this@SettingsFragment.activitySettingsInterface.refreshAllApiClients()
+        this@SettingsFragment.settingsActivity.refreshAllApiClients()
     }
 }

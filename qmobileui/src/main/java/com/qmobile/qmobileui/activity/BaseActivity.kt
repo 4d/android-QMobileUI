@@ -83,6 +83,7 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
     lateinit var loginApiService: LoginApiService
     lateinit var apiService: ApiService
     lateinit var feedbackApiService: FeedbackApiService
+    lateinit var crashHandler: CrashHandler
 
     abstract fun handleAuthenticationState(authenticationState: AuthenticationState)
     abstract fun handleNetworkState(networkState: NetworkState)
@@ -95,7 +96,9 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
         feedbackViewModel = getFeedbackViewModel(this, feedbackApiService)
         getEntityListViewModelList()
 
-        CrashHandler(this, feedbackViewModel)
+        crashHandler = CrashHandler(this, feedbackViewModel).apply {
+            checkIfShouldDisplayDialog()
+        }
     }
 
     // Get EntityListViewModel list
@@ -115,20 +118,24 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
 
     fun refreshApiClients(loginRequiredCallbackForInterceptor: LoginRequiredCallback = {}) {
         ApiClient.clearApiClients()
+        ApiClient.setLogBody(BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE)
+
         feedbackApiService = FeedbackApiClient.getApiService()
+
         loginApiService = ApiClient.getLoginApiService(
             sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
-            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE,
             mapper = BaseApp.mapper
         )
+
         accessibilityApiService = ApiClient.getAccessibilityApiService(
             sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
-            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE,
             mapper = BaseApp.mapper
         )
+
         if (::loginViewModel.isInitialized) {
             loginViewModel.refreshAuthRepository(loginApiService)
         }
+
         if (::connectivityViewModel.isInitialized) {
             connectivityViewModel.refreshAccessibilityRepository(accessibilityApiService)
         }
@@ -137,9 +144,9 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
             loginApiService = loginApiService,
             loginRequiredCallback = loginRequiredCallbackForInterceptor,
             sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
-            logBody = BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE,
             mapper = BaseApp.mapper
         )
+
         if (this::entityListViewModelList.isInitialized) {
             entityListViewModelList.forEach { it.refreshRestRepository(apiService) }
         }

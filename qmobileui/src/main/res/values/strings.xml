@@ -160,11 +160,25 @@
     <string name="feedback_suggest_improvement">Suggest an improvement</string>
     <string name="feedback_suggest_improvement_body">Suggest an improvement here</string>
     <string name="feedback_show_current_log">Show current log</string>
+    <string name="feedback_show_current_log_action_dismiss">Dismiss</string>
+    <string name="feedback_show_current_log_action_send">Send</string>
+    <string name="feedback_show_current_log_action_change_level">Change log level</string>
     <string name="feedback_report_a_problem">Report a problem</string>
     <string name="feedback_report_a_problem_body">What when wrong ?</string>
     <string name="feedback_report_previous_crash">Report previous crash</string>
     <string name="feedback_email_hint">Enter your email</string>
     <string name="feedback_send">Send</string>
     <string name="feedback_send_success">Thank you for your feedback !</string>
+    <string name="feedback_log_attached">Log attached</string>
+
+    <!-- Log Levels -->
+    <string name="log_level_menu_verbose">Verbose</string>
+    <string name="log_level_menu_debug">Debug</string>
+    <string name="log_level_menu_info">Info (Default)</string>
+    <string name="log_level_menu_warn">Warn</string>
+    <string name="log_level_menu_error">Error</string>
+    <string name="log_level_menu_assert">Assert</string>
+    <string name="log_level_menu_none">None</string>
+    <string name="log_level_changed">Log level changed to %s</string>
 
 </resources>

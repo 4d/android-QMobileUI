@@ -6,24 +6,36 @@
 
 package com.qmobile.qmobileui.feedback
 
+import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.log.CurrentLogHelper.getCurrentLogText
+import com.qmobile.qmobiledatasync.log.LogFileHelper.findCrashLogFile
+import com.qmobile.qmobiledatasync.log.LogLevel
+import com.qmobile.qmobiledatasync.log.LogLevelController
 import com.qmobile.qmobiledatasync.utils.FeedbackType
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.log.LogFileHelper.findCrashLogFile
+import com.qmobile.qmobileui.log.CrashHandler
+import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.getStatusBarHeight
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.ui.setSharedAxisYExitTransition
 import java.io.File
 
-class FeedbackHandler(private val fragment: Fragment) {
+class FeedbackHandler(private val fragment: Fragment, private val crashHandler: CrashHandler) {
 
     private val bottomSheetDialog: BottomSheetDialog
     private var currentCrashLog: File? = null
+    private lateinit var currentLogDialog: AlertDialog
 
     init {
         fragment.requireContext().apply {
@@ -70,20 +82,56 @@ class FeedbackHandler(private val fragment: Fragment) {
     }
 
     private fun showCurrentLog() {
-        println()
-//        MaterialAlertDialogBuilder(fragment.requireContext())
-//            .setMessage(log)
-//            .setPositiveButton(fragment.resources.getString(R.string.crash_log_dialog_response_action), null)
-//            .show()
+        fragment.requireContext().apply {
+            currentLogDialog = MaterialAlertDialogBuilder(this)
+                .setMessage(getCurrentLogText(this))
+                .setPositiveButton(resources.getString(R.string.feedback_show_current_log_action_dismiss), null)
+                .setNeutralButton(resources.getString(R.string.feedback_show_current_log_action_send)) { _, _ ->
+                    openFeedbackFragment(FeedbackType.REPORT_A_PROBLEM)
+                }
+                .setNegativeButton(resources.getString(R.string.feedback_show_current_log_action_change_level), null)
+                .create().apply {
+                    setOnShowListener {
+                        getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener { view ->
+                            openLogLevelMenu(view)
+                        }
+                    }
+                }
+            currentLogDialog.show()
+        }
+    }
+
+    private fun openLogLevelMenu(view: View) {
+        val popup = PopupMenu(fragment.requireContext(), view)
+        popup.menuInflater.inflate(R.menu.menu_log_level, popup.menu)
+
+        popup.setOnMenuItemClickListener { menuItem: MenuItem ->
+            val level = when (menuItem.itemId) {
+                R.id.log_verbose -> LogLevel.VERBOSE.level
+                R.id.log_debug -> LogLevel.DEBUG.level
+                R.id.log_info -> LogLevel.INFO.level
+                R.id.log_warn -> LogLevel.WARN.level
+                R.id.log_error -> LogLevel.ERROR.level
+                R.id.log_assert -> LogLevel.ASSERT.level
+                R.id.log_none -> LogLevel.NONE.level
+                else -> LogLevel.NONE.level
+            }
+            currentLogDialog.dismiss()
+            setLogLevel(level, menuItem.title.toString())
+            true
+        }
+        popup.show()
+    }
+
+    private fun setLogLevel(level: Int, title: String) {
+        BaseApp.runtimeDataHolder.logLevel = level
+        LogLevelController.level = level
+        ApiClient.setLogBody(level <= Log.VERBOSE)
+        SnackbarHelper.show(fragment.activity, fragment.resources.getString(R.string.log_level_changed, title))
     }
 
     private fun reportPreviousCrash() {
-        println()
-//        findCrashLogFile(fragment.requireContext())?.let { logFile ->
-//            compress(logFile)?.let { zipFile ->
-//                checkNetwork(logFile, zipFile)
-//            }
-//        }
+        crashHandler.proceedFile()
     }
 
     private fun openFeedbackFragment(type: FeedbackType) {

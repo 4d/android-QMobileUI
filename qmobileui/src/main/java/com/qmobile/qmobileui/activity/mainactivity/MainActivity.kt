@@ -53,9 +53,10 @@ import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getActionViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getDeletedRecordsViewModel
 import com.qmobile.qmobileui.ActionActivity
-import com.qmobile.qmobileui.ActivitySettingsInterface
+import com.qmobile.qmobileui.FeedbackActivity
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.SettingsActivity
 import com.qmobile.qmobileui.action.ActionNavigable
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
 import com.qmobile.qmobileui.action.model.Action
@@ -89,9 +90,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 class MainActivity :
     BaseActivity(),
     FragmentCommunication,
-    ActivitySettingsInterface,
+    SettingsActivity,
     LifecycleEventObserver,
-    ActionActivity {
+    ActionActivity,
+    FeedbackActivity {
 
     private var loginStatusText = ""
     private var onLaunch = true

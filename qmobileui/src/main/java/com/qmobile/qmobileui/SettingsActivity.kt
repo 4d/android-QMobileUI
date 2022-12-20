@@ -11,7 +11,7 @@ import com.qmobile.qmobileapi.network.AccessibilityApiService
 import com.qmobile.qmobileapi.network.LoginApiService
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 
-interface ActivitySettingsInterface {
+interface SettingsActivity {
 
     val loginApiService: LoginApiService
 

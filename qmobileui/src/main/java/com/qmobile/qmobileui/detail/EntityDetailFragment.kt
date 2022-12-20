@@ -146,7 +146,6 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
                     }
 //                    val shareIntent = Intent.createChooser(sendIntent, "Share using")
                     startActivity(sendIntent)
-
                     true
                 }
             }

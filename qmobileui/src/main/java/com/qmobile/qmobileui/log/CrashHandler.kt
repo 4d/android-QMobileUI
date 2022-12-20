@@ -8,21 +8,21 @@ package com.qmobile.qmobileui.log
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.log.LogFileHelper.compress
+import com.qmobile.qmobiledatasync.log.LogFileHelper.findCrashLogFile
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.viewmodel.FeedbackViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
-import com.qmobile.qmobileui.log.LogFileHelper.compress
-import com.qmobile.qmobileui.log.LogFileHelper.findCrashLogFile
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import java.io.File
 
 class CrashHandler(private val activity: BaseActivity, private val feedbackViewModel: FeedbackViewModel) {
 
-    init {
+    fun checkIfShouldDisplayDialog() {
         if (BaseApp.sharedPreferencesHolder.displayCrashDialog && findCrashLogFile(activity)?.exists() == true) {
             when {
                 activity is LoginActivity && !BaseApp.runtimeDataHolder.guestLogin -> displayCrashDialog()
@@ -48,7 +48,7 @@ class CrashHandler(private val activity: BaseActivity, private val feedbackViewM
         }
     }
 
-    private fun proceedFile() {
+    fun proceedFile() {
         findCrashLogFile(activity)?.let { logFile ->
             compress(logFile)?.let { zipFile ->
                 checkNetwork(logFile, zipFile)

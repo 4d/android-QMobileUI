@@ -3,57 +3,85 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/feedback_nested_scroll_view"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/feedback_constraint_layout"
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/feedback_nested_scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="128dp"
+            android:scrollbars="none"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/email_input"
-                style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:hint="@string/feedback_email_hint"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:layout_height="wrap_content">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/email_edit"
+                <TextView
+                    android:id="@+id/log_attachment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text"
-                    android:singleLine="true" />
+                    android:background="?attr/colorSecondary"
+                    android:drawablePadding="8dp"
+                    android:padding="12dp"
+                    android:text="@string/feedback_log_attached"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                    android:textColor="?attr/colorOnSecondary"
+                    app:drawableStartCompat="@drawable/attach_file"
+                    app:drawableTint="?attr/colorOnSecondary"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/feedback_body_input"
-                style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/email_input">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/feedback_body_edit"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/email_input"
+                    style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="top"
-                    android:inputType="text|textMultiLine"
-                    android:minLines="8" />
+                    android:layout_marginBottom="24dp"
+                    android:hint="@string/feedback_email_hint"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/log_attachment">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/email_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:singleLine="true" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-    </androidx.core.widget.NestedScrollView>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/feedback_body_input"
+                    style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/email_input">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/feedback_body_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:inputType="text|textMultiLine"
+                        android:minLines="8" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

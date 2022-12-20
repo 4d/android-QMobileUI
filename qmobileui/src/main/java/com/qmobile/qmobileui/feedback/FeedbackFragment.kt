@@ -6,6 +6,7 @@
 
 package com.qmobile.qmobileui.feedback
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -15,19 +16,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.view.MenuProvider
+import com.qmobile.qmobiledatasync.log.LogFileHelper.getCurrentDateTimeLogFormat
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.utils.FeedbackType
 import com.qmobile.qmobiledatasync.viewmodel.FeedbackViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getFeedbackViewModel
 import com.qmobile.qmobileui.BaseFragment
+import com.qmobile.qmobileui.FeedbackActivity
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.databinding.FragmentFeedbackBinding
-import com.qmobile.qmobileui.log.LogFileHelper.getCurrentDateTimeLogFormat
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
-import com.qmobile.qmobileui.ui.noTabLayoutUI
 import com.qmobile.qmobileui.ui.setSharedAxisYEnterTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.serializable
@@ -41,6 +41,14 @@ class FeedbackFragment : BaseFragment(), MenuProvider {
     private lateinit var feedbackViewModel: FeedbackViewModel
 
     private lateinit var type: FeedbackType
+    private lateinit var feedbackActivity: FeedbackActivity
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is FeedbackActivity) {
+            feedbackActivity = context
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,13 +78,14 @@ class FeedbackFragment : BaseFragment(), MenuProvider {
         super.onViewCreated(view, savedInstanceState)
 
         binding.feedbackBodyInput.hint = getBodyHint()
-        if (!noTabLayoutUI) {
-            binding.feedbackConstraintLayout.setPadding(0, 0, 0, getPaddingBottom())
+
+        initMenuProvider()
+
+        if (type != FeedbackType.REPORT_A_PROBLEM) {
+            binding.logAttachment.visibility = View.GONE
         }
 
-        (activity as? BaseActivity)?.feedbackApiService?.let {
-            feedbackViewModel = getFeedbackViewModel(this, it)
-        }
+        feedbackViewModel = getFeedbackViewModel(this, feedbackActivity.feedbackApiService)
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -142,7 +151,7 @@ class FeedbackFragment : BaseFragment(), MenuProvider {
             FeedbackType.SUGGEST_IMPROVEMENT -> getString(R.string.feedback_suggest_improvement)
             FeedbackType.SHOW_CURRENT_LOG -> ""
             FeedbackType.REPORT_A_PROBLEM -> getString(R.string.feedback_report_a_problem)
-            FeedbackType.REPORT_PREVIOUS_CRASH -> getString(R.string.feedback_report_previous_crash)
+            FeedbackType.REPORT_PREVIOUS_CRASH -> ""
         }
     }
 
@@ -152,7 +161,7 @@ class FeedbackFragment : BaseFragment(), MenuProvider {
             FeedbackType.SUGGEST_IMPROVEMENT -> getString(R.string.feedback_suggest_improvement_body)
             FeedbackType.SHOW_CURRENT_LOG -> ""
             FeedbackType.REPORT_A_PROBLEM -> getString(R.string.feedback_report_a_problem_body)
-            FeedbackType.REPORT_PREVIOUS_CRASH -> getString(R.string.feedback_report_a_problem_body)
+            FeedbackType.REPORT_PREVIOUS_CRASH -> ""
         }
     }
 }
