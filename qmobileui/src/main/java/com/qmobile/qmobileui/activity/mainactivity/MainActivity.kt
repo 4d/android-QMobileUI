@@ -108,7 +108,7 @@ class MainActivity :
     private var isFullScreen = false
     private var snackbar: Snackbar? = null
     private var snackBarRequired = false
-    private var licenseCheckRequired = AtomicBoolean(false) // SET TO TRUE FOR FEATURE
+    private var licenseCheckRequired = AtomicBoolean(true)
 
     // FragmentCommunication
     private var currentEntity: RoomEntity? = null
