@@ -55,12 +55,6 @@ subprojects {
                     versionName "1.0"
                     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
                     vectorDrawables.useSupportLibrary = true
-
-                    externalNativeBuild {
-                        cmake {
-                            cppFlags "-std=c++14"
-                        }
-                    }
                 }
 
                 buildTypes {
