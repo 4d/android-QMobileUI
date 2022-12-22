@@ -8,7 +8,6 @@ package com.qmobile.qmobileui.crash
 
 import android.content.Context
 import com.qmobile.qmobiledatasync.log.LogFileHelper
-import org.jetbrains.annotations.TestOnly
 import timber.log.Timber
 
 /** Handle Signal crashes (ex: SIGSEGV) and write basic log after it */

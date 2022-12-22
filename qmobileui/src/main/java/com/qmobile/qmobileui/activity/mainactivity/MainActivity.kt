@@ -350,7 +350,7 @@ class MainActivity :
                         DataSync.State.UNSYNCHRONIZED -> mainActivityDataSync.dataSync()
                         DataSync.State.SYNCHRONIZED -> {
                             setCheckInProgress(true)
-                            entityListViewModel.getEntities(false) { shouldSyncData ->
+                            entityListViewModel.getEntities(false) { _, shouldSyncData ->
                                 setCheckInProgress(false)
                                 if (shouldSyncData) {
                                     mainActivityDataSync.shouldDataSync(currentTableName)
@@ -580,8 +580,11 @@ class MainActivity :
                 val savedActionContent = actionTask.actionContent
                 val cleanedActionContent = actionTask.cleanActionContent()
 
-                actionViewModel.sendAction(actionTask.actionInfo.actionName, cleanedActionContent) { actionResponse ->
-                    actionResponse?.let {
+                actionViewModel.sendAction(
+                    actionTask.actionInfo.actionName,
+                    cleanedActionContent
+                ) { _, actionResponse ->
+                    if (actionResponse != null) {
                         if (actionResponse.success) {
                             actionTask.status = ActionTask.Status.SUCCESS
                         } else {
