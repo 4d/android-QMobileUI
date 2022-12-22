@@ -110,7 +110,7 @@ class MainActivity :
     private var isFullScreen = false
     private var snackbar: Snackbar? = null
     private var snackBarRequired = false
-    private var licenseCheckRequired = AtomicBoolean(true)
+    private var licenseCheckRequired = AtomicBoolean(BaseApp.sharedPreferencesHolder.guestLogin)
 
     // FragmentCommunication
     private var currentEntity: RoomEntity? = null
@@ -162,7 +162,9 @@ class MainActivity :
         // Follow activity lifecycle and check when activity enters foreground for data sync
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
-        performLicenseCheck()
+        if (licenseCheckRequired.get()) {
+            performLicenseCheck()
+        }
     }
 
     override fun onDestroy() {
