@@ -5,6 +5,12 @@ apply plugin: 'kotlin-kapt'
 
 android {
     namespace 'com.qmobile.qmobileui'
+
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+        }
+    }
 }
 
 apply from: "$rootDir/buildscripts/ktlint.gradle"

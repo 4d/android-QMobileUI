@@ -4,10 +4,9 @@
  * Copyright (c) 2022 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.log
+package com.qmobile.qmobileui.crash
 
 import android.content.Context
-import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.log.LogFileHelper.cleanOlderCrashLogs
 import com.qmobile.qmobiledatasync.log.LogFileHelper.createLogFile
 
@@ -48,7 +47,6 @@ class TopExceptionHandler(private val context: Context) : Thread.UncaughtExcepti
         report += "-------------------------------\n\n"
         cleanOlderCrashLogs(context)
         createLogFile(context, report)
-        BaseApp.sharedPreferencesHolder.displayCrashDialog = true
         defaultUEH?.uncaughtException(t, e)
     }
 }

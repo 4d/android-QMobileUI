@@ -7,7 +7,7 @@
 package com.qmobile.qmobileui
 
 import com.qmobile.qmobileapi.network.FeedbackApiService
-import com.qmobile.qmobileui.log.CrashHandler
+import com.qmobile.qmobileui.crash.CrashHandler
 
 interface FeedbackActivity {
 

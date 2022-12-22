@@ -4,13 +4,16 @@
  * Copyright (c) 2022 qmarciset. All rights reserved.
  */
 
-package com.qmobile.qmobileui.log
+package com.qmobile.qmobileui.crash
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.log.LogFileHelper
+import com.qmobile.qmobiledatasync.log.LogFileHelper.cleanOlderCrashLogs
 import com.qmobile.qmobiledatasync.log.LogFileHelper.compress
 import com.qmobile.qmobiledatasync.log.LogFileHelper.findCrashLogFile
 import com.qmobile.qmobiledatasync.toast.ToastMessage
+import com.qmobile.qmobiledatasync.utils.FeedbackType
 import com.qmobile.qmobiledatasync.viewmodel.FeedbackViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
@@ -18,52 +21,57 @@ import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
+import org.json.JSONObject
 import java.io.File
 
 class CrashHandler(private val activity: BaseActivity, private val feedbackViewModel: FeedbackViewModel) {
 
-    fun checkIfShouldDisplayDialog() {
-        if (BaseApp.sharedPreferencesHolder.displayCrashDialog && findCrashLogFile(activity)?.exists() == true) {
-            when {
-                activity is LoginActivity && !BaseApp.runtimeDataHolder.guestLogin -> displayCrashDialog()
-                activity is MainActivity && BaseApp.runtimeDataHolder.guestLogin -> displayCrashDialog()
-            }
+    init {
+        when {
+            activity is LoginActivity && !BaseApp.runtimeDataHolder.guestLogin -> displayCrashDialog()
+            activity is MainActivity && BaseApp.runtimeDataHolder.guestLogin -> displayCrashDialog()
         }
     }
 
     private fun displayCrashDialog() {
-        activity.apply {
-            MaterialAlertDialogBuilder(this)
-                .setTitle(getString(R.string.crash_log_dialog_title))
-                .setMessage(getString(R.string.crash_log_dialog_message))
-                .setPositiveButton(getString(R.string.crash_log_dialog_send)) { _, _ ->
-                    proceedFile()
-                    BaseApp.sharedPreferencesHolder.displayCrashDialog = false
+        val crashLog = findCrashLogFile(activity)
+        if (crashLog != null) {
+            if (BaseApp.sharedPreferencesHolder.crashLogSavedForLater != crashLog.name) {
+                BaseApp.sharedPreferencesHolder.crashLogSavedForLater = crashLog.name
+                activity.apply {
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle(getString(R.string.crash_log_dialog_title))
+                        .setMessage(getString(R.string.crash_log_dialog_message))
+                        .setPositiveButton(getString(R.string.crash_log_dialog_send)) { _, _ ->
+                            proceedFile(crashLog)
+                        }
+                        .setNegativeButton(getString(R.string.crash_log_dialog_deny)) { _, _ ->
+                            cleanOlderCrashLogs(this)
+                        }
+                        .setNeutralButton(getString(R.string.crash_log_dialog_save_for_later)) { _, _ ->
+                            BaseApp.sharedPreferencesHolder.crashLogSavedForLater = crashLog.name
+                        }
+                        .show()
                 }
-                .setNegativeButton(getString(R.string.crash_log_dialog_deny)) { _, _ ->
-                    BaseApp.sharedPreferencesHolder.displayCrashDialog = false
-                }
-                .setNeutralButton(getString(R.string.crash_log_dialog_save_for_later), null)
-                .show()
-        }
-    }
-
-    fun proceedFile() {
-        findCrashLogFile(activity)?.let { logFile ->
-            compress(logFile)?.let { zipFile ->
-                checkNetwork(logFile, zipFile)
             }
         }
     }
 
-    private fun checkNetwork(logFile: File, zipFile: File) {
+    fun proceedFile(file: File) {
+        compress(file)?.let { zipFile ->
+            checkNetworkAndSend(zipFile, file.name)
+        }
+    }
+
+    private fun checkNetworkAndSend(zipFile: File, fileName: String) {
         activity.queryNetwork(
             object : NetworkChecker {
                 override fun onServerAccessible() {
-                    sendCrashReport(logFile, zipFile)
+                    sendCrashReport(zipFile, fileName)
                 }
 
                 override fun onServerInaccessible() {
+                    BaseApp.sharedPreferencesHolder.crashLogSavedForLater = fileName
                     SnackbarHelper.show(
                         activity,
                         activity.getString(R.string.server_not_accessible),
@@ -72,6 +80,7 @@ class CrashHandler(private val activity: BaseActivity, private val feedbackViewM
                 }
 
                 override fun onNoInternet() {
+                    BaseApp.sharedPreferencesHolder.crashLogSavedForLater = fileName
                     SnackbarHelper.show(activity, activity.getString(R.string.no_internet), ToastMessage.Type.WARNING)
                 }
             },
@@ -79,27 +88,24 @@ class CrashHandler(private val activity: BaseActivity, private val feedbackViewM
         )
     }
 
-    /*private fun buildRequestJson(): JSONObject {
+    private fun buildRequestJson(): JSONObject {
         return JSONObject().apply {
             put("type", FeedbackType.REPORT_PREVIOUS_CRASH.key)
             put("fileName", "")
             put("sendDate", LogFileHelper.getCurrentDateTimeLogFormat())
             put("isCrash", "1")
         }
-    }*/
+    }
 
-    private fun sendCrashReport(logFile: File, zipFile: File) {
-        feedbackViewModel.sendCrashReport(zipFile) { isSuccess ->
+    private fun sendCrashReport(zipFile: File, fileName: String) {
+        feedbackViewModel.sendCrashReport(buildRequestJson(), zipFile) { isSuccess ->
             if (isSuccess) {
-                deleteFiles(logFile, zipFile)
+                cleanOlderCrashLogs(activity)
+            } else {
+                BaseApp.sharedPreferencesHolder.crashLogSavedForLater = fileName
             }
             displayCrashSent(isSuccess)
         }
-    }
-
-    private fun deleteFiles(logFile: File, zipFile: File) {
-        logFile.delete()
-        zipFile.delete()
     }
 
     private fun displayCrashSent(isSuccess: Boolean) {

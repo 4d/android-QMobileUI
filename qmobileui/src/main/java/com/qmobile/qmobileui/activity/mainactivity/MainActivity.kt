@@ -69,6 +69,7 @@ import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.binding.px
+import com.qmobile.qmobileui.crash.SignalHandler
 import com.qmobile.qmobileui.databinding.ActivityMainBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.settings.SettingsFragment
@@ -104,6 +105,7 @@ class MainActivity :
     private lateinit var mainActivityObserver: MainActivityObserver
     private lateinit var actionViewModel: ActionViewModel
     internal lateinit var deletedRecordsViewModel: DeletedRecordsViewModel
+    private lateinit var signalHandler: SignalHandler
 
     private var isFullScreen = false
     private var snackbar: Snackbar? = null
@@ -130,6 +132,11 @@ class MainActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        signalHandler = SignalHandler(this).apply {
+//            initSignalHandler()
+        }
+
         setupUI()
 
         // Init system services in onCreate()
@@ -156,6 +163,11 @@ class MainActivity :
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
         performLicenseCheck()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        signalHandler.clearSignalHandler()
     }
 
     override fun initViewModels() {

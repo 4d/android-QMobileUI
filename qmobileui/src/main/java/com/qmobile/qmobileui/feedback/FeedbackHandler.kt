@@ -24,7 +24,7 @@ import com.qmobile.qmobiledatasync.log.LogLevel
 import com.qmobile.qmobiledatasync.log.LogLevelController
 import com.qmobile.qmobiledatasync.utils.FeedbackType
 import com.qmobile.qmobileui.R
-import com.qmobile.qmobileui.log.CrashHandler
+import com.qmobile.qmobileui.crash.CrashHandler
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.getStatusBarHeight
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
@@ -64,7 +64,7 @@ class FeedbackHandler(private val fragment: Fragment, private val crashHandler: 
 
             currentCrashLog = findCrashLogFile(this)
 
-            if (currentCrashLog?.exists() != true) {
+            if (currentCrashLog == null) {
                 bottomSheetDialog.findViewById<TextView>(R.id.report_previous_crash)?.visibility = View.GONE
             }
 
@@ -131,7 +131,7 @@ class FeedbackHandler(private val fragment: Fragment, private val crashHandler: 
     }
 
     private fun reportPreviousCrash() {
-        crashHandler.proceedFile()
+        currentCrashLog?.let { crashHandler.proceedFile(it) }
     }
 
     private fun openFeedbackFragment(type: FeedbackType) {

@@ -46,7 +46,7 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getTaskViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.mainactivity.ActivityResultController
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
-import com.qmobile.qmobileui.log.CrashHandler
+import com.qmobile.qmobileui.crash.CrashHandler
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.SnackbarHelper
@@ -96,9 +96,7 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
         feedbackViewModel = getFeedbackViewModel(this, feedbackApiService)
         getEntityListViewModelList()
 
-        crashHandler = CrashHandler(this, feedbackViewModel).apply {
-            checkIfShouldDisplayDialog()
-        }
+        crashHandler = CrashHandler(this, feedbackViewModel)
     }
 
     // Get EntityListViewModel list

@@ -49,7 +49,7 @@ class SettingsFragment :
 
     private lateinit var settingsActivity: SettingsActivity
     internal lateinit var actionActivity: ActionActivity
-    internal lateinit var feedbackActivity: FeedbackActivity
+    private lateinit var feedbackActivity: FeedbackActivity
     internal lateinit var delegate: FragmentCommunication
 
     // ViewModels
