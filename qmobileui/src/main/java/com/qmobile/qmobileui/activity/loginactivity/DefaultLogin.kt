@@ -101,9 +101,11 @@ class DefaultLogin(private val activity: LoginActivity) : LoginHandler {
             activity.showRemoteUrlDialog()
         }
 
-        if (activity.authorizedStatus != AuthorizedStatus.AUTHORIZED) {
-            binding.loginEmailInput.setText(BaseApp.sharedPreferencesHolder.lastLoginMail)
-            binding.loginButtonAuth.isEnabled = true
+        BaseApp.sharedPreferencesHolder.lastLoginMail.let {
+            if (it.isNotEmpty()) {
+                binding.loginEmailInput.setText(BaseApp.sharedPreferencesHolder.lastLoginMail)
+                binding.loginButtonAuth.isEnabled = true
+            }
         }
     }
 
