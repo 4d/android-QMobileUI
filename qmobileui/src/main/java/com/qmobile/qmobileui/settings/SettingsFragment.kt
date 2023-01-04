@@ -26,6 +26,7 @@ import com.qmobile.qmobileui.FeedbackActivity
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.SettingsActivity
+import com.qmobile.qmobileui.feedback.FeedbackHandler
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
@@ -134,7 +135,7 @@ class SettingsFragment :
     }
 
     fun initFeedbackUI() {
-//        FeedbackHandler(this, feedbackActivity.crashHandler)
+        FeedbackHandler(this, feedbackActivity.crashHandler)
     }
 
     /**

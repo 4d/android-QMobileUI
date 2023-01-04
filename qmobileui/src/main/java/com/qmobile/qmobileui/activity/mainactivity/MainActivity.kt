@@ -134,7 +134,7 @@ class MainActivity :
         super.onCreate(savedInstanceState)
 
         signalHandler = SignalHandler(this).apply {
-//            initSignalHandler()
+            initSignalHandler()
         }
 
         setupUI()
