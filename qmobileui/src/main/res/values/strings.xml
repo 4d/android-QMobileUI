@@ -141,7 +141,7 @@
     <!-- Sessions -->
     <string name="missing_session_file_logout">You have been logged out, please log in again</string>
     <string name="missing_session_file_logout_with_pending_tasks">You have been logged out with pending actions, please log in again in order to execute these actions</string>
-    <string name="max_device_connection_reached">You have exceeded the number of available licenses, please contact your server administrator</string>
+    <string name="max_device_connection_reached">The number of available licenses has been exceeded, please contact your server administrator</string>
 
     <!-- Crash Logs -->
     <string name="crash_log_dialog_title">Oops ! It looks like your app didn\'t close correctly</string>
