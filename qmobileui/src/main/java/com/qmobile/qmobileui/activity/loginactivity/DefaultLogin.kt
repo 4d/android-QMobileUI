@@ -97,7 +97,7 @@ class DefaultLogin(private val activity: LoginActivity) : LoginHandler {
         }
 
         binding.loginLogo.setOnVeryLongClickListener {
-            activity.showRemoteUrlDialog()
+            activity.showLogoMenu()
         }
 
         BaseApp.sharedPreferencesHolder.lastLoginMail.let {

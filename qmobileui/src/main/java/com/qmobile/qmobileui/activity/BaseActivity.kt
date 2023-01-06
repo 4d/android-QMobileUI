@@ -96,7 +96,9 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
         feedbackViewModel = getFeedbackViewModel(this, feedbackApiService)
         getEntityListViewModelList()
 
-        crashHandler = CrashHandler(this, feedbackViewModel)
+        if (BaseApp.runtimeDataHolder.crashLogs) {
+            crashHandler = CrashHandler(this, feedbackViewModel)
+        }
     }
 
     // Get EntityListViewModel list

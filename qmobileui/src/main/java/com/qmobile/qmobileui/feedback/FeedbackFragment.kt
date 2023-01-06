@@ -16,7 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.view.MenuProvider
-import com.qmobile.qmobiledatasync.log.LogFileHelper.getCurrentDateTimeLogFormat
+import com.qmobile.qmobiledatasync.log.CurrentLogHelper.getCurrentLogZip
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.utils.FeedbackType
 import com.qmobile.qmobiledatasync.viewmodel.FeedbackViewModel
@@ -31,7 +31,7 @@ import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.setSharedAxisYEnterTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.utils.serializable
-import org.json.JSONObject
+import java.io.File
 
 class FeedbackFragment : BaseFragment(), MenuProvider {
 
@@ -94,12 +94,12 @@ class FeedbackFragment : BaseFragment(), MenuProvider {
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         if (menuItem.itemId == R.id.send) {
-            checkNetwork()
+            checkNetworkAndSend()
         }
         return false
     }
 
-    private fun checkNetwork() {
+    private fun checkNetworkAndSend() {
         delegate.checkNetwork(
             object : NetworkChecker {
                 override fun onServerAccessible() {
@@ -123,7 +123,17 @@ class FeedbackFragment : BaseFragment(), MenuProvider {
     }
 
     private fun sendFeedback() {
-        feedbackViewModel.sendFeedback(buildRequestJson()) { isSuccess ->
+        var currentLogZip: File? = null
+        if (type == FeedbackType.REPORT_A_PROBLEM) {
+            currentLogZip = getCurrentLogZip(requireContext())
+        }
+
+        feedbackViewModel.sendFeedback(
+            type = type,
+            email = binding.emailEdit.toString(),
+            feedbackContent = binding.feedbackBodyEdit.toString(),
+            zipFile = currentLogZip
+        ) { isSuccess ->
             if (isSuccess) {
                 SnackbarHelper.show(
                     activity,
@@ -131,17 +141,6 @@ class FeedbackFragment : BaseFragment(), MenuProvider {
                     ToastMessage.Type.SUCCESS
                 )
             }
-        }
-    }
-
-    private fun buildRequestJson(): JSONObject {
-        return JSONObject().apply {
-            put("email", binding.emailEdit.toString())
-            put("summary", binding.feedbackBodyEdit.toString())
-            put("type", type.key)
-            put("fileName", "")
-            put("sendDate", getCurrentDateTimeLogFormat())
-            put("isCrash", "0")
         }
     }
 

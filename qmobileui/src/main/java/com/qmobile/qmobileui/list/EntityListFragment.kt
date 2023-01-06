@@ -75,6 +75,7 @@ open class EntityListFragment : ListFormFragment() {
     override fun initOnRefreshListener() {
         binding.root.findViewById<SwipeRefreshLayout>(R.id.fragment_list_swipe_to_refresh)?.apply {
             setOnRefreshListener {
+                listOf<String>().first()
                 delegate.requestDataSync(tableName)
                 recyclerView.adapter = adapter
                 this.isRefreshing = false

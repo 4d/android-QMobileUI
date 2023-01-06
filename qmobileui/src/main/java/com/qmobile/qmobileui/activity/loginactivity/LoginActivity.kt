@@ -20,6 +20,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.auth.isEmailValid
@@ -34,10 +36,13 @@ import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.mainactivity.ActivityResultController
 import com.qmobile.qmobileui.activity.mainactivity.ActivityResultControllerImpl
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
+import com.qmobile.qmobileui.feedback.FeedbackHandler
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.clearViewInParent
+import com.qmobile.qmobileui.ui.getStatusBarHeight
+import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.PermissionCheckerImpl
 import com.qmobile.qmobileui.utils.hideKeyboard
@@ -50,6 +55,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, Activ
 
     private var loggedOut = false
     internal var authorizedStatus = AuthorizedStatus.AUTHORIZED
+    private lateinit var bottomSheetDialog: BottomSheetDialog
 
     private var remoteUrl = ""
     private var serverAccessibleDrawable: Drawable? = null
@@ -275,8 +281,28 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, Activ
         refreshApiClients()
     }
 
-    fun showRemoteUrlDialog() {
+    private fun showRemoteUrlDialog() {
         queryNetwork(this)
         showRemoteUrlDisplayDialog()
+    }
+
+    fun showLogoMenu() {
+        bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.setContentView(R.layout.logo_menu)
+        bottomSheetDialog.findViewById<View>(R.id.design_bottom_sheet)?.let {
+            val marginHeight =
+                resources.displayMetrics.heightPixels - getStatusBarHeight(this)
+            BottomSheetBehavior.from(it).peekHeight = marginHeight
+        }
+
+        bottomSheetDialog.findViewById<TextView>(R.id.edit_remote_url)?.setOnSingleClickListener {
+            bottomSheetDialog.dismiss()
+            showRemoteUrlDialog()
+        }
+        bottomSheetDialog.findViewById<TextView>(R.id.help_and_feedback)?.setOnSingleClickListener {
+            bottomSheetDialog.dismiss()
+            FeedbackHandler(this)
+        }
+        bottomSheetDialog.show()
     }
 }

@@ -22,15 +22,20 @@
     <string name="try_refresh_data">Please try refreshing data again</string>
 
     <!--    Settings Fragment -->
-    <string name="cat_title_server">SERVER</string>
+    <string name="cat_title_server">Server</string>
     <string name="pref_remote_url_key">remote_url</string>
     <string name="pref_remote_url_title">Remote URL</string>
     <string name="cat_account_key">account_category</string>
-    <string name="cat_title_account">ACCOUNT</string>
+    <string name="cat_title_account">Account</string>
+    <string name="cat_title_feedback">Help and Feedback</string>
+    <string name="cat_feedback_key">feedback_category</string>
     <string name="pref_logout_key">logout</string>
+    <string name="pref_feedback_key">feedback</string>
     <string name="pref_pending_tasks_key">pending</string>
     <string name="pref_pending_tasks_count">%d pending</string>
-    <string name="pref_logout_title">LOGOUT</string>
+    <string name="pref_logout_title">Logout</string>
+    <string name="pref_feedback_title">Send feedback</string>
+    <string name="pref_feedback_summary">Help us get better</string>
     <string name="pref_logout_summary">Logout current user</string>
     <string name="pref_pending_tasks">Pending tasks</string>
     <string name="logout_dialog_negative">Cancel</string>
@@ -70,6 +75,8 @@
     <string name="login_google_signing_out">Signing out from Google account</string>
     <string name="login_google_signed_out">Signed out from Google account</string>
     <string name="login_google_no_server_client_id">String resource \"server_client_id\" has not been defined</string>
+    <string name="logo_menu_edit_remote_url">Edit remote URL</string>
+    <string name="logo_menu_feedback">Help and Feedback</string>
 
     <string name="web_view_refresh">Refresh</string>
     <string name="web_view_share">Share</string>
@@ -155,6 +162,7 @@
     <string name="crash_log_dialog_response_action">OK</string>
 
     <!-- Feedback -->
+    <string name="feedback_menu_title">How can we help you ?</string>
     <string name="feedback_talk_to_us">Talk to us</string>
     <string name="feedback_talk_to_us_body">Give us your feedback</string>
     <string name="feedback_suggest_improvement">Suggest an improvement</string>
@@ -169,6 +177,7 @@
     <string name="feedback_email_hint">Enter your email</string>
     <string name="feedback_send">Send</string>
     <string name="feedback_send_success">Thank you for your feedback !</string>
+    <string name="feedback_send_current_logs">Logs successfully sent</string>
     <string name="feedback_log_attached">Log attached</string>
 
     <!-- Log Levels -->

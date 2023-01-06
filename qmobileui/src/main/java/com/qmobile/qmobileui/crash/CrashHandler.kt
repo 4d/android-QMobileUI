@@ -8,12 +8,10 @@ package com.qmobile.qmobileui.crash
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmobile.qmobiledatasync.app.BaseApp
-import com.qmobile.qmobiledatasync.log.LogFileHelper
 import com.qmobile.qmobiledatasync.log.LogFileHelper.cleanOlderCrashLogs
 import com.qmobile.qmobiledatasync.log.LogFileHelper.compress
 import com.qmobile.qmobiledatasync.log.LogFileHelper.findCrashLogFile
 import com.qmobile.qmobiledatasync.toast.ToastMessage
-import com.qmobile.qmobiledatasync.utils.FeedbackType
 import com.qmobile.qmobiledatasync.viewmodel.FeedbackViewModel
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
@@ -21,10 +19,9 @@ import com.qmobile.qmobileui.activity.loginactivity.LoginActivity
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.SnackbarHelper
-import org.json.JSONObject
 import java.io.File
 
-class CrashHandler(private val activity: BaseActivity, private val feedbackViewModel: FeedbackViewModel) {
+class CrashHandler(val activity: BaseActivity, val feedbackViewModel: FeedbackViewModel) {
 
     init {
         when {
@@ -88,17 +85,8 @@ class CrashHandler(private val activity: BaseActivity, private val feedbackViewM
         )
     }
 
-    private fun buildRequestJson(): JSONObject {
-        return JSONObject().apply {
-            put("type", FeedbackType.REPORT_PREVIOUS_CRASH.key)
-            put("fileName", "")
-            put("sendDate", LogFileHelper.getCurrentDateTimeLogFormat())
-            put("isCrash", "1")
-        }
-    }
-
     private fun sendCrashReport(zipFile: File, fileName: String) {
-        feedbackViewModel.sendCrashReport(buildRequestJson(), zipFile) { isSuccess ->
+        feedbackViewModel.sendCrash(zipFile) { isSuccess ->
             if (isSuccess) {
                 cleanOlderCrashLogs(activity)
             } else {

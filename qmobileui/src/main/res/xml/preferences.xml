@@ -34,4 +34,16 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="@string/cat_title_feedback"
+        app:isPreferenceVisible="true"
+        app:key="@string/cat_feedback_key">
+
+        <Preference
+            app:key="@string/pref_feedback_key"
+            app:summary="@string/pref_feedback_summary"
+            app:title="@string/pref_feedback_title" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

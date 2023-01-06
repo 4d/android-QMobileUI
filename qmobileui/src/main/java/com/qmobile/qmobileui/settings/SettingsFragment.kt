@@ -22,10 +22,10 @@ import com.qmobile.qmobiledatasync.viewmodel.LoginViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getConnectivityViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getLoginViewModel
 import com.qmobile.qmobileui.ActionActivity
-import com.qmobile.qmobileui.FeedbackActivity
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.SettingsActivity
+import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.feedback.FeedbackHandler
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.SnackbarHelper
@@ -40,17 +40,18 @@ class SettingsFragment :
 
     internal var firstTime = true
     private val remoteUrlPrefKey by lazy { getString(R.string.pref_remote_url_key) }
+    private val feedbackPrefKey by lazy { getString(R.string.pref_feedback_key) }
     private val accountCategoryKey by lazy { getString(R.string.cat_account_key) }
     private val pendingTaskPrefKey by lazy { getString(R.string.pref_pending_tasks_key) }
     private val logoutPrefKey by lazy { getString(R.string.pref_logout_key) }
 
     private val remoteUrlPref by lazy { findPreference<Preference>(remoteUrlPrefKey) }
+    private val feedbackPref by lazy { findPreference<Preference>(feedbackPrefKey) }
     internal val pendingTaskPref by lazy { findPreference<Preference>(pendingTaskPrefKey) }
     private lateinit var remoteUrl: String
 
     private lateinit var settingsActivity: SettingsActivity
     internal lateinit var actionActivity: ActionActivity
-    private lateinit var feedbackActivity: FeedbackActivity
     internal lateinit var delegate: FragmentCommunication
 
     // ViewModels
@@ -71,9 +72,6 @@ class SettingsFragment :
         }
         if (context is ActionActivity) {
             actionActivity = context
-        }
-        if (context is FeedbackActivity) {
-            feedbackActivity = context
         }
     }
 
@@ -104,6 +102,7 @@ class SettingsFragment :
         findPreference<Preference>(logoutPrefKey)?.onPreferenceClickListener = this
         remoteUrlPref?.onPreferenceClickListener = this
         pendingTaskPref?.onPreferenceClickListener = this
+        feedbackPref?.onPreferenceClickListener = this
     }
 
     override fun onPreferenceClick(preference: Preference): Boolean {
@@ -128,14 +127,16 @@ class SettingsFragment :
                 }
                 true
             }
+            feedbackPrefKey -> {
+                (activity as? BaseActivity)?.apply {
+                    FeedbackHandler(this)
+                }
+                true
+            }
             else -> {
                 false
             }
         }
-    }
-
-    fun initFeedbackUI() {
-        FeedbackHandler(this, feedbackActivity.crashHandler)
     }
 
     /**

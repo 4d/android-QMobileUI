@@ -5,6 +5,7 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -12,6 +13,14 @@
     <com.google.android.material.bottomsheet.BottomSheetDragHandleView
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="16dp"
+        android:text="@string/feedback_menu_title"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -26,36 +35,50 @@
                 android:id="@+id/talk_to_us"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
                 android:padding="16dp"
-                android:text="@string/feedback_talk_to_us" />
+                android:text="@string/feedback_talk_to_us"
+                app:drawableStartCompat="@drawable/chat" />
 
             <TextView
                 android:id="@+id/suggest_improvement"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
                 android:padding="16dp"
-                android:text="@string/feedback_suggest_improvement" />
+                android:text="@string/feedback_suggest_improvement"
+                app:drawableStartCompat="@drawable/tips_and_updates" />
 
             <TextView
                 android:id="@+id/show_current_log"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
                 android:padding="16dp"
-                android:text="@string/feedback_show_current_log" />
+                android:text="@string/feedback_show_current_log"
+                app:drawableStartCompat="@drawable/description" />
 
             <TextView
                 android:id="@+id/report_a_problem"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
                 android:padding="16dp"
-                android:text="@string/feedback_report_a_problem" />
+                android:text="@string/feedback_report_a_problem"
+                android:textColor="?attr/colorError"
+                app:drawableStartCompat="@drawable/warning"
+                app:drawableTint="?attr/colorError" />
 
             <TextView
                 android:id="@+id/report_previous_crash"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
                 android:padding="16dp"
-                android:text="@string/feedback_report_previous_crash" />
+                android:text="@string/feedback_report_previous_crash"
+                android:textColor="?attr/colorError"
+                app:drawableStartCompat="@drawable/warning"
+                app:drawableTint="?attr/colorError" />
 
         </LinearLayout>
 
