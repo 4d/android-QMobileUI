@@ -86,20 +86,20 @@ class CrashHandler(val activity: BaseActivity, val feedbackViewModel: FeedbackVi
     }
 
     private fun sendCrashReport(zipFile: File, fileName: String) {
-        feedbackViewModel.sendCrash(zipFile) { isSuccess ->
+        feedbackViewModel.sendCrash(zipFile) { isSuccess, ticket ->
             if (isSuccess) {
                 cleanOlderCrashLogs(activity)
             } else {
                 BaseApp.sharedPreferencesHolder.crashLogSavedForLater = fileName
             }
-            displayCrashSent(isSuccess)
+            displayCrashSent(isSuccess, ticket)
         }
     }
 
-    private fun displayCrashSent(isSuccess: Boolean) {
+    private fun displayCrashSent(isSuccess: Boolean, ticket: String?) {
         activity.apply {
             val message = if (isSuccess) {
-                getString(R.string.crash_log_dialog_response_message_success, "ticket")
+                getString(R.string.crash_log_dialog_response_message_success, ticket ?: "")
             } else {
                 getString(R.string.crash_log_dialog_response_message_fail)
             }
