@@ -12,6 +12,7 @@ import com.qmobile.qmobiledatasync.sync.DataSync
 import com.qmobile.qmobiledatasync.toast.Event
 import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
+import com.qmobile.qmobiledatasync.viewmodel.ActionViewModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
@@ -21,6 +22,7 @@ import timber.log.Timber
 class MainActivityObserver(
     private val activity: MainActivity,
     private val entityListViewModelList: List<EntityListViewModel<EntityModel>>,
+    private val actionViewModel: ActionViewModel,
     private val taskViewModel: TaskViewModel
 ) : BaseObserver {
 
@@ -30,8 +32,10 @@ class MainActivityObserver(
             observeDataSynchronized(entityListViewModel)
             observeJSONRelation(entityListViewModel)
             observeEntityListToastMessage(entityListViewModel)
-            observeIsUnauthorized(entityListViewModel)
+            observeEntityListIsUnauthorized(entityListViewModel)
         }
+        observeActionToastMessage()
+        observeActionIsUnauthorized()
         observePendingTasks()
     }
 
@@ -78,8 +82,22 @@ class MainActivityObserver(
         }
     }
 
-    private fun observeIsUnauthorized(entityListViewModel: EntityListViewModel<EntityModel>) {
+    private fun observeEntityListIsUnauthorized(entityListViewModel: EntityListViewModel<EntityModel>) {
         entityListViewModel.isUnauthorized.launchAndCollectIn(activity, Lifecycle.State.STARTED) { isUnauthorized ->
+            if (isUnauthorized) {
+                activity.logout(true)
+            }
+        }
+    }
+
+    private fun observeActionToastMessage() {
+        actionViewModel.toastMessage.message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
+            activity.handleEvent(event)
+        }
+    }
+
+    private fun observeActionIsUnauthorized() {
+        actionViewModel.isUnauthorized.launchAndCollectIn(activity, Lifecycle.State.STARTED) { isUnauthorized ->
             if (isUnauthorized) {
                 activity.logout(true)
             }

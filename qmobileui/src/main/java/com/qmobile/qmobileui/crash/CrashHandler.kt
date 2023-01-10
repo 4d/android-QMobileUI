@@ -26,7 +26,7 @@ class CrashHandler(val activity: BaseActivity, val feedbackViewModel: FeedbackVi
     init {
         when {
             activity is LoginActivity && !BaseApp.runtimeDataHolder.guestLogin -> displayCrashDialog()
-            activity is MainActivity && BaseApp.runtimeDataHolder.guestLogin -> displayCrashDialog()
+            activity is MainActivity -> displayCrashDialog()
         }
     }
 
@@ -45,9 +45,9 @@ class CrashHandler(val activity: BaseActivity, val feedbackViewModel: FeedbackVi
                         .setNegativeButton(getString(R.string.crash_log_dialog_deny)) { _, _ ->
                             cleanOlderCrashLogs(this)
                         }
-                        .setNeutralButton(getString(R.string.crash_log_dialog_save_for_later)) { _, _ ->
+                        /*.setNeutralButton(getString(R.string.crash_log_dialog_save_for_later)) { _, _ ->
                             BaseApp.sharedPreferencesHolder.crashLogSavedForLater = crashLog.name
-                        }
+                        }*/
                         .show()
                 }
             }

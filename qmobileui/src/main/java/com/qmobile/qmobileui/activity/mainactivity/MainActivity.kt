@@ -150,9 +150,10 @@ class MainActivity :
 
         initViewModels()
 
-        mainActivityObserver = MainActivityObserver(this, entityListViewModelList, taskViewModel).apply {
-            initObservers()
-        }
+        mainActivityObserver =
+            MainActivityObserver(this, entityListViewModelList, actionViewModel, taskViewModel).apply {
+                initObservers()
+            }
 
         mainActivityDataSync = MainActivityDataSync(this)
 
