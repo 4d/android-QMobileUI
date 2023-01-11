@@ -14,6 +14,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.core.view.MenuProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.progressindicator.CircularProgressIndicator
@@ -25,6 +26,7 @@ import com.qmobile.qmobiledatasync.viewmodel.factory.getEntityListViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.BaseFragment
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.binding.ImageHelper
 import com.qmobile.qmobileui.ui.DepthPageTransformer
 import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
@@ -72,6 +74,11 @@ class EntityViewPagerFragment : BaseFragment(), MenuProvider {
                 arguments?.getString("path")?.let { path = it }
                 setSharedAxisZEnterTransition()
             }
+        }
+
+        activity?.onBackPressedDispatcher?.addCallback {
+            (activity as? MainActivity?)?.navController?.navigateUp()
+            this.isEnabled = false
         }
     }
 
