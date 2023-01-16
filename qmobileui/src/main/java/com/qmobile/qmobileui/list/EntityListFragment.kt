@@ -52,12 +52,12 @@ open class EntityListFragment : ListFormFragment() {
                 recyclerView.addItemDecoration(divider)
 
                 // Add section itemDecoration if defined for this table
-                val sectionField = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.name
-                if (!sectionField.isNullOrEmpty()) {
+                val sectionFieldName = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.name
+                if (!sectionFieldName.isNullOrEmpty()) {
                     val sectionItemDecoration = RecyclerSectionItemDecoration(
                         resources.getDimensionPixelSize(R.dimen.recycler_section_header_height),
                         true,
-                        adapter.getSectionCallback(sectionField)
+                        adapter.getSectionCallback(sectionFieldName)
                     )
                     recyclerView.addItemDecoration(sectionItemDecoration)
                     recyclerView.isVerticalScrollBarEnabled = false

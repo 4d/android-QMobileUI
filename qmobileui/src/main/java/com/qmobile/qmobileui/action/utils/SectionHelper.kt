@@ -24,19 +24,18 @@ object SectionHelper {
         tableName: String,
         customSortFields: LinkedHashMap<String, String>? = null // here for unit tests
     ): LinkedHashMap<String, String>? {
-        var sectionField = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.name
+        val sectionField = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)
+        var sectionFieldName = sectionField?.name
 
-        if (!sectionField.isNullOrEmpty()) {
-            if (sectionField.contains(".")) {
-                sectionField = "$DESTINATION_TABLE_SQL_NAME.${sectionField.split(".").last()}"
-            }
+        if (sectionFieldName?.contains(".") == true) {
+            sectionFieldName = "$DESTINATION_TABLE_SQL_NAME.${sectionFieldName.split(".").last()}"
         }
 
         val sortFields = customSortFields ?: Sort.getSortFieldsFromSharedPrefs(tableName)
 
-        val sectionFieldType = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.type
-        if (!sectionField.isNullOrEmpty()) {
-            val key = getTypeConstraints(sectionField, sectionFieldType, Sort.Order.ASCENDING.value)
+        if (!sectionFieldName.isNullOrEmpty()) {
+            val sectionFieldType = sectionField?.type
+            val key = getTypeConstraints(sectionFieldName, sectionFieldType, Sort.Order.ASCENDING.value)
             val sortListWithSection = linkedMapOf(key to Sort.Order.ASCENDING.value)
             if (sortFields != null) {
                 sortListWithSection.putAll(sortFields)
@@ -47,9 +46,9 @@ object SectionHelper {
     }
 
     fun getSectionRelationQuery(tableName: String): String {
-        BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.path?.let { sectionPath ->
-            if (sectionPath.contains(".")) {
-                val relationName = sectionPath.split(".").first()
+        BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.path?.let { sectionFieldPath ->
+            if (sectionFieldPath.contains(".")) {
+                val relationName = sectionFieldPath.split(".").first()
                 val sectionRelation = RelationHelper.getRelation(tableName, relationName)
                 return getQuery(sectionRelation)
             }
@@ -59,7 +58,7 @@ object SectionHelper {
 
     private fun getQuery(relation: Relation): String {
         return " AS $SOURCE_TABLE_SQL_NAME LEFT JOIN ${relation.dest} " +
-            "$DESTINATION_TABLE_SQL_NAME WHERE " +
-            "$DESTINATION_TABLE_SQL_NAME.__KEY = $SOURCE_TABLE_SQL_NAME.__${relation.name}KEY"
+                "$DESTINATION_TABLE_SQL_NAME WHERE " +
+                "$DESTINATION_TABLE_SQL_NAME.__KEY = $SOURCE_TABLE_SQL_NAME.__${relation.name}KEY"
     }
 }

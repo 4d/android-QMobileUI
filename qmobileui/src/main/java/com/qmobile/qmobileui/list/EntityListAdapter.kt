@@ -41,7 +41,7 @@ class EntityListAdapter internal constructor(
                 oldItem: RoomEntity,
                 newItem: RoomEntity
             ) = (oldItem.__entity as? EntityModel)?.__STAMP == (newItem.__entity as? EntityModel)?.__STAMP &&
-                BaseApp.genericRelationHelper.relationsEquals(oldItem, newItem)
+                    BaseApp.genericRelationHelper.relationsEquals(oldItem, newItem)
         }
     }
 
@@ -87,11 +87,10 @@ class EntityListAdapter internal constructor(
             }
 
             override fun getSectionHeader(position: Int): CharSequence {
-                val sectionFieldType =
-                    BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.type
-                val value =
-                    getItem(position)?.let { ReflectionUtils.getInstanceProperty(it, sectionField) }
-                        ?: ""
+                val sectionFieldType = BaseApp.genericTableHelper.getSectionFieldForTable(tableName)?.type
+                val value = getItem(position)?.let { roomEntity ->
+                    ReflectionUtils.getInstanceProperty(roomEntity, sectionField)
+                } ?: ""
                 return FormatterUtils.applyFormat(sectionFieldType ?: "", value.toString())
             }
         }
