@@ -120,7 +120,7 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
         ApiClient.clearApiClients()
         ApiClient.setLogBody(BaseApp.runtimeDataHolder.logLevel <= Log.VERBOSE)
 
-        feedbackApiService = FeedbackApiClient.getApiService()
+        feedbackApiService = FeedbackApiClient.getApiService(BaseApp.runtimeDataHolder.logServer)
 
         loginApiService = ApiClient.getLoginApiService(
             sharedPreferencesHolder = BaseApp.sharedPreferencesHolder,
