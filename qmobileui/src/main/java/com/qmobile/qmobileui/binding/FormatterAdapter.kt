@@ -9,10 +9,13 @@ package com.qmobile.qmobileui.binding
 import android.view.View
 import android.webkit.WebView
 import android.widget.TextView
+import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.chip.Chip
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.FieldMapping
+import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.formatters.ImageNamed
 import com.qmobile.qmobileui.webview.WebViewHelper
@@ -60,18 +63,30 @@ private fun handleAsTextView(
     imageHeight: Int?
 ): Boolean {
     if (!format.isNullOrEmpty()) {
-        return if (!format.startsWith("/")) {
-            view.text = FormatterUtils.applyFormat(format, text)
-            true
-        } else {
-            applyCustomFormat(
-                view,
-                fieldName,
-                tableName,
-                text.toString(),
-                imageWidth,
-                imageHeight
-            )
+        return when {
+            format == "imageURL" -> {
+                (view.context as? MainActivity)?.apply {
+                    val imageGetter = HtmlImageGetter(lifecycleScope, resources, view)
+                    val styledText =
+                        HtmlCompat.fromHtml(text.toString(), HtmlCompat.FROM_HTML_MODE_LEGACY, imageGetter, null)
+                    view.text = styledText
+                }
+                true
+            }
+            !format.startsWith("/") -> {
+                view.text = FormatterUtils.applyFormat(format, text)
+                true
+            }
+            else -> {
+                applyCustomFormat(
+                    view,
+                    fieldName,
+                    tableName,
+                    text.toString(),
+                    imageWidth,
+                    imageHeight
+                )
+            }
         }
     }
     return false
