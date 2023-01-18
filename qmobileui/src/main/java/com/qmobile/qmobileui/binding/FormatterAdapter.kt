@@ -9,16 +9,17 @@ package com.qmobile.qmobileui.binding
 import android.view.View
 import android.webkit.WebView
 import android.widget.TextView
-import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.chip.Chip
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.utils.FieldMapping
-import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.formatters.ImageNamed
 import com.qmobile.qmobileui.webview.WebViewHelper
+import timber.log.Timber
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URL
 
 @BindingAdapter(
     value = ["text", "format", "tableName", "fieldName", "imageWidth", "imageHeight"],
@@ -65,12 +66,7 @@ private fun handleAsTextView(
     if (!format.isNullOrEmpty()) {
         return when {
             format == "imageURL" -> {
-                (view.context as? MainActivity)?.apply {
-                    val imageGetter = HtmlImageGetter(lifecycleScope, resources, view)
-                    val styledText =
-                        HtmlCompat.fromHtml(text.toString(), HtmlCompat.FROM_HTML_MODE_LEGACY, imageGetter, null)
-                    view.text = styledText
-                }
+                InlineImageHelper.handle(view, text)
                 true
             }
             !format.startsWith("/") -> {
@@ -90,6 +86,32 @@ private fun handleAsTextView(
         }
     }
     return false
+}
+
+fun getContentType(urlString: String?): String? {
+    val url = URL(urlString)
+    return try {
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "HEAD"
+        if (isRedirect(connection.responseCode)) {
+            val newUrl =
+                connection.getHeaderField("Location") // get redirect url from "location" header field
+            getContentType(newUrl)
+        } else {
+            connection.contentType
+        }
+    } catch (e: IOException) {
+        Timber.e(e.message)
+        null
+    }
+}
+
+fun isRedirect(statusCode: Int): Boolean {
+    return when (statusCode) {
+        HttpURLConnection.HTTP_OK -> false
+        HttpURLConnection.HTTP_MOVED_TEMP, HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_SEE_OTHER -> true
+        else -> false
+    }
 }
 
 /**

@@ -243,7 +243,7 @@ void registerNativeCrashHandler() {
         return;
     }
 
-    __android_log_print(ANDROID_LOG_ERROR, "NDK Playground", "%s", "Native crash handler successfully initialized.");
+    __android_log_print(ANDROID_LOG_INFO, "NDK Playground", "%s", "Native crash handler successfully initialized.");
 }
 
 bool unregisterNativeCrashHandler() {
@@ -257,7 +257,7 @@ bool unregisterNativeCrashHandler() {
     free(crashInContext);
     crashInContext = nullptr;
 
-    __android_log_print(ANDROID_LOG_ERROR, "NDK Playground", "%s", "Native crash handler successfully deinitialized.");
+    __android_log_print(ANDROID_LOG_INFO, "NDK Playground", "%s", "Native crash handler successfully deinitialized.");
 
     return true;
 }
