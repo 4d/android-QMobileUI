@@ -16,10 +16,6 @@ import com.qmobile.qmobiledatasync.utils.FieldMapping
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.formatters.ImageNamed
 import com.qmobile.qmobileui.webview.WebViewHelper
-import timber.log.Timber
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
 
 @BindingAdapter(
     value = ["text", "format", "tableName", "fieldName", "imageWidth", "imageHeight"],
@@ -86,32 +82,6 @@ private fun handleAsTextView(
         }
     }
     return false
-}
-
-fun getContentType(urlString: String?): String? {
-    val url = URL(urlString)
-    return try {
-        val connection = url.openConnection() as HttpURLConnection
-        connection.requestMethod = "HEAD"
-        if (isRedirect(connection.responseCode)) {
-            val newUrl =
-                connection.getHeaderField("Location") // get redirect url from "location" header field
-            getContentType(newUrl)
-        } else {
-            connection.contentType
-        }
-    } catch (e: IOException) {
-        Timber.e(e.message)
-        null
-    }
-}
-
-fun isRedirect(statusCode: Int): Boolean {
-    return when (statusCode) {
-        HttpURLConnection.HTTP_OK -> false
-        HttpURLConnection.HTTP_MOVED_TEMP, HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_SEE_OTHER -> true
-        else -> false
-    }
 }
 
 /**
