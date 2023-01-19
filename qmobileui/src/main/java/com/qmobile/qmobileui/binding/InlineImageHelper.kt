@@ -94,7 +94,9 @@ object InlineImageHelper {
     private fun isRedirect(statusCode: Int): Boolean {
         return when (statusCode) {
             HttpURLConnection.HTTP_OK -> false
-            HttpURLConnection.HTTP_MOVED_TEMP, HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_SEE_OTHER -> true
+            HttpURLConnection.HTTP_MOVED_TEMP,
+            HttpURLConnection.HTTP_MOVED_PERM,
+            HttpURLConnection.HTTP_SEE_OTHER -> true
             else -> false
         }
     }
