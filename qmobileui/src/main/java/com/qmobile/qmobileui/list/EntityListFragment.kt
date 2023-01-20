@@ -6,7 +6,10 @@
 
 package com.qmobile.qmobileui.list
 
+import android.net.Uri
+import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.databinding.ViewDataBinding
@@ -32,6 +35,10 @@ open class EntityListFragment : ListFormFragment() {
         }
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        handleDeepLinkIfNeeded()
+    }
     override fun initRecyclerView() {
         when (BaseApp.genericTableFragmentHelper.layoutType(tableName)) {
             LayoutType.GRID -> {
@@ -78,6 +85,31 @@ open class EntityListFragment : ListFormFragment() {
                 delegate.requestDataSync(tableName)
                 recyclerView.adapter = adapter
                 this.isRefreshing = false
+            }
+        }
+    }
+
+    private fun handleDeepLinkIfNeeded() {
+        val intent = activity?.intent
+        val data: Uri? = intent?.data
+        if (data != null && data.isHierarchical) {
+            val uri = Uri.parse(intent.dataString)
+
+            val dataClass = uri.getQueryParameter("dataClass")
+            val primaryKey = uri.getQueryParameter("entity.primaryKey")
+            val relationName = uri.getQueryParameter("relationName")
+
+            if ((dataClass == tableName) && (dataClass.isNotEmpty()) && (!primaryKey.isNullOrEmpty())) {
+                BaseApp.genericNavigationResolver.navigateToDetailsFromDeepLink(
+                    fragmentActivity = requireActivity(),
+                    tableName = dataClass,
+                    navbarTitle = dataClass,
+                    itemId = primaryKey
+                )
+
+                if (relationName.isNullOrEmpty()) {
+                    activity?.intent = null
+                }
             }
         }
     }

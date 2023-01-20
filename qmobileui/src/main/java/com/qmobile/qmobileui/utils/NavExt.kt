@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.utils
 
 import android.content.Intent
+import android.net.Uri
 import android.util.SparseArray
 import androidx.core.content.ContextCompat
 import androidx.core.util.forEach
@@ -247,6 +248,14 @@ private fun TabLayout.setupDeepLinks(
     containerId: Int,
     intent: Intent
 ) {
+    var dataClass: String? = null
+
+    val data: Uri? = intent.data
+    if (data != null && data.isHierarchical) {
+        val uri = Uri.parse(intent.dataString)
+        dataClass = uri.getQueryParameter("dataClass")
+    }
+
     navGraphIds.forEachIndexed { index, navGraphId ->
         val fragmentTag =
             getFragmentTag(index)
@@ -259,8 +268,10 @@ private fun TabLayout.setupDeepLinks(
                 navGraphId,
                 containerId
             )
+
+        val label = navHostFragment.navController.graph.findStartDestination().label
         // Handle Intent
-        if (navHostFragment.navController.handleDeepLink(intent) && index != this.selectedTabPosition) {
+        if (label == dataClass && index != this.selectedTabPosition) {
             this.getTabAt(index)?.select()
         }
     }
