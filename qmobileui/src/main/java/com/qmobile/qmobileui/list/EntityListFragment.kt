@@ -100,7 +100,7 @@ open class EntityListFragment : ListFormFragment() {
             val relationName = uri.getQueryParameter("relationName")
 
             if ((dataClass == tableName) && (dataClass.isNotEmpty()) && (!primaryKey.isNullOrEmpty())) {
-                BaseApp.genericNavigationResolver.navigateToDetailsFromDeepLink(
+                BaseApp.genericNavigationResolver.navigateToDetailFromDeepLink(
                     fragmentActivity = requireActivity(),
                     tableName = dataClass,
                     navbarTitle = dataClass,

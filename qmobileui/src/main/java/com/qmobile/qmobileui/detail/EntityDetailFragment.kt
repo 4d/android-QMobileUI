@@ -217,7 +217,6 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
                     val relationName = uri.getQueryParameter("relationName")
 
                     if ((!primaryKey.isNullOrEmpty()) && (!relationName.isNullOrEmpty())) {
-
                         val relation = RelationHelper.getRelation(dataClass, relationName)
                         if (relation.type == Relation.Type.MANY_TO_ONE) {
                             BaseApp.genericNavigationResolver.navigateToDeepLinkManyToOneRelation(
