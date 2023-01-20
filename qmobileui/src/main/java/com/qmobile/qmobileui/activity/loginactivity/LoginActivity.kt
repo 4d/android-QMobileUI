@@ -209,7 +209,9 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, Activ
      * Goes to MainActivity, and finishes LoginActivity
      */
     private fun startMainActivity(skipAnimation: Boolean, loginStatusText: String = "") {
+        val deeplinkIntent = intent
         val intent = Intent(this, MainActivity::class.java)
+        intent.data = deeplinkIntent.data
         intent.putExtra(LOGIN_STATUS_TEXT, loginStatusText)
         if (skipAnimation) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
