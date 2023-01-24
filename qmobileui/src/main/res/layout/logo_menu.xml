@@ -23,13 +23,13 @@
         android:text="@string/logo_menu_edit_remote_url"
         app:drawableStartCompat="@drawable/edit" />
 
-    <TextView
+    <!--<TextView
         android:id="@+id/help_and_feedback"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:drawablePadding="8dp"
         android:padding="16dp"
         android:text="@string/logo_menu_feedback"
-        app:drawableStartCompat="@drawable/tips_and_updates" />
+        app:drawableStartCompat="@drawable/tips_and_updates" />-->
 
 </LinearLayout>

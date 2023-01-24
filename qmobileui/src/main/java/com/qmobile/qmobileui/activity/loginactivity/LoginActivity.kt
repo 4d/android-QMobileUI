@@ -36,7 +36,6 @@ import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.activity.mainactivity.ActivityResultController
 import com.qmobile.qmobileui.activity.mainactivity.ActivityResultControllerImpl
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
-import com.qmobile.qmobileui.feedback.FeedbackHandler
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.network.RemoteUrlChanger
 import com.qmobile.qmobileui.ui.SnackbarHelper
@@ -301,10 +300,10 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, Activ
             bottomSheetDialog.dismiss()
             showRemoteUrlDialog()
         }
-        bottomSheetDialog.findViewById<TextView>(R.id.help_and_feedback)?.setOnSingleClickListener {
+        /*bottomSheetDialog.findViewById<TextView>(R.id.help_and_feedback)?.setOnSingleClickListener {
             bottomSheetDialog.dismiss()
             FeedbackHandler(this)
-        }
+        }*/
         bottomSheetDialog.show()
     }
 }
