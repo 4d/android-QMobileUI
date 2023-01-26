@@ -88,7 +88,6 @@ abstract class BaseInputLessViewHolder(itemView: View, format: String) : BaseVie
     }
 
     internal fun setOnSingleClickListener(onClick: () -> Unit) {
-        container.error = null
         input.setOnSingleClickListener {
             onClick()
         }
