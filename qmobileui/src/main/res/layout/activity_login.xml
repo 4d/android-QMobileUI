@@ -58,7 +58,6 @@
             android:id="@+id/login_button_auth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/login_button_bottom_margin"
             android:enabled="false"
             android:text="@string/login_button_text"
             app:layout_constraintBottom_toBottomOf="parent"
