@@ -33,9 +33,11 @@ import com.google.android.material.snackbar.Snackbar
 import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.model.error.AuthorizedStatus
+import com.qmobile.qmobileapi.utils.DeviceInfo
 import com.qmobile.qmobileapi.utils.LoginRequiredCallback
 import com.qmobile.qmobileapi.utils.UploadHelper.UPLOADED_METADATA_STRING
 import com.qmobile.qmobileapi.utils.UploadHelper.getBodies
+import com.qmobile.qmobileapi.utils.getSafeBoolean
 import com.qmobile.qmobiledatastore.dao.ActionInfo
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.data.RoomEntity
@@ -685,27 +687,29 @@ class MainActivity :
     }
 
     private fun performLicenseCheck() {
-        queryNetwork(object : NetworkChecker {
-            override fun onServerAccessible() {
-                if (licenseCheckRequired.getAndSet(false)) {
-                    loginViewModel.checkLicenses { isOk ->
-                        if (isOk) {
-                            dismissSnackbar()
-                        } else {
-                            showSnackbar()
+        if (BaseApp.sharedPreferencesHolder.device.getSafeBoolean(DeviceInfo.SIMULATOR) != true) {
+            queryNetwork(object : NetworkChecker {
+                override fun onServerAccessible() {
+                    if (licenseCheckRequired.getAndSet(false)) {
+                        loginViewModel.checkLicenses { isOk ->
+                            if (isOk) {
+                                dismissSnackbar()
+                            } else {
+                                showSnackbar()
+                            }
                         }
                     }
                 }
-            }
 
-            override fun onServerInaccessible() {
-                Timber.d(getString(R.string.server_not_accessible))
-            }
+                override fun onServerInaccessible() {
+                    Timber.d(getString(R.string.server_not_accessible))
+                }
 
-            override fun onNoInternet() {
-                Timber.d(getString(R.string.no_internet))
-            }
-        })
+                override fun onNoInternet() {
+                    Timber.d(getString(R.string.no_internet))
+                }
+            })
+        }
     }
 
     private fun showSnackbar() {
