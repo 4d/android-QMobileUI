@@ -14,7 +14,6 @@ import com.qmobile.qmobileapi.utils.parseToString
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
-import com.qmobile.qmobiledatasync.relation.RelationHelper.inverseAliasPath
 import com.qmobile.qmobiledatasync.utils.fieldAdjustment
 import com.qmobile.qmobileui.action.inputcontrols.InputControl
 import com.qmobile.qmobileui.action.model.Action
