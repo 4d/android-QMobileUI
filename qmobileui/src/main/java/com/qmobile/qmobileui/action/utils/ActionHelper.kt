@@ -49,9 +49,9 @@ object ActionHelper {
             entity["primaryKey"] = itemId
         }
 
-        if (relation != null) {
-            entity["relationName"] = relation.name
-        }
+//        if (relation != null) {
+//            entity["relationName"] = relation.inverseAliasPath()
+//        }
 
         if (entity.isNotEmpty()) {
             actionContext["entity"] = entity
@@ -63,7 +63,7 @@ object ActionHelper {
 
             parent["primaryKey"] = parentItemId
 
-            parent["relationName"] = relation.inverseAliasPath()
+            parent["relationName"] = relation.name
             parent["dataClass"] = relation.source
 
             if (parent.isNotEmpty()) {
