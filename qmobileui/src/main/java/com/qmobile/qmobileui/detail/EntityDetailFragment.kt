@@ -50,10 +50,12 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
     val binding get() = _binding!!
     private lateinit var webView: WebView
     private lateinit var entityViewModel: EntityViewModel<EntityModel>
+    private var relation: Relation? = null
 
     // fragment parameters
     override var tableName = ""
     private var itemId = ""
+    private var parentItemId = ""
 
     override lateinit var actionActivity: ActionActivity
     private var currentRecordActionsJsonObject = BaseApp.runtimeDataHolder.currentRecordActions
@@ -71,6 +73,17 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
         arguments?.getString("navbarTitle")?.let { navbarTitle = it }
         arguments?.getString("itemId")?.let { itemId = it }
         arguments?.getString("tableName")?.let { tableName = it }
+        arguments?.getString("relationName")?.let { relationName ->
+            if (relationName.isNotEmpty()) {
+                var parentTableName = ""
+                arguments?.getString("parentTableName")?.let { parentTableName = it }
+                relation = RelationHelper.getRelation(parentTableName, relationName)
+                arguments?.getString("parentItemId")?.let {
+                    parentItemId = it
+                }
+                setSharedAxisZEnterTransition()
+            }
+        }
 
         setSharedAxisZEnterTransition()
     }
@@ -178,17 +191,17 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
     }
 
     override fun getActionContent(actionUUID: String, itemId: String?): MutableMap<String, Any> {
-        // Event if we are in a N-1 relation, we don't need to provide parent information in the request
         return ActionHelper.getActionContent(
             tableName = tableName,
             actionUUID = actionUUID,
-            itemId = itemId ?: ""
+            itemId = itemId ?: "",
+            parentItemId = parentItemId,
+            relation = relation
         )
     }
 
     override fun navigateToActionForm(action: Action, itemId: String?) {
         setFadeThroughExitTransition()
-        // Even if we are in a N-1 relation, we don't need to provide parent information in the request
         BaseApp.genericNavigationResolver.navigateToActionForm(
             viewDataBinding = binding,
             tableName = tableName,

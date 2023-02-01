@@ -447,6 +447,7 @@ class MainActivity :
                 if (withIcons) ActionUIHelper.getActionIconDrawable(this, action, ImageHelper.DRAWABLE_24.px) else null
             drawable?.setMenuItemColorFilter(this)
 
+            val isEnabled = action.isOfflineCompatible() || connectivityViewModel.isConnected()
             // not giving a simple string because we want a divider before pending tasks
             menu.add(0, action.hashCode(), order, action.getPreferredName())
                 .setOnMenuItemClickListener {
@@ -458,6 +459,7 @@ class MainActivity :
                     true
                 }
                 .setIcon(drawable)
+                .setEnabled(isEnabled)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
 
             order++
@@ -498,6 +500,11 @@ class MainActivity :
     }
 
     override fun onActionClick(action: Action, actionNavigable: ActionNavigable) {
+        // Avoid sending primary key on table scope request
+        if (action.scope == Action.Scope.TABLE) {
+            currentEntity = null
+        }
+
         when {
             action.isOpenUrlAction() -> {
                 // action.description contains the url if openUrl action
@@ -524,9 +531,6 @@ class MainActivity :
                 }
             }
             action.parameters.length() > 0 -> {
-                if (action.scope == Action.Scope.TABLE) {
-                    currentEntity = null
-                }
                 actionNavigable.navigateToActionForm(action, (currentEntity?.__entity as? EntityModel)?.__KEY)
             }
             else -> {
@@ -578,6 +582,9 @@ class MainActivity :
                     if (actionResponse != null) {
                         if (actionResponse.success) {
                             actionTask.status = ActionTask.Status.SUCCESS
+                            actionResponse.share?.firstOrNull()?.value?.let { value ->
+                                shareInfo(value)
+                            }
                         } else {
                             actionTask.status = ActionTask.Status.ERROR_SERVER
                             actionTask.actionContent = savedActionContent
@@ -606,6 +613,15 @@ class MainActivity :
         })
     }
 
+    fun shareInfo(value: String) {
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, value)
+            type = "text/plain"
+        }
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
+    }
     override fun uploadImage(
         bodies: Map<String, RequestBody?>,
         tableName: String,
