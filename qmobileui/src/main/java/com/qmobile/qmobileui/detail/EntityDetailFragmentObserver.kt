@@ -12,7 +12,10 @@ import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
 import com.qmobile.qmobileui.BR
+import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseObserver
+import com.qmobile.qmobileui.activity.mainactivity.MainActivity
+import com.qmobile.qmobileui.ui.SnackbarHelper
 import timber.log.Timber
 
 class EntityDetailFragmentObserver(
@@ -21,8 +24,22 @@ class EntityDetailFragmentObserver(
 ) : BaseObserver {
 
     override fun initObservers() {
-        observeEntity()
+        observeDoesEntityExist()
         fragment.delegate.observeEntityToastMessage(entityViewModel.toastMessage.message)
+    }
+
+    private fun observeDoesEntityExist() {
+        entityViewModel.doesEntityExist.observe(
+            fragment.viewLifecycleOwner
+        ) { doesEntityExist ->
+            Timber.d("Observed does entity exist : $doesEntityExist")
+            if (doesEntityExist) {
+                observeEntity()
+            } else {
+                SnackbarHelper.show(fragment.activity, fragment.getString(R.string.record_not_found))
+                (fragment.activity as? MainActivity?)?.navController?.navigateUp()
+            }
+        }
     }
 
     // Observe entity

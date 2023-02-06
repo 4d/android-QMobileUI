@@ -20,6 +20,7 @@
 
     <!--    Detail and List -->
     <string name="try_refresh_data">Please try refreshing data again</string>
+    <string name="record_not_found">The record could not be found</string>
 
     <!--    Settings Fragment -->
     <string name="cat_title_server">Server</string>

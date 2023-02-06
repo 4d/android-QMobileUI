@@ -8,6 +8,8 @@ package com.qmobile.qmobileui.list
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -147,7 +149,11 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
             bundle.getString(BARCODE_VALUE_KEY)?.let {
-                searchPattern = it
+                if (hasAppUrlScheme(it)) {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)))
+                } else {
+                    searchPattern = it
+                }
             }
         }
 
@@ -179,6 +185,8 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
         hideKeyboard(activity)
         customFragment = BaseApp.genericTableFragmentHelper.getCustomEntityListFragment(tableName, binding)
         customFragment?.onViewCreated(view, savedInstanceState)
+
+        handleDeepLinkIfNeeded()
     }
 
     override fun onDestroyView() {
@@ -425,5 +433,39 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
                 currentItemId = ""
             )
         }
+    }
+
+    private fun handleDeepLinkIfNeeded() {
+        val intent = activity?.intent
+        val data: Uri? = intent?.data
+        if (data != null && data.isHierarchical) {
+            val uri = Uri.parse(intent.dataString)
+            val dataClass = uri.getQueryParameter("dataClass")
+            val primaryKey = uri.getQueryParameter("entity.primaryKey")
+            val relationName = uri.getQueryParameter("relationName")
+
+            if (dataClass == tableName && dataClass.isNotEmpty() && !primaryKey.isNullOrEmpty()) {
+                BaseApp.genericNavigationResolver.navigateToDetailFromDeepLink(
+                    fragmentActivity = requireActivity(),
+                    tableName = dataClass,
+                    navbarTitle = dataClass,
+                    itemId = primaryKey
+                )
+
+                if (relationName.isNullOrEmpty()) {
+                    activity?.intent = null
+                }
+            }
+        }
+    }
+
+    private fun hasAppUrlScheme(url: String): Boolean {
+        val schemes = resources.getStringArray(R.array.url_schemes)
+        schemes.forEach { scheme ->
+            if (url.startsWith(scheme)) {
+                return true
+            }
+        }
+        return false
     }
 }

@@ -215,10 +215,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
     }
 
     private fun handleDeepLinkIfNeeded() {
-        entityViewModel.entity.observe(
-            viewLifecycleOwner
-        ) { entity ->
-
+        entityViewModel.entity.observe(viewLifecycleOwner) { entity ->
             val intent = activity?.intent
             val data: Uri? = intent?.data
             if (data != null && data.isHierarchical) {
@@ -229,7 +226,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
                     val primaryKey = uri.getQueryParameter("entity.primaryKey")
                     val relationName = uri.getQueryParameter("relationName")
 
-                    if ((!primaryKey.isNullOrEmpty()) && (!relationName.isNullOrEmpty())) {
+                    if (!primaryKey.isNullOrEmpty() && !relationName.isNullOrEmpty()) {
                         val relation = RelationHelper.getRelation(dataClass, relationName)
                         if (relation.type == Relation.Type.MANY_TO_ONE) {
                             BaseApp.genericNavigationResolver.navigateToDeepLinkManyToOneRelation(

@@ -6,4 +6,5 @@
 
 <resources>
     <item name="base_detail_scroll_view" type="id" />
+    <item name="url_schemes" type="array" />
 </resources>
