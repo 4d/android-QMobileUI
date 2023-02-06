@@ -45,5 +45,4 @@ interface ActionActivity {
     fun getTaskVM(): TaskViewModel
 
     fun sendPendingTasks()
-    fun isConnected(): Boolean
 }

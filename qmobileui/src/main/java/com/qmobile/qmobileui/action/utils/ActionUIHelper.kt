@@ -57,7 +57,7 @@ object ActionUIHelper {
         }
     }
 
-    fun getActionArrayAdapter(context: Context, actionList: List<Action>): ArrayAdapter<Action> {
+    fun getActionArrayAdapter(context: Context, actionList: List<Action>, isConnected: Boolean): ArrayAdapter<Action> {
         val withIcons = actionList.firstOrNull { it.getIconDrawablePath() != null } != null
 
         return object :
@@ -80,6 +80,7 @@ object ActionUIHelper {
                 }
 
                 textView.text = action.getPreferredName()
+                textView.isEnabled = action.isOfflineCompatible() || isConnected
                 return itemView
             }
         }

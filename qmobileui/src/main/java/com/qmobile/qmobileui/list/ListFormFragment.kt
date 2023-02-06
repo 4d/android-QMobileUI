@@ -267,7 +267,7 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
         if (hasCurrentRecordActions) {
             ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
             currentRecordActionsListAdapter =
-                ActionUIHelper.getActionArrayAdapter(requireContext(), currentRecordActions)
+                ActionUIHelper.getActionArrayAdapter(requireContext(), currentRecordActions, delegate.isConnected())
         }
     }
 
@@ -318,9 +318,9 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
         onActionClick: (action: Action, roomEntity: RoomEntity) -> Unit
     ): ItemActionButton {
         val isEnabled = action?.let {
-            it.isOfflineCompatible() || actionActivity.isConnected()
-        }
-        return ItemActionButton(requireContext(), action, horizontalIndex, isEnabled?: false) {
+            it.isOfflineCompatible() || delegate.isConnected()
+        } ?: false
+        return ItemActionButton(requireContext(), action, horizontalIndex, isEnabled) {
             adapter.getSelectedItem(position)?.let { entity ->
                 if (action == null) { // the case of "..." button
                     showDialog { clickedAction ->

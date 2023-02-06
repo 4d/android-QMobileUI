@@ -38,8 +38,6 @@ open class Action(
         else -> name
     }
 
-    fun isOfflineCompatible() = preset?.lowercase(Locale.getDefault()) != "share"
-
     enum class Type {
         TAKE_PICTURE_CAMERA, PICK_PHOTO_GALLERY, SCAN, SIGN
     }
@@ -50,6 +48,7 @@ open class Action(
 
     fun isSortAction() = preset == "sort"
     fun isOpenUrlAction() = preset == "openURL"
+    fun isOfflineCompatible() = preset?.lowercase(Locale.getDefault()) != "share"
 
     class ActionException(message: String) : Exception(message)
 }

@@ -27,7 +27,7 @@ class ItemActionButton(
     val context: Context,
     val action: Action?,
     horizontalIndex: Int,
-    val isEnabled: Boolean,
+    isEnabled: Boolean,
     private val onClick: () -> Unit
 ) {
 

@@ -533,27 +533,25 @@ class MainActivity :
             action.parameters.length() > 0 -> {
                 actionNavigable.navigateToActionForm(action, (currentEntity?.__entity as? EntityModel)?.__KEY)
             }
-            else -> {
-                if (action.isOfflineCompatible() || connectivityViewModel.isConnected()) {
-                    val task = ActionTask(
-                        status = ActionTask.Status.PENDING,
-                        date = Date(),
-                        relatedItemId = (currentEntity?.__entity as? EntityModel)?.__KEY,
-                        label = action.getPreferredName(),
-                        actionInfo = ActionInfo(
-                            actionName = action.name,
-                            tableName = actionNavigable.tableName,
-                            actionUUID = action.uuid,
-                            isOfflineCompatible = action.isOfflineCompatible(),
-                            preferredShortName = action.getPreferredShortName()
-                        )
+            action.isOfflineCompatible() || connectivityViewModel.isConnected() -> {
+                val task = ActionTask(
+                    status = ActionTask.Status.PENDING,
+                    date = Date(),
+                    relatedItemId = (currentEntity?.__entity as? EntityModel)?.__KEY,
+                    label = action.getPreferredName(),
+                    actionInfo = ActionInfo(
+                        actionName = action.name,
+                        tableName = actionNavigable.tableName,
+                        actionUUID = action.uuid,
+                        isOfflineCompatible = action.isOfflineCompatible(),
+                        preferredShortName = action.getPreferredShortName()
                     )
-                    task.actionContent =
-                        actionNavigable.getActionContent(task.id, (currentEntity?.__entity as? EntityModel)?.__KEY)
+                )
+                task.actionContent =
+                    actionNavigable.getActionContent(task.id, (currentEntity?.__entity as? EntityModel)?.__KEY)
 
-                    sendAction(task, actionNavigable.tableName) {
-                        // Nothing to do
-                    }
+                sendAction(task, actionNavigable.tableName) {
+                    // Nothing to do
                 }
             }
         }
@@ -624,6 +622,7 @@ class MainActivity :
         val shareIntent = Intent.createChooser(sendIntent, null)
         startActivity(shareIntent)
     }
+
     override fun uploadImage(
         bodies: Map<String, RequestBody?>,
         tableName: String,
@@ -827,7 +826,7 @@ class MainActivity :
     }
 
     override fun isConnected(): Boolean {
-     return  connectivityViewModel.isConnected()
+        return connectivityViewModel.isConnected()
     }
 
     private fun sendSinglePendingTask(pendingTask: ActionTask) {

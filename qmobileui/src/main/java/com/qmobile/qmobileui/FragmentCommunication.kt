@@ -21,6 +21,8 @@ interface FragmentCommunication {
 
     fun checkNetwork(networkChecker: NetworkChecker, feedbackServer: Boolean = false)
 
+    fun isConnected(): Boolean
+
     fun requestDataSync(currentTableName: String) // list
 
     fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessage.Holder>>) // detail
