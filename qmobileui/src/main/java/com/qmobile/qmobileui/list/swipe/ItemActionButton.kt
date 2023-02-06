@@ -7,6 +7,7 @@
 package com.qmobile.qmobileui.list.swipe
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
@@ -26,6 +27,7 @@ class ItemActionButton(
     val context: Context,
     val action: Action?,
     horizontalIndex: Int,
+    val isEnabled: Boolean,
     private val onClick: () -> Unit
 ) {
 
@@ -45,8 +47,16 @@ class ItemActionButton(
     }
     val iconIntrinsicWidth = icon?.intrinsicWidth?.toFloat() ?: 0f
     val iconIntrinsicHeight = icon?.intrinsicHeight?.toFloat() ?: 0f
-    val backgroundColor = ActionUIHelper.getActionButtonColor(context, horizontalIndex)
-    val textColor = context.getColorFromAttr(R.attr.colorOnPrimary)
+    val backgroundColor = if (isEnabled) {
+        ActionUIHelper.getActionButtonColor(context, horizontalIndex)
+    } else {
+        Color.GRAY
+    }
+    val textColor = if (isEnabled) {
+        context.getColorFromAttr(R.attr.colorOnPrimary)
+    } else {
+        Color.BLACK
+    }
 
     val textPaint: Paint = Paint().apply {
         textSize = TEXT_SIZE.px.toFloat()
