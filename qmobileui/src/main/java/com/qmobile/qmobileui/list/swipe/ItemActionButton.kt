@@ -7,7 +7,6 @@
 package com.qmobile.qmobileui.list.swipe
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
@@ -37,6 +36,7 @@ class ItemActionButton(
         private const val HORIZONTAL_PADDING = 50.0F
         private const val TEXT_SIZE = 14 // Material Design md.sys.typescale.label-large.size
         private const val TITLE_FONT = "Roboto-Medium.ttf" // md.sys.typescale.label-large.font
+        private const val DISABLED_ACTION_ALPHA = 100
     }
 
     private val screenWidth: Int = context.resources.displayMetrics.widthPixels
@@ -44,19 +44,14 @@ class ItemActionButton(
 
     val icon = getIconDrawable()?.apply {
         this.setTint(context.getColorFromAttr(R.attr.colorOnPrimary))
+        if (!isEnabled) {
+            this.alpha = DISABLED_ACTION_ALPHA
+        }
     }
     val iconIntrinsicWidth = icon?.intrinsicWidth?.toFloat() ?: 0f
     val iconIntrinsicHeight = icon?.intrinsicHeight?.toFloat() ?: 0f
-    val backgroundColor = if (isEnabled) {
-        ActionUIHelper.getActionButtonColor(context, horizontalIndex)
-    } else {
-        Color.GRAY
-    }
-    val textColor = if (isEnabled) {
-        context.getColorFromAttr(R.attr.colorOnPrimary)
-    } else {
-        Color.BLACK
-    }
+    val backgroundColor = ActionUIHelper.getActionButtonColor(context, horizontalIndex)
+    val textColor = context.getColorFromAttr(R.attr.colorOnPrimary)
 
     val textPaint: Paint = Paint().apply {
         textSize = TEXT_SIZE.px.toFloat()
@@ -64,6 +59,9 @@ class ItemActionButton(
         // trying to mimic Material Design button style
         typeface = Typeface.createFromAsset(context.assets, TITLE_FONT)
         color = textColor
+        if (!isEnabled) {
+            alpha = DISABLED_ACTION_ALPHA
+        }
     }
 
     val title: String = getTitle(action, textPaint, intrinsicWidth)
