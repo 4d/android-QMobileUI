@@ -309,7 +309,10 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
         horizontalIndex: Int,
         onActionClick: (action: Action, roomEntity: RoomEntity) -> Unit
     ): ItemActionButton {
-        return ItemActionButton(requireContext(), action, horizontalIndex) {
+        val isEnabled = action?.let {
+            it.isOfflineCompatible() || actionActivity.isConnected()
+        }
+        return ItemActionButton(requireContext(), action, horizontalIndex, isEnabled?: false) {
             adapter.getSelectedItem(position)?.let { entity ->
                 if (action == null) { // the case of "..." button
                     showDialog { clickedAction ->
