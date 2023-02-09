@@ -224,21 +224,27 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
 
                 if ((dataClass == tableName) && (dataClass.isNotEmpty())) {
                     val primaryKey = uri.getQueryParameter("entity.primaryKey")
+                    //4D original name
                     val relationName = uri.getQueryParameter("relationName")
+                    val adjustedName =
+                        BaseApp.runtimeDataHolder.tableInfo[tableName]?.fields?.filterValues {
+                            it.removeSuffix(Relation.SUFFIX) == relationName
+                        }?.keys?.firstOrNull()
 
-                    if (!primaryKey.isNullOrEmpty() && !relationName.isNullOrEmpty()) {
-                        val relation = RelationHelper.getRelation(dataClass, relationName)
+
+                    if (!primaryKey.isNullOrEmpty() && !adjustedName.isNullOrEmpty()) {
+                        val relation = RelationHelper.getRelation(dataClass, adjustedName)
                         if (relation.type == Relation.Type.MANY_TO_ONE) {
                             BaseApp.genericNavigationResolver.navigateToDeepLinkManyToOneRelation(
                                 roomEntity = entity,
-                                relationName = relationName,
+                                relationName = adjustedName,
                                 fragmentActivity = requireActivity(),
                                 viewDataBinding = this.binding
                             )
                         } else {
                             BaseApp.genericNavigationResolver.navigateToDeepLinkOneToManyRelation(
                                 roomEntity = entity,
-                                relationName = relationName,
+                                relationName = adjustedName,
                                 fragmentActivity = requireActivity(),
                                 viewDataBinding = this.binding
                             )
