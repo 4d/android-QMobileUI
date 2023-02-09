@@ -62,7 +62,12 @@ object ActionHelper {
 
             parent["primaryKey"] = parentItemId
 
-            parent["relationName"] = relation.name
+            // 4D relation name
+            val originalRelationName =
+                BaseApp.runtimeDataHolder.tableInfo[relation.source]
+                    ?.fields?.get(relation.name)
+                    ?.removeSuffix(Relation.SUFFIX) ?: ""
+            parent["relationName"] = originalRelationName
             parent["dataClass"] = relation.source
 
             if (parent.isNotEmpty()) {
