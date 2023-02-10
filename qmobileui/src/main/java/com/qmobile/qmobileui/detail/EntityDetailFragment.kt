@@ -24,6 +24,7 @@ import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.relation.RelationHelper
@@ -129,7 +130,6 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
         }
 
         EntityDetailFragmentObserver(this, entityViewModel).initObservers()
-        handleDeepLinkIfNeeded()
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -214,44 +214,47 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
         )
     }
 
-    private fun handleDeepLinkIfNeeded() {
-        entityViewModel.entity.observe(viewLifecycleOwner) { entity ->
-            val intent = activity?.intent
-            val data: Uri? = intent?.data
-            if (data != null && data.isHierarchical) {
-                val uri = Uri.parse(intent.dataString)
-                val dataClass = uri.getQueryParameter("dataClass")
+    internal fun handleDeepLinkIfNeeded(entity: RoomEntity) {
+        val newIntent = activity?.intent
+        val data: Uri? = newIntent?.data
+        if (data != null && data.isHierarchical) {
+            val uri = Uri.parse(newIntent.dataString)
+            val dataClass = uri.getQueryParameter("dataClass")
 
-                if ((dataClass == tableName) && (dataClass.isNotEmpty())) {
-                    val primaryKey = uri.getQueryParameter("entity.primaryKey")
-                    //4D original name
-                    val relationName = uri.getQueryParameter("relationName")
-                    val adjustedName =
-                        BaseApp.runtimeDataHolder.tableInfo[tableName]?.fields?.filterValues {
-                            it.removeSuffix(Relation.SUFFIX) == relationName
-                        }?.keys?.firstOrNull()
+            if (dataClass == tableName) {
+                val primaryKey = uri.getQueryParameter("entity.primaryKey")
+                //4D original name
+                val relationName = uri.getQueryParameter("relationName")
+                val adjustedName =
+                    BaseApp.runtimeDataHolder.tableInfo[tableName]?.fields?.filterValues {
+                        it.removeSuffix(Relation.SUFFIX) == relationName
+                    }?.keys?.firstOrNull()
 
+                moveToDeepLink(entity, dataClass, primaryKey, adjustedName)
+            }
+        }
+    }
 
-                    if (!primaryKey.isNullOrEmpty() && !adjustedName.isNullOrEmpty()) {
-                        val relation = RelationHelper.getRelation(dataClass, adjustedName)
-                        if (relation.type == Relation.Type.MANY_TO_ONE) {
-                            BaseApp.genericNavigationResolver.navigateToDeepLinkManyToOneRelation(
-                                roomEntity = entity,
-                                relationName = adjustedName,
-                                fragmentActivity = requireActivity(),
-                                viewDataBinding = this.binding
-                            )
-                        } else {
-                            BaseApp.genericNavigationResolver.navigateToDeepLinkOneToManyRelation(
-                                roomEntity = entity,
-                                relationName = adjustedName,
-                                fragmentActivity = requireActivity(),
-                                viewDataBinding = this.binding
-                            )
-                        }
-                        activity?.intent = null
-                    }
+    private fun moveToDeepLink(entity: RoomEntity, dataClass: String, primaryKey: String?, relationName: String?) {
+        if (!primaryKey.isNullOrEmpty() && !relationName.isNullOrEmpty()) {
+            val relation = RelationHelper.getRelation(dataClass, relationName)
+            activity?.apply {
+                if (relation.type == Relation.Type.MANY_TO_ONE) {
+                    BaseApp.genericNavigationResolver.navigateToDeepLinkManyToOneRelation(
+                        roomEntity = entity,
+                        relationName = relationName,
+                        fragmentActivity = this,
+                        viewDataBinding = this@EntityDetailFragment.binding
+                    )
+                } else {
+                    BaseApp.genericNavigationResolver.navigateToDeepLinkOneToManyRelation(
+                        roomEntity = entity,
+                        relationName = relationName,
+                        fragmentActivity = this,
+                        viewDataBinding = this@EntityDetailFragment.binding
+                    )
                 }
+                activity?.intent = null
             }
         }
     }

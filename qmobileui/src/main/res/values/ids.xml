@@ -6,5 +6,7 @@
 
 <resources>
     <item name="base_detail_scroll_view" type="id" />
+    <item name="launch_screen" type="drawable" />
+    <item name="seed" type="color" />
     <item name="url_schemes" type="array" />
 </resources>

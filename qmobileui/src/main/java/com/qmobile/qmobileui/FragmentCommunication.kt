@@ -23,7 +23,7 @@ interface FragmentCommunication {
 
     fun isConnected(): Boolean
 
-    fun requestDataSync(currentTableName: String) // list
+    fun requestDataSync(currentTableName: String?) // list
 
     fun observeEntityToastMessage(message: SharedFlow<Event<ToastMessage.Holder>>) // detail
 

@@ -33,7 +33,6 @@ import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.utils.LoginHandler
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.activity.BaseActivity
-import com.qmobile.qmobileui.activity.mainactivity.ActivityResultController
 import com.qmobile.qmobileui.activity.mainactivity.ActivityResultControllerImpl
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.network.NetworkChecker
@@ -42,7 +41,8 @@ import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.clearViewInParent
 import com.qmobile.qmobileui.ui.getStatusBarHeight
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
-import com.qmobile.qmobileui.utils.PermissionChecker
+import com.qmobile.qmobileui.utils.DeepLinkUtil.PN_DEEPLINK_DATACLASS
+import com.qmobile.qmobileui.utils.DeepLinkUtil.PN_DEEPLINK_PRIMARY_KEY
 import com.qmobile.qmobileui.utils.PermissionCheckerImpl
 import com.qmobile.qmobileui.utils.hideKeyboard
 import com.qmobile.qmobileui.utils.serializable
@@ -50,7 +50,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 
-class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, ActivityResultController {
+class LoginActivity : BaseActivity(), RemoteUrlChanger {
 
     private var loggedOut = false
     internal var authorizedStatus = AuthorizedStatus.AUTHORIZED
@@ -60,6 +60,7 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, Activ
     private var serverAccessibleDrawable: Drawable? = null
     private var serverNotAccessibleDrawable: Drawable? = null
     private lateinit var loginHandler: LoginHandler
+    private var currentNotificationId = -1
 
     // Views
     private lateinit var remoteUrlDisplayDialog: View
@@ -72,6 +73,9 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, Activ
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        currentNotificationId = intent.getIntExtra(CURRENT_NOTIFICATION_ID, -1)
+        BaseApp.sharedPreferencesHolder.removeNotificationId(currentNotificationId)
 
         // If guest or already logged in, skip LoginActivity
         if (isAlreadyLoggedIn() || BaseApp.runtimeDataHolder.guestLogin) {
@@ -161,7 +165,11 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, Activ
                 }
 
                 override fun onNoInternet() {
-                    SnackbarHelper.show(this@LoginActivity, getString(R.string.no_internet), ToastMessage.Type.WARNING)
+                    SnackbarHelper.show(
+                        this@LoginActivity,
+                        getString(R.string.no_internet),
+                        ToastMessage.Type.WARNING
+                    )
                     loginHandler.onLoginUnsuccessful()
                 }
             })
@@ -195,27 +203,38 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, Activ
             ContextCompat.getDrawable(this, R.drawable.network_nok_circle)
 
         remoteUrlDisplayDialog = LayoutInflater.from(this)
-            .inflate(R.layout.login_remote_url_display_dialog, findViewById(android.R.id.content), false)
+            .inflate(
+                R.layout.login_remote_url_display_dialog,
+                findViewById(android.R.id.content),
+                false
+            )
         imageNetworkStatus = remoteUrlDisplayDialog.findViewById(R.id.image_network_status)
         remoteUrlMessage = remoteUrlDisplayDialog.findViewById(R.id.remote_url_message)
 
         serverNotAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
         remoteUrlMessage.text =
-            getString(R.string.remote_url_placeholder, remoteUrl, getString(R.string.server_not_accessible))
+            getString(
+                R.string.remote_url_placeholder,
+                remoteUrl,
+                getString(R.string.server_not_accessible)
+            )
     }
 
     /**
      * Goes to MainActivity, and finishes LoginActivity
      */
     private fun startMainActivity(skipAnimation: Boolean, loginStatusText: String = "") {
-        val deeplinkIntent = intent
-        val intent = Intent(this, MainActivity::class.java)
-        intent.data = deeplinkIntent.data
-        intent.putExtra(LOGIN_STATUS_TEXT, loginStatusText)
+        val newIntent = Intent(this, MainActivity::class.java)
+        newIntent.data = intent.data
+        newIntent.putExtra(LOGIN_STATUS_TEXT, loginStatusText)
+        newIntent.putExtra(PUSH_DATA_SYNC, intent.getBooleanExtra(PUSH_DATA_SYNC, false))
+        newIntent.putExtra(PN_DEEPLINK_DATACLASS, intent.getStringExtra(PN_DEEPLINK_DATACLASS))
+        newIntent.putExtra(PN_DEEPLINK_PRIMARY_KEY, intent.getStringExtra(PN_DEEPLINK_PRIMARY_KEY))
+
         if (skipAnimation) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+            newIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
         }
-        startActivity(intent)
+        startActivity(newIntent)
         finish()
     }
 
@@ -260,18 +279,27 @@ class LoginActivity : BaseActivity(), RemoteUrlChanger, PermissionChecker, Activ
 
     override fun onServerAccessible() {
         remoteUrlMessage.text =
-            getString(R.string.remote_url_placeholder, remoteUrl, getString(R.string.server_accessible))
+            getString(
+                R.string.remote_url_placeholder,
+                remoteUrl,
+                getString(R.string.server_accessible)
+            )
         serverAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
     }
 
     override fun onServerInaccessible() {
         remoteUrlMessage.text =
-            getString(R.string.remote_url_placeholder, remoteUrl, getString(R.string.server_not_accessible))
+            getString(
+                R.string.remote_url_placeholder,
+                remoteUrl,
+                getString(R.string.server_not_accessible)
+            )
         serverNotAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
     }
 
     override fun onNoInternet() {
-        remoteUrlMessage.text = getString(R.string.remote_url_placeholder, remoteUrl, getString(R.string.no_internet))
+        remoteUrlMessage.text =
+            getString(R.string.remote_url_placeholder, remoteUrl, getString(R.string.no_internet))
         serverNotAccessibleDrawable?.let { imageNetworkStatus.setImageDrawable(it) }
     }
 

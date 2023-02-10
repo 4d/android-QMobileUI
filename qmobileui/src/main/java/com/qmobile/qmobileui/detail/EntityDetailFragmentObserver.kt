@@ -52,6 +52,8 @@ class EntityDetailFragmentObserver(
                 fragment.binding.setVariable(BR.entityData, entity)
                 fragment.binding.executePendingBindings()
                 RelationHelper.setupRelationNavigation(fragment.tableName, fragment.binding, entity)
+
+                fragment.handleDeepLinkIfNeeded(entity)
             }
         }
     }
