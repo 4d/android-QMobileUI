@@ -6,6 +6,8 @@
 
 package com.qmobile.qmobileui.activity.mainactivity
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -28,8 +30,10 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.messaging.FirebaseMessaging
 import com.qmobile.qmobileapi.auth.AuthenticationState
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.model.error.AuthorizedStatus
@@ -50,9 +54,11 @@ import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.utils.ScheduleRefresh
 import com.qmobile.qmobiledatasync.viewmodel.ActionViewModel
 import com.qmobile.qmobiledatasync.viewmodel.DeletedRecordsViewModel
+import com.qmobile.qmobiledatasync.viewmodel.PushViewModel
 import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getActionViewModel
 import com.qmobile.qmobiledatasync.viewmodel.factory.getDeletedRecordsViewModel
+import com.qmobile.qmobiledatasync.viewmodel.factory.getPushViewModel
 import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.FeedbackActivity
 import com.qmobile.qmobileui.FragmentCommunication
@@ -78,6 +84,7 @@ import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.noTabLayoutUI
 import com.qmobile.qmobileui.ui.setMaterialFadeTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZExitTransition
+import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.PermissionCheckerImpl
 import com.qmobile.qmobileui.utils.setupWithNavController
 import dev.chrisbanes.insetter.applyInsetter
@@ -103,6 +110,7 @@ class MainActivity :
     private lateinit var mainActivityDataSync: MainActivityDataSync
     private lateinit var mainActivityObserver: MainActivityObserver
     private lateinit var actionViewModel: ActionViewModel
+    private lateinit var pushViewModel: PushViewModel
     internal lateinit var deletedRecordsViewModel: DeletedRecordsViewModel
     private lateinit var signalHandler: SignalHandler
 
@@ -111,10 +119,11 @@ class MainActivity :
     private var snackBarRequired = false
     private var licenseCheckRequired = AtomicBoolean(BaseApp.sharedPreferencesHolder.guestLogin)
 
-    // FragmentCommunication
     private var currentEntity: RoomEntity? = null
     private var authorizedStatus = AuthorizedStatus.AUTHORIZED
     private val logoutRequested = AtomicBoolean(false)
+    private val pushTokenToBeSent = AtomicBoolean(false)
+    private var pushDataSync = false
 
     override val activityResultControllerImpl = ActivityResultControllerImpl(this)
     override val permissionCheckerImpl = PermissionCheckerImpl(this)
@@ -147,13 +156,22 @@ class MainActivity :
             setupTabLayout()
         } // Else, need to wait for onRestoreInstanceState
 
+        pushDataSync = intent.getBooleanExtra(PUSH_DATA_SYNC, false)
+        Timber.i("pushDataSync: $pushDataSync")
+
         // Init ApiClients
         refreshAllApiClients()
 
         initViewModels()
 
         mainActivityObserver =
-            MainActivityObserver(this, entityListViewModelList, actionViewModel, taskViewModel).apply {
+            MainActivityObserver(
+                this,
+                entityListViewModelList,
+                actionViewModel,
+                pushViewModel,
+                taskViewModel
+            ).apply {
                 initObservers()
             }
 
@@ -165,6 +183,10 @@ class MainActivity :
         if (licenseCheckRequired.get()) {
             performLicenseCheck()
         }
+
+        if (BaseApp.runtimeDataHolder.pushNotification) {
+            askNotificationsPermission()
+        }
     }
 
     override fun onDestroy() {
@@ -175,6 +197,7 @@ class MainActivity :
     override fun initViewModels() {
         super.initViewModels()
         actionViewModel = getActionViewModel(this, apiService)
+        pushViewModel = getPushViewModel(this, apiService)
         deletedRecordsViewModel = getDeletedRecordsViewModel(this, apiService)
     }
 
@@ -282,6 +305,9 @@ class MainActivity :
         if (::actionViewModel.isInitialized) {
             actionViewModel.refreshActionRepository(apiService)
         }
+        if (::pushViewModel.isInitialized) {
+            pushViewModel.refreshPushRepository(apiService)
+        }
     }
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
@@ -325,9 +351,13 @@ class MainActivity :
     /**
      * Performs data sync, requested by a table request
      */
-    override fun requestDataSync(currentTableName: String) {
-        val entityListViewModel =
+    override fun requestDataSync(currentTableName: String?) {
+        val entityListViewModel = if (currentTableName != null) {
             entityListViewModelList.find { it.getAssociatedTableName() == currentTableName }
+        } else {
+            entityListViewModelList.firstOrNull()
+        }
+        val tableName = entityListViewModel?.getAssociatedTableName() ?: ""
 
         queryNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
@@ -344,7 +374,7 @@ class MainActivity :
                             entityListViewModel.getEntities(false) { _, shouldSyncData ->
                                 setCheckInProgress(false)
                                 if (shouldSyncData) {
-                                    mainActivityDataSync.shouldDataSync(currentTableName)
+                                    mainActivityDataSync.shouldDataSync(tableName)
                                 } else {
                                     Timber.d("GlobalStamp unchanged, no synchronization is required")
                                 }
@@ -360,11 +390,11 @@ class MainActivity :
             }
 
             override fun onServerInaccessible() {
-                onServerInaccessible(currentTableName)
+                onServerInaccessible(tableName)
             }
 
             override fun onNoInternet() {
-                onNoInternet(currentTableName)
+                onNoInternet(tableName)
             }
         })
     }
@@ -379,7 +409,11 @@ class MainActivity :
             navController.navigateUp()
         } else {
             connectivityViewModel.toastMessage
-                .showMessage(getString(R.string.server_not_accessible), tableName, ToastMessage.Type.ERROR)
+                .showMessage(
+                    getString(R.string.server_not_accessible),
+                    tableName,
+                    ToastMessage.Type.ERROR
+                )
         }
     }
 
@@ -410,6 +444,12 @@ class MainActivity :
                 if (shouldDelayOnForegroundEvent.getAndSet(false)) {
                     onStartCallback()
                 }
+
+                getCurrentFCMToken()
+
+                if (pushDataSync) {
+                    requestDataSync(null)
+                }
             }
             AuthenticationState.LOGOUT -> {
                 if (!isAlreadyLoggedIn()) {
@@ -432,6 +472,7 @@ class MainActivity :
         }
     }
 
+    @SuppressLint("RestrictedApi")
     override fun setupActionsMenu(
         menu: Menu,
         actions: List<Action>,
@@ -440,11 +481,20 @@ class MainActivity :
     ) {
         (menu as? MenuBuilder)?.setOptionalIconsVisible(true)
 
-        val withIcons = actions.firstOrNull { it.getIconDrawablePath() != null } != null || actions.isEmpty()
+        val withIcons =
+            actions.firstOrNull { it.getIconDrawablePath() != null } != null || actions.isEmpty()
         var order = 0
         actions.forEach { action ->
             val drawable =
-                if (withIcons) ActionUIHelper.getActionIconDrawable(this, action, ImageHelper.DRAWABLE_24.px) else null
+                if (withIcons) {
+                    ActionUIHelper.getActionIconDrawable(
+                        this,
+                        action,
+                        ImageHelper.DRAWABLE_24.px
+                    )
+                } else {
+                    null
+                }
             drawable?.setMenuItemColorFilter(this)
 
             val isEnabled = action.isOfflineCompatible() || connectivityViewModel.isConnected()
@@ -548,7 +598,10 @@ class MainActivity :
                     )
                 )
                 task.actionContent =
-                    actionNavigable.getActionContent(task.id, (currentEntity?.__entity as? EntityModel)?.__KEY)
+                    actionNavigable.getActionContent(
+                        task.id,
+                        (currentEntity?.__entity as? EntityModel)?.__KEY
+                    )
 
                 sendAction(task, actionNavigable.tableName) {
                     // Nothing to do
@@ -676,6 +729,10 @@ class MainActivity :
                     authenticationRequested = false
                     tryAutoLogin()
                     checkPendingTasks()
+                }
+
+                if (pushTokenToBeSent.get()) {
+                    sendPushTokenToServer()
                 }
             }
             else -> {}
@@ -845,7 +902,10 @@ class MainActivity :
                 taskToSendIfOffline = null,
                 onImageUploaded = { parameterName, receivedId ->
                     pendingTask.actionInfo.paramsToSubmit?.set(parameterName, receivedId)
-                    pendingTask.actionInfo.metaDataToSubmit?.set(parameterName, UPLOADED_METADATA_STRING)
+                    pendingTask.actionInfo.metaDataToSubmit?.set(
+                        parameterName,
+                        UPLOADED_METADATA_STRING
+                    )
                 },
                 onAllUploadFinished = {
                     sendAction(pendingTask, pendingTask.actionInfo.tableName) {
@@ -900,6 +960,76 @@ class MainActivity :
             View.VISIBLE
         } else {
             View.GONE
+        }
+    }
+
+    private fun sendPushTokenToServer(newToken: String? = null) {
+        val token = newToken ?: BaseApp.sharedPreferencesHolder.fcmToken
+        queryNetwork(object : NetworkChecker {
+            override fun onServerAccessible() {
+                pushViewModel.sendToken(token) { isSuccess ->
+                    if (isSuccess) {
+                        pushTokenToBeSent.set(false)
+                        Timber.i("Push token successfully refreshed server side")
+                    } else {
+                        SnackbarHelper.show(
+                            this@MainActivity,
+                            getString(R.string.push_cannot_send),
+                            ToastMessage.Type.WARNING
+                        )
+                    }
+                }
+            }
+
+            override fun onServerInaccessible() {
+                Timber.d(getString(R.string.server_not_accessible))
+                pushTokenToBeSent.set(true)
+            }
+
+            override fun onNoInternet() {
+                Timber.d(getString(R.string.no_internet))
+                pushTokenToBeSent.set(true)
+            }
+        })
+    }
+
+    private fun askNotificationsPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            (this as? PermissionChecker)?.askPermission(
+                context = this,
+                permission = Manifest.permission.POST_NOTIFICATIONS,
+                rationale = getString(R.string.permission_rationale_notifications)
+            ) { isGranted ->
+                Timber.i("Push notification permission : $isGranted")
+                getCurrentFCMToken()
+            }
+        } else {
+            Timber.i(
+                "Push notification permission : true " +
+                    "(SDK version (${Build.VERSION.SDK_INT}) <  Build.VERSION_CODES.TIRAMISU (33)"
+            )
+        }
+    }
+
+    internal fun getCurrentFCMToken() {
+        if (BaseApp.runtimeDataHolder.pushNotification) {
+            FirebaseMessaging.getInstance().token.addOnCompleteListener(
+                OnCompleteListener { task ->
+                    if (!task.isSuccessful) {
+                        Timber.w("Fetching FCM registration token failed", task.exception)
+                        return@OnCompleteListener
+                    }
+
+                    // Get new FCM registration token
+                    val token = task.result
+                    Timber.d("New FCM Token : $token")
+                    val oldToken = BaseApp.sharedPreferencesHolder.fcmToken
+                    if (oldToken != token || pushTokenToBeSent.get()) {
+                        sendPushTokenToServer(token)
+                        BaseApp.sharedPreferencesHolder.fcmToken = token
+                    }
+                }
+            )
         }
     }
 }

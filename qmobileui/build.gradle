@@ -76,6 +76,7 @@ dependencies {
     implementation Libs.maps_utils_ktx
 
     // Utils
+    implementation Libs.firebase_messaging
     implementation Libs.insetter
     implementation Libs.material
     implementation Libs.okhttp_jvm

@@ -14,6 +14,7 @@ import com.qmobile.qmobiledatasync.toast.ToastMessage
 import com.qmobile.qmobiledatasync.utils.launchAndCollectIn
 import com.qmobile.qmobiledatasync.viewmodel.ActionViewModel
 import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
+import com.qmobile.qmobiledatasync.viewmodel.PushViewModel
 import com.qmobile.qmobiledatasync.viewmodel.TaskViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import kotlinx.coroutines.flow.SharedFlow
@@ -23,6 +24,7 @@ class MainActivityObserver(
     private val activity: MainActivity,
     private val entityListViewModelList: List<EntityListViewModel<EntityModel>>,
     private val actionViewModel: ActionViewModel,
+    private val pushViewModel: PushViewModel,
     private val taskViewModel: TaskViewModel
 ) : BaseObserver {
 
@@ -36,6 +38,8 @@ class MainActivityObserver(
         }
         observeActionToastMessage()
         observeActionIsUnauthorized()
+        observePushToastMessage()
+        observePushIsUnauthorized()
         observePendingTasks()
     }
 
@@ -98,6 +102,20 @@ class MainActivityObserver(
 
     private fun observeActionIsUnauthorized() {
         actionViewModel.isUnauthorized.launchAndCollectIn(activity, Lifecycle.State.STARTED) { isUnauthorized ->
+            if (isUnauthorized) {
+                activity.logout(true)
+            }
+        }
+    }
+
+    private fun observePushToastMessage() {
+        pushViewModel.toastMessage.message.launchAndCollectIn(activity, Lifecycle.State.STARTED) { event ->
+            activity.handleEvent(event)
+        }
+    }
+
+    private fun observePushIsUnauthorized() {
+        pushViewModel.isUnauthorized.launchAndCollectIn(activity, Lifecycle.State.STARTED) { isUnauthorized ->
             if (isUnauthorized) {
                 activity.logout(true)
             }

@@ -50,6 +50,7 @@ import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
 import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
+import com.qmobile.qmobileui.utils.DeepLinkUtil
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.hideKeyboard
@@ -149,7 +150,7 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
             bundle.getString(BARCODE_VALUE_KEY)?.let {
-                if (hasAppUrlScheme(it)) {
+                if (DeepLinkUtil.hasAppUrlScheme(requireContext(), it)) {
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)))
                 } else {
                     searchPattern = it
@@ -170,8 +171,10 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
         super.onViewCreated(view, savedInstanceState)
         formQueryBuilder = FormQueryBuilder(tableName)
 
-        hasSearch = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchFields?.isNotEmpty() == true
-        searchableWithBarcode = BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchableWithBarcode ?: false
+        hasSearch =
+            BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchFields?.isNotEmpty() == true
+        searchableWithBarcode =
+            BaseApp.runtimeDataHolder.tableInfo[tableName]?.searchableWithBarcode ?: false
         hasCurrentRecordActions = currentRecordActionsJsonObject.has(tableName)
         isSwipable = BaseApp.genericTableFragmentHelper.isSwipeAllowed(tableName)
 
@@ -183,7 +186,8 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
         initOnRefreshListener()
         EntityListFragmentObserver(this, entityListViewModel).initObservers()
         hideKeyboard(activity)
-        customFragment = BaseApp.genericTableFragmentHelper.getCustomEntityListFragment(tableName, binding)
+        customFragment =
+            BaseApp.genericTableFragmentHelper.getCustomEntityListFragment(tableName, binding)
         customFragment?.onViewCreated(view, savedInstanceState)
 
         handleDeepLinkIfNeeded()
@@ -265,9 +269,17 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
             ActionHelper.fillActionList(tableActionsJsonObject, tableName, tableActions)
         }
         if (hasCurrentRecordActions) {
-            ActionHelper.fillActionList(currentRecordActionsJsonObject, tableName, currentRecordActions)
+            ActionHelper.fillActionList(
+                currentRecordActionsJsonObject,
+                tableName,
+                currentRecordActions
+            )
             currentRecordActionsListAdapter =
-                ActionUIHelper.getActionArrayAdapter(requireContext(), currentRecordActions, delegate.isConnected())
+                ActionUIHelper.getActionArrayAdapter(
+                    requireContext(),
+                    currentRecordActions,
+                    delegate.isConnected()
+                )
         }
     }
 
@@ -288,10 +300,14 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
                             } else {
                                 currentRecordActions[i]
                             }
-                            val swipeButton = createSwipeButton(position, action, i) { clickedAction, entity ->
-                                actionActivity.setCurrentEntityModel(entity)
-                                actionActivity.onActionClick(clickedAction, this@ListFormFragment)
-                            }
+                            val swipeButton =
+                                createSwipeButton(position, action, i) { clickedAction, entity ->
+                                    actionActivity.setCurrentEntityModel(entity)
+                                    actionActivity.onActionClick(
+                                        clickedAction,
+                                        this@ListFormFragment
+                                    )
+                                }
                             swipeButtons.add(swipeButton)
                             if (action == null) break
                         }
@@ -303,7 +319,10 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
     }
 
     private fun showDialog(onClick: (action: Action) -> Unit) {
-        MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_Material3_MaterialAlertDialog)
+        MaterialAlertDialogBuilder(
+            requireContext(),
+            R.style.ThemeOverlay_Material3_MaterialAlertDialog
+        )
             .setTitle(getString(R.string.action_list_title))
             .setAdapter(currentRecordActionsListAdapter) { _, position ->
                 onClick(currentRecordActions[position])
@@ -436,17 +455,26 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
     }
 
     private fun handleDeepLinkIfNeeded() {
-        val intent = activity?.intent
-        val data: Uri? = intent?.data
+        val newIntent = activity?.intent
+        val data: Uri? = newIntent?.data
         if (data != null && data.isHierarchical) {
-            val uri = Uri.parse(intent.dataString)
+            val uri = Uri.parse(newIntent.dataString)
             val dataClass = uri.getQueryParameter("dataClass")
             val primaryKey = uri.getQueryParameter("entity.primaryKey")
             val relationName = uri.getQueryParameter("relationName")
+            moveForDeepLink(dataClass, primaryKey, relationName)
+        } else {
+            val dataClass = newIntent?.getStringExtra("push_notification_dataClass")
+            val primaryKey = newIntent?.getStringExtra("push_notification_primaryKey")
+            moveForDeepLink(dataClass, primaryKey)
+        }
+    }
 
-            if (dataClass == tableName && dataClass.isNotEmpty() && !primaryKey.isNullOrEmpty()) {
+    private fun moveForDeepLink(dataClass: String?, primaryKey: String?, relationName: String? = null) {
+        if (dataClass == tableName && !primaryKey.isNullOrEmpty()) {
+            activity?.apply {
                 BaseApp.genericNavigationResolver.navigateToDetailFromDeepLink(
-                    fragmentActivity = requireActivity(),
+                    fragmentActivity = this,
                     tableName = dataClass,
                     navbarTitle = dataClass,
                     itemId = primaryKey
@@ -457,15 +485,5 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
                 }
             }
         }
-    }
-
-    private fun hasAppUrlScheme(url: String): Boolean {
-        val schemes = resources.getStringArray(R.array.url_schemes)
-        schemes.forEach { scheme ->
-            if (url.startsWith(scheme)) {
-                return true
-            }
-        }
-        return false
     }
 }

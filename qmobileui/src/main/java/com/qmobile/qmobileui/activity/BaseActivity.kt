@@ -71,6 +71,12 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
 
         // Constant used when going to MainActivity after a successful login from LoginActivity
         const val LOGIN_STATUS_TEXT = "loginStatusText"
+
+        // Constant used to know which notification id we used to open the app
+        const val CURRENT_NOTIFICATION_ID = "current_notification_id"
+
+        // Constant used when receiving a push notification that requests a data sync
+        const val PUSH_DATA_SYNC = "pushDataSync"
     }
 
     lateinit var entityListViewModelList: MutableList<EntityListViewModel<EntityModel>>
@@ -167,11 +173,17 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
         }
     }
 
-    fun showRemoteUrlEditDialog(remoteUrl: String, remoteUrlChanger: RemoteUrlChanger, onDialogDismiss: () -> Unit) {
+    fun showRemoteUrlEditDialog(
+        remoteUrl: String,
+        remoteUrlChanger: RemoteUrlChanger,
+        onDialogDismiss: () -> Unit
+    ) {
         val remoteUrlEditDialog = LayoutInflater.from(this)
             .inflate(R.layout.remote_url_edit_dialog, findViewById(android.R.id.content), false)
-        val remoteUrlEditLayout = remoteUrlEditDialog.findViewById<TextInputLayout>(R.id.remote_url_edit_layout)
-        val remoteUrlEditEditText = remoteUrlEditDialog.findViewById<TextInputEditText>(R.id.remote_url_edit_edittext)
+        val remoteUrlEditLayout =
+            remoteUrlEditDialog.findViewById<TextInputLayout>(R.id.remote_url_edit_layout)
+        val remoteUrlEditEditText =
+            remoteUrlEditDialog.findViewById<TextInputEditText>(R.id.remote_url_edit_edittext)
 
         remoteUrlEditDialog.clearViewInParent()
         remoteUrlEditLayout.editText?.setText(remoteUrl)
@@ -215,7 +227,11 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
         }
     }
 
-    fun queryNetwork(networkChecker: NetworkChecker, toastError: Boolean = false, feedbackServer: Boolean = false) {
+    fun queryNetwork(
+        networkChecker: NetworkChecker,
+        toastError: Boolean = false,
+        feedbackServer: Boolean = false
+    ) {
         if (connectivityViewModel.isConnected()) {
             if (this is MainActivity) {
                 setCheckInProgress(true)
@@ -248,7 +264,8 @@ abstract class BaseActivity : AppCompatActivity(), PermissionChecker, ActivityRe
 
     fun handleEvent(event: Event<ToastMessage.Holder>) {
         event.getContentIfNotHandled()?.let { toastMessageHolder: ToastMessage.Holder ->
-            val message = ResourcesHelper.fetchResourceString(this.baseContext, toastMessageHolder.message)
+            val message =
+                ResourcesHelper.fetchResourceString(this.baseContext, toastMessageHolder.message)
             SnackbarHelper.show(this, message, toastMessageHolder.type)
         }
     }

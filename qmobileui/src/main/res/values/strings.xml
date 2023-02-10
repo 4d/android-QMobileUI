@@ -129,6 +129,7 @@
     <string name="permission_dialog_negative">No, thank you</string>
     <string name="permission_rationale_barcode">Permission required to scan bar codes</string>
     <string name="permission_rationale_camera">Permission required to take photos</string>
+    <string name="permission_rationale_notifications">Permission required to send you push notifications</string>
 
     <!-- Barcode -->
     <string name="barcode_camera_back_content_description">Back</string>
@@ -190,5 +191,10 @@
     <string name="log_level_menu_assert">Assert</string>
     <string name="log_level_menu_none">None</string>
     <string name="log_level_changed">Log level changed to %s</string>
+
+    <!-- Push Notifications -->
+    <string name="push_cannot_send">Could not send push registration token to server</string>
+    <string name="push_channel_id">qmobile_channel_id</string>
+    <string name="push_channel_description">Used for 4D push notifications</string>
 
 </resources>
