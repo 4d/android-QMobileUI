@@ -22,6 +22,7 @@ import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.databinding.FragmentActionWebviewBinding
 import com.qmobile.qmobileui.network.NetworkChecker
 import com.qmobile.qmobileui.ui.setSharedAxisZEnterTransition
+import com.qmobile.qmobileui.ui.setupToolbarTitle
 import com.qmobile.qmobileui.webview.WebViewHelper
 
 class ActionWebViewFragment : BaseFragment() {
@@ -33,6 +34,7 @@ class ActionWebViewFragment : BaseFragment() {
     private var actionLabel = ""
     private var actionShortLabel = ""
     private var base64EncodedContext = ""
+    private var isGlobalActionFromNavBar = false
 
     companion object {
         private const val HEADER_CONTEXT_KEY = "X-QMobile-Context"
@@ -43,10 +45,10 @@ class ActionWebViewFragment : BaseFragment() {
         arguments?.getString("path")?.let { path = it }
         arguments?.getString("actionName")?.let { actionName = it }
         arguments?.getString("actionLabel")?.let { actionLabel = it }
-        arguments?.getString("actionShortLabel")?.let {
-            actionShortLabel = it
-        }
+        arguments?.getString("actionShortLabel")?.let { actionShortLabel = it }
         arguments?.getString("base64EncodedContext")?.let { base64EncodedContext = it }
+        arguments?.getBoolean("isGlobalActionFromNavBar")?.let { isGlobalActionFromNavBar = it }
+        arguments?.getString("navbarTitle")?.let { navbarTitle = it }
 
         setSharedAxisZEnterTransition()
 
@@ -61,12 +63,19 @@ class ActionWebViewFragment : BaseFragment() {
         _binding = FragmentActionWebviewBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner
         }
+
+        if (isGlobalActionFromNavBar) {
+            activity?.setupToolbarTitle(actionLabel)
+        }
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        delegate.setFullScreenMode(true)
+        if (!isGlobalActionFromNavBar) {
+            delegate.setFullScreenMode(true)
+        }
         setupWebView()
     }
 
@@ -124,7 +133,9 @@ class ActionWebViewFragment : BaseFragment() {
                 .setNegativeButton(
                     getString(R.string.open_url_dialog_cancel)
                 ) { _, _ ->
-                    activity?.onBackPressedDispatcher?.onBackPressed()
+                    if (!isGlobalActionFromNavBar) {
+                        activity?.onBackPressedDispatcher?.onBackPressed()
+                    }
                 }
                 .show()
         }

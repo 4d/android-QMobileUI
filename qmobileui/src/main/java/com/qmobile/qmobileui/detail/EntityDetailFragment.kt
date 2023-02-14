@@ -223,7 +223,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
 
             if (dataClass == tableName) {
                 val primaryKey = uri.getQueryParameter("entity.primaryKey")
-                //4D original name
+                // 4D original name
                 val relationName = uri.getQueryParameter("relationName")
                 val adjustedName =
                     BaseApp.runtimeDataHolder.tableInfo[tableName]?.fields?.filterValues {

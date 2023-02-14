@@ -26,6 +26,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.qmobile.qmobileui.action.actionparameters.ActionParametersFragment
 import com.qmobile.qmobileui.action.inputcontrols.PushInputControlFragment
 import com.qmobile.qmobileui.action.pendingtasks.TasksFragment
+import com.qmobile.qmobileui.action.webview.ActionWebViewFragment
 import com.qmobile.qmobileui.detail.EntityDetailFragment
 import com.qmobile.qmobileui.feedback.FeedbackFragment
 import com.qmobile.qmobileui.list.EntityListFragment
@@ -73,7 +74,7 @@ abstract class BaseFragment : Fragment() {
                 is TasksFragment -> appBarLayout.liftOnScrollTargetViewId = R.id.task_nested_scroll_view
                 is PushInputControlFragment ->
                     appBarLayout.liftOnScrollTargetViewId = R.id.input_control_list_recycler_view
-                is MapsFragment -> appBarLayout.setExpanded(false)
+                is MapsFragment, is ActionWebViewFragment -> appBarLayout.setExpanded(false)
                 is FeedbackFragment -> appBarLayout.liftOnScrollTargetViewId = R.id.feedback_nested_scroll_view
             }
         }
