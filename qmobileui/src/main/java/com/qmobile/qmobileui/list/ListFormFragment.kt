@@ -380,7 +380,7 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
     }
 
     private fun setupSearchMenuIfNeeded(menu: Menu, inflater: MenuInflater) {
-        if (hasSearch || searchableWithBarcode) {
+        if (hasSearch) {
             setupSearchView(menu, inflater, searchableWithBarcode) {
                 activity?.apply {
                     (this as? PermissionChecker)?.askPermission(
