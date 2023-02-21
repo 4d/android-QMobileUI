@@ -184,7 +184,7 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
         initAdapter()
         initRecyclerView()
         initOnRefreshListener()
-        EntityListFragmentObserver(this, entityListViewModel).initObservers()
+        ListFragmentObserver(this, entityListViewModel).initObservers()
         hideKeyboard(activity)
         customFragment =
             BaseApp.genericTableFragmentHelper.getCustomEntityListFragment(tableName, binding)

@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class EntityListFragmentObserver(
+class ListFragmentObserver(
     private val fragment: ListFormFragment,
     private val entityListViewModel: EntityListViewModel<EntityModel>
 ) : BaseObserver {

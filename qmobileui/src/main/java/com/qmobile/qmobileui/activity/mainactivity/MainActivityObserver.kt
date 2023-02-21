@@ -66,7 +66,9 @@ class MainActivityObserver(
                         }
                     }
                 }
-                else -> {}
+                else -> {
+                    activity.cancelPushDataSync()
+                }
             }
         }
     }

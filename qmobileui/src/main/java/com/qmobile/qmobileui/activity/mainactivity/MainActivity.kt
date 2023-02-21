@@ -94,6 +94,7 @@ import timber.log.Timber
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
+@Suppress("LargeClass")
 class MainActivity :
     BaseActivity(),
     FragmentCommunication,
@@ -124,6 +125,7 @@ class MainActivity :
     private val logoutRequested = AtomicBoolean(false)
     private val pushTokenToBeSent = AtomicBoolean(false)
     private var pushDataSync = false
+    private val tabLayoutSetup = AtomicBoolean(false)
 
     override val activityResultControllerImpl = ActivityResultControllerImpl(this)
     override val permissionCheckerImpl = PermissionCheckerImpl(this)
@@ -150,14 +152,17 @@ class MainActivity :
         // Init system services in onCreate()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
+        pushDataSync = intent.getBooleanExtra(PUSH_DATA_SYNC, false)
+        Timber.i("pushDataSync: $pushDataSync")
+
         if (savedInstanceState == null) {
             // Retrieve bundled parameter to know if there was a successful login with statusText
             loginStatusText = intent.getStringExtra(LOGIN_STATUS_TEXT) ?: ""
-            setupTabLayout()
-        } // Else, need to wait for onRestoreInstanceState
 
-        pushDataSync = intent.getBooleanExtra(PUSH_DATA_SYNC, false)
-        Timber.i("pushDataSync: $pushDataSync")
+            if (!pushDataSync || !isConnected()) {
+                setupTabLayout()
+            }
+        } // Else, need to wait for onRestoreInstanceState
 
         // Init ApiClients
         refreshAllApiClients()
@@ -390,10 +395,12 @@ class MainActivity :
             }
 
             override fun onServerInaccessible() {
+                cancelPushDataSync()
                 onServerInaccessible(tableName)
             }
 
             override fun onNoInternet() {
+                cancelPushDataSync()
                 onNoInternet(tableName)
             }
         })
@@ -819,6 +826,7 @@ class MainActivity :
             }
 
             override fun onServerInaccessible() {
+                cancelPushDataSync()
                 authenticationRequested = true
                 Timber.d("No Internet connection, authenticationRequested")
                 SnackbarHelper.show(
@@ -829,6 +837,7 @@ class MainActivity :
             }
 
             override fun onNoInternet() {
+                cancelPushDataSync()
                 authenticationRequested = true
                 Timber.d("No Internet connection, authenticationRequested")
                 SnackbarHelper.show(
@@ -848,19 +857,21 @@ class MainActivity :
      * Called on first creation and when restoring state.
      */
     private fun setupTabLayout() {
-        // Setup the TabLayout with a list of navigation graphs
-        val controller = binding.scrollableTabLayout.setupWithNavController(
-            fragmentManager = supportFragmentManager,
-            intent = intent
-        ) {
-            // If we are on a fullscreen activity and we change nav item, we need to cancel fullscreen mode
-            setFullScreenMode(false)
-        }
-        // Whenever the selected controller changes, setup the action bar.
-        controller.observe(
-            this
-        ) { navController ->
-            setupActionBarWithNavController(navController)
+        if (!tabLayoutSetup.getAndSet(true)) {
+            // Setup the TabLayout with a list of navigation graphs
+            val controller = binding.scrollableTabLayout.setupWithNavController(
+                fragmentManager = supportFragmentManager,
+                intent = intent
+            ) {
+                // If we are on a fullscreen activity and we change nav item, we need to cancel fullscreen mode
+                setFullScreenMode(false)
+            }
+            // Whenever the selected controller changes, setup the action bar.
+            controller.observe(
+                this
+            ) { navController ->
+                setupActionBarWithNavController(navController)
+            }
         }
     }
 
@@ -1031,5 +1042,10 @@ class MainActivity :
                 }
             )
         }
+    }
+
+    internal fun cancelPushDataSync() {
+        pushDataSync = false
+        setupTabLayout()
     }
 }
