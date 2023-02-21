@@ -464,8 +464,8 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
             val relationName = uri.getQueryParameter("relationName")
             moveForDeepLink(dataClass, primaryKey, relationName)
         } else {
-            val dataClass = newIntent?.getStringExtra("push_notification_dataClass")
-            val primaryKey = newIntent?.getStringExtra("push_notification_primaryKey")
+            val dataClass = newIntent?.getStringExtra(DeepLinkUtil.PN_DEEPLINK_DATACLASS)
+            val primaryKey = newIntent?.getStringExtra(DeepLinkUtil.PN_DEEPLINK_PRIMARY_KEY)
             moveForDeepLink(dataClass, primaryKey)
         }
     }

@@ -248,31 +248,37 @@ private fun TabLayout.setupDeepLinks(
     containerId: Int,
     intent: Intent
 ) {
-    var dataClass: String? = null
+    var dataClass = ""
 
     val data: Uri? = intent.data
     if (data != null && data.isHierarchical) {
         val uri = Uri.parse(intent.dataString)
-        dataClass = uri.getQueryParameter("dataClass")
+        dataClass = uri.getQueryParameter("dataClass") ?: ""
+    }
+    intent.getStringExtra(DeepLinkUtil.PN_DEEPLINK_DATACLASS)?.let {
+        dataClass = it
     }
 
-    navGraphIds.forEachIndexed { index, navGraphId ->
-        val fragmentTag =
-            getFragmentTag(index)
+    BaseApp.runtimeDataHolder.tableInfo[dataClass]?.label?.let { targetDataClassLabel ->
+        navGraphIds.forEachIndexed { index, navGraphId ->
+            val fragmentTag =
+                getFragmentTag(index)
 
-        // Find or create the Navigation host fragment
-        val navHostFragment =
-            obtainNavHostFragment(
-                fragmentManager,
-                fragmentTag,
-                navGraphId,
-                containerId
-            )
+            // Find or create the Navigation host fragment
+            val navHostFragment =
+                obtainNavHostFragment(
+                    fragmentManager,
+                    fragmentTag,
+                    navGraphId,
+                    containerId
+                )
 
-        val label = navHostFragment.navController.graph.findStartDestination().label
-        // Handle Intent
-        if (label == dataClass && index != this.selectedTabPosition) {
-            this.getTabAt(index)?.select()
+            val currentGraphLabel = navHostFragment.navController.graph.findStartDestination().label
+
+            // Handle Intent
+            if (currentGraphLabel == targetDataClassLabel && index != this.selectedTabPosition) {
+                this.getTabAt(index)?.select()
+            }
         }
     }
 }
