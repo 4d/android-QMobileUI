@@ -155,6 +155,11 @@ class MainActivity :
         pushDataSync = intent.getBooleanExtra(PUSH_DATA_SYNC, false)
         Timber.i("pushDataSync: $pushDataSync")
 
+        // Init ApiClients
+        refreshAllApiClients()
+
+        initViewModels()
+
         if (savedInstanceState == null) {
             // Retrieve bundled parameter to know if there was a successful login with statusText
             loginStatusText = intent.getStringExtra(LOGIN_STATUS_TEXT) ?: ""
@@ -163,11 +168,6 @@ class MainActivity :
                 setupTabLayout()
             }
         } // Else, need to wait for onRestoreInstanceState
-
-        // Init ApiClients
-        refreshAllApiClients()
-
-        initViewModels()
 
         mainActivityObserver =
             MainActivityObserver(
@@ -1017,7 +1017,7 @@ class MainActivity :
         } else {
             Timber.i(
                 "Push notification permission : true " +
-                    "(SDK version (${Build.VERSION.SDK_INT}) <  Build.VERSION_CODES.TIRAMISU (33)"
+                        "(SDK version (${Build.VERSION.SDK_INT}) <  Build.VERSION_CODES.TIRAMISU (33)"
             )
         }
     }
