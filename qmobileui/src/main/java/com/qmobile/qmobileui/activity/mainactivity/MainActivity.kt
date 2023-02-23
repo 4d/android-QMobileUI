@@ -125,6 +125,7 @@ class MainActivity :
     private val logoutRequested = AtomicBoolean(false)
     private val pushTokenToBeSent = AtomicBoolean(false)
     private var pushDataSync = false
+    internal val pushDataSyncRequested = AtomicBoolean(false)
     private val tabLayoutSetup = AtomicBoolean(false)
 
     override val activityResultControllerImpl = ActivityResultControllerImpl(this)
@@ -164,7 +165,7 @@ class MainActivity :
             // Retrieve bundled parameter to know if there was a successful login with statusText
             loginStatusText = intent.getStringExtra(LOGIN_STATUS_TEXT) ?: ""
 
-            if (!pushDataSync || !isConnected()) {
+            if (!pushDataSync) {
                 setupTabLayout()
             }
         } // Else, need to wait for onRestoreInstanceState
@@ -455,6 +456,7 @@ class MainActivity :
                 getCurrentFCMToken()
 
                 if (pushDataSync) {
+                    pushDataSyncRequested.set(true)
                     requestDataSync(null)
                 }
             }

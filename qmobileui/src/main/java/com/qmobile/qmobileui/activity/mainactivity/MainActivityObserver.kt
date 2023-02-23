@@ -67,7 +67,9 @@ class MainActivityObserver(
                     }
                 }
                 else -> {
-                    activity.cancelPushDataSync()
+                    if (activity.pushDataSyncRequested.getAndSet(false)) {
+                        activity.cancelPushDataSync()
+                    }
                 }
             }
         }
