@@ -1017,7 +1017,7 @@ class MainActivity :
         } else {
             Timber.i(
                 "Push notification permission : true " +
-                        "(SDK version (${Build.VERSION.SDK_INT}) <  Build.VERSION_CODES.TIRAMISU (33)"
+                    "(SDK version (${Build.VERSION.SDK_INT}) <  Build.VERSION_CODES.TIRAMISU (33)"
             )
         }
     }

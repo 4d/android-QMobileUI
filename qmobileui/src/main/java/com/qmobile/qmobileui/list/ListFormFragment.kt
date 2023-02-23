@@ -54,6 +54,7 @@ import com.qmobile.qmobileui.utils.DeepLinkUtil
 import com.qmobile.qmobileui.utils.FormQueryBuilder
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.hideKeyboard
+import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider {
 
@@ -91,6 +92,8 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
     private var isSwipable = false
     private var searchPattern = "" // search area
     private var relation: Relation? = null
+    internal var searchingFromBarCode = AtomicBoolean(false)
+    internal var allowToOpenFirstRecord = AtomicBoolean(false)
 
     private val searchListener: SearchView.OnQueryTextListener =
         object : SearchView.OnQueryTextListener {
@@ -153,6 +156,8 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
                 if (DeepLinkUtil.hasAppUrlScheme(requireContext(), it)) {
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)))
                 } else {
+                    allowToOpenFirstRecord.set(true)
+                    searchingFromBarCode.set(true)
                     searchPattern = it
                 }
             }
@@ -229,17 +234,7 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
             tableName = tableName,
             lifecycleOwner = viewLifecycleOwner,
             onItemClick = { dataBinding, position ->
-                setSharedAxisXExitTransition()
-                BaseApp.genericNavigationResolver.navigateFromListToViewPager(
-                    viewDataBinding = dataBinding,
-                    sourceTable = relation?.source ?: tableName,
-                    position = position,
-                    query = searchPattern,
-                    relationName = relation?.name ?: "",
-                    parentItemId = parentItemId,
-                    path = path,
-                    navbarTitle = navbarTitle ?: ""
-                )
+                onItemClick(dataBinding, position)
             },
             onItemLongClick = { currentEntity ->
                 if (hasCurrentRecordActions && !isSwipable) {
@@ -249,6 +244,20 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
                     }
                 }
             }
+        )
+    }
+
+    internal fun onItemClick(dataBinding: ViewDataBinding, position: Int) {
+        setSharedAxisXExitTransition()
+        BaseApp.genericNavigationResolver.navigateFromListToViewPager(
+            viewDataBinding = dataBinding,
+            sourceTable = relation?.source ?: tableName,
+            position = position,
+            query = searchPattern,
+            relationName = relation?.name ?: "",
+            parentItemId = parentItemId,
+            path = path,
+            navbarTitle = navbarTitle ?: ""
         )
     }
 

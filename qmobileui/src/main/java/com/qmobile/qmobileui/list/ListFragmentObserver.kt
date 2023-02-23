@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.list
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatasync.utils.ScheduleRefresh
@@ -16,6 +17,7 @@ import com.qmobile.qmobiledatasync.viewmodel.EntityListViewModel
 import com.qmobile.qmobileui.activity.BaseObserver
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -56,7 +58,26 @@ class ListFragmentObserver(
         fragment.lifecycleScope.launch {
             entityListViewModel.entityListPagingDataFlow.distinctUntilChanged().collectLatest {
                 fragment.adapter.submitData(it)
+
+                if (fragment.searchingFromBarCode.getAndSet(false)) {
+                    observeLoadState()
+                }
             }
+        }
+    }
+
+    private fun observeLoadState() {
+        fragment.lifecycleScope.launchWhenCreated {
+            fragment.adapter.loadStateFlow.map { it.refresh }
+                .distinctUntilChanged()
+                .collect {
+                    if (it is LoadState.NotLoading &&
+                        fragment.adapter.itemCount == 1 &&
+                        fragment.allowToOpenFirstRecord.getAndSet(false)
+                    ) {
+                        fragment.onItemClick(fragment.binding, 0)
+                    }
+                }
         }
     }
 }
