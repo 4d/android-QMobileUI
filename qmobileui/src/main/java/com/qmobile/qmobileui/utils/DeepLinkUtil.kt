@@ -17,7 +17,7 @@ object DeepLinkUtil {
     fun hasAppUrlScheme(context: Context, url: String): Boolean {
         val schemes = context.resources.getStringArray(R.array.url_schemes)
         schemes.forEach { scheme ->
-            if (url.startsWith(scheme)) {
+            if (url.lowercase().startsWith(scheme.lowercase())) {
                 return true
             }
         }
