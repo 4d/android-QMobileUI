@@ -33,8 +33,6 @@ fun TabLayout.setupWithNavController(
     intent: Intent,
     onTabSelected: () -> Unit
 ): LiveData<NavController> {
-    val navGraphIds: List<Int> = BaseApp.navGraphIds
-    val containerId: Int = R.id.nav_host_container
     // Map of tags
     val graphIndexToTagMap = SparseArray<String>()
     // Result. Mutable live data with the selected controlled
@@ -47,10 +45,10 @@ fun TabLayout.setupWithNavController(
     val barcodeScanNavLabel = this.resources.getString(R.string.nav_barcode_scan)
     val feedbackNavLabel = this.resources.getString(R.string.nav_feedback)
 
-    val isWithIcons = isWithIcons(navGraphIds, fragmentManager, containerId)
+    val isWithIcons = isWithIcons(fragmentManager)
 
     // First create a NavHostFragment for each NavGraph ID
-    navGraphIds.forEachIndexed { index, navGraphId ->
+    BaseApp.navGraphIds.forEachIndexed { index, navGraphId ->
 
         val fragmentTag = getFragmentTag(index)
 
@@ -60,7 +58,7 @@ fun TabLayout.setupWithNavController(
                 fragmentManager,
                 fragmentTag,
                 navGraphId,
-                containerId
+                R.id.nav_host_container
             )
 
         this.addTab(
@@ -197,7 +195,7 @@ fun TabLayout.setupWithNavController(
     })
 
     // Handle deep link
-    setupDeepLinks(navGraphIds, fragmentManager, containerId, intent)
+    setupDeepLinks(fragmentManager, intent)
 
     // Finally, ensure that we update our TabLayout when the back stack changes
     fragmentManager.addOnBackStackChangedListener {
@@ -217,11 +215,9 @@ fun TabLayout.setupWithNavController(
 }
 
 private fun isWithIcons(
-    navGraphIds: List<Int>,
-    fragmentManager: FragmentManager,
-    containerId: Int
+    fragmentManager: FragmentManager
 ): Boolean {
-    navGraphIds.forEachIndexed { index, navGraphId ->
+    BaseApp.navGraphIds.forEachIndexed { index, navGraphId ->
 
         val fragmentTag = getFragmentTag(index)
 
@@ -231,7 +227,7 @@ private fun isWithIcons(
                 fragmentManager,
                 fragmentTag,
                 navGraphId,
-                containerId
+                R.id.nav_host_container
             )
         val label = navHostFragment.navController.graph.findStartDestination().label
         val icon = BaseApp.genericTableFragmentHelper.getNavIcon(label.toString())
@@ -242,10 +238,8 @@ private fun isWithIcons(
     return false
 }
 
-private fun TabLayout.setupDeepLinks(
-    navGraphIds: List<Int>,
+fun TabLayout.setupDeepLinks(
     fragmentManager: FragmentManager,
-    containerId: Int,
     intent: Intent
 ) {
     var dataClass = ""
@@ -260,7 +254,7 @@ private fun TabLayout.setupDeepLinks(
     }
 
     BaseApp.runtimeDataHolder.tableInfo[dataClass]?.label?.let { targetDataClassLabel ->
-        navGraphIds.forEachIndexed { index, navGraphId ->
+        BaseApp.navGraphIds.forEachIndexed { index, navGraphId ->
             val fragmentTag =
                 getFragmentTag(index)
 
@@ -270,7 +264,7 @@ private fun TabLayout.setupDeepLinks(
                     fragmentManager,
                     fragmentTag,
                     navGraphId,
-                    containerId
+                    R.id.nav_host_container
                 )
 
             val currentGraphLabel = navHostFragment.navController.graph.findStartDestination().label

@@ -43,8 +43,10 @@ import com.qmobile.qmobileui.action.model.Action
 import com.qmobile.qmobileui.action.sort.Sort
 import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.action.utils.ActionUIHelper
+import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.list.swipe.ItemActionButton
 import com.qmobile.qmobileui.list.swipe.SwipeToActionCallback
+import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.ui.setFadeThroughExitTransition
 import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
 import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
@@ -152,13 +154,13 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
         navbarTitle?.let { activity?.setupToolbarTitle(it) }
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
-            bundle.getString(BARCODE_VALUE_KEY)?.let {
-                if (DeepLinkUtil.hasAppUrlScheme(requireContext(), it)) {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)))
+            bundle.getString(BARCODE_VALUE_KEY)?.let { barcodeValue ->
+                if (DeepLinkUtil.hasAppUrlScheme(requireContext(), barcodeValue)) {
+                    handleUrlSchemeFromScan(barcodeValue)
                 } else {
                     allowToOpenFirstRecord.set(true)
                     searchingFromBarCode.set(true)
-                    searchPattern = it
+                    searchPattern = barcodeValue
                 }
             }
         }
@@ -493,6 +495,18 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
                     activity?.intent = null
                 }
             }
+        }
+    }
+
+    private fun handleUrlSchemeFromScan(barcodeValue: String) {
+        val uri = Uri.parse(barcodeValue)
+        val dataClass = uri.getQueryParameter("dataClass") ?: ""
+        when {
+            dataClass == "" -> SnackbarHelper.show(activity, getString(R.string.incorrect_deeplink))
+            BaseApp.runtimeDataHolder.tableInfo.keys.contains(dataClass) -> (activity as? MainActivity)?.resetTabLayout(
+                Intent(Intent.ACTION_VIEW, uri)
+            )
+            else -> SnackbarHelper.show(activity, getString(R.string.table_not_found, dataClass))
         }
     }
 }

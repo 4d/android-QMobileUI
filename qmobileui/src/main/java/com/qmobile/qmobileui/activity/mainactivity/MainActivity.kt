@@ -86,6 +86,7 @@ import com.qmobile.qmobileui.ui.setMaterialFadeTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZExitTransition
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.PermissionCheckerImpl
+import com.qmobile.qmobileui.utils.setupDeepLinks
 import com.qmobile.qmobileui.utils.setupWithNavController
 import dev.chrisbanes.insetter.applyInsetter
 import kotlinx.coroutines.flow.SharedFlow
@@ -875,6 +876,13 @@ class MainActivity :
                 setupActionBarWithNavController(navController)
             }
         }
+    }
+
+    internal fun resetTabLayout(intent: Intent) {
+        binding.scrollableTabLayout.setupDeepLinks(
+            fragmentManager = supportFragmentManager,
+            intent = intent
+        )
     }
 
     override fun sendPendingTasks() {
