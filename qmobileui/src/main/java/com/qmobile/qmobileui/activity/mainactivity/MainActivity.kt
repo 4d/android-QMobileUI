@@ -128,6 +128,7 @@ class MainActivity :
     private var pushDataSync = false
     internal val pushDataSyncRequested = AtomicBoolean(false)
     private val tabLayoutSetup = AtomicBoolean(false)
+    private var savedTokenToBeSent = ""
 
     override val activityResultControllerImpl = ActivityResultControllerImpl(this)
     override val permissionCheckerImpl = PermissionCheckerImpl(this)
@@ -984,13 +985,14 @@ class MainActivity :
         }
     }
 
-    private fun sendPushTokenToServer(newToken: String? = null) {
-        val token = newToken ?: BaseApp.sharedPreferencesHolder.fcmToken
+    private fun sendPushTokenToServer() {
         queryNetwork(object : NetworkChecker {
             override fun onServerAccessible() {
-                pushViewModel.sendToken(token) { isSuccess ->
+                pushViewModel.sendToken(savedTokenToBeSent) { isSuccess ->
                     if (isSuccess) {
                         pushTokenToBeSent.set(false)
+                        BaseApp.sharedPreferencesHolder.fcmToken = savedTokenToBeSent
+                        savedTokenToBeSent = ""
                         Timber.i("Push token successfully refreshed server side")
                     } else {
                         SnackbarHelper.show(
@@ -1046,8 +1048,8 @@ class MainActivity :
                     Timber.d("New FCM Token : $token")
                     val oldToken = BaseApp.sharedPreferencesHolder.fcmToken
                     if (oldToken != token || pushTokenToBeSent.get()) {
-                        sendPushTokenToServer(token)
-                        BaseApp.sharedPreferencesHolder.fcmToken = token
+                        savedTokenToBeSent = token
+                        sendPushTokenToServer()
                     }
                 }
             )
