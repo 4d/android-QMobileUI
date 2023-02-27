@@ -238,7 +238,7 @@ private fun isWithIcons(
     return false
 }
 
-fun TabLayout.setupDeepLinks(
+private fun TabLayout.setupDeepLinks(
     fragmentManager: FragmentManager,
     intent: Intent
 ) {
