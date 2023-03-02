@@ -16,12 +16,20 @@ object DeepLinkUtil {
 
     fun isAppUrlScheme(context: Context, url: String): Boolean {
         val scheme = context.resources.getString(R.string.deeplink_scheme)
-        return url.lowercase().startsWith(scheme.lowercase())
+        return if (scheme.isNotEmpty()) {
+            url.lowercase().startsWith(scheme.lowercase())
+        } else {
+            false
+        }
     }
 
     fun isUniversalLink(context: Context, url: String): Boolean {
         val scheme = context.resources.getString(R.string.universal_link_scheme)
         val host = context.resources.getString(R.string.universal_link_host)
-        return url.lowercase().startsWith(scheme + host)
+        return if (scheme.isNotEmpty() && host.isNotEmpty()) {
+            url.lowercase().startsWith(scheme + host)
+        } else {
+            false
+        }
     }
 }
