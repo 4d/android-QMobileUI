@@ -154,12 +154,16 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
 
         setFragmentResultListener(BARCODE_FRAGMENT_REQUEST_KEY) { _, bundle ->
             bundle.getString(BARCODE_VALUE_KEY)?.let { barcodeValue ->
-                if (DeepLinkUtil.hasAppUrlScheme(requireContext(), barcodeValue)) {
-                    handleUrlSchemeFromScan(barcodeValue)
-                } else {
-                    allowToOpenFirstRecord.set(true)
-                    searchingFromBarCode.set(true)
-                    searchPattern = barcodeValue
+                when {
+                    DeepLinkUtil.isAppUrlScheme(requireContext(), barcodeValue) ->
+                        handleDeepLinkUrlFromScan(barcodeValue)
+                    DeepLinkUtil.isUniversalLink(requireContext(), barcodeValue) ->
+                        handleDeepLinkUrlFromScan(barcodeValue)
+                    else -> {
+                        allowToOpenFirstRecord.set(true)
+                        searchingFromBarCode.set(true)
+                        searchPattern = barcodeValue
+                    }
                 }
             }
         }
@@ -497,7 +501,7 @@ abstract class ListFormFragment : BaseFragment(), ActionNavigable, MenuProvider 
         }
     }
 
-    private fun handleUrlSchemeFromScan(barcodeValue: String) {
+    private fun handleDeepLinkUrlFromScan(barcodeValue: String) {
         val uri = Uri.parse(barcodeValue)
         val dataClass = uri.getQueryParameter("dataClass") ?: ""
         when {

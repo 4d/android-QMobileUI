@@ -14,13 +14,14 @@ object DeepLinkUtil {
     const val PN_DEEPLINK_DATACLASS = "push_notification_dataClass"
     const val PN_DEEPLINK_PRIMARY_KEY = "push_notification_primaryKey"
 
-    fun hasAppUrlScheme(context: Context, url: String): Boolean {
-        val schemes = context.resources.getStringArray(R.array.url_schemes)
-        schemes.forEach { scheme ->
-            if (url.lowercase().startsWith(scheme.lowercase())) {
-                return true
-            }
-        }
-        return false
+    fun isAppUrlScheme(context: Context, url: String): Boolean {
+        val scheme = context.resources.getString(R.string.deeplink_scheme)
+        return url.lowercase().startsWith(scheme.lowercase())
+    }
+
+    fun isUniversalLink(context: Context, url: String): Boolean {
+        val scheme = context.resources.getString(R.string.universal_link_scheme)
+        val host = context.resources.getString(R.string.universal_link_host)
+        return url.lowercase().startsWith(scheme + host)
     }
 }
