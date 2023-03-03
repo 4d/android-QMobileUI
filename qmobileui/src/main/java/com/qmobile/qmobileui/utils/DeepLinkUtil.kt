@@ -27,7 +27,7 @@ object DeepLinkUtil {
         val scheme = context.resources.getString(R.string.universal_link_scheme)
         val host = context.resources.getString(R.string.universal_link_host)
         return if (scheme.isNotEmpty() && host.isNotEmpty()) {
-            url.lowercase().startsWith(scheme + host)
+            url.lowercase().startsWith(scheme.removeSuffix("://") + "://" + host)
         } else {
             false
         }
