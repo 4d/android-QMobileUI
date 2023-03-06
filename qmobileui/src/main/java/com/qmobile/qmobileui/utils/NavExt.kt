@@ -270,7 +270,7 @@ private fun TabLayout.setupDeepLinks(
             val currentGraphLabel = navHostFragment.navController.graph.findStartDestination().label
 
             // Handle Intent
-            if (currentGraphLabel == targetDataClassLabel && index != this.selectedTabPosition) {
+            if (currentGraphLabel == targetDataClassLabel) {
                 this.getTabAt(index)?.select()
             }
         }
