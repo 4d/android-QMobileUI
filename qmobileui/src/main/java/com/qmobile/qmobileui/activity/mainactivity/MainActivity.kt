@@ -86,6 +86,7 @@ import com.qmobile.qmobileui.ui.setMaterialFadeTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZExitTransition
 import com.qmobile.qmobileui.utils.PermissionChecker
 import com.qmobile.qmobileui.utils.PermissionCheckerImpl
+import com.qmobile.qmobileui.utils.setupDeepLinks
 import com.qmobile.qmobileui.utils.setupWithNavController
 import dev.chrisbanes.insetter.applyInsetter
 import kotlinx.coroutines.flow.SharedFlow
@@ -166,8 +167,10 @@ class MainActivity :
             // Retrieve bundled parameter to know if there was a successful login with statusText
             loginStatusText = intent.getStringExtra(LOGIN_STATUS_TEXT) ?: ""
 
+            setupTabLayout()
+
             if (!pushDataSync) {
-                setupTabLayout()
+                setupDeepLink()
             }
         } // Else, need to wait for onRestoreInstanceState
 
@@ -284,6 +287,7 @@ class MainActivity :
         // and its selectedItemId, we can proceed with setting up the
         // TabLayout with Navigation
         setupTabLayout()
+        setupDeepLink()
     }
 
     // Back button from appbar
@@ -860,21 +864,25 @@ class MainActivity :
      * Called on first creation and when restoring state.
      */
     private fun setupTabLayout() {
-        if (!tabLayoutSetup.getAndSet(true)) {
-            // Setup the TabLayout with a list of navigation graphs
-            val controller = binding.scrollableTabLayout.setupWithNavController(
-                fragmentManager = supportFragmentManager,
-                intent = intent
-            ) {
-                // If we are on a fullscreen activity and we change nav item, we need to cancel fullscreen mode
-                setFullScreenMode(false)
-            }
-            // Whenever the selected controller changes, setup the action bar.
-            controller.observe(
-                this
-            ) { navController ->
-                setupActionBarWithNavController(navController)
-            }
+        // Setup the TabLayout with a list of navigation graphs
+        val controller = binding.scrollableTabLayout.setupWithNavController(
+            fragmentManager = supportFragmentManager,
+            intent = intent
+        ) {
+            // If we are on a fullscreen activity and we change nav item, we need to cancel fullscreen mode
+            setFullScreenMode(false)
+        }
+        // Whenever the selected controller changes, setup the action bar.
+        controller.observe(
+            this
+        ) { navController ->
+            setupActionBarWithNavController(navController)
+        }
+    }
+
+    private fun setupDeepLink() {
+        if (!tabLayoutSetup.getAndSet(true) && intent != null) {
+            binding.scrollableTabLayout.setupDeepLinks(supportFragmentManager, intent)
         }
     }
 
@@ -1050,6 +1058,6 @@ class MainActivity :
 
     internal fun cancelPushDataSync() {
         pushDataSync = false
-        setupTabLayout()
+        setupDeepLink()
     }
 }

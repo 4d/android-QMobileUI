@@ -238,7 +238,7 @@ private fun isWithIcons(
     return false
 }
 
-private fun TabLayout.setupDeepLinks(
+internal fun TabLayout.setupDeepLinks(
     fragmentManager: FragmentManager,
     intent: Intent
 ) {
@@ -270,7 +270,7 @@ private fun TabLayout.setupDeepLinks(
             val currentGraphLabel = navHostFragment.navController.graph.findStartDestination().label
 
             // Handle Intent
-            if (currentGraphLabel == targetDataClassLabel) {
+            if (currentGraphLabel == targetDataClassLabel && index != this.selectedTabPosition) {
                 this.getTabAt(index)?.select()
             }
         }
