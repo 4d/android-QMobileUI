@@ -1,10 +1,11 @@
 include ':qmobileui'
 rootProject.name = 'QMobileUI'
 if (System.getenv('CI_DEPS_TO_BE_FETCHED') == null) {
+    def depRoot = System.getenv('DEPS_PATH') ?: "../"
     include ':qmobileapi'
-    project(':qmobileapi').projectDir = new File(settingsDir, '../QMobileAPI/qmobileapi')
+    project(':qmobileapi').projectDir = new File(settingsDir, depRoot+'QMobileAPI/qmobileapi')
     include ':qmobiledatastore'
-    project(':qmobiledatastore').projectDir = new File(settingsDir, '../QMobileDataStore/qmobiledatastore')
+    project(':qmobiledatastore').projectDir = new File(settingsDir, depRoot+'QMobileDataStore/qmobiledatastore')
     include ':qmobiledatasync'
-    project(':qmobiledatasync').projectDir = new File(settingsDir, '../QMobileDataSync/qmobiledatasync')
+    project(':qmobiledatasync').projectDir = new File(settingsDir, depRoot+'QMobileDataSync/qmobiledatasync')
 }
