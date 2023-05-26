@@ -14,9 +14,22 @@ This android framework belong to [android SDK](https://github.com/4d/android-sdk
 
 ### Actions
 
-🚧
+Code for action could be found in [action package](qmobileui/src/main/java/com/qmobile/qmobileui/action)
 
-### 🚧
+An action is desctibed by its model [Action](qmobileui/src/main/java/com/qmobile/qmobileui/action/model/Action.kt)
+
+An anction could have some parameters (lien parameters)
+each parameters is displayed using a view that extends lien vers BaseViewHolder
+
+#### sort
+
+Sort action is a special action : lien vers l'endroit ou ca sort dans la list form
+
+#### open url
+
+..
+
+### xxx 🚧
 
 
 
