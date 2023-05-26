@@ -8,13 +8,33 @@ This android framework belong to [android SDK](https://github.com/4d/android-sdk
 
 ## How it workds
 
-### Forms
-
-🚧
+### List View sections
+https://dev.azure.com/4dimension/4D/_workitems/edit/4563
 
 ### Actions
 
-🚧
+Simple actions (without parameters):
+https://project.4d.com/issues/130347
+
+Actions with parameters (action forms)
+https://project.4d.com/issues/131410
+
+
+Actions with Image, Barcode, signature fields 
+https://project.4d.com/issues/133592
+
+Offline actions
+https://project.4d.com/issues/131302
+
+Sort actions
+https://dev.azure.com/4dimension/4D/_workitems/edit/3575
+
+
+
+
+
+
+
 
 ### 🚧
 
