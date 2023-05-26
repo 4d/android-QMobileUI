@@ -1,5 +1,7 @@
 # QMobileUI
 
+[![Build](https://github.com/4d/android-QMobileUI/actions/workflows/build.yml/badge.svg)](https://github.com/4d/android-QMobileUI/actions/workflows/build.yml)
+
 This android framework belong to [android SDK](https://github.com/4d/android-sdk) and it contains :
 - graphical views ie. the navigation, list, details and action forms
 - ...
