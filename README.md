@@ -6,7 +6,7 @@ This android framework belong to [android SDK](https://github.com/4d/android-sdk
 - graphical views ie. the navigation, list, details and action forms
 - ...
 
-## How it workds
+## How it works
 
 ### Forms
 
@@ -23,10 +23,10 @@ Detail forms inherit from [EntityDetailFragment](https://github.com/4d/android-Q
 
 Code for action could be found in [action package](qmobileui/src/main/java/com/qmobile/qmobileui/action)
 
-An action is desctibed by its model [Action](qmobileui/src/main/java/com/qmobile/qmobileui/action/model/Action.kt)
+An action is described by its model [Action](qmobileui/src/main/java/com/qmobile/qmobileui/action/model/Action.kt)
 
 An action could have some [parameters](qmobileui/src/main/java/com/qmobile/qmobileui/action/actionparameters) and
-each parameters is displayed using a view that extends lien vers [BaseViewHolder](qmobileui/src/main/java/com/qmobile/qmobileui/action/actionparameters/viewholders/BaseViewHolder.kt)
+each parameters is displayed using a view that extends [BaseViewHolder](qmobileui/src/main/java/com/qmobile/qmobileui/action/actionparameters/viewholders/BaseViewHolder.kt)
 
 #### sort
 
@@ -35,7 +35,7 @@ Sort action is a special action the code for sorting data could be found in this
 #### Offline actions
 
 Offline action is an action that is not sent immediately (due to network problem, server not reached ...) and saved as a pending task to be sent later
-Code to handle and display pending task could be found in this [pendind tasks package](qmobileui/src/main/java/com/qmobile/qmobileui/action/pendingtasks)
+Code to handle and display pending task could be found in this [pending tasks package](qmobileui/src/main/java/com/qmobile/qmobileui/action/pendingtasks)
 
 #### Open url action
 

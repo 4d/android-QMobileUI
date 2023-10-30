@@ -38,7 +38,7 @@ interface BaseInputControlViewHolder : InputControlDataHandler {
     }
 
     val fragMng: FragmentManager?
-    val placeHolder: String
+    var placeHolder: String
     val circularProgressBar: CircularProgressIndicator?
     var currentEditEntityValue: Any?
     val fieldValueMap: Map<Int, Any?>

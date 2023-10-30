@@ -35,7 +35,7 @@ class PopoverViewHolder(
 
     override val fragMng: FragmentManager? = fragmentManager
     override var fieldMapping: FieldMapping? = null
-    override val placeHolder = itemView.context.resources.getString(R.string.input_control_popover_baseline)
+    override var placeHolder = itemView.context.resources.getString(R.string.input_control_popover_baseline)
     override var currentEditEntityValue: Any? = null
     override val circularProgressBar: CircularProgressIndicator? = null
     override val fieldValueMap = mutableMapOf<Int, Any?>()

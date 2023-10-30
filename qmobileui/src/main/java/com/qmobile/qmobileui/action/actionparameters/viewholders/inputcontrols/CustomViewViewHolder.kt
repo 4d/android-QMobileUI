@@ -27,7 +27,7 @@ abstract class CustomViewViewHolder(
 
     override val fragMng: FragmentManager? = fragmentManager
     override var fieldMapping: FieldMapping? = null
-    override val placeHolder: String = ""
+    override var placeHolder: String = ""
     override var currentEditEntityValue: Any? = null
     override val circularProgressBar: CircularProgressIndicator = itemView.findViewById(R.id.circular_progress)
     override val fieldValueMap = mutableMapOf<Int, Any?>()

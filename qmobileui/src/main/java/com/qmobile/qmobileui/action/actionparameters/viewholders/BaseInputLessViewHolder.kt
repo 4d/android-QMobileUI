@@ -12,6 +12,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobileui.R
+import com.qmobile.qmobileui.action.actionparameters.viewholders.inputcontrols.BaseInputControlViewHolder
 import com.qmobile.qmobileui.ui.getShakeAnimation
 import com.qmobile.qmobileui.ui.setOnSingleClickListener
 import org.json.JSONObject
@@ -44,8 +45,14 @@ abstract class BaseInputLessViewHolder(itemView: View, format: String) : BaseVie
         when {
             itemJsonObject.getSafeString("default") != null ->
                 input.setText(itemJsonObject.getSafeString("default"))
-            itemJsonObject.getSafeString("placeholder") != null ->
+            itemJsonObject.getSafeString("placeholder") != null -> {
                 input.setText(itemJsonObject.getSafeString("placeholder"))
+                itemJsonObject.getSafeString("placeholder")?.let {
+                    if (this is BaseInputControlViewHolder) {
+                        (this as BaseInputControlViewHolder).placeHolder = it
+                    }
+                }
+            }
         }
 
         container.endIconMode = TextInputLayout.END_ICON_CUSTOM
