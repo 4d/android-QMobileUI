@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Created by emarchand on 30/10/2023.
+  ~ 4D SAS
+  ~ Copyright (c) 2023 emarchand. All rights reserved.
+  -->
+
+<resources>
+    <string name="deeplink_scheme"></string>
+    <string name="nav_settings">Paramètres</string>
+    <string name="nav_pending_tasks">Taches en attentes</string>
+    <string name="nav_barcode_scan">LEcture de barcode</string>
+    <string name="nav_feedback">Retour</string>
+</resources>

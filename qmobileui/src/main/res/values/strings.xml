@@ -5,7 +5,7 @@
   -->
 
 <resources>
-    <string name="qmobileui_app_name">QMobileUI</string>
+    <string name="qmobileui_app_name" translatable="false">QMobileUI</string>
 
     <!--    Navigation labels -->
     <string name="nav_settings">Settings</string>
@@ -14,9 +14,9 @@
     <string name="nav_feedback">Feedback</string>
 
     <!--    Placeholders -->
-    <string name="placeholder_title">___TITLE___</string>
-    <string name="placeholder_id">___ID___</string>
-    <string name="placeholder_value">___VALUE___</string>
+    <string name="placeholder_title" translatable="false">___TITLE___</string>
+    <string name="placeholder_id" translatable="false">___ID___</string>
+    <string name="placeholder_value" translatable="false">___VALUE___</string>
 
     <!--    Detail and List -->
     <string name="try_refresh_data">Please try refreshing data again</string>
@@ -26,9 +26,9 @@
 
     <!--    Settings Fragment -->
     <string name="cat_title_server">Server</string>
-    <string name="pref_remote_url_key">remote_url</string>
+    <string name="pref_remote_url_key" translatable="false">remote_url</string>
     <string name="pref_remote_url_title">Remote URL</string>
-    <string name="cat_account_key">account_category</string>
+    <string name="cat_account_key" translatable="false">account_category</string>
     <string name="cat_title_account">Account</string>
     <string name="cat_title_feedback">Help and Feedback</string>
     <string name="cat_feedback_key">feedback_category</string>
