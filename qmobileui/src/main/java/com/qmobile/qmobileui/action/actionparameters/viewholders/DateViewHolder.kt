@@ -91,7 +91,7 @@ class DateViewHolder(
             ) + "!" + calendar.get(Calendar.YEAR)
 
     private fun updatePickerDate(newDate: String) {
-        val cal = DateFormat.getDateFromString(newDate)
+        val cal = DateFormat.getDateFromString(newDate) ?: return
         val clearedTZ = Calendar.getInstance().apply {
             set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH))
             set(Calendar.MONTH, cal.get(Calendar.MONTH))

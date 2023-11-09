@@ -17,20 +17,20 @@ object DateFormat {
     private const val nullDate = "0!0!0"
 
     fun applyFormat(format: String, baseText: String): String {
-        if (baseText == nullDate) return ""
-        val calendar = getDateFromString(baseText).time
+        val calendar = getDateFromString(baseText) ?: return ""
+        val time = calendar.time
         return when (format) {
             "fullDate" -> {
-                DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault()).format(calendar)
+                DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault()).format(time)
             }
             "longDate" -> {
-                DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault()).format(calendar)
+                DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault()).format(time)
             }
             "mediumDate" -> {
-                DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault()).format(calendar)
+                DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault()).format(time)
             }
             "shortDate" -> {
-                DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(calendar)
+                DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(time)
             }
             else -> {
                 baseText
@@ -38,7 +38,8 @@ object DateFormat {
         }
     }
 
-    fun getDateFromString(date: String): Calendar = Calendar.getInstance().apply {
+    fun getDateFromString(date: String): Calendar? = Calendar.getInstance().apply {
+        if (date == nullDate) return null
         val dateFormat = SimpleDateFormat("dd!MM!yyyy", Locale.getDefault())
         dateFormat.safeParse(date)?.let { date ->
             time = date
