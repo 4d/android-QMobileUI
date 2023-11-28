@@ -1,45 +1,202 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Created by emarchand on 30/10/2023.
+  ~ Created by Quentin Marciset on 19/2/2020.
   ~ 4D SAS
-  ~ Copyright (c) 2023 emarchand. All rights reserved.
+  ~ Copyright (c) 2020 Quentin Marciset. All rights reserved.
   -->
 
 <resources>
-    <string name="deeplink_scheme"></string>
-    <string name="nav_settings">Paramètres</string>
-    <string name="nav_pending_tasks">Taches en attentes</string>
-    <string name="nav_barcode_scan">LEcture de barcode</string>
-    <string name="nav_feedback">Retour</string>
+    <string name="qmobileui_app_name">QMobileUI</string>
+
+    <!--    Navigation labels -->
+    <string name="nav_settings">Réglages</string>
+    <string name="nav_pending_tasks">Tâches en attente</string>
+    <string name="nav_barcode_scan">Scan code-barres</string>
+    <string name="nav_feedback">Commentaires</string>
+
+    <!--    Placeholders -->
+    <string name="placeholder_title">___TITLE___</string>
+    <string name="placeholder_id">___ID___</string>
+    <string name="placeholder_value">___VALUE___</string>
+
+    <!--    Detail and List -->
+    <string name="try_refresh_data">Veuillez réessayer d\'actualiser les données</string>
+    <string name="record_not_found">L\'enregistrement  est introuvable</string>
+    <string name="table_not_found">La table %1$s est introuvable</string>
+    <string name="incorrect_deeplink">Il manque un paramètre \'dataClass\' dans l\'URL du lien profond</string>
+
+    <!--    Settings Fragment -->
     <string name="cat_title_server">Serveur</string>
-    <string name="pref_remote_url_title">URL serveur</string>
-    <string name="pref_logout_key">Déconnection</string>
-    <string name="cat_title_server">Serveur</string>
-    <string name="pref_pending_tasks_key">en attente</string>
+    <string name="pref_remote_url_key">remote_url</string>
+    <string name="pref_remote_url_title">URL distante</string>
+    <string name="cat_account_key">account_category</string>
+    <string name="cat_title_account">Compte</string>
+    <string name="cat_title_feedback">Aide et avis</string>
+    <string name="cat_feedback_key">feedback_category</string>
+    <string name="pref_logout_key">logout</string>
+    <string name="pref_feedback_key">feedback</string>
+    <string name="pref_pending_tasks_key">pending</string>
+    <string name="pref_pending_tasks_count">%d en attente</string>
     <string name="pref_logout_title">Se déconnecter</string>
-    <string name="pref_feedback_title">Envoyer un feedback</string>
-    <string name="pref_feedback_summary">Aider nous à améloirer</string>
-    <string name="pref_logout_summary">Déconnecter l\'utlisateur</string>
-    <string name="settings_navbar_title">Paramètres</string>
-    <string name="no_internet">Pas de connexion internet</string>
-    <string name="no_internet_auto_login">Pas de connexion internet, vous ne pouvez pas accèder au serveur</string>
+    <string name="pref_feedback_title">Envoyer un avis</string>
+    <string name="pref_feedback_summary">Aidez-nous à nous améliorer</string>
+    <string name="pref_logout_summary">Déconnexion de l\'utilisateur actuel</string>
+    <string name="pref_pending_tasks">Tâches en attente</string>
+    <string name="logout_dialog_negative">Annuler</string>
+    <string name="logout_dialog_positive">Se déconnecter</string>
+    <string name="logout_dialog_title">Êtes-vous sûr de vouloir vous déconnecter ?</string>
+    <string name="logout_dialog_message">Vous devrez vous reconnecter</string>
+    <string name="logout_dialog_message_if_pending_task">Les tâches en attente seront supprimées. Êtes-vous sûr de vouloir vous déconnecter ?</string>
+    <string name="settings_navbar_title">Réglages</string>
+
+    <!--    Network -->
+    <string name="no_internet">Pas de connexion Internet</string>
+    <string name="no_internet_auto_login">Pas de connexion Internet, vous ne pourrez pas effectuer de requêtes serveur</string>
     <string name="server_accessible">Serveur accessible</string>
-    <string name="server_not_accessible">Serveur non accessible</string>
-    <string name="server_not_accessible_auto_login">Serveur non accessible, vous ne pouvez pas accéder au serveur</string>
-    <string name="server_not_reachable">Le serveur n\'est pas joignable</string>
+    <string name="server_not_accessible">Serveur inaccessible</string>
+    <string name="server_not_accessible_auto_login">Serveur inaccessible, vous ne pourrez pas effectuer de requêtes serveur</string>
+    <string name="server_not_reachable">Serveur injoignable</string>
     <string name="open_url_server_not_reachable">Le serveur n\'est pas joignable</string>
-    <string name="remote_url_checking">Vérification...</string>
-    <string name="login_button_text">Se connecter</string>
+    <string name="remote_url_placeholder">%1$s - %2$s</string>
+    <string name="remote_url_checking">Vérification…</string>
+
+    <!--    Login -->
+    <string name="login_button_text">Connexion</string>
+    <string name="login_placeholder_email">Courriel</string>
     <string name="login_logged_out">Vous avez été déconnecté</string>
+    <string name="login_invalid_email">Adresse courriel invalide</string>
+    <string name="login_image_content_description">Logo de l\'application</string>
     <string name="remote_url_dialog_cancel">Annuler</string>
     <string name="open_url_dialog_cancel">Annuler</string>
-    <string name="remote_url_dialog_done">Valider</string>
+    <string name="remote_url_dialog_done">Effectué</string>
     <string name="remote_url_dialog_positive">OK</string>
-    <string name="remote_url_dialog_edit">Editer</string>
-    <string name="remote_url_invalid">" URL du serveur invalid"</string>
-    <string name="logo_menu_edit_remote_url">Editer l\'URL du serveur</string>
-    <string name="web_view_refresh">Raffraichir</string>
+    <string name="remote_url_dialog_edit">Modifier</string>
+    <string name="remote_url_invalid">URL distante invalide</string>
+    <string name="network_status_image">Image de l\'état du réseau</string>
+    <string name="https_hint">https://…</string>
+    <string name="login_qrcode_caption">Scannez le code QR pour vous connecter</string>
+    <string name="login_qrcode_retry">Réessayez</string>
+    <string name="login_google_signing_out">Se déconnecter du compte Google</string>
+    <string name="login_google_signed_out">Déconnecté du compte Google</string>
+    <string name="login_google_no_server_client_id">La ressource de chaîne \"server_client_id\" n\'a pas été définie</string>
+    <string name="logo_menu_edit_remote_url">Modifier l\'URL distante</string>
+    <string name="logo_menu_feedback">Aide et avis</string>
+
+    <string name="web_view_refresh">Rafraîchir</string>
     <string name="web_view_share">Partager</string>
     <string name="previous">Précédent</string>
     <string name="next">Suivant</string>
-    <string name="action_send_no_internet">Vérifier votre connection internet</string>
+    <string name="search_title">search_title</string>
+
+    <!-- Actions -->
+    <string name="action_send_no_internet">Vérifiez votre connexion Internet, votre action sera exécutée plus tard</string>
+    <string name="action_send_server_not_accessible">Le serveur n\'est pas disponible, votre action sera exécutée plus tard</string>
+    <string name="retry_action">Réessayez</string>
+    <string name="open_url_retry_dialog">Essayez à nouveau</string>
+    <string name="validate_action">Valider</string>
+    <string name="action_list_title">Actions</string>
+    <string name="action_item_image_content_description">Image de l\'élément d\'action</string>
+    <string name="action_remove_item_image_content_description">Supprimer l\'image de l\'élément</string>
+    <string name="item_parameter_boolean_image_switch_content_description">Image à deux états pour les booléens</string>
+    <string name="action_parameter_mandatory_error">Champ obligatoire</string>
+    <string name="action_parameter_min_value_error">Doit être supérieur ou égal à %s</string>
+    <string name="action_parameter_max_value_error">Doit être inférieur ou égal à %s</string>
+    <string name="action_parameter_number_error">La valeur du champ doit être un nombre</string>
+    <string name="action_parameter_invalid_email_error">Courriel invalide</string>
+    <string name="action_parameter_invalid_url_error">URL invalide</string>
+    <string name="action_parameter_image_dialog_title">Ajouter une image</string>
+    <string name="action_parameter_image_dialog_photo">Prendre une photo</string>
+    <string name="action_parameter_image_dialog_gallery">Choisir depuis la galerie</string>
+    <string name="pending_task_menu_item">Tâches en attente</string>
+    <string name="pending_task_navbar_title">Tâches en attente</string>
+    <string name="scroll_to_not_seen">Défilement vers les paramètres restants</string>
+    <string name="icon_state_content_description">État de l\'icône d\'action terminée</string>
+    <string name="completed_tasks_title">Tâches terminées</string>
+    <string name="server_status_icon">Icône d\'état du serveur</string>
+    <string name="pending_task_cancelled">Tâche en attente supprimée</string>
+    <string name="pending_task_cancelled_undo">Annuler</string>
+    <string name="item_action_button_ellipsize">…</string>
+    <string name="action_time_dialog_negative">Annuler</string>
+    <string name="action_time_dialog_positive">OK</string>
+    <string name="action_more_button_title">Autre</string>
+    <string name="action_create_image_fail">Impossible de créer le fichier temporaire</string>
+
+    <!-- Duration Picker -->
+    <string name="hour_column_title">Heures</string>
+    <string name="minute_column_title">Minutes</string>
+    <string name="second_column_title">Secondes</string>
+
+    <!-- Permissions -->
+    <string name="permission_dialog_title">Autorisation requise</string>
+    <string name="permission_dialog_positive">OK</string>
+    <string name="permission_dialog_negative">Non, merci</string>
+    <string name="permission_rationale_barcode">Autorisation requise pour scanner les codes-barres</string>
+    <string name="permission_rationale_camera">Autorisation requise pour prendre des photos</string>
+    <string name="permission_rationale_notifications">Autorisation requise pour vous envoyer des notifications push</string>
+
+    <!-- Barcode -->
+    <string name="barcode_camera_back_content_description">Retour</string>
+
+    <!-- Signature -->
+    <string name="signature_dialog_title">Signer ici</string>
+    <string name="signature_dialog_positive">Valider</string>
+    <string name="signature_dialog_cancel">Annuler</string>
+
+    <!-- Input controls -->
+    <string name="input_control_push_baseline">Cliquez pour choisir</string>
+    <string name="input_control_popover_baseline">Cliquez pour choisir</string>
+    <string name="input_control_menu_baseline">Cliquez pour ouvrir le menu</string>
+    <string name="input_control_datasource_no_data">Impossible d\'obtenir des données pour le contrôle de saisie \"%s\"</string>
+    <string name="input_control_datasource_no_table">Il n\'existe pas de table \"%1$s\" (contrôle de saisie \"%2$s\")</string>
+    <string name="input_control_datasource_no_field">Il n\'y a pas de champ \"%1$s\" dans la table \"%2$s\" (contrôle de saisie \"%3$s\")</string>
+
+    <!-- Sessions -->
+    <string name="missing_session_file_logout">Vous avez été déconnecté, veuillez vous reconnecter</string>
+    <string name="missing_session_file_logout_with_pending_tasks">Vous avez été déconnecté avec des actions en attente, veuillez vous reconnecter afin d\'exécuter ces actions</string>
+    <string name="max_device_connection_reached">Le nombre de licences disponibles est dépassé, veuillez contacter l\'administrateur du serveur</string>
+
+    <!-- Crash Logs -->
+    <string name="crash_log_dialog_title">Oops ! Il semble que votre application ne s\'est pas fermée correctement</string>
+    <string name="crash_log_dialog_message">Vous souhaitez nous aider à nous améliorer ?\nUn rapport d\'erreur a été généré, envoyez-le SVP à 4D.com. Nous garderons vos informations confidentielles</string>
+    <string name="crash_log_dialog_save_for_later">Enregistrer le rapport pour plus tard</string>
+    <string name="crash_log_dialog_send">Envoyer un rapport</string>
+    <string name="crash_log_dialog_deny">Ne pas envoyer de rapport</string>
+    <string name="crash_log_dialog_response_title">Rapport envoyé</string>
+    <string name="crash_log_dialog_response_message_success">Merci de nous aider à améliorer cette application !\nVeuillez noter la référence %1$s pour suivre le rapport</string>
+    <string name="crash_log_dialog_response_message_fail">Le serveur n\'a pas accepté le fichier de crash</string>
+    <string name="crash_log_dialog_response_action">OK</string>
+
+    <!-- Feedback -->
+    <string name="feedback_menu_title">Comment pouvons-nous vous aider ?</string>
+    <string name="feedback_talk_to_us">Dites-nous</string>
+    <string name="feedback_talk_to_us_body">Donnez-nous votre avis</string>
+    <string name="feedback_suggest_improvement">Proposer une amélioration</string>
+    <string name="feedback_suggest_improvement_body">Suggérez une amélioration ici</string>
+    <string name="feedback_show_current_log">Afficher le journal actuel</string>
+    <string name="feedback_show_current_log_action_dismiss">Abandonner</string>
+    <string name="feedback_show_current_log_action_send">Envoyer</string>
+    <string name="feedback_show_current_log_action_change_level">Modifier le niveau de journalisation</string>
+    <string name="feedback_report_a_problem">Signaler un problème</string>
+    <string name="feedback_report_a_problem_body">Qu\'est-ce qui ne va pas ?</string>
+    <string name="feedback_report_previous_crash">Signaler un crash précédent</string>
+    <string name="feedback_email_hint">Saisissez votre adresse courriel</string>
+    <string name="feedback_send">Envoyer</string>
+    <string name="feedback_send_success">Merci pour votre avis !</string>
+    <string name="feedback_send_current_logs">Journaux envoyés avec succès</string>
+    <string name="feedback_log_attached">Journal joint</string>
+
+    <!-- Log Levels -->
+    <string name="log_level_menu_verbose">Détaillé</string>
+    <string name="log_level_menu_debug">Débogage</string>
+    <string name="log_level_menu_info">Info (par défaut)</string>
+    <string name="log_level_menu_warn">Avertissement</string>
+    <string name="log_level_menu_error">Erreur</string>
+    <string name="log_level_menu_assert">Assert</string>
+    <string name="log_level_menu_none">Aucun</string>
+    <string name="log_level_changed">Niveau de journalisation modifié en %s</string>
+
+    <!-- Push Notifications -->
+    <string name="push_cannot_send">Impossible d\'envoyer le jeton d\'enregistrement push au serveur</string>
+    <string name="push_channel_id">qmobile_channel_id</string>
+    <string name="push_channel_description">Utilisé pour les notifications push 4D</string>
+
 </resources>
