@@ -430,7 +430,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         // first: check if visible items are valid
         val validList = LinkedList(validationMap.values)
         for (i in 0 until lastVisibleItemPosition + 1) {
-            if (!validList[i]) {
+            if (i < validList.size && !validList[i]) {
                 scrollTo(position = i, shouldHideKeyboard = true, triggerError = true)
                 return false
             }
