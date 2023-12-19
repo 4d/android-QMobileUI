@@ -595,7 +595,16 @@ class MainActivity :
                 }
             }
             action.parameters.length() > 0 -> {
-                actionNavigable.navigateToActionForm(action, (currentEntity?.__entity as? EntityModel)?.__KEY)
+                val itemId = (currentEntity?.__entity as? EntityModel)?.__KEY
+
+                var pendingTaskId: String? = null
+                if (action.hasUniqueTask || (BaseApp.runtimeDataHolder.editActionHasUniqueTask && (action.scope == Action.Scope.CURRENT_RECORD) && action.isEditAction())) {
+                    pendingTaskId = this.getTaskVM().pendingTasks.value?.firstOrNull {
+                        it.isPending() && it.match(action.name, actionNavigable.tableName, itemId)
+                    }?.id
+                }
+
+                actionNavigable.navigateToActionForm(action, itemId, pendingTaskId)
             }
             action.isOfflineCompatible() || connectivityViewModel.isConnected() -> {
                 val task = ActionTask(

@@ -200,7 +200,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
         )
     }
 
-    override fun navigateToActionForm(action: Action, itemId: String?) {
+    override fun navigateToActionForm(action: Action, itemId: String?, taskId: String?) {
         setFadeThroughExitTransition()
         BaseApp.genericNavigationResolver.navigateToActionForm(
             viewDataBinding = binding,
@@ -208,7 +208,7 @@ open class EntityDetailFragment : BaseFragment(), ActionNavigable, MenuProvider 
             itemId = itemId ?: this.itemId,
             relationName = "",
             parentItemId = "",
-            pendingTaskId = "",
+            pendingTaskId = taskId ?: "",
             actionUUID = action.uuid,
             navbarTitle = action.getPreferredShortName()
         )
