@@ -25,6 +25,7 @@ import com.qmobile.qmobileui.ActionActivity
 import com.qmobile.qmobileui.FragmentCommunication
 import com.qmobile.qmobileui.R
 import com.qmobile.qmobileui.SettingsActivity
+import com.qmobile.qmobileui.action.utils.ActionHelper
 import com.qmobile.qmobileui.activity.BaseActivity
 import com.qmobile.qmobileui.feedback.FeedbackHandler
 import com.qmobile.qmobileui.network.RemoteUrlChanger
@@ -149,6 +150,9 @@ class SettingsFragment :
         } else {
             getString(R.string.logout_dialog_title)
         }
+        // actionActivity.getTaskVM().pendingTasks.value?.filter { it.isPending() && ActionHelper.match(it, entity = )}
+
+
         MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_QMobile_MaterialAlertDialog_FullWidthButtons)
             .setTitle(title)
             .setMessage(getString(R.string.logout_dialog_message))

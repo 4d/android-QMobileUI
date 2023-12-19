@@ -11,7 +11,10 @@ import com.qmobile.qmobileapi.utils.getJSONObjectList
 import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileapi.utils.parseToString
+import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.utils.getSafeBoolean
 import com.qmobile.qmobiledatastore.dao.ActionTask
+import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.Relation
 import com.qmobile.qmobiledatasync.utils.fieldAdjustment
@@ -100,7 +103,8 @@ object ActionHelper {
                 parameters = parameters,
                 uuid = getSafeString("uuid") ?: "",
                 description = getSafeString("description") ?: "",
-                sortFields = getSortFields(parameters)
+                sortFields = getSortFields(parameters),
+                hasUniqueTask = getSafeBoolean("hasUniqueTask") ?: false
             )
         }
     }

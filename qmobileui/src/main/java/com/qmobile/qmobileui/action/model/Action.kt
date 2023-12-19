@@ -20,7 +20,8 @@ open class Action(
     val parameters: JSONArray,
     val uuid: String,
     val description: String? = null,
-    val sortFields: LinkedHashMap<String, String>
+    val sortFields: LinkedHashMap<String, String>,
+    val hasUniqueTask: Boolean
 ) {
 
     fun getIconDrawablePath(): String? =
@@ -46,6 +47,8 @@ open class Action(
         TABLE, CURRENT_RECORD
     }
 
+    fun isAddAction() = preset == "add"
+    fun isEditAction() = preset == "edit"
     fun isSortAction() = preset == "sort"
     fun isOpenUrlAction() = preset == "openURL"
     fun isOfflineCompatible() = preset?.lowercase(Locale.getDefault()) != "share"
