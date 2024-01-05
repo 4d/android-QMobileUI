@@ -109,6 +109,18 @@ class PushInputControlFragment : BaseFragment(), MenuProvider, InputControlDataH
         }
     }
 
+    override fun FieldMapping.prepareCurrentEntity(isMandatory: Boolean, choiceList: Map<String, Any>?) {
+        var wantedChoiceList: Any? = choiceList
+        choiceList?.let {
+            if (it.containsKey("choiceList")) {
+                wantedChoiceList = it["choiceList"]
+            }
+        }
+        handleMandatory(this.getChoiceList(wantedChoiceList), isMandatory) { items ->
+            initAdapter(items)
+        }
+    }
+
     override fun FieldMapping.prepareDataSource(isMandatory: Boolean) {
         this@PushInputControlFragment.binding.circularProgress.visibility = View.VISIBLE
         dataSourceHandler = super.handleDataSource(

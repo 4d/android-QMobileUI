@@ -10,6 +10,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.text.method.Touch.scrollTo
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -31,9 +33,13 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.UploadHelper
 import com.qmobile.qmobileapi.utils.UploadHelper.getBodies
 import com.qmobile.qmobileapi.utils.getSafeArray
+import com.qmobile.qmobileapi.utils.getSafeBoolean
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileapi.utils.getStringList
+import com.qmobile.qmobileapi.utils.parseToString
+import com.qmobile.qmobileapi.utils.parseToType
+import com.qmobile.qmobileapi.utils.toStringMap
 import com.qmobile.qmobiledatastore.dao.ActionInfo
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.data.RoomEntity
@@ -65,9 +71,11 @@ import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
 import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZExitTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
+import com.qmobile.qmobileui.utils.ReflectionUtils
 import com.qmobile.qmobileui.utils.hideKeyboard
 import okhttp3.RequestBody
 import org.json.JSONArray
+import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
 import java.lang.Integer.max
@@ -126,6 +134,21 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         const val INPUT_CONTROL_PUSH_FIELD_VALUE_KEY = "input_control_push_field_value"
         const val INPUT_CONTROL_DISPLAY_TEXT_INJECT_KEY = "input_control_display_text_inject"
         const val INPUT_CONTROL_FIELD_VALUE_INJECT_KEY = "input_control_field_value_inject"
+
+        @Suppress("UNCHECKED_CAST")
+        fun checkChoiceList(actionParameter : JSONObject, immutableEntity: RoomEntity) {
+            val inputControlName = actionParameter.getSafeString("source")?.removePrefix("/") ?: return
+            val fieldMapping = BaseApp.runtimeDataHolder.inputControls.find { it.name == inputControlName } ?: return
+            fieldMapping.choiceListComputed = null
+
+            val dataSource = ((fieldMapping.choiceList as? Map<String, Any>)?.get("dataSource")) as? Map<String, Any> ?: return
+            val currentEntity = dataSource.get("currentEntity") as? Boolean ?: false
+            if (!currentEntity) return
+
+            val fieldName = (dataSource.get("field") as? String) ?: return
+            val choiceList = (ReflectionUtils.getInstancePropertyForInputControl(immutableEntity, fieldName) as? JSONObject) ?: return
+            fieldMapping.choiceListComputed = choiceList.toStringMap()
+        }
     }
 
     private val lastVisibleItemPosition: Int
@@ -328,6 +351,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
             }
         )
         binding.parametersRecyclerView.adapter = adapter
+
+        // TODO: here could check all choiceList according to selectedEntity
     }
 
     private fun onValueChanged(name: String, value: Any?, metaData: String?, isValid: Boolean) {
@@ -570,6 +595,10 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         actionParameter?.getSafeString("source")?.let { format ->
             setSharedAxisXExitTransition()
             val isMandatory = actionParameter.getSafeArray("rules")?.getStringList()?.contains("mandatory") ?: false
+
+            selectedEntity?.let {
+                checkChoiceList(actionParameter, it) // TODO: Maybe do it before to use it when displaying value mapping
+            }
             BaseApp.genericNavigationResolver.navigateToPushInputControl(binding, format.removePrefix("/"), isMandatory)
         }
     }
