@@ -58,6 +58,18 @@ interface BaseInputControlViewHolder : InputControlDataHandler {
         }
     }
 
+    override fun FieldMapping.prepareCurrentEntity(isMandatory: Boolean, choiceList: Map<String, Any>?) {
+        var wantedChoiceList: Any? = choiceList
+        choiceList?.let {
+            if (it.containsKey("choiceList")) {
+                wantedChoiceList = it["choiceList"]
+            }
+        }
+        handleMandatory(this.getChoiceList(wantedChoiceList), isMandatory) { items ->
+            setupValues(items)
+        }
+    }
+
     override fun FieldMapping.prepareDataSource(isMandatory: Boolean) {
         val fragment = fragMng?.getParentFragment()
         if (fragment is ActionParametersFragment) {

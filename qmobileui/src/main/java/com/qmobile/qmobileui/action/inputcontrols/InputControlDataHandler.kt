@@ -25,6 +25,9 @@ interface InputControlDataHandler {
 
             if (InputControl.hasStaticData(fieldMapping.choiceList)) {
                 fieldMapping.prepareStaticData(isMandatory)
+            }
+            else if (InputControl.hasCurrentEntity(fieldMapping.choiceList)) {
+                fieldMapping.prepareCurrentEntity(isMandatory, fieldMapping.choiceListComputed)
             } else {
                 fieldMapping.prepareDataSource(isMandatory)
             }
@@ -32,6 +35,8 @@ interface InputControlDataHandler {
     }
 
     fun FieldMapping.prepareStaticData(isMandatory: Boolean)
+
+    fun FieldMapping.prepareCurrentEntity(isMandatory: Boolean, choiceList: Map<String, Any>?)
 
     fun FieldMapping.prepareDataSource(isMandatory: Boolean)
 

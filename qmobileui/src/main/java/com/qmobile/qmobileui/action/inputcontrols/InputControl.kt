@@ -47,6 +47,16 @@ object InputControl {
         }
     }
 
+
+    @Suppress("UNCHECKED_CAST")
+    fun hasCurrentEntity(choiceList: Any?): Boolean {
+        return when (choiceList) {
+            is List<*> -> false
+            is Map<*, *> -> isValidCurrentEntity(choiceList)
+            else -> false
+        }
+    }
+
     fun getTypedValue(itemJsonObject: JSONObject, fieldValue: Any?): Any? {
         if (fieldValue == null) {
             return null
@@ -73,6 +83,11 @@ object InputControl {
     private fun isValidDataSource(choiceList: Map<*, *>): Boolean {
         return ((choiceList["dataSource"] as? Map<*, *>)?.get("dataClass") as? String)?.isNotEmpty() == true &&
             ((choiceList["dataSource"] as? Map<*, *>)?.get("field") as? String)?.isNotEmpty() == true
+    }
+
+    private fun isValidCurrentEntity(choiceList: Map<*, *>): Boolean {
+        return isValidDataSource(choiceList) &&
+                (((choiceList["dataSource"] as? Map<*, *>)?.get("currentEntity") as? Boolean) == true)
     }
 
     @Suppress("UNCHECKED_CAST")
