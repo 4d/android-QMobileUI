@@ -213,18 +213,24 @@ class TasksFragment : BaseFragment(), NetworkChecker {
     }
 
     override fun onServerAccessible() {
-        binding.serverStatus.text = getString(R.string.server_accessible)
-        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.domain)
+        checkIfFragmentAttached {
+            binding.serverStatus.text = getString(R.string.server_accessible)
+            binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.domain)
+        }
     }
 
     override fun onServerInaccessible() {
-        binding.serverStatus.text = getString(R.string.server_not_accessible)
-        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.domain_disabled)
+        checkIfFragmentAttached {
+            binding.serverStatus.text = getString(R.string.server_not_accessible)
+            binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.domain_disabled)
+        }
     }
 
     override fun onNoInternet() {
-        binding.serverStatus.text = getString(R.string.no_internet)
-        binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.signal_disconnected)
+        checkIfFragmentAttached {
+            binding.serverStatus.text = getString(R.string.no_internet)
+            binding.serverStatus.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.signal_disconnected)
+        }
     }
 
     private fun onServerStatusClick() {

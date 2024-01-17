@@ -130,4 +130,10 @@ abstract class BaseFragment : Fragment() {
             true
         }
     }
+
+    protected fun checkIfFragmentAttached(operation: Context.() -> Unit) {
+        if (isAdded && context != null) {
+            operation(requireContext())
+        }
+    }
 }
