@@ -194,36 +194,48 @@ class SettingsFragment :
             connectivityViewModel.isConnected()
     }
 
-    override fun onServerAccessible() {
-        activity?.apply {
-            remoteUrlPref?.summary =
-                this.getString(
-                    R.string.remote_url_placeholder,
-                    remoteUrl,
-                    getString(R.string.server_accessible)
-                )
+    private fun checkIfFragmentAttached(operation: Context.() -> Unit) {
+        if (isAdded && context != null) {
+            operation(requireContext())
         }
-        remoteUrlPref?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.network_ok_circle)
+    }
+
+    override fun onServerAccessible() {
+        checkIfFragmentAttached {
+            activity?.apply {
+                remoteUrlPref?.summary =
+                    this.getString(
+                        R.string.remote_url_placeholder,
+                        remoteUrl,
+                        getString(R.string.server_accessible)
+                    )
+            }
+            remoteUrlPref?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.network_ok_circle)
+        }
     }
 
     override fun onServerInaccessible() {
-        activity?.apply {
-            remoteUrlPref?.summary =
-                this.getString(
-                    R.string.remote_url_placeholder,
-                    remoteUrl,
-                    getString(R.string.server_not_accessible)
-                )
+        checkIfFragmentAttached {
+            activity?.apply {
+                remoteUrlPref?.summary =
+                    this.getString(
+                        R.string.remote_url_placeholder,
+                        remoteUrl,
+                        getString(R.string.server_not_accessible)
+                    )
+            }
+            remoteUrlPref?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.network_nok_circle)
         }
-        remoteUrlPref?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.network_nok_circle)
     }
 
     override fun onNoInternet() {
-        activity?.apply {
-            remoteUrlPref?.summary =
-                this.getString(R.string.remote_url_placeholder, remoteUrl, getString(R.string.no_internet))
+        checkIfFragmentAttached {
+            activity?.apply {
+                remoteUrlPref?.summary =
+                    this.getString(R.string.remote_url_placeholder, remoteUrl, getString(R.string.no_internet))
+            }
+            remoteUrlPref?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.network_nok_circle)
         }
-        remoteUrlPref?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.network_nok_circle)
     }
 
     override fun onValidRemoteUrlChange(newRemoteUrl: String) {
