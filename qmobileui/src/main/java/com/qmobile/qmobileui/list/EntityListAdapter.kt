@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.DiffUtil
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
+import com.qmobile.qmobiledatasync.utils.FieldMapping
 import com.qmobile.qmobileui.formatters.FormatterUtils
 import com.qmobile.qmobileui.utils.ReflectionUtils
 import com.qmobile.qmobileui.utils.ResourcesHelper
@@ -58,8 +59,21 @@ class EntityListAdapter internal constructor(
         return ListItemViewHolder(dataBinding, tableName, onItemClick, onItemLongClick)
     }
 
+    private fun checkChoiceList(immutableEntity: RoomEntity) {
+         BaseApp.runtimeDataHolder.customFormatters[tableName]?.let { fieldMappings ->
+            for ((name, fieldMapping) in fieldMappings) {
+                if (fieldMapping.binding == "localizedText") {
+                   fieldMapping.checkChoiceList(immutableEntity)
+                }
+            }
+        }
+    }
     override fun onBindViewHolder(holder: ListItemViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val roomEntity: RoomEntity? = getItem(position)
+        roomEntity?.let {
+            checkChoiceList(it)
+        }
+        holder.bind(roomEntity)
     }
 
     @Suppress("TooGenericExceptionCaught")

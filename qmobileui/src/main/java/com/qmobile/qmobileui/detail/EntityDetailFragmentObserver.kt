@@ -8,6 +8,7 @@ package com.qmobile.qmobileui.detail
 
 import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.parseToString
+import com.qmobile.qmobiledatastore.data.RoomEntity
 import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobiledatasync.relation.RelationHelper
 import com.qmobile.qmobiledatasync.viewmodel.EntityViewModel
@@ -42,6 +43,14 @@ class EntityDetailFragmentObserver(
         }
     }
 
+    private fun checkChoiceList(tableName : String, immutableEntity: RoomEntity) {
+        BaseApp.runtimeDataHolder.customFormatters[tableName]?.let { fieldMappings ->
+            for ((name, fieldMapping) in fieldMappings) {
+                if (fieldMapping.binding == "localizedText") fieldMapping.checkChoiceList(immutableEntity)
+            }
+        }
+    }
+
     // Observe entity
     private fun observeEntity() {
         entityViewModel.entity.observe(
@@ -50,6 +59,7 @@ class EntityDetailFragmentObserver(
             Timber.d("Observed entity from Room, json = ${BaseApp.mapper.parseToString(entity)}")
             entity?.let {
                 fragment.binding.setVariable(BR.entityData, entity)
+                checkChoiceList(entityViewModel.getAssociatedTableName(), it)
                 fragment.binding.executePendingBindings()
                 RelationHelper.setupRelationNavigation(fragment.tableName, fragment.binding, entity)
 

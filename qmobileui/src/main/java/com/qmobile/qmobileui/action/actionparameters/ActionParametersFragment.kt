@@ -135,19 +135,10 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         const val INPUT_CONTROL_DISPLAY_TEXT_INJECT_KEY = "input_control_display_text_inject"
         const val INPUT_CONTROL_FIELD_VALUE_INJECT_KEY = "input_control_field_value_inject"
 
-        @Suppress("UNCHECKED_CAST")
         fun checkChoiceList(actionParameter : JSONObject, immutableEntity: RoomEntity) {
             val inputControlName = actionParameter.getSafeString("source")?.removePrefix("/") ?: return
             val fieldMapping = BaseApp.runtimeDataHolder.inputControls.find { it.name == inputControlName } ?: return
-            fieldMapping.choiceListComputed = null
-
-            val dataSource = ((fieldMapping.choiceList as? Map<String, Any>)?.get("dataSource")) as? Map<String, Any> ?: return
-            val currentEntity = dataSource.get("currentEntity") as? Boolean ?: false
-            if (!currentEntity) return
-
-            val fieldName = (dataSource.get("field") as? String) ?: return
-            val choiceList = (ReflectionUtils.getInstancePropertyForInputControl(immutableEntity, fieldName) as? JSONObject) ?: return
-            fieldMapping.choiceListComputed = choiceList.toStringMap()
+            fieldMapping.checkChoiceList(immutableEntity)
         }
     }
 
