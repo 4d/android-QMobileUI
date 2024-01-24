@@ -352,7 +352,13 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         )
         binding.parametersRecyclerView.adapter = adapter
 
-        // TODO: here could check all choiceList according to selectedEntity
+        // check all choiceList according to selectedEntity
+        selectedEntity?.let {
+            for (i in 0 until allParameters.length()) {
+                val actionParameter = allParameters.getJSONObject(i)
+                checkChoiceList(actionParameter, it)
+            }
+        }
     }
 
     private fun onValueChanged(name: String, value: Any?, metaData: String?, isValid: Boolean) {
@@ -595,10 +601,6 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
         actionParameter?.getSafeString("source")?.let { format ->
             setSharedAxisXExitTransition()
             val isMandatory = actionParameter.getSafeArray("rules")?.getStringList()?.contains("mandatory") ?: false
-
-            selectedEntity?.let {
-                checkChoiceList(actionParameter, it) // TODO: Maybe do it before to use it when displaying value mapping
-            }
             BaseApp.genericNavigationResolver.navigateToPushInputControl(binding, format.removePrefix("/"), isMandatory)
         }
     }

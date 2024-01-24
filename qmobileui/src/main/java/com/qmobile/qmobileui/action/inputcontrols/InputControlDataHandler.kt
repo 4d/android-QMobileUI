@@ -23,12 +23,13 @@ interface InputControlDataHandler {
         // Input control data can either be a static list / map or fetched data from database
         BaseApp.runtimeDataHolder.inputControls.find { it.name == fieldMapping?.name }?.let { fieldMapping ->
 
-            if (InputControl.hasStaticData(fieldMapping.choiceList)) {
+            if (InputControl.hasCurrentEntity(fieldMapping.choiceList)) {
+                fieldMapping.prepareCurrentEntity(isMandatory, fieldMapping.choiceListComputed)
+            }
+            else if (InputControl.hasStaticData(fieldMapping.choiceList)) {
                 fieldMapping.prepareStaticData(isMandatory)
             }
-            else if (InputControl.hasCurrentEntity(fieldMapping.choiceList)) {
-                fieldMapping.prepareCurrentEntity(isMandatory, fieldMapping.choiceListComputed)
-            } else {
+            else {
                 fieldMapping.prepareDataSource(isMandatory)
             }
         }
