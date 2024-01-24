@@ -80,13 +80,16 @@ object InputControl {
         return ResourcesHelper.correctIconPath("${this.name}_$text")
     }
 
+    private fun isValidDataSourceField(choiceList: Map<*, *>): Boolean {
+        return ((choiceList["dataSource"] as? Map<*, *>)?.get("field") as? String)?.isNotEmpty() == true
+    }
     private fun isValidDataSource(choiceList: Map<*, *>): Boolean {
         return ((choiceList["dataSource"] as? Map<*, *>)?.get("dataClass") as? String)?.isNotEmpty() == true &&
-            ((choiceList["dataSource"] as? Map<*, *>)?.get("field") as? String)?.isNotEmpty() == true
+                isValidDataSourceField(choiceList)
     }
 
     private fun isValidCurrentEntity(choiceList: Map<*, *>): Boolean {
-        return isValidDataSource(choiceList) &&
+        return isValidDataSourceField(choiceList) &&
                 (((choiceList["dataSource"] as? Map<*, *>)?.get("currentEntity") as? Boolean) == true)
     }
 
