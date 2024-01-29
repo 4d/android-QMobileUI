@@ -728,8 +728,6 @@ class MainActivity :
                     },
                     onImageFailed = { parameterName, throwable ->
                         onImageFailed(parameterName, throwable)
-                    },
-                    onError = {
                         taskToSendIfOffline?.let { taskViewModel.insert(it) }
                     }
                 ) {
