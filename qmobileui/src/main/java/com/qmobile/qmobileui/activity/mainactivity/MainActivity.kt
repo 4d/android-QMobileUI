@@ -8,15 +8,18 @@ package com.qmobile.qmobileui.activity.mainactivity
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.addCallback
+import androidx.annotation.CallSuper
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
@@ -142,6 +145,14 @@ class MainActivity :
             ?.fragments
             ?.first()
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == Activity.RESULT_OK) {
+            val selectedUri: Uri = data?.data ?: return
+            contentResolver.takePersistableUriPermission(selectedUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -700,11 +711,12 @@ class MainActivity :
     }
 
     override fun uploadImage(
-        bodies: Map<String, RequestBody?>,
+        bodies: Map<String, Result<RequestBody>>,
         tableName: String,
         isFromAction: Boolean,
         taskToSendIfOffline: ActionTask?,
         onImageUploaded: (parameterName: String, receivedId: String) -> Unit,
+        onImageFailed: (parameterName: String, throwable: Throwable) -> Unit,
         onAllUploadFinished: () -> Unit
     ) {
         queryNetwork(object : NetworkChecker {
@@ -713,6 +725,9 @@ class MainActivity :
                     imagesToUpload = bodies,
                     onImageUploaded = { parameterName, receivedId ->
                         onImageUploaded(parameterName, receivedId)
+                    },
+                    onImageFailed = { parameterName, throwable ->
+                        onImageFailed(parameterName, throwable)
                     },
                     onError = {
                         taskToSendIfOffline?.let { taskViewModel.insert(it) }
@@ -933,6 +948,12 @@ class MainActivity :
                 taskToSendIfOffline = null,
                 onImageUploaded = { parameterName, receivedId ->
                     pendingTask.actionInfo.paramsToSubmit?.set(parameterName, receivedId)
+                    pendingTask.actionInfo.metaDataToSubmit?.set(
+                        parameterName,
+                        UPLOADED_METADATA_STRING
+                    )
+                },
+                onImageFailed = { parameterName, throwable ->
                     pendingTask.actionInfo.metaDataToSubmit?.set(
                         parameterName,
                         UPLOADED_METADATA_STRING

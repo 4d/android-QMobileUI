@@ -32,11 +32,12 @@ interface ActionActivity {
     )
 
     fun uploadImage(
-        bodies: Map<String, RequestBody?>,
+        bodies: Map<String, Result<RequestBody>>,
         tableName: String,
         isFromAction: Boolean = false,
         taskToSendIfOffline: ActionTask?,
         onImageUploaded: (parameterName: String, receivedId: String) -> Unit,
+        onImageFailed: (parameterName: String, e: Throwable) -> Unit,
         onAllUploadFinished: () -> Unit
     )
 

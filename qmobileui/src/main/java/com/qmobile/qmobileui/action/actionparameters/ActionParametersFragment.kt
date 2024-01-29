@@ -540,7 +540,8 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     }
 
     private fun uploadImages(proceed: () -> Unit) {
-        val bodies: Map<String, RequestBody?> = imagesToUpload.getBodies(activity)
+        val activity = this.activity ?: return
+        val bodies: Map<String, Result<RequestBody>> = imagesToUpload.getBodies(activity)
 
         actionActivity.uploadImage(
             bodies = bodies,
@@ -550,10 +551,15 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
             onImageUploaded = { parameterName, receivedId ->
                 paramsToSubmit[parameterName] = receivedId
                 metaDataToSubmit[parameterName] = UploadHelper.UPLOADED_METADATA_STRING
+            },
+            onImageFailed = { parameterName, throwable ->
+                //paramsToSubmit[parameterName] = receivedId
+                metaDataToSubmit[parameterName] = UploadHelper.UPLOADED_METADATA_STRING
+            },
+            onAllUploadFinished = {
+                proceed()
             }
-        ) {
-            proceed()
-        }
+        )
     }
 
     override fun getActionContent(actionUUID: String, itemId: String?): MutableMap<String, Any> {
