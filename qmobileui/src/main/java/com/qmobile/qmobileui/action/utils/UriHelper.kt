@@ -12,7 +12,7 @@ import android.net.Uri
 object UriHelper {
 
     fun HashMap<String, Uri>.uriToString(): HashMap<String, String> = this.mapValues { entry ->
-        entry.value.path
+        entry.value.toString()
     } as HashMap<String, String>
 
     fun HashMap<String, String>.stringToUri(): HashMap<String, Uri> = this.mapValues { entry ->
