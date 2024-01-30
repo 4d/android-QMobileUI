@@ -950,6 +950,7 @@ class MainActivity :
                         parameterName,
                         UPLOADED_METADATA_STRING
                     )
+                    // MAYBE reset this to not upload pendingTask.actionInfo.imagesToUpload?.set(parameterName, null)
                 },
                 onImageFailed = { parameterName, throwable ->
                     pendingTask.actionInfo.metaDataToSubmit?.set(
@@ -958,6 +959,9 @@ class MainActivity :
                     )
                 },
                 onAllUploadFinished = {
+                    ActionHelper.updateActionContent(pendingTask.actionContent,
+                        parameters = pendingTask.actionInfo.paramsToSubmit,
+                        metaData = pendingTask.actionInfo.metaDataToSubmit)
                     sendAction(pendingTask, pendingTask.actionInfo.tableName) {
                         // Nothing to do
                     }

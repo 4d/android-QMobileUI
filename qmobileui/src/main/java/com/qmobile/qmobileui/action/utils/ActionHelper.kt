@@ -86,6 +86,14 @@ object ActionHelper {
         return map
     }
 
+    fun updateActionContent(actionContent:  MutableMap<String, Any>?,
+                            parameters: HashMap<String, Any>? = null,
+                            metaData: HashMap<String, String>? = null) {
+
+        parameters?.let { actionContent?.put("parameters", parameters) }
+        metaData?.let { actionContent?.put("metadata", ActionMetaData(metaData)) }
+    }
+
     fun updateActionContentId(actionContent: MutableMap<String, Any>?) {
         actionContent?.put("id", UUID.randomUUID().toString())
     }
