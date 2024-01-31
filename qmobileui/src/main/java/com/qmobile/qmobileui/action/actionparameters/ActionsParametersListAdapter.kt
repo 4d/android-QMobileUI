@@ -85,7 +85,7 @@ class ActionsParametersListAdapter(
         val alreadyFilledValue = when (holder) {
             is ImageViewHolder, is SignatureViewHolder ->
                 // if image or signature we take the uri to pre-fill image/signature preview
-                imagesToUpload[paramName]
+                imagesToUpload[paramName] ?: paramsToSubmit[paramName]
             else ->
                 // for other field we take the value to prefill editText
                 paramsToSubmit[paramName]

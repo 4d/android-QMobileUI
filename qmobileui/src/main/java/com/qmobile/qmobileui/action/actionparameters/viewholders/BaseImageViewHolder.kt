@@ -73,6 +73,10 @@ abstract class BaseImageViewHolder(itemView: View, format: String) : BaseViewHol
 
         if (alreadyFilledValue is Uri) {
             displayImage(alreadyFilledValue.toString())
+        } else if (alreadyFilledValue is String && alreadyFilledValue.isEmpty()) {
+            setDefaultPlaceholder()
+            currentUri = null
+            //  onValueChanged(parameterName, null, null, validate(false))
         } else {
             getDefaultFieldValue(currentEntity, itemJsonObject) { defaultPhoto ->
                 BaseApp.mapper.parseToType<Photo>(defaultPhoto.toString())?.__deferred?.uri?.let {
