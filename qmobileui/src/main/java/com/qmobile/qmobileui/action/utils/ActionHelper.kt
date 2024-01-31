@@ -12,6 +12,7 @@ import com.qmobile.qmobileapi.utils.getSafeArray
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileapi.utils.parseToString
 import com.qmobile.qmobileapi.model.entity.EntityModel
+import com.qmobile.qmobileapi.network.ApiClient
 import com.qmobile.qmobileapi.utils.getSafeBoolean
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.data.RoomEntity
@@ -170,6 +171,7 @@ object ActionHelper {
         (newActionContent["parameters"] as? MutableMap<String, Any?>)?.let { parameters ->
             this.getParametersAsList().forEach { actionParameter ->
                 convertTimeToSeconds(actionParameter, parameters)
+                removeImageURL(actionParameter, parameters)
             }
         }
         return newActionContent
@@ -182,12 +184,21 @@ object ActionHelper {
     }
 
     private fun convertTimeToSeconds(actionParameter: JSONObject, parameters: MutableMap<String, Any?>) {
-        if (actionParameter.getSafeString("type") == "time") {
-            actionParameter.getSafeString("name")?.let { parameterName ->
-                (parameters[parameterName] as? Long?)?.let { millisValue ->
-                    parameters[parameterName] = millisValue / TimeFormat.INT_1000
-                }
-            }
+        if (actionParameter.getSafeString("type") != "time") return
+        val parameterName = actionParameter.getSafeString("name") ?: return
+        val millisValue = (parameters[parameterName] as? Long) ?: return
+        parameters[parameterName] = millisValue / TimeFormat.INT_1000
+    }
+
+    // picture URL means already on server, so do not send URL (maybe replace by a new upload)
+    private fun removeImageURL(actionParameter: JSONObject, parameters: MutableMap<String, Any?>) {
+        if (actionParameter.getSafeString("type") != "image") return
+        val parameterName = actionParameter.getSafeString("name") ?: return
+        val stringValue = (parameters[parameterName] as? String) ?: return
+        if (stringValue.startsWith(ApiClient.SERVER_ENDPOINT)) { // must be an upload ID
+            parameters.remove(parameterName)
+        } else if (stringValue.isEmpty()) {
+            parameters[parameterName] = null // no upload, must set image to null (or maybe set metadata upload...)
         }
     }
 }
