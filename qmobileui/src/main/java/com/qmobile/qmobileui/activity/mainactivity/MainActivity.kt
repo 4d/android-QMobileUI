@@ -155,6 +155,7 @@ class MainActivity :
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
+        ToastMessage.context = getApplicationContext()
         super.onCreate(savedInstanceState)
 
         signalHandler = SignalHandler(this).apply {
