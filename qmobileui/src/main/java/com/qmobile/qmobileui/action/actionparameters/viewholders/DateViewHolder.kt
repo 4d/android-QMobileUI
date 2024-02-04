@@ -31,8 +31,6 @@ class DateViewHolder(
         else -> "shortDate"
     }
 
-    private val calendar = Calendar.getInstance()
-
     private var initialPickerDate = -1L
 
     override fun bind(
@@ -59,7 +57,7 @@ class DateViewHolder(
                 .build()
 
         datePicker.addOnPositiveButtonClickListener {
-            calendar.timeInMillis = it
+            initialPickerDate = it
 
             val dateToSubmit = getDateToSubmit()
             input.setText(formatToDisplay(dateToSubmit))
@@ -83,12 +81,15 @@ class DateViewHolder(
         }
     }
 
-    private fun getDateToSubmit(): String =
-        calendar.get(Calendar.DAY_OF_MONTH).toString() + "!" + (
+    private fun getDateToSubmit(): String {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = initialPickerDate
+        return calendar.get(Calendar.DAY_OF_MONTH).toString() + "!" + (
             calendar.get(
                 Calendar.MONTH
             ) + 1
             ) + "!" + calendar.get(Calendar.YEAR)
+    }
 
     private fun updatePickerDate(newDate: String) {
         val cal = DateFormat.getDateFromString(newDate) ?: return
