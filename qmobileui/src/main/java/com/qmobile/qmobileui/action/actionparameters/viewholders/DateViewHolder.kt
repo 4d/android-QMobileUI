@@ -105,7 +105,8 @@ class DateViewHolder(
         FormatterUtils.applyFormat(dateFormat, input)
 
     override fun fill(value: Any) {
-        updatePickerDate(value.toString())
+        val string = if (value == JSONObject.NULL) "" else value.toString()
+        updatePickerDate(string)
         super.fill(value)
     }
 }

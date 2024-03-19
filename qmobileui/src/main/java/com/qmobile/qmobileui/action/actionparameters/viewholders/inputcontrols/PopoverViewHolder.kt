@@ -134,7 +134,8 @@ class PopoverViewHolder(
 
     override fun fill(value: Any) {
         super.fill(value)
-        if (value.toString().isNotEmpty()) {
+        val string = if (value == JSONObject.NULL) "" else value.toString()
+        if (string.isNotEmpty()) {
             currentEditEntityValue = value
         }
     }

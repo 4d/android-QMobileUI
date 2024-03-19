@@ -61,9 +61,9 @@ abstract class BaseViewHolder(itemView: View, format: String) : RecyclerView.Vie
             itemJsonObject.getSafeString("defaultField")?.let { defaultField ->
                 ReflectionUtils.getInstanceProperty(entity, defaultField)?.let { value ->
                     valueCallback(value)
-                }
-            }
-        }
+                } ?: valueCallback(JSONObject.NULL)
+            } ?: valueCallback(JSONObject.NULL)
+        } ?: valueCallback(JSONObject.NULL)
     }
 
     fun isMandatory() = itemJsonObject.getSafeArray("rules")?.getStringList()?.contains("mandatory") ?: false

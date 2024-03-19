@@ -87,7 +87,8 @@ abstract class BaseInputLessViewHolder(itemView: View, format: String) : BaseVie
     }
 
     override fun fill(value: Any) {
-        input.setText(formatToDisplay(value.toString()))
+        val string = if (value == JSONObject.NULL) "" else value.toString()
+        input.setText(formatToDisplay(string))
     }
 
     override fun getInputType(format: String): Int {

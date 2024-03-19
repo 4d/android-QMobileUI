@@ -97,7 +97,8 @@ abstract class CustomViewViewHolder(
     }
 
     override fun fill(value: Any) {
-        if (value.toString().isNotEmpty()) {
+        val string = if (value == JSONObject.NULL) "" else value.toString()
+        if (string.isNotEmpty()) {
             currentEditEntityValue = value
         }
     }

@@ -95,7 +95,8 @@ abstract class BaseTextViewHolder(itemView: View, private val format: String) : 
     }
 
     override fun fill(value: Any) {
-        input.setText(formattedValue(value.toString()))
+        val string = if (value == JSONObject.NULL) "" else value.toString()
+        input.setText(formattedValue(string))
     }
 
     abstract fun onTextChanged(s: CharSequence)
