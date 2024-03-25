@@ -150,7 +150,11 @@ class MainActivity :
 
         if (resultCode == Activity.RESULT_OK) {
             val selectedUri: Uri = data?.data ?: return
-            contentResolver.takePersistableUriPermission(selectedUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            try {
+                contentResolver.takePersistableUriPermission(selectedUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            } catch (e: Exception) {
+                Timber.i(e)
+            }
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
