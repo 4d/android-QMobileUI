@@ -44,7 +44,7 @@ class ActionsParametersListAdapter(
     private val context: Context,
     val allParameters: JSONArray,
     // contains data of the failed action, this data will be used for pre-fill form to edit pending task
-    private val paramsToSubmit: HashMap<String, Any>,
+    private val paramsToSubmit: HashMap<String, Any?>,
     private val imagesToUpload: HashMap<String, Uri>,
     private val paramsError: HashMap<String, String>,
     private val inputControlFormatHolders: Map<Int, InputControlFormatHolder>,

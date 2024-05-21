@@ -101,7 +101,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
     override lateinit var actionActivity: ActionActivity
 
     internal var errorsByParameter = HashMap<String, String>()
-    internal var paramsToSubmit = HashMap<String, Any>()
+    internal var paramsToSubmit = HashMap<String, Any?>()
     private val metaDataToSubmit = HashMap<String, String>()
     internal var validationMap = linkedMapOf<String, Boolean>()
     internal var imagesToUpload = HashMap<String, Uri>()

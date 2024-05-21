@@ -50,9 +50,10 @@ class PendingTaskViewHolder(
         index: Int,
         format: String?,
         type: String?,
-        value: Any,
+        value: Any?,
         sb: StringBuilder
     ): StringBuilder {
+        if (value == null) return sb
         val stringToAppend = when {
             format == "password" -> "" // We don't display password fields
             type == "date" -> FormatterUtils.applyFormat("shortDate", value.toString())

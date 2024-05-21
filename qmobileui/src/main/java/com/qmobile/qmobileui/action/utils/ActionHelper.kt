@@ -36,7 +36,7 @@ object ActionHelper {
         tableName: String,
         actionUUID: String,
         itemId: String = "",
-        parameters: HashMap<String, Any>? = null,
+        parameters: HashMap<String, Any?>? = null,
         metaData: HashMap<String, String>? = null,
         parentItemId: String = "",
         relation: Relation? = null
@@ -88,7 +88,7 @@ object ActionHelper {
     }
 
     fun updateActionContent(actionContent:  MutableMap<String, Any>?,
-                            parameters: HashMap<String, Any>? = null,
+                            parameters: HashMap<String, Any?>? = null,
                             metaData: HashMap<String, String>? = null) {
 
         parameters?.let { actionContent?.put("parameters", parameters) }
