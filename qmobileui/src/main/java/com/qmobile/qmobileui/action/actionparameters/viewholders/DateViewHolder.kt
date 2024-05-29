@@ -45,13 +45,9 @@ class DateViewHolder(
 
         container.endIconDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.calendar_month)
 
-        if (initialPickerDate == -1L) {
-            initialPickerDate = Calendar.getInstance().timeInMillis
-        }
-
         val datePicker =
             MaterialDatePicker.Builder.datePicker()
-                .setSelection(initialPickerDate)
+                .setSelection(if (initialPickerDate == -1L) Calendar.getInstance().timeInMillis else initialPickerDate)
                 .setTitleText(container.hint)
                 .setInputMode(MaterialDatePicker.INPUT_MODE_TEXT)
                 .build()
@@ -82,6 +78,10 @@ class DateViewHolder(
     }
 
     private fun getDateToSubmit(): String {
+        if (initialPickerDate == -1L) {
+            return DateFormat.nullDate
+        }
+
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = initialPickerDate
         return calendar.get(Calendar.DAY_OF_MONTH).toString() + "!" + (
@@ -92,21 +92,30 @@ class DateViewHolder(
     }
 
     private fun updatePickerDate(newDate: String) {
-        val cal = DateFormat.getDateFromString(newDate) ?: return
-        val clearedTZ = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH))
-            set(Calendar.MONTH, cal.get(Calendar.MONTH))
-            set(Calendar.YEAR, cal.get(Calendar.YEAR))
+        DateFormat.getDateFromString(newDate)?.let { cal ->
+            val clearedTZ = Calendar.getInstance().apply {
+                set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH))
+                set(Calendar.MONTH, cal.get(Calendar.MONTH))
+                set(Calendar.YEAR, cal.get(Calendar.YEAR))
+            }
+            initialPickerDate = clearedTZ.timeInMillis
+        } ?: run {
+            initialPickerDate = -1L
         }
-        initialPickerDate = clearedTZ.timeInMillis
     }
 
     override fun formatToDisplay(input: String): String =
         FormatterUtils.applyFormat(dateFormat, input)
 
     override fun fill(value: Any) {
-        val string = if (value == JSONObject.NULL) "" else value.toString()
-        updatePickerDate(string)
-        super.fill(value)
+        if (value == JSONObject.NULL) {
+            val string = DateFormat.nullDate
+            updatePickerDate(string)
+            super.fill(string)
+        }
+        else {
+            updatePickerDate(value.toString())
+            super.fill(value)
+        }
     }
 }

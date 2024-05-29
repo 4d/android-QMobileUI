@@ -14,7 +14,7 @@ import java.util.Locale
 
 object DateFormat {
 
-    private const val nullDate = "0!0!0"
+    public const val nullDate = "0!0!0"
 
     fun applyFormat(format: String, baseText: String): String {
         val calendar = getDateFromString(baseText) ?: return ""
