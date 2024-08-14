@@ -11,6 +11,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
@@ -161,6 +162,8 @@ class MainActivity :
         installSplashScreen()
         ToastMessage.context = getApplicationContext()
         super.onCreate(savedInstanceState)
+
+        if (BaseApp.runtimeDataHolder.lockOrientation) setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
         signalHandler = SignalHandler(this).apply {
             initSignalHandler()
