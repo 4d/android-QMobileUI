@@ -6,12 +6,13 @@
 
 package com.qmobile.qmobileui.action.actionparameters
 
+import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.text.method.Touch.scrollTo
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -33,13 +34,9 @@ import com.qmobile.qmobileapi.model.entity.EntityModel
 import com.qmobile.qmobileapi.utils.UploadHelper
 import com.qmobile.qmobileapi.utils.UploadHelper.getBodies
 import com.qmobile.qmobileapi.utils.getSafeArray
-import com.qmobile.qmobileapi.utils.getSafeBoolean
 import com.qmobile.qmobileapi.utils.getSafeObject
 import com.qmobile.qmobileapi.utils.getSafeString
 import com.qmobile.qmobileapi.utils.getStringList
-import com.qmobile.qmobileapi.utils.parseToString
-import com.qmobile.qmobileapi.utils.parseToType
-import com.qmobile.qmobileapi.utils.toStringMap
 import com.qmobile.qmobiledatastore.dao.ActionInfo
 import com.qmobile.qmobiledatastore.dao.ActionTask
 import com.qmobile.qmobiledatastore.data.RoomEntity
@@ -71,15 +68,16 @@ import com.qmobile.qmobileui.ui.setSharedAxisXEnterTransition
 import com.qmobile.qmobileui.ui.setSharedAxisXExitTransition
 import com.qmobile.qmobileui.ui.setSharedAxisZExitTransition
 import com.qmobile.qmobileui.ui.setupToolbarTitle
-import com.qmobile.qmobileui.utils.ReflectionUtils
 import com.qmobile.qmobileui.utils.hideKeyboard
 import okhttp3.RequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
+import java.io.Serializable
 import java.lang.Integer.max
 import java.util.*
+import kotlin.collections.HashMap
 
 class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
@@ -102,7 +100,7 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
 
     internal var errorsByParameter = HashMap<String, String>()
     internal var paramsToSubmit = HashMap<String, Any?>()
-    private val metaDataToSubmit = HashMap<String, String>()
+    private var metaDataToSubmit = HashMap<String, String>()
     internal var validationMap = linkedMapOf<String, Boolean>()
     internal var imagesToUpload = HashMap<String, Uri>()
     internal var inputControlFormatHolders = mutableMapOf<Int, InputControlFormatHolder>()
@@ -256,433 +254,476 @@ class ActionParametersFragment : BaseFragment(), ActionProvider, MenuProvider {
             shouldInitObservers = false
         }
         onHideKeyboardCallback()
+
+       activity?.let {
+            it.setRequestedOrientation(it.resources.configuration.orientation) // lock orientation
+       }
+
+        restoreState(savedInstanceState)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable("paramsToSubmit", paramsToSubmit)
+        outState.putSerializable("metaDataToSubmit", metaDataToSubmit)
+        outState.putSerializable("imagesToUpload", imagesToUpload)
+    }
+
+    private fun restoreState(savedInstanceState: Bundle?) {
+        savedInstanceState?.let {
+            it.serializable<HashMap<String, Any?>>("paramsToSubmit")?.let {
+                paramsToSubmit = it
+            }
+            it.serializable<HashMap<String, String>>("metaDataToSubmit")?.let {
+                metaDataToSubmit = it
+            }
+            it.serializable<HashMap<String, Uri>>("imagesToUpload")?.let {
+                imagesToUpload = it
+            }
+        }
+    }
+
+    inline fun <reified T : Serializable> Bundle.serializable(key: String): T? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getSerializable(key, T::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            getSerializable(key) as? T
+        }
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.menu_actions_parameters, menu)
     }
 
-    override fun onPrepareMenu(menu: Menu) {
-        validateMenuItem = menu.findItem(R.id.validate)
-        if (fromPendingTasks) {
-            currentTask?.isErrorServer()?.let { isErrorServer ->
-                validateMenuItem.title = if (isErrorServer) { // error server tasks
-                    getString(R.string.retry_action)
-                } else { // pending tasks
-                    getString(R.string.validate_action)
-                }
-            }
-        } else {
-            validateMenuItem.title = getString(R.string.validate_action)
-        }
-        super.onPrepareMenu(menu)
-    }
+   override fun onDestroy() {
+       activity?.let {
+           it.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER) // restore listen to orientation
+       }
+       super.onDestroy()
+   }
 
-    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        if (menuItem.itemId == R.id.validate) {
-            onValidateClick()
-        }
-        return false
-    }
+ override fun onPrepareMenu(menu: Menu) {
+     validateMenuItem = menu.findItem(R.id.validate)
+     if (fromPendingTasks) {
+         currentTask?.isErrorServer()?.let { isErrorServer ->
+             validateMenuItem.title = if (isErrorServer) { // error server tasks
+                 getString(R.string.retry_action)
+             } else { // pending tasks
+                 getString(R.string.validate_action)
+             }
+         }
+     } else {
+         validateMenuItem.title = getString(R.string.validate_action)
+     }
+     super.onPrepareMenu(menu)
+ }
 
-    private fun setupRecyclerView() {
-        val smoothScroller = CenterLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
-        binding.parametersRecyclerView.layoutManager = smoothScroller
-        binding.parametersRecyclerView.edgeEffectFactory = BounceEdgeEffectFactory()
-        binding.parametersRecyclerView.adapter = adapter
-        binding.parametersRecyclerView.addOnScrollListener(onScrollToValidationListener)
-        // Important line : prevent recycled views to get their content reset
-        binding.parametersRecyclerView.setItemViewCacheSize(action.parameters.length())
-        // Remove keyboard when click is perform below recyclerView items
-        binding.parametersRecyclerView.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
-            override fun onInterceptTouchEvent(recyclerView: RecyclerView, motionEvent: MotionEvent): Boolean {
-                return when {
-                    motionEvent.action != MotionEvent.ACTION_UP || recyclerView.findChildViewUnder(
-                        motionEvent.x,
-                        motionEvent.y
-                    ) != null -> false
-                    else -> {
-                        onHideKeyboardCallback()
-                        true
-                    }
-                }
-            }
+ override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+     if (menuItem.itemId == R.id.validate) {
+         onValidateClick()
+     }
+     return false
+ }
 
-            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
-            override fun onTouchEvent(recyclerView: RecyclerView, motionEvent: MotionEvent) {}
-        })
-    }
+ private fun setupRecyclerView() {
+     val smoothScroller = CenterLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+     binding.parametersRecyclerView.layoutManager = smoothScroller
+     binding.parametersRecyclerView.edgeEffectFactory = BounceEdgeEffectFactory()
+     binding.parametersRecyclerView.adapter = adapter
+     binding.parametersRecyclerView.addOnScrollListener(onScrollToValidationListener)
+     // Important line : prevent recycled views to get their content reset
+     binding.parametersRecyclerView.setItemViewCacheSize(action.parameters.length())
+     // Remove keyboard when click is perform below recyclerView items
+     binding.parametersRecyclerView.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
+         override fun onInterceptTouchEvent(recyclerView: RecyclerView, motionEvent: MotionEvent): Boolean {
+             return when {
+                 motionEvent.action != MotionEvent.ACTION_UP || recyclerView.findChildViewUnder(
+                     motionEvent.x,
+                     motionEvent.y
+                 ) != null -> false
+                 else -> {
+                     onHideKeyboardCallback()
+                     true
+                 }
+             }
+         }
 
-    internal fun setupAdapter() {
-        adapter = ActionsParametersListAdapter(
-            context = requireContext(),
-            allParameters = allParameters,
-            paramsToSubmit = paramsToSubmit,
-            imagesToUpload = imagesToUpload,
-            paramsError = errorsByParameter,
-            inputControlFormatHolders = inputControlFormatHolders,
-            currentEntity = selectedEntity,
-            fragmentManager = activity?.supportFragmentManager,
-            hideKeyboardCallback = { onHideKeyboardCallback() },
-            focusNextCallback = { position, onlyScroll -> onFocusNextCallback(position, onlyScroll) },
-            actionTypesCallback = { actionType, position ->
-                actionTypesCallback(actionType, position)
-            },
-            goToPushFragment = { position ->
-                goToPushFragment(position)
-            },
-            formatHolderCallback = { holder, position ->
-                formatHolderCallback(holder, position)
-            },
-            onDataLoadedCallback = {
-                onDataLoadedCallback()
-            },
-            onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
-                onValueChanged(name, value, metaData, isValid)
-            }
-        )
-        binding.parametersRecyclerView.adapter = adapter
+         override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+         override fun onTouchEvent(recyclerView: RecyclerView, motionEvent: MotionEvent) {}
+     })
+ }
 
-        // check all choiceList according to selectedEntity
-        selectedEntity?.let {
-            for (i in 0 until allParameters.length()) {
-                val actionParameter = allParameters.getJSONObject(i)
-                checkChoiceList(actionParameter, it)
-            }
-        }
-    }
+ internal fun setupAdapter() {
+     adapter = ActionsParametersListAdapter(
+         context = requireContext(),
+         allParameters = allParameters,
+         paramsToSubmit = paramsToSubmit,
+         imagesToUpload = imagesToUpload,
+         paramsError = errorsByParameter,
+         inputControlFormatHolders = inputControlFormatHolders,
+         currentEntity = selectedEntity,
+         fragmentManager = activity?.supportFragmentManager,
+         hideKeyboardCallback = { onHideKeyboardCallback() },
+         focusNextCallback = { position, onlyScroll -> onFocusNextCallback(position, onlyScroll) },
+         actionTypesCallback = { actionType, position ->
+             actionTypesCallback(actionType, position)
+         },
+         goToPushFragment = { position ->
+             goToPushFragment(position)
+         },
+         formatHolderCallback = { holder, position ->
+             formatHolderCallback(holder, position)
+         },
+         onDataLoadedCallback = {
+             onDataLoadedCallback()
+         },
+         onValueChanged = { name: String, value: Any?, metaData: String?, isValid: Boolean ->
+             onValueChanged(name, value, metaData, isValid)
+         }
+     )
+     binding.parametersRecyclerView.adapter = adapter
 
-    private fun onValueChanged(name: String, value: Any?, metaData: String?, isValid: Boolean) {
-        validationMap[name] = isValid
-        paramsToSubmit[name] = value ?: ""
+     // check all choiceList according to selectedEntity
+     selectedEntity?.let {
+         for (i in 0 until allParameters.length()) {
+             val actionParameter = allParameters.getJSONObject(i)
+             checkChoiceList(actionParameter, it)
+         }
+     }
+ }
 
-        metaData?.let {
-            metaDataToSubmit[name] = metaData
-        }
-        if (value == null) {
-            imagesToUpload.remove(name)
-        }
-    }
+ private fun onValueChanged(name: String, value: Any?, metaData: String?, isValid: Boolean) {
+     validationMap[name] = isValid
+     paramsToSubmit[name] = value ?: ""
 
-    private fun onHideKeyboardCallback() {
-        activity?.let {
-            binding.root.clearFocus()
-            hideKeyboard(it)
-        }
-    }
+     metaData?.let {
+         metaDataToSubmit[name] = metaData
+     }
+     if (value == null) {
+         imagesToUpload.remove(name)
+     }
+ }
 
-    private fun onFocusNextCallback(position: Int, onlyScroll: Boolean) {
-        scrollTo(position = position + 1, shouldHideKeyboard = false, triggerError = false)
-        if (!onlyScroll) {
-            binding.parametersRecyclerView.findViewHolderForLayoutPosition(position + 1)
-                ?.itemView?.findViewById<TextInputEditText>(R.id.input)
-                ?.requestFocus()
-                ?: kotlin.run {
-                    Timber.d("Can't find input to focus at position ${position + 1}, scrolling now")
-                }
-        }
-    }
+ private fun onHideKeyboardCallback() {
+     activity?.let {
+         binding.root.clearFocus()
+         hideKeyboard(it)
+     }
+ }
 
-    private fun onValidateClick() {
-        if (fromPendingTasks && currentTask?.status == ActionTask.Status.PENDING) {
-            // When coming from pending task
-            validatePendingTask()
-        } else {
-            // When coming from actions or click on error server failed task (in history section)
-            if (currentTask?.status == ActionTask.Status.ERROR_SERVER) {
-                // should delete current failed task to re-store it as new task after sending
-                currentTask?.let {
-                    actionActivity.getTaskVM().deleteOne(it.id)
-                }
-            }
-            validateAction()
-        }
-    }
+ private fun onFocusNextCallback(position: Int, onlyScroll: Boolean) {
+     scrollTo(position = position + 1, shouldHideKeyboard = false, triggerError = false)
+     if (!onlyScroll) {
+         binding.parametersRecyclerView.findViewHolderForLayoutPosition(position + 1)
+             ?.itemView?.findViewById<TextInputEditText>(R.id.input)
+             ?.requestFocus()
+             ?: kotlin.run {
+                 Timber.d("Can't find input to focus at position ${position + 1}, scrolling now")
+             }
+     }
+ }
 
-    private fun getActionInfo(): ActionInfo = ActionInfo(
-        paramsToSubmit = paramsToSubmit,
-        metaDataToSubmit = metaDataToSubmit,
-        imagesToUpload = imagesToUpload.uriToString(),
-        validationMap = validationMap,
-        allParameters = action.parameters.toString(),
-        actionName = action.name,
-        tableName = tableName,
-        actionUUID = action.uuid,
-        isOfflineCompatible = action.isOfflineCompatible(),
-        preferredShortName = action.getPreferredShortName()
-    )
+ private fun onValidateClick() {
+     if (fromPendingTasks && currentTask?.status == ActionTask.Status.PENDING) {
+         // When coming from pending task
+         validatePendingTask()
+     } else {
+         // When coming from actions or click on error server failed task (in history section)
+         if (currentTask?.status == ActionTask.Status.ERROR_SERVER) {
+             // should delete current failed task to re-store it as new task after sending
+             currentTask?.let {
+                 actionActivity.getTaskVM().deleteOne(it.id)
+             }
+         }
+         validateAction()
+     }
+ }
 
-    private fun validatePendingTask() {
-        if (isFormValid()) {
-            currentTask?.let { task ->
-                val actionTask = ActionTask(
-                    status = ActionTask.Status.PENDING,
-                    date = task.date,
-                    relatedItemId = task.relatedItemId,
-                    label = task.label,
-                    actionInfo = getActionInfo()
-                )
-                actionTask.id = task.id
-                actionTask.actionContent = getActionContent(task.id, (selectedEntity?.__entity as? EntityModel)?.__KEY)
+ private fun getActionInfo(): ActionInfo = ActionInfo(
+     paramsToSubmit = paramsToSubmit,
+     metaDataToSubmit = metaDataToSubmit,
+     imagesToUpload = imagesToUpload.uriToString(),
+     validationMap = validationMap,
+     allParameters = action.parameters.toString(),
+     actionName = action.name,
+     tableName = tableName,
+     actionUUID = action.uuid,
+     isOfflineCompatible = action.isOfflineCompatible(),
+     preferredShortName = action.getPreferredShortName()
+ )
 
-                actionTask.saveInputControlFormatHolders(inputControlFormatHolders)
+ private fun validatePendingTask() {
+     if (isFormValid()) {
+         currentTask?.let { task ->
+             val actionTask = ActionTask(
+                 status = ActionTask.Status.PENDING,
+                 date = task.date,
+                 relatedItemId = task.relatedItemId,
+                 label = task.label,
+                 actionInfo = getActionInfo()
+             )
+             actionTask.id = task.id
+             actionTask.actionContent = getActionContent(task.id, (selectedEntity?.__entity as? EntityModel)?.__KEY)
 
-                actionActivity.getTaskVM().insert(actionTask)
-            }
+             actionTask.saveInputControlFormatHolders(inputControlFormatHolders)
 
-            (activity as? MainActivity?)?.navController?.navigateUp()
-        }
-    }
+             actionActivity.getTaskVM().insert(actionTask)
+         }
 
-    private fun validateAction() {
-        if (isFormValid()) {
-            validateMenuItem.isEnabled = false
-            if (imagesToUpload.isEmpty()) {
-                sendAction()
-            } else {
-                uploadImages {
-                    sendAction()
-                }
-            }
-        }
-    }
+         (activity as? MainActivity?)?.navController?.navigateUp()
+     }
+ }
 
-    @Suppress("ReturnCount")
-    private fun isFormValid(): Boolean {
-        // first: check if visible items are valid
-        val validList = LinkedList(validationMap.values)
-        for (i in 0 until lastVisibleItemPosition + 1) {
-            if (i < validList.size && !validList[i]) {
-                scrollTo(position = i, shouldHideKeyboard = true, triggerError = true)
-                return false
-            }
-        }
+ private fun validateAction() {
+     if (isFormValid()) {
+         validateMenuItem.isEnabled = false
+         if (imagesToUpload.isEmpty()) {
+             sendAction()
+         } else {
+             uploadImages {
+                 sendAction()
+             }
+         }
+     }
+ }
 
-        // second: check if there are not yet visible items
-        if (!allSeen && lastVisibleItemPosition < adapter.itemCount - 1) { // Second condition is if we never scrolled
-            maxSeen = max(maxSeen, lastVisibleItemPosition)
-            if (maxSeen < adapter.itemCount - 1) {
-                SnackbarHelper.show(activity, getString(R.string.scroll_to_not_seen))
-                scrollTo(position = maxSeen + 2, shouldHideKeyboard = true, triggerError = true)
-            }
-            return false
-        }
+ @Suppress("ReturnCount")
+ private fun isFormValid(): Boolean {
+     // first: check if visible items are valid
+     val validList = LinkedList(validationMap.values)
+     for (i in 0 until lastVisibleItemPosition + 1) {
+         if (i < validList.size && !validList[i]) {
+             scrollTo(position = i, shouldHideKeyboard = true, triggerError = true)
+             return false
+         }
+     }
 
-        // third: check any not valid item
-        var formIsValid = true
-        validationMap.values.forEachIndexed { index, isValid ->
-            if (!isValid) {
-                if (formIsValid) { // scroll to first not valid
-                    scrollTo(position = index, shouldHideKeyboard = true, triggerError = true)
-                }
-                formIsValid = false
-            }
-        }
-        if (!formIsValid) {
-            return false
-        }
+     // second: check if there are not yet visible items
+     if (!allSeen && lastVisibleItemPosition < adapter.itemCount - 1) { // Second condition is if we never scrolled
+         maxSeen = max(maxSeen, lastVisibleItemPosition)
+         if (maxSeen < adapter.itemCount - 1) {
+             SnackbarHelper.show(activity, getString(R.string.scroll_to_not_seen))
+             scrollTo(position = maxSeen + 2, shouldHideKeyboard = true, triggerError = true)
+         }
+         return false
+     }
 
-        return true
-    }
+     // third: check any not valid item
+     var formIsValid = true
+     validationMap.values.forEachIndexed { index, isValid ->
+         if (!isValid) {
+             if (formIsValid) { // scroll to first not valid
+                 scrollTo(position = index, shouldHideKeyboard = true, triggerError = true)
+             }
+             formIsValid = false
+         }
+     }
+     if (!formIsValid) {
+         return false
+     }
 
-    private fun scrollTo(position: Int, shouldHideKeyboard: Boolean, triggerError: Boolean) {
-        if (shouldHideKeyboard) onHideKeyboardCallback()
-        if (position == -1) return
-        scrollPos = if (position > adapter.itemCount - 1) {
-            adapter.itemCount - 1
-        } else {
-            position
-        }
-        if (triggerError) {
-            binding.parametersRecyclerView.removeOnScrollListener(onScrollToErrorListener)
-            binding.parametersRecyclerView.addOnScrollListener(onScrollToErrorListener)
-        }
-        binding.parametersRecyclerView.smoothScrollToPosition(scrollPos)
-    }
+     return true
+ }
 
-    private fun triggerError(position: Int) {
-        (binding.parametersRecyclerView.findViewHolderForLayoutPosition(position) as? BaseViewHolder)?.validate(true)
-    }
+ private fun scrollTo(position: Int, shouldHideKeyboard: Boolean, triggerError: Boolean) {
+     if (shouldHideKeyboard) onHideKeyboardCallback()
+     if (position == -1) return
+     scrollPos = if (position > adapter.itemCount - 1) {
+         adapter.itemCount - 1
+     } else {
+         position
+     }
+     if (triggerError) {
+         binding.parametersRecyclerView.removeOnScrollListener(onScrollToErrorListener)
+         binding.parametersRecyclerView.addOnScrollListener(onScrollToErrorListener)
+     }
+     binding.parametersRecyclerView.smoothScrollToPosition(scrollPos)
+ }
 
-    private fun retrieveAction(): Action {
-        ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.tableActions, tableName)
-            .plus(ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.currentRecordActions, tableName))
-            .forEach { action ->
-                // create id with pattern: $actionName$tableName
-                val actionId = action.getSafeString("name") + tableName
-                if (actionUUID == actionId) {
-                    return ActionHelper.createActionFromJsonObject(action)
-                }
-            }
-        throw Action.ActionException("Couldn't find action from table [$tableName], with uuid [$actionUUID]")
-    }
+ private fun triggerError(position: Int) {
+     (binding.parametersRecyclerView.findViewHolderForLayoutPosition(position) as? BaseViewHolder)?.validate(true)
+ }
 
-    private fun createPendingTask(): ActionTask {
-        val actionTask = ActionTask(
-            status = ActionTask.Status.PENDING,
-            date = Date(),
-            relatedItemId = (selectedEntity?.__entity as? EntityModel)?.__KEY,
-            label = action.getPreferredName(),
-            actionInfo = getActionInfo()
-        )
-        actionTask.actionContent = getActionContent(actionTask.id, (selectedEntity?.__entity as? EntityModel)?.__KEY)
+ private fun retrieveAction(): Action {
+     ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.tableActions, tableName)
+         .plus(ActionHelper.getActionObjectList(BaseApp.runtimeDataHolder.currentRecordActions, tableName))
+         .forEach { action ->
+             // create id with pattern: $actionName$tableName
+             val actionId = action.getSafeString("name") + tableName
+             if (actionUUID == actionId) {
+                 return ActionHelper.createActionFromJsonObject(action)
+             }
+         }
+     throw Action.ActionException("Couldn't find action from table [$tableName], with uuid [$actionUUID]")
+ }
 
-        actionTask.saveInputControlFormatHolders(inputControlFormatHolders)
+ private fun createPendingTask(): ActionTask {
+     val actionTask = ActionTask(
+         status = ActionTask.Status.PENDING,
+         date = Date(),
+         relatedItemId = (selectedEntity?.__entity as? EntityModel)?.__KEY,
+         label = action.getPreferredName(),
+         actionInfo = getActionInfo()
+     )
+     actionTask.actionContent = getActionContent(actionTask.id, (selectedEntity?.__entity as? EntityModel)?.__KEY)
 
-        return actionTask
-    }
+     actionTask.saveInputControlFormatHolders(inputControlFormatHolders)
 
-    private fun sendAction() {
-        val pendingTask = createPendingTask()
-        actionActivity.sendAction(actionTask = pendingTask, tableName = tableName) {
-            (activity as? MainActivity?)?.navController?.navigateUp()
-        }
-    }
+     return actionTask
+ }
 
-    private fun uploadImages(proceed: () -> Unit) {
-        val activity = this.activity ?: return
-        val bodies: Map<String, Result<RequestBody>> = imagesToUpload.getBodies(activity)
+ private fun sendAction() {
+     val pendingTask = createPendingTask()
+     actionActivity.sendAction(actionTask = pendingTask, tableName = tableName) {
+         (activity as? MainActivity?)?.navController?.navigateUp()
+     }
+ }
 
-        actionActivity.uploadImage(
-            bodies = bodies,
-            tableName = tableName,
-            isFromAction = true,
-            taskToSendIfOffline = if (action.isOfflineCompatible()) createPendingTask() else null,
-            onImageUploaded = { parameterName, receivedId ->
-                paramsToSubmit[parameterName] = receivedId
-                metaDataToSubmit[parameterName] = UploadHelper.UPLOADED_METADATA_STRING
-            },
-            onImageFailed = { parameterName, throwable ->
-                //paramsToSubmit[parameterName] = receivedId
-                metaDataToSubmit[parameterName] = UploadHelper.UPLOADED_METADATA_STRING
-            },
-            onAllUploadFinished = {
-                proceed()
-            }
-        )
-    }
+ private fun uploadImages(proceed: () -> Unit) {
+     val activity = this.activity ?: return
+     val bodies: Map<String, Result<RequestBody>> = imagesToUpload.getBodies(activity)
 
-    override fun getActionContent(actionUUID: String, itemId: String?): MutableMap<String, Any> {
-        return ActionHelper.getActionContent(
-            tableName = tableName,
-            actionUUID = actionUUID,
-            itemId = itemId ?: this.itemId,
-            parameters = paramsToSubmit,
-            metaData = metaDataToSubmit,
-            parentItemId = parentItemId,
-            relation = relation
-        )
-    }
+     actionActivity.uploadImage(
+         bodies = bodies,
+         tableName = tableName,
+         isFromAction = true,
+         taskToSendIfOffline = if (action.isOfflineCompatible()) createPendingTask() else null,
+         onImageUploaded = { parameterName, receivedId ->
+             paramsToSubmit[parameterName] = receivedId
+             metaDataToSubmit[parameterName] = UploadHelper.UPLOADED_METADATA_STRING
+         },
+         onImageFailed = { parameterName, throwable ->
+             //paramsToSubmit[parameterName] = receivedId
+             metaDataToSubmit[parameterName] = UploadHelper.UPLOADED_METADATA_STRING
+         },
+         onAllUploadFinished = {
+             proceed()
+         }
+     )
+ }
 
-    private fun onImageChosen(uri: Uri) {
-        action.parameters.getSafeObject(parameterPosition)?.getSafeString("name")?.let { parameterName ->
-            imagesToUpload[parameterName] = uri
-            paramsToSubmit[parameterName] = uri
-            adapter.notifyItemChanged(parameterPosition)
-        }
-    }
+ override fun getActionContent(actionUUID: String, itemId: String?): MutableMap<String, Any> {
+     return ActionHelper.getActionContent(
+         tableName = tableName,
+         actionUUID = actionUUID,
+         itemId = itemId ?: this.itemId,
+         parameters = paramsToSubmit,
+         metaData = metaDataToSubmit,
+         parentItemId = parentItemId,
+         relation = relation
+     )
+ }
 
-    private fun actionTypesCallback(actionType: Action.Type, position: Int) {
-        parameterPosition = position
-        when (actionType) {
-            Action.Type.PICK_PHOTO_GALLERY -> pickPhotoFromGallery()
-            Action.Type.TAKE_PICTURE_CAMERA -> takePhotoFromCamera()
-            Action.Type.SCAN -> scan()
-            Action.Type.SIGN -> showSignDialog()
-        }
-    }
+ private fun onImageChosen(uri: Uri) {
+     action.parameters.getSafeObject(parameterPosition)?.getSafeString("name")?.let { parameterName ->
+         imagesToUpload[parameterName] = uri
+         paramsToSubmit[parameterName] = uri
+         adapter.notifyItemChanged(parameterPosition)
+     }
+ }
 
-    private fun goToPushFragment(position: Int) {
-        parameterPosition = position
-        val actionParameter = action.parameters.getSafeObject(parameterPosition)
-        actionParameter?.getSafeString("source")?.let { format ->
-            setSharedAxisXExitTransition()
-            val isMandatory = actionParameter.getSafeArray("rules")?.getStringList()?.contains("mandatory") ?: false
-            BaseApp.genericNavigationResolver.navigateToPushInputControl(binding, format.removePrefix("/"), isMandatory)
-        }
-    }
+ private fun actionTypesCallback(actionType: Action.Type, position: Int) {
+     parameterPosition = position
+     when (actionType) {
+         Action.Type.PICK_PHOTO_GALLERY -> pickPhotoFromGallery()
+         Action.Type.TAKE_PICTURE_CAMERA -> takePhotoFromCamera()
+         Action.Type.SCAN -> scan()
+         Action.Type.SIGN -> showSignDialog()
+     }
+ }
 
-    private fun formatHolderCallback(inputControlFormatHolder: InputControlFormatHolder, position: Int) {
-        if (inputControlFormatHolder.displayText.isEmpty() && inputControlFormatHolder.fieldValue == null) {
-            inputControlFormatHolders.remove(position)
-        } else {
-            inputControlFormatHolders[position] = inputControlFormatHolder
-        }
-    }
+ private fun goToPushFragment(position: Int) {
+     parameterPosition = position
+     val actionParameter = action.parameters.getSafeObject(parameterPosition)
+     actionParameter?.getSafeString("source")?.let { format ->
+         setSharedAxisXExitTransition()
+         val isMandatory = actionParameter.getSafeArray("rules")?.getStringList()?.contains("mandatory") ?: false
+         BaseApp.genericNavigationResolver.navigateToPushInputControl(binding, format.removePrefix("/"), isMandatory)
+     }
+ }
 
-    // Callback triggered when an input control datasource has done loading its data and displayed it
-    private fun onDataLoadedCallback() {
-        scrollTo(position = parameterPosition, shouldHideKeyboard = false, triggerError = false)
-    }
+ private fun formatHolderCallback(inputControlFormatHolder: InputControlFormatHolder, position: Int) {
+     if (inputControlFormatHolder.displayText.isEmpty() && inputControlFormatHolder.fieldValue == null) {
+         inputControlFormatHolders.remove(position)
+     } else {
+         inputControlFormatHolders[position] = inputControlFormatHolder
+     }
+ }
 
-    private fun showSignDialog() {
-        activity?.apply {
-            signatureDialog = LayoutInflater.from(this)
-                .inflate(R.layout.action_parameter_signature_dialog, findViewById(android.R.id.content), false)
+ // Callback triggered when an input control datasource has done loading its data and displayed it
+ private fun onDataLoadedCallback() {
+     scrollTo(position = parameterPosition, shouldHideKeyboard = false, triggerError = false)
+ }
 
-            MaterialAlertDialogBuilder(this)
-                .setView(signatureDialog)
-                .setTitle(getString(R.string.signature_dialog_title))
-                .setPositiveButton(getString(R.string.signature_dialog_positive)) { _, _ ->
-                    onSigned()
-                }
-                .setNegativeButton(getString(R.string.signature_dialog_cancel), null)
-                .show()
-        }
-    }
+ private fun showSignDialog() {
+     activity?.apply {
+         signatureDialog = LayoutInflater.from(this)
+             .inflate(R.layout.action_parameter_signature_dialog, findViewById(android.R.id.content), false)
 
-    private fun onSigned() {
-        activity?.let {
-            ImageHelper.getTempImageFile(it, Bitmap.CompressFormat.PNG) { _, signatureFilePath ->
-                File(signatureFilePath).apply {
-                    val bitmap = try {
-                        signatureDialog.findViewById<SignaturePad>(R.id.signature_pad)?.transparentSignatureBitmap
-                    } catch (e: IllegalArgumentException) {
-                        Timber.d("Could not get the signature bitmap (${e.message})")
-                        null
-                    }
-                    bitmap?.let {
-                        this.writeBitmap(bitmap)
-                        onImageChosen(Uri.fromFile(this))
-                    }
-                }
-            }
-        }
-    }
+         MaterialAlertDialogBuilder(this)
+             .setView(signatureDialog)
+             .setTitle(getString(R.string.signature_dialog_title))
+             .setPositiveButton(getString(R.string.signature_dialog_positive)) { _, _ ->
+                 onSigned()
+             }
+             .setNegativeButton(getString(R.string.signature_dialog_cancel), null)
+             .show()
+     }
+ }
 
-    private fun pickPhotoFromGallery() {
-        getImageFromGallery.launch("image/*")
-    }
+ private fun onSigned() {
+     activity?.let {
+         ImageHelper.getTempImageFile(it, Bitmap.CompressFormat.PNG) { _, signatureFilePath ->
+             File(signatureFilePath).apply {
+                 val bitmap = try {
+                     signatureDialog.findViewById<SignaturePad>(R.id.signature_pad)?.transparentSignatureBitmap
+                 } catch (e: IllegalArgumentException) {
+                     Timber.d("Could not get the signature bitmap (${e.message})")
+                     null
+                 }
+                 bitmap?.let {
+                     this.writeBitmap(bitmap)
+                     onImageChosen(Uri.fromFile(this))
+                 }
+             }
+         }
+     }
+ }
 
-    private fun takePhotoFromCamera() {
-        activity?.let {
-            ImageHelper.getTempImageFile(it, Bitmap.CompressFormat.JPEG) { uri, photoFilePath ->
-                currentPhotoPath = photoFilePath
-                getCameraImage.launch(uri)
-            }
-        }
-    }
+ private fun pickPhotoFromGallery() {
+     getImageFromGallery.launch("image/*")
+ }
 
-    private fun scan() {
-        activity?.apply {
-            setSharedAxisZExitTransition()
-            BaseApp.genericNavigationResolver.navigateToActionScanner(this, BARCODE_FRAGMENT_REQUEST_KEY)
-        }
-    }
+ private fun takePhotoFromCamera() {
+     activity?.let {
+         ImageHelper.getTempImageFile(it, Bitmap.CompressFormat.JPEG) { uri, photoFilePath ->
+             currentPhotoPath = photoFilePath
+             getCameraImage.launch(uri)
+         }
+     }
+ }
 
-    private fun registerImageFromGallery(): ActivityResultLauncher<String> {
-        return registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            uri?.let {
-                onImageChosen(uri)
-            }
-        }
-    }
+ private fun scan() {
+     activity?.apply {
+         setSharedAxisZExitTransition()
+         BaseApp.genericNavigationResolver.navigateToActionScanner(this, BARCODE_FRAGMENT_REQUEST_KEY)
+     }
+ }
 
-    private fun registerCameraImage(): ActivityResultLauncher<Uri> {
-        return registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-            if (success) {
-                onImageChosen(Uri.fromFile(File(currentPhotoPath)))
-            }
-        }
-    }
+ private fun registerImageFromGallery(): ActivityResultLauncher<String> {
+     return registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+         uri?.let {
+             onImageChosen(uri)
+         }
+     }
+ }
+
+ private fun registerCameraImage(): ActivityResultLauncher<Uri> {
+     return registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+         if (success) {
+             onImageChosen(Uri.fromFile(File(currentPhotoPath)))
+         }
+     }
+ }
 }
