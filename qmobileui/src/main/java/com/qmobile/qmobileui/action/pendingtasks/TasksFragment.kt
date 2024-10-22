@@ -52,7 +52,6 @@ class TasksFragment : BaseFragment(), NetworkChecker {
     private lateinit var progressIndicatorDrawable: IndeterminateDrawable<CircularProgressIndicatorSpec>
 
     companion object {
-        internal const val MAX_PENDING_TASKS = 10
         private const val DIVIDER_INSET_START = 56
     }
 

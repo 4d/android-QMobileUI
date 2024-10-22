@@ -7,7 +7,7 @@
 package com.qmobile.qmobileui.action.pendingtasks
 
 import com.qmobile.qmobiledatastore.dao.ActionTask
-import com.qmobile.qmobileui.action.pendingtasks.TasksFragment.Companion.MAX_PENDING_TASKS
+import com.qmobile.qmobiledatasync.app.BaseApp
 import com.qmobile.qmobileui.activity.BaseObserver
 import timber.log.Timber
 
@@ -37,7 +37,7 @@ class TasksFragmentObserver(
 
             val history = filteredList
                 .filter { it.isHistory() }
-                .takeLast(MAX_PENDING_TASKS)
+                .takeLast(BaseApp.runtimeDataHolder.maxPendingActionTask)
                 .sortedByDescending { it.date }
 
             fragment.pendingAdapter.updateItems(pendingTasks)
@@ -52,8 +52,8 @@ class TasksFragmentObserver(
             .filter { it.isHistory() }
             .sortedByDescending { it.date }
 
-        if (allHistory.size > MAX_PENDING_TASKS) {
-            val idToDelete = allHistory.subList(MAX_PENDING_TASKS - 1, allHistory.size - 1).map { it.id }
+        if (allHistory.size > BaseApp.runtimeDataHolder.maxPendingActionTask) {
+            val idToDelete = allHistory.subList(BaseApp.runtimeDataHolder.maxPendingActionTask - 1, allHistory.size - 1).map { it.id }
             fragment.actionActivity.getTaskVM().deleteList(idToDelete)
         }
     }
